@@ -1,3 +1,9 @@
+## [2.32.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.12...v2.32.0-stage.13) (2025-08-13)
+
+### 🐛 Bug Fixes
+
+* added back missing env ([ee67975](https://github.com/keyshade-xyz/keyshade/commit/ee67975453f91e91bde64416c22d7118c1406675))
+
 ## [2.32.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.11...v2.32.0-stage.12) (2025-08-13)
 
 ### 🐛 Bug Fixes
