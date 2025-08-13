@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import { useAtomValue } from 'jotai'
 import type { AllowedPlans } from '@keyshade/schema'
-import { LoadingSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
 import Visible from '@/components/common/visible'
 import { Slider } from '@/components/ui/slider'
@@ -73,25 +72,40 @@ export default function PlanCard({
       return
     }
     setIsLoading(true)
-    generatePaymentLink().then(({ data, success, error }) => {
-      if (success && data) {
-        toast.success('Payment link generated successfully!', {
-          description: (
-            <p className="text-xs text-green-300">Redirecting to payment...</p>
-          )
-        })
-        window.location.href = data.link
-      } else {
-        toast.error('Error generating payment link', {
+
+    generatePaymentLink()
+      .then(({ data, success, error }) => {
+        if (success && data) {
+          toast.success('Payment link generated successfully!', {
+            description: (
+              <p className="text-xs text-green-300">
+                Redirecting to payment...
+              </p>
+            )
+          })
+          window.location.href = data.link
+        } else {
+          toast.error('Error generating payment link', {
+            description: (
+              <p className="text-xs text-red-300">
+                {error?.message || 'Please try again later.'}
+              </p>
+            )
+          })
+        }
+      })
+      .catch((err) => {
+        toast.error('Unexpected error occurred', {
           description: (
             <p className="text-xs text-red-300">
-              {error?.message || 'Please try again later.'}
+              {err?.message || 'Please try again later.'}
             </p>
           )
         })
-      }
-    })
-    setIsLoading(false)
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const isNotEnterprise = tierName !== 'Enterprise'
@@ -151,7 +165,7 @@ export default function PlanCard({
           onClick={redirectToPayment}
           type="button"
         >
-          {isLoading ? <LoadingSVG /> : 'Continue to payment'}
+          {isLoading ? 'Generating payment link...' : 'Continue to payment'}
         </button>
       </div>
     </div>

@@ -9,6 +9,7 @@ import CurrentBillDetails from '@/components/billing/currentBillDetails'
 
 export default function Billing() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const isInFreeTier = currentWorkspace?.subscription.plan === 'FREE'
 
   if (currentWorkspace?.subscription === undefined) {
     return (
@@ -20,10 +21,10 @@ export default function Billing() {
 
   return (
     <div>
-      <Visible if={currentWorkspace.subscription.plan === 'FREE'}>
+      <Visible if={isInFreeTier}>
         <NewBilling />
       </Visible>
-      <Visible if={currentWorkspace.subscription.plan !== 'FREE'}>
+      <Visible if={!isInFreeTier}>
         <CurrentBillDetails />
       </Visible>
     </div>

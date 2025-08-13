@@ -7,6 +7,7 @@ import type {
   Status
 } from '@keyshade/schema'
 import { DownloadSVG, MoneySend } from '@public/svg/badges'
+import PlanNameBadge from '../../planNameBadge'
 import TabelLoader from './tabel-loader'
 import {
   Table,
@@ -196,10 +197,12 @@ export default function DownloadInvoice({
                     {renderBadge(invoice.status)}
                   </TableCell>
                   <TableCell className="text-center">
-                    {invoice.amount}
+                    ${invoice.amount}
                   </TableCell>
-                  <TableCell className="text-center">{invoice.plan}</TableCell>
-                  <TableCell className="flex h-full justify-center">
+                  <TableCell className="text-center">
+                    <PlanNameBadge planName={invoice.plan} />
+                  </TableCell>
+                  <TableCell className="flex h-full items-center justify-center">
                     <button
                       onClick={() => {
                         void onDownloadInvoicesById(invoice.orderId)

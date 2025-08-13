@@ -1,13 +1,16 @@
 import { useAtomValue } from 'jotai'
 import React from 'react'
+import RenewSubscription from '../renewSubscription'
 import BillingDetail from './billingDetail'
 import DownloadInvoice from './downloadInvoice'
 import CancelPlan from './canclePlan'
 import { selectedWorkspaceAtom } from '@/store'
-// import { Button } from '@/components/ui/button'
+import Visible from '@/components/common/visible'
 
 export default function CurrentBillDetails() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const isSubscriptionCancelled =
+    currentWorkspace?.subscription.status === 'CANCELLED'
 
   return (
     <div className="flex flex-col gap-12">
@@ -20,13 +23,18 @@ export default function CurrentBillDetails() {
               subscription.
             </p>
           </div>
+          <Visible if={isSubscriptionCancelled}>
+            <RenewSubscription currentWorkspace={currentWorkspace} />
+          </Visible>
           {/* <Button variant="secondary">Update your Plan</Button>  */}
         </div>
         <BillingDetail currentWorkspace={currentWorkspace} />
       </div>
 
       <DownloadInvoice currentWorkspace={currentWorkspace} />
-      <CancelPlan currentWorkspace={currentWorkspace} />
+      <Visible if={!isSubscriptionCancelled}>
+        <CancelPlan currentWorkspace={currentWorkspace} />
+      </Visible>
     </div>
   )
 }

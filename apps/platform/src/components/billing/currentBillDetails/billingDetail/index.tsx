@@ -1,6 +1,7 @@
 import React from 'react'
 import type { GetAllWorkspacesOfUserResponse } from '@keyshade/schema'
 import dayjs from 'dayjs'
+import { useAtomValue } from 'jotai'
 import DetailContainer from './detail-container'
 import TierLimitItem from './tier-limit-item'
 import BillingDetailRow from './billing-detail-row'
@@ -8,6 +9,18 @@ import { Separator } from '@/components/ui/separator'
 import { PricingTiers } from '@/constants/billing/planCard'
 import { Badge } from '@/components/ui/badge'
 import { formatName } from '@/lib/format-name'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
+import {
+  workspaceIntegrationCountAtom,
+  workspaceMemberCountAtom,
+  workspaceProjectCountAtom,
+  workspaceRolesCountAtom
+} from '@/store'
 
 interface BillingDetailProps {
   currentWorkspace: GetAllWorkspacesOfUserResponse['items'][number] | null
@@ -17,6 +30,10 @@ export default function BillingDetail({
   currentWorkspace
 }: BillingDetailProps) {
   const currentSubscription = currentWorkspace?.subscription
+  const workspaceProjectCount = useAtomValue(workspaceProjectCountAtom)
+  const workspaceMemberCount = useAtomValue(workspaceMemberCountAtom)
+  const workspaceRolesCount = useAtomValue(workspaceRolesCountAtom)
+  const workspaceIntegrationCount = useAtomValue(workspaceIntegrationCountAtom)
 
   const formatPlan = (): string => {
     return `${currentSubscription?.plan[0].toUpperCase()}${currentSubscription?.plan.slice(1).toLowerCase()}`
@@ -56,7 +73,8 @@ export default function BillingDetail({
   const renderSubscriptionStatusBadge = (
     status:
       | GetAllWorkspacesOfUserResponse['items'][number]['subscription']['status']
-      | undefined
+      | undefined,
+    endDate?: string
   ) => {
     switch (status) {
       case 'ACTIVE':
@@ -67,9 +85,24 @@ export default function BillingDetail({
         )
       case 'CANCELLED':
         return (
-          <Badge color="red" icon="cancel" type="icon" variant="solid">
-            {formatName(status)}
-          </Badge>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge color="red" icon="cancel" type="icon" variant="solid">
+                  {formatName(status)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-center" sideOffset={6}>
+                <p className="text-xs text-red-600/70">
+                  Your workspace plan will be reverted to Free tier on{' '}
+                  <span className="font-bold text-red-600">
+                    {endDate ? dayjs(endDate).format('MMMM D, YYYY') : null}
+                  </span>
+                  .
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )
       case 'INCOMPLETE':
         return (
@@ -95,6 +128,9 @@ export default function BillingDetail({
     }
   }
 
+  const isPlanActive = currentSubscription?.status === 'ACTIVE'
+  const billingCycle = currentSubscription?.isAnnual ? 'Annual' : 'Monthly'
+
   return (
     <div className="mt-7 grid grid-cols-2 gap-6">
       <DetailContainer>
@@ -110,25 +146,25 @@ export default function BillingDetail({
 
         <div className="mt-5 grid grid-cols-2 grid-rows-2 gap-8">
           <TierLimitItem
-            current={currentWorkspace?.totalProjects ?? 0}
+            current={workspaceProjectCount}
             label="Projects"
             max={currentWorkspace?.maxAllowedProjects ?? 1}
           />
 
           <TierLimitItem
-            current={currentWorkspace?.totalMembers ?? 0}
+            current={workspaceMemberCount}
             label="Members"
             max={currentWorkspace?.maxAllowedMembers ?? 1}
           />
 
           <TierLimitItem
-            current={currentWorkspace?.totalIntegrations ?? 0}
+            current={workspaceIntegrationCount}
             label="Integrations"
             max={currentWorkspace?.maxAllowedIntegrations ?? 1}
           />
 
           <TierLimitItem
-            current={currentWorkspace?.totalRoles ?? 0}
+            current={workspaceRolesCount}
             label="Roles"
             max={currentWorkspace?.maxAllowedRoles ?? 1}
           />
@@ -139,7 +175,10 @@ export default function BillingDetail({
           <div className="flex items-center justify-between">
             <h3 className="mb-1 flex items-center gap-2 text-xl font-bold">
               {formatName(currentSubscription?.plan as string)} plan{' '}
-              {renderSubscriptionStatusBadge(currentSubscription?.status)}
+              {renderSubscriptionStatusBadge(
+                currentSubscription?.status,
+                currentSubscription?.renewsOn
+              )}
             </h3>
             <p>
               <span className="text-xl font-bold">{planPrice()}</span> per user
@@ -164,13 +203,14 @@ export default function BillingDetail({
           <BillingDetailRow
             label="Next Billing Date"
             value={
-              dayjs(currentSubscription?.renewsOn).format('MMMM D, YYYY') ||
-              'N/A'
+              isPlanActive
+                ? dayjs(currentSubscription.renewsOn).format('MMMM D, YYYY')
+                : 'N/A'
             }
           />
           <BillingDetailRow
             label="Billing Cycle"
-            value={currentSubscription?.isAnnual ? 'Annual' : 'Monthly'}
+            value={isPlanActive ? billingCycle : 'N/A'}
           />
         </div>
       </DetailContainer>
