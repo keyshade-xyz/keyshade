@@ -958,7 +958,6 @@ export class WorkspaceMembershipService {
       workspace.name,
       `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
       user.name,
-      membership.createdOn.toISOString(),
       true
     )
 
@@ -1117,11 +1116,9 @@ export class WorkspaceMembershipService {
         workspace.name,
         `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
         currentUser.name,
-        invitedOn.toISOString(),
         isExistingUser,
         inviteeName
       )
-      this.log.debug(`Sent workspace invitation mail to user ${memberUser}`)
 
       hydratedMembers.push(
         await this.hydrationService.hydrateWorkspaceMember({

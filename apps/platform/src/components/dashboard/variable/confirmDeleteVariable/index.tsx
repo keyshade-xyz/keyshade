@@ -45,12 +45,13 @@ export default function ConfirmDeleteVariable() {
 
   const handleDeleteVariable = useCallback(async () => {
     if (selectedVariable) {
-      const { success } = await deleteVariable()
 
       setIsLoading(true)
       toast.loading('Deleting variable...')
 
       try {
+        const { success } = await deleteVariable()
+
         if (success) {
           setProjectVariableCount((prevCount) => prevCount - 1)
           toast.success('Variable deleted successfully', {
@@ -68,12 +69,12 @@ export default function ConfirmDeleteVariable() {
             )
           )
           setSelectedVariable(null)
-
-          handleClose()
         }
       } finally {
         setIsLoading(false)
         toast.dismiss()
+        setSelectedVariable(null)
+        handleClose()
       }
     }
   }, [

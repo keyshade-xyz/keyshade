@@ -26,6 +26,7 @@ import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { PaymentGatewayModule } from '@/payment-gateway/payment-gateway.module'
+import { ShareSecretModule } from '@/share-secret/share-secret.module'
 
 @Module({
   controllers: [AppController],
@@ -60,7 +61,8 @@ import { PaymentGatewayModule } from '@/payment-gateway/payment-gateway.module'
     FeedbackModule,
     CacheModule,
     WorkspaceMembershipModule,
-    PaymentGatewayModule
+    PaymentGatewayModule,
+    ShareSecretModule
   ],
   providers: [
     {

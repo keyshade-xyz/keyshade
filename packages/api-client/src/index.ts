@@ -12,7 +12,7 @@ import AuthController from '@api-client/controllers/auth'
 import UserController from '@api-client/controllers/user'
 import ApiKeyController from './controllers/api-key'
 import PaymentController from './controllers/payment'
-
+import ShareSecretController from './controllers/share-secret'
 export {
   AppController,
   EnvironmentController,
@@ -27,5 +27,6 @@ export {
   AuthController,
   UserController,
   ApiKeyController,
-  PaymentController
+  PaymentController,
+  ShareSecretController
 }
