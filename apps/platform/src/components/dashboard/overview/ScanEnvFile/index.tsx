@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import secretDetector from '@keyshade/secret-scan'
 import { parse as parseDotenv } from 'dotenv'
 import type { Project } from '@keyshade/schema'
@@ -49,12 +49,29 @@ function ScanEnvModal({
   const [isProceedModalOpen, setIsProceedModalOpen] = useState(false)
 
   const parsedContent = parseDotenv(content)
-  const secretAndVariables = secretDetector.scanJsObject(parsedContent)
+  const secretsAndVariables = secretDetector.scanJsObject(parsedContent)
 
-  const secretsCount = Object.keys(secretAndVariables.secrets).length
-  const variablesCount = Object.keys(secretAndVariables.variables).length
+  const secretsCount = Object.keys(secretsAndVariables.secrets).length
+  const variablesCount = Object.keys(secretsAndVariables.variables).length
 
-  const secretsList = Object.entries(secretAndVariables.secrets).map(
+  const [selectedItems, setSelectedItems] = useState<
+    Record<string, 'secret' | 'variable'>
+  >({})
+
+  const [proceedPayload, setProceedPayload] = useState<{
+    secrets: Record<string, string>
+    variables: Record<string, string>
+  }>({ secrets: {}, variables: {} })
+
+  const allItems = useMemo(
+    () => ({
+      ...secretsAndVariables.secrets,
+      ...secretsAndVariables.variables
+    }),
+    [secretsAndVariables.secrets, secretsAndVariables.variables]
+  )
+
+  const secretsList = Object.entries(secretsAndVariables.secrets).map(
     ([key]) => {
       return (
         <div
@@ -67,7 +84,7 @@ function ScanEnvModal({
     }
   )
 
-  const variablesList = Object.entries(secretAndVariables.variables).map(
+  const variablesList = Object.entries(secretsAndVariables.variables).map(
     ([key]) => {
       return (
         <div
@@ -79,6 +96,25 @@ function ScanEnvModal({
       )
     }
   )
+
+  const getTransformedSecretsAndVariables = () => {
+    const transformedSecrets: Record<string, string> = {}
+    const transformedVariables: Record<string, string> = {}
+
+    Object.entries(selectedItems).forEach(([key, type]) => {
+      const value = allItems[key]
+      if (type === 'secret') {
+        transformedSecrets[key] = value
+      } else {
+        transformedVariables[key] = value
+      }
+    })
+
+    return {
+      secrets: transformedSecrets,
+      variables: transformedVariables
+    }
+  }
 
   const getProjectEnvironment = useHttp((slug: string) =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
@@ -104,13 +140,31 @@ function ScanEnvModal({
     fetchEnvironments()
   }, [projectSlug, getProjectEnvironment])
 
+  useEffect(() => {
+    const initialSelection: Record<string, 'secret' | 'variable'> = {}
+
+    Object.keys(secretsAndVariables.secrets).forEach((key) => {
+      initialSelection[key] = 'secret'
+    })
+
+    Object.keys(secretsAndVariables.variables).forEach((key) => {
+      initialSelection[key] = 'variable'
+    })
+
+    setSelectedItems(initialSelection)
+  }, [secretsAndVariables])
+
   const handleModify = () => {
     setIsModifyModalOpen(true)
     onClose()
   }
+
   const handleProceed = () => {
-    setIsProceedModalOpen(true)
+    const entries = getTransformedSecretsAndVariables()
+    setProceedPayload(entries)
+
     onClose()
+    setIsProceedModalOpen(true)
   }
 
   const handleEnvironmentSelect = (value: string) => {
@@ -230,14 +284,14 @@ function ScanEnvModal({
         isOpen={isModifyModalOpen}
         onClose={() => setIsModifyModalOpen(false)}
         projectSlug={projectSlug}
-        secretsAndVariables={secretAndVariables}
+        secretsAndVariables={secretsAndVariables}
       />
       <ImportConfiguration
         environmentSlug={selectedEnvironment?.slug || ''}
         isOpen={isProceedModalOpen}
         onClose={() => setIsProceedModalOpen(false)}
         projectSlug={projectSlug}
-        secretsAndVariables={secretAndVariables}
+        secretsAndVariables={proceedPayload}
       />
     </>
   )
