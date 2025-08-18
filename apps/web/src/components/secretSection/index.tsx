@@ -1,4 +1,5 @@
 import { GeistSans } from 'geist/font/sans'
+import React from 'react'
 import {
   AudtingSVG,
   PublicKeySVG,
@@ -48,7 +49,7 @@ const cardData = [
   }
 ]
 
-function SecrectSection(): React.JSX.Element {
+function SecretSection(): React.JSX.Element {
   return (
     <section className="mt-[10vw] flex min-h-[50vh] w-full flex-col items-center gap-y-[5rem] p-6 sm:mt-[1vh] md:gap-y-[9.69rem] landscape:mt-[30vh]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
@@ -71,11 +72,11 @@ function SecrectSection(): React.JSX.Element {
                 <span className="text-base text-[#9394A1]">{description}</span>
               </div>
             </Card>
-          );
+          )
         })}
       </div>
     </section>
-  );
+  )
 }
 
-export default SecrectSection
+export default SecretSection

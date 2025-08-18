@@ -38,7 +38,8 @@ export const WorkspaceRoleSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       profilePictureUrl: z.string().nullable(),
-      memberSince: z.string().datetime()
+      memberSince: z.string().datetime(),
+      invitationAccepted: z.boolean()
     })
   ),
   entitlements: z.object({
