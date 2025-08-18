@@ -4,7 +4,6 @@ import { parse as parseDotenv } from 'dotenv'
 import type { Project } from '@keyshade/schema'
 import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import ImportConfiguration from '../ImportConfiguration'
-import ModifyFileScan from '../ModifyFileScan'
 import {
   Select,
   SelectContent,
@@ -45,7 +44,6 @@ function ScanEnvModal({
   const [environments, setEnvironments] = useState<Environment[]>([])
   const [selectedEnvironment, setSelectedEnvironment] =
     useState<Environment | null>(null)
-  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false)
   const [isProceedModalOpen, setIsProceedModalOpen] = useState(false)
 
   const parsedContent = useMemo(() => parseDotenv(content), [content])
@@ -157,11 +155,6 @@ function ScanEnvModal({
     setSelectedItems(initialSelection)
   }, [secretsAndVariables])
 
-  const handleModify = () => {
-    setIsModifyModalOpen(true)
-    onClose()
-  }
-
   const handleProceed = () => {
     const entries = getTransformedSecretsAndVariables()
     setProceedPayload(entries)
@@ -259,18 +252,9 @@ function ScanEnvModal({
 
           <div className="flex flex-col gap-4">
             <div className="text-sm text-white/60">
-              Would you like to proceed with this selection or modify it
-              manually?
+              Drag items to customize your selection, or proceed as is.
             </div>
-            <div className="flex items-center justify-between">
-              <Button
-                disabled={!selectedEnvironment}
-                onClick={handleModify}
-                variant="secondary"
-              >
-                Modify
-              </Button>
-
+            <div className="flex items-center justify-end">
               <Button
                 disabled={!selectedEnvironment}
                 onClick={handleProceed}
@@ -282,13 +266,7 @@ function ScanEnvModal({
           </div>
         </DialogContent>
       </Dialog>
-      <ModifyFileScan
-        environmentSlug={selectedEnvironment?.slug || ''}
-        isOpen={isModifyModalOpen}
-        onClose={() => setIsModifyModalOpen(false)}
-        projectSlug={projectSlug}
-        secretsAndVariables={secretsAndVariables}
-      />
+
       <ImportConfiguration
         environmentSlug={selectedEnvironment?.slug || ''}
         isOpen={isProceedModalOpen}
