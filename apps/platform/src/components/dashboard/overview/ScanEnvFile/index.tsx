@@ -48,8 +48,11 @@ function ScanEnvModal({
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false)
   const [isProceedModalOpen, setIsProceedModalOpen] = useState(false)
 
-  const parsedContent = parseDotenv(content)
-  const secretsAndVariables = secretDetector.scanJsObject(parsedContent)
+  const parsedContent = useMemo(() => parseDotenv(content), [content])
+  const secretsAndVariables = useMemo(
+    () => secretDetector.scanJsObject(parsedContent),
+    [parsedContent]
+  )
 
   const secretsCount = Object.keys(secretsAndVariables.secrets).length
   const variablesCount = Object.keys(secretsAndVariables.variables).length
