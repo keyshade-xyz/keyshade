@@ -9,7 +9,7 @@ interface ProjectDetailsProps {
   project: Project
 }
 
-function ProjectDetails({ project }: ProjectDetailsProps) {
+function ProjectDetails({ project }: Readonly<ProjectDetailsProps>) {
   return (
     <div className="h-fit w-full rounded-2xl bg-white/5 shadow-[0px_1px_2px_rgba(16,24,40,0.06),0px_1px_3px_rgba(16,24,40,0.1)]">
       <div className="flex items-start justify-between p-4">
@@ -22,20 +22,21 @@ function ProjectDetails({ project }: ProjectDetailsProps) {
         </div>
         <CopyToClipboard text={project.slug} />
       </div>
-      <div className="flex items-center gap-1 border-t border-white/20 p-4">
-        <AvatarComponent
-          className="mr-2 rounded-md"
-          name={project.lastUpdatedBy.name}
-          profilePictureUrl={project.lastUpdatedBy.profilePictureUrl}
-        />
-        <div className="flex-wrap text-sm text-white/60">
-          last updated by &nbsp;
-          <span className="font-semibold text-white">
-            {project.lastUpdatedBy.name}
-          </span>{' '}
-          on <span>{formatDate(project.updatedAt || project.createdAt)}</span>
+      {project.lastUpdatedBy.name ? (
+        <div className="flex items-center gap-1 border-t border-white/20 p-4">
+          <AvatarComponent
+            className="mr-2 rounded-md"
+            name={project.lastUpdatedBy.name}
+            profilePictureUrl={project.lastUpdatedBy.profilePictureUrl}
+          />
+          <div className="flex-wrap text-sm text-white/60">
+            <span>last updated by </span>
+            <span className="font-semibold text-white">{project.lastUpdatedBy.name}</span>
+            <span> on </span>
+            <span>{formatDate(project.updatedAt || project.createdAt)}</span>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
