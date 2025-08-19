@@ -6,11 +6,13 @@ import {
   User
 } from '@prisma/client'
 
-export interface SecretRevision {
+export interface HydratedSecretRevision {
   environment: {
     id: Environment['id']
     name: Environment['name']
     slug: Environment['slug']
+    maxAllowedRevisions: number
+    totalRevisions: number
   }
   value: SecretVersion['value']
   version: SecretVersion['version']
@@ -19,6 +21,15 @@ export interface SecretRevision {
     id: User['id']
     name: User['name']
     profilePictureUrl: User['profilePictureUrl']
+  }
+}
+
+export interface RawSecretRevision
+  extends Omit<HydratedSecretRevision, 'environment'> {
+  environment: {
+    id: Environment['id']
+    name: Environment['name']
+    slug: Environment['slug']
   }
 }
 
@@ -42,9 +53,10 @@ export interface HydratedSecret extends Secret {
     privateKey: Project['privateKey']
     storePrivateKey: Project['storePrivateKey']
   }
-  versions: Array<SecretRevision>
+  versions: Array<HydratedSecretRevision>
 }
 
-export interface RawSecret extends Omit<HydratedSecret, 'entitlements'> {
-  versions: HydratedSecret['versions']
+export interface RawSecret
+  extends Omit<HydratedSecret, 'entitlements' | 'versions'> {
+  versions: Array<RawSecretRevision>
 }

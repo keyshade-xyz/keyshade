@@ -1,6 +1,7 @@
 import {
   Integration,
   Project,
+  Subscription,
   User,
   Workspace,
   WorkspaceMember,
@@ -12,7 +13,13 @@ export interface HydratedWorkspace extends Workspace {
   totalProjects: number
   maxAllowedMembers: number
   totalMembers: number
+  maxAllowedRoles: number
+  totalRoles: number
+  maxAllowedIntegrations: number
+  totalIntegrations: number
   projects: number
+  integrations: number
+  subscription: Subscription
   entitlements: {
     canReadProjects: boolean
     canCreateProjects: boolean
@@ -41,8 +48,14 @@ export interface RawWorkspace
     | 'totalProjects'
     | 'maxAllowedMembers'
     | 'totalMembers'
+    | 'maxAllowedRoles'
+    | 'totalRoles'
+    | 'maxAllowedIntegrations'
+    | 'totalIntegrations'
     | 'projects'
+    | 'integrations'
   > {
+  subscription: Subscription
   members: Partial<WorkspaceMember>[]
   roles: Partial<WorkspaceRole>[]
   projects: Partial<Project>[]

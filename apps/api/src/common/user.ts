@@ -16,6 +16,8 @@ import { HydrationService } from './hydration.service'
  * Creates a new user and optionally creates a default workspace for them.
  * @param dto - The user data to create a user with.
  * @param prisma - The prisma service to use for database operations.
+ * @param slugGenerator
+ * @param hydrationService
  * @returns The created user and, if the user is not an admin, a default workspace.
  */
 export async function createUser(
