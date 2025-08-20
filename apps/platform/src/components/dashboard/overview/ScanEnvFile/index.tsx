@@ -80,25 +80,26 @@ function ScanEnvModal({
 
   const handleDragEnd = () => setDraggingKey(null)
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
+  const handleDragOver =
+    (target: 'secret' | 'variable') => (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.dataTransfer.dropEffect = 'move'
+      setOver(target)
+    }
 
   const handleDrop =
-    (target: 'secret' | 'variable') =>
-    (e: React.DragEvent) => {
+    (target: 'secret' | 'variable') => (e: React.DragEvent) => {
       e.preventDefault()
+      e.stopPropagation()
       const key = e.dataTransfer.getData('text/plain')
       if (!key) return
-      setSelectedItems(prev =>
+      setSelectedItems((prev) =>
         prev[key] === target ? prev : { ...prev, [key]: target }
       )
       setOver(null)
       setDraggingKey(null)
     }
-
-
 
   const secretsList = useMemo(
     () =>
@@ -230,18 +231,20 @@ function ScanEnvModal({
 
           <div className="flex flex-col gap-1 border-b border-white/20">
             <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto  py-2">
-              <div 
-                className={`flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white ${
+              <div
+                className={`flex flex-col gap-2 rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
                   over === 'secret'
                     ? 'border-blue-500 bg-blue-500 bg-opacity-10'
                     : 'border-white/20 hover:border-white/40'
                 }`}
-                onDragEnter={handleDragOver}
+                onDragEnter={handleDragOver('secret')}
                 onDragLeave={(e) => {
-                  if (!(e.currentTarget as Node).contains(e.relatedTarget as Node)) 
+                  if (
+                    !(e.currentTarget as Node).contains(e.relatedTarget as Node)
+                  )
                     setOver(null)
                 }}
-                onDragOver={handleDragOver}
+                onDragOver={handleDragOver('secret')}
                 onDrop={handleDrop('secret')}
               >
                 <div className="flex items-center gap-2">
@@ -250,18 +253,20 @@ function ScanEnvModal({
                 </div>
                 <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
               </div>
-              <div 
-                className={`flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white ${
+              <div
+                className={`flex flex-col gap-2 rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
                   over === 'variable'
                     ? 'border-blue-500 bg-blue-500 bg-opacity-10'
                     : 'border-white/20 hover:border-white/40'
                 }`}
-                onDragEnter={handleDragOver}
+                onDragEnter={handleDragOver('variable')}
                 onDragLeave={(e) => {
-                  if (!(e.currentTarget as Node).contains(e.relatedTarget as Node)) 
+                  if (
+                    !(e.currentTarget as Node).contains(e.relatedTarget as Node)
+                  )
                     setOver(null)
                 }}
-                onDragOver={handleDragOver}
+                onDragOver={handleDragOver('variable')}
                 onDrop={handleDrop('variable')}
               >
                 <div className="flex items-center gap-2">
