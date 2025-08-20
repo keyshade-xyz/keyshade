@@ -52,9 +52,6 @@ function ScanEnvModal({
     [parsedContent]
   )
 
-  const secretsCount = Object.keys(secretsAndVariables.secrets).length
-  const variablesCount = Object.keys(secretsAndVariables.variables).length
-
   const [selectedItems, setSelectedItems] = useState<
     Record<string, 'secret' | 'variable'>
   >({})
@@ -72,31 +69,81 @@ function ScanEnvModal({
     [secretsAndVariables.secrets, secretsAndVariables.variables]
   )
 
-  const secretsList = Object.entries(secretsAndVariables.secrets).map(
-    ([key]) => {
-      return (
-        <div
-          className="w-fit rounded-md bg-neutral-800 p-2 text-xs text-white"
-          key={key}
-        >
-          {key}
-        </div>
+  const [draggingKey, setDraggingKey] = useState<string | null>(null)
+  const [over, setOver] = useState<null | 'secret' | 'variable'>(null)
+
+  const handleDragStart = (e: React.DragEvent, key: string) => {
+    e.dataTransfer.setData('text/plain', key)
+    e.dataTransfer.effectAllowed = 'move'
+    setDraggingKey(key)
+  }
+
+  const handleDragEnd = () => setDraggingKey(null)
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop =
+    (target: 'secret' | 'variable') =>
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const key = e.dataTransfer.getData('text/plain')
+      if (!key) return
+      setSelectedItems(prev =>
+        prev[key] === target ? prev : { ...prev, [key]: target }
       )
+      setOver(null)
+      setDraggingKey(null)
     }
+
+
+
+  const secretsList = useMemo(
+    () =>
+      Object.entries(selectedItems)
+        .filter(([, type]) => type === 'secret')
+        .map(([key]) => {
+          return (
+            <div
+              className={`w-fit cursor-grab select-none rounded-md bg-neutral-800 p-2 text-xs text-white
+                ${draggingKey === key ? 'opacity-60' : ''}`}
+              draggable
+              key={key}
+              onDragEnd={handleDragEnd}
+              onDragStart={(e) => handleDragStart(e, key)}
+            >
+              {key}
+            </div>
+          )
+        }),
+    [selectedItems, draggingKey]
   )
 
-  const variablesList = Object.entries(secretsAndVariables.variables).map(
-    ([key]) => {
-      return (
-        <div
-          className="w-fit rounded-md bg-neutral-800 p-2 text-xs text-white"
-          key={key}
-        >
-          {key}
-        </div>
-      )
-    }
+  const variablesList = useMemo(
+    () =>
+      Object.entries(selectedItems)
+        .filter(([, type]) => type === 'variable')
+        .map(([key]) => {
+          return (
+            <div
+              className={`w-fit cursor-grab select-none rounded-md bg-neutral-800 p-2 text-xs text-white
+                ${draggingKey === key ? 'opacity-60' : ''}`}
+              draggable
+              key={key}
+              onDragEnd={handleDragEnd}
+              onDragStart={(e) => handleDragStart(e, key)}
+            >
+              {key}
+            </div>
+          )
+        }),
+    [selectedItems, draggingKey]
   )
+
+  const secretsCount = secretsList.length
+  const variablesCount = variablesList.length
 
   const getTransformedSecretsAndVariables = () => {
     const transformedSecrets: Record<string, string> = {}
@@ -183,14 +230,40 @@ function ScanEnvModal({
 
           <div className="flex flex-col gap-1 border-b border-white/20">
             <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto  py-2">
-              <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
+              <div 
+                className={`flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white ${
+                  over === 'secret'
+                    ? 'border-blue-500 bg-blue-500 bg-opacity-10'
+                    : 'border-white/20 hover:border-white/40'
+                }`}
+                onDragEnter={handleDragOver}
+                onDragLeave={(e) => {
+                  if (!(e.currentTarget as Node).contains(e.relatedTarget as Node)) 
+                    setOver(null)
+                }}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop('secret')}
+              >
                 <div className="flex items-center gap-2">
                   <SecretSVG height={21} width={21} />
                   <p>{secretsCount} secrets to import</p>
                 </div>
                 <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
               </div>
-              <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
+              <div 
+                className={`flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white ${
+                  over === 'variable'
+                    ? 'border-blue-500 bg-blue-500 bg-opacity-10'
+                    : 'border-white/20 hover:border-white/40'
+                }`}
+                onDragEnter={handleDragOver}
+                onDragLeave={(e) => {
+                  if (!(e.currentTarget as Node).contains(e.relatedTarget as Node)) 
+                    setOver(null)
+                }}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop('variable')}
+              >
                 <div className="flex items-center gap-2">
                   <VariableSVG height={21} width={21} />
                   <p>{variablesCount} variables to import</p>
