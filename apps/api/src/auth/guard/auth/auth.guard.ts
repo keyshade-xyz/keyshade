@@ -12,13 +12,14 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '@/decorators/bypass-onboarding.decorator'
 import { AuthenticatedUserContext } from '../../auth.types'
 import { EnvSchema } from '@/common/env/env.schema'
-import { CacheService } from '@/cache/cache.service'
+import { UserCacheService } from '@/cache/user-cache.service'
 import { toSHA256 } from '@/common/cryptography'
 import { getUserByEmailOrId } from '@/common/user'
 import { Request } from 'express'
 import { constructErrorBody } from '@/common/util'
 import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -31,13 +32,14 @@ export class AuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly reflector: Reflector,
-    private readonly cache: CacheService,
+    private readonly cache: UserCacheService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService
   ) {}
 
   /**
-   * This method is called by NestJS every time an HTTP request is made to an endpoint
+   * This method called by NestJS every time an HTTP request is made to an endpoint
    * that is protected by this guard. It checks if the request is authenticated and if
    * the user is active. If the user is not active, it throws an UnauthorizedException.
    * If the onboarding is not finished, it throws an UnauthorizedException.
@@ -61,7 +63,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>()
     const authType = this.getAuthType(request)
     const parsedEnv = EnvSchema.safeParse(process.env)
-    let nodeEnv
+    let nodeEnv: string
 
     if (!parsedEnv.success) {
       nodeEnv = 'dev' // Default to a valid value or handle appropriately
@@ -73,7 +75,7 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException('No authentication provided')
     }
 
-    // In case the environment is e2e, we want to authenticate the user using the email
+    // In case the environment is e2e, we want to authenticate the user using the email,
     // else we want to authenticate the user using the JWT token.
 
     if (authType !== 'API_KEY' && nodeEnv === 'e2e') {
@@ -85,7 +87,8 @@ export class AuthGuard implements CanActivate {
         email,
         this.prisma,
         this.slugGenerator,
-        this.hydrationService
+        this.hydrationService,
+        this.workspaceCacheService
       )
 
       userContext = {
@@ -147,7 +150,8 @@ export class AuthGuard implements CanActivate {
               payload['id'],
               this.prisma,
               this.slugGenerator,
-              this.hydrationService
+              this.hydrationService,
+              this.workspaceCacheService
             )
 
             userContext = {
@@ -168,7 +172,7 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException()
     }
 
-    // If the user is not active, we throw an UnauthorizedException.
+    // If the user is not active, we throw UnauthorizedException.
     if (!userContext.isActive) {
       throw new UnauthorizedException(
         constructErrorBody(

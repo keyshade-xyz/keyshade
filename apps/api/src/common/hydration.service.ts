@@ -42,6 +42,7 @@ import { HydratedProject, RawProject } from '@/project/project.types'
 import { TierLimitService } from './tier-limit.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { HydratedWorkspace, RawWorkspace } from '@/workspace/workspace.types'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 type RootHydrationParams = {
   user: AuthenticatedUser
@@ -90,7 +91,8 @@ export class HydrationService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly tierLimitService: TierLimitService
+    private readonly tierLimitService: TierLimitService,
+    private readonly workspaceCacheService: WorkspaceCacheService
   ) {}
 
   /**
@@ -112,7 +114,8 @@ export class HydrationService {
       permittedAuthorities = await getCollectiveWorkspaceAuthorities(
         integration.workspaceId,
         user.id,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -163,7 +166,8 @@ export class HydrationService {
       permittedAuthorities = await getCollectiveProjectAuthorities(
         user.id,
         secret.project,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -218,7 +222,8 @@ export class HydrationService {
       permittedAuthorities = await getCollectiveProjectAuthorities(
         user.id,
         variable.project,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -271,7 +276,8 @@ export class HydrationService {
       permittedAuthorities = await getCollectiveEnvironmentAuthorities(
         user.id,
         environment,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -320,7 +326,8 @@ export class HydrationService {
       permittedAuthorities = await getCollectiveWorkspaceAuthorities(
         workspaceRole.workspaceId,
         user.id,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -369,7 +376,8 @@ export class HydrationService {
       permittedAuthorities = await getCollectiveWorkspaceAuthorities(
         workspaceMember.workspaceId,
         user.id,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -429,11 +437,17 @@ export class HydrationService {
     if (!permittedAuthorities) {
       permittedAuthorities =
         project.accessLevel === ProjectAccessLevel.PRIVATE
-          ? await getCollectiveProjectAuthorities(user.id, project, this.prisma)
+          ? await getCollectiveProjectAuthorities(
+              user.id,
+              project,
+              this.prisma,
+              this.workspaceCacheService
+            )
           : await getCollectiveWorkspaceAuthorities(
               project.workspaceId,
               user.id,
-              this.prisma
+              this.prisma,
+              this.workspaceCacheService
             )
     }
 
@@ -507,11 +521,21 @@ export class HydrationService {
     permittedAuthorities,
     authorizationService
   }: WorkspaceHydrationParams): Promise<HydratedWorkspace> {
+    const cachedHydratedWorkspace =
+      await this.workspaceCacheService.getHydratedWorkspace(
+        workspace.id,
+        user.id
+      )
+    if (cachedHydratedWorkspace) {
+      return cachedHydratedWorkspace
+    }
+
     if (!permittedAuthorities) {
       permittedAuthorities = await getCollectiveWorkspaceAuthorities(
         workspace.id,
         user.id,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService
       )
     }
 
@@ -585,26 +609,33 @@ export class HydrationService {
     delete workspace.members
     delete workspace.roles
 
-    return {
+    const hydratedWorkspace: HydratedWorkspace = {
       ...workspace,
       ...tierLimits,
       ...workspaceResources,
       entitlements,
       isDefault: workspace.isDefault && workspace.ownerId === user.id
     }
+
+    await this.workspaceCacheService.setHydratedWorkspace(
+      hydratedWorkspace,
+      user.id
+    )
+
+    return hydratedWorkspace
   }
 
   /**
-   * Count the number of authorized environments, variables and secrets in a project.
+   * Count the number of authorized environments, variables, and secrets in a project.
    *
    * This function will check if the user has access to each environment in the project
    * and then fetch the counts of variables and secrets for each permitted environment.
    *
    * @param project The project to count the resources of.
-   * @param user The user to check the access for.
+   * @param user The user, to check the access for.
    * @param authorizationService The authorization service to use for checking access.
    * @returns A promise that resolves with an object containing the counts of environments,
-   * variables and secrets the user has access to in the project.
+   * variables, and secrets the user has access to in the project.
    */
   public async countAuthorizedProjectResources(
     project: RawProject,
@@ -744,35 +775,27 @@ export class HydrationService {
     const projectId = project.id
     this.logger.log(`Parsing project item limits for project ${projectId}`)
 
-    this.logger.log(`Getting environment tier limit for project ${projectId}`)
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(project.workspaceId)
+
     // Get the tier limit for environments in the project
     const maxAllowedEnvironments =
-      await this.tierLimitService.getEnvironmentTierLimit(project.workspaceId)
+      workspaceTierLimit.MAX_ENVIRONMENTS_PER_PROJECT
 
     // Get the total number of environments in the project
     const totalEnvironments = project.environments.length
-    this.logger.log(
-      `Found ${totalEnvironments} environments in project ${projectId}`
-    )
 
-    this.logger.log(`Getting secret tier limit for project ${projectId}`)
     // Get the tier limit for secrets in the project
-    const maxAllowedSecrets = await this.tierLimitService.getSecretTierLimit(
-      project.workspaceId
-    )
+    const maxAllowedSecrets = workspaceTierLimit.MAX_SECRETS_PER_PROJECT
 
     // Get the total number of secrets in the project
     const totalSecrets = project.secrets.length
-    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
 
-    this.logger.log(`Getting variable tier limit for project ${projectId}`)
     // Get the tier limit for variables in the project
-    const maxAllowedVariables =
-      await this.tierLimitService.getVariableTierLimit(project.workspaceId)
+    const maxAllowedVariables = workspaceTierLimit.MAX_VARIABLES_PER_PROJECT
 
     // Get the total number of variables in the project
     const totalVariables = project.variables.length
-    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
 
     return {
       maxAllowedEnvironments,
@@ -807,47 +830,34 @@ export class HydrationService {
       `Parsing workspace item limits for workspace ${workspaceId}`
     )
 
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(workspaceId)
+
     // Get the tier limit for the members in the workspace
-    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
-    const maxAllowedMembers =
-      await this.tierLimitService.getMemberTierLimit(workspaceId)
+    const maxAllowedMembers = workspaceTierLimit.MAX_MEMBERS_PER_WORKSPACE
 
     // Get total members in the workspace
     const totalMembers = workspace.members.length
-    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
 
     // Get project tier limit
-    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
-    const maxAllowedProjects =
-      await this.tierLimitService.getProjectTierLimit(workspaceId)
+    const maxAllowedProjects = workspaceTierLimit.MAX_PROJECTS_PER_WORKSPACE
 
     // Get total projects in the workspace
     const totalProjects = workspace.projects.length
-    this.logger.log(
-      `Found ${totalProjects} projects in workspace ${workspaceId}`
-    )
 
     // Get role tier limit
-    this.logger.log(`Getting role tier limit for workspace ${workspaceId}`)
-    const maxAllowedRoles =
-      await this.tierLimitService.getRoleTierLimit(workspaceId)
+    const maxAllowedRoles = workspaceTierLimit.MAX_ROLES_PER_WORKSPACE
 
     // Get total roles in the workspace
     const totalRoles = workspace.roles.length
     this.logger.log(`Found ${totalRoles} roles for workspace ${workspaceId}`)
 
     // Get integration tier limit
-    this.logger.log(
-      `Getting integration tier limit for workspace ${workspaceId}`
-    )
     const maxAllowedIntegrations =
-      await this.tierLimitService.getIntegrationTierLimit(workspaceId)
+      workspaceTierLimit.MAX_INTEGRATIONS_PER_WORKSPACE
 
     // Get total integrations in workspace
     const totalIntegrations = workspace.integrations.length
-    this.logger.log(
-      `Found ${totalIntegrations} integrations for workspace ${workspaceId}`
-    )
 
     return {
       maxAllowedMembers,
@@ -980,10 +990,12 @@ export class HydrationService {
       new Map()
 
     // Fetch max allowed revisions for configurations in the workspace
-    const maxAllowedRevisions =
-      await this.tierLimitService.getConfigurationVersionTierLimit(
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(
         rawSecret.project.workspaceId
       )
+    const maxAllowedRevisions =
+      workspaceTierLimit.MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT
 
     for (const secretVersion of rawSecret.versions) {
       const environmentSlug = secretVersion.environment.slug
@@ -1085,10 +1097,12 @@ export class HydrationService {
       new Map()
 
     // Fetch max allowed revisions for configurations in the workspace
-    const maxAllowedRevisions =
-      await this.tierLimitService.getConfigurationVersionTierLimit(
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(
         rawVariable.project.workspaceId
       )
+    const maxAllowedRevisions =
+      workspaceTierLimit.MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT
 
     for (const variableVersion of rawVariable.versions) {
       const environmentSlug = variableVersion.environment.slug

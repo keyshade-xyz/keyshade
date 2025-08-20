@@ -33,6 +33,7 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedWorkspaceMember } from './workspace-membership.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -45,7 +46,8 @@ export class WorkspaceMembershipService {
     private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService
   ) {}
 
   /**
@@ -74,7 +76,8 @@ export class WorkspaceMembershipService {
       otherUserEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     if (otherUser.id === user.id) {
@@ -205,6 +208,12 @@ export class WorkspaceMembershipService {
       this.prisma
     )
 
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
+    await this.workspaceCacheService.setWorkspaceAdmin(
+      workspace.id,
+      otherUser.id
+    )
+
     this.log.debug(
       `Transferred ownership of workspace ${workspace.name} (${workspace.id}) to user ${otherUser.email} (${otherUser.id})`
     )
@@ -294,6 +303,8 @@ export class WorkspaceMembershipService {
       )
       return []
     }
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
   }
 
   /**
@@ -392,6 +403,8 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `Removed users from workspace ${workspace.name} (${workspace.id})`
     )
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
   }
 
   /**
@@ -414,7 +427,8 @@ export class WorkspaceMembershipService {
       otherUserEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     const workspace =
@@ -526,6 +540,8 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `Updated role of user ${otherUser.id} in workspace ${workspace.name} (${workspace.id})`
     )
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
 
     return await this.hydrationService.hydrateWorkspaceMember({
       user,
@@ -718,7 +734,8 @@ export class WorkspaceMembershipService {
       inviteeEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     const workspace =
@@ -753,6 +770,8 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `User ${user.name} (${user.id}) cancelled invitation to workspace ${workspace.id}`
     )
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
   }
 
   /**
@@ -797,6 +816,8 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `User ${user.name} (${user.id}) declined invitation to workspace ${workspace.id}`
     )
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
   }
 
   /**
@@ -857,6 +878,8 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `User ${user.name} (${user.id}) left workspace ${workspace.id}`
     )
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
   }
 
   /**
@@ -878,7 +901,8 @@ export class WorkspaceMembershipService {
         otherUserEmail,
         this.prisma,
         this.slugGenerator,
-        this.hydrationService
+        this.hydrationService,
+        this.workspaceCacheService
       )
     } catch (e) {
       return false
@@ -908,7 +932,8 @@ export class WorkspaceMembershipService {
       inviteeEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     const workspace =
@@ -1088,7 +1113,8 @@ export class WorkspaceMembershipService {
           },
           this.prisma,
           this.slugGenerator,
-          this.hydrationService
+          this.hydrationService,
+          this.workspaceCacheService
         )
       }
 

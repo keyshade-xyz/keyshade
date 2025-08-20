@@ -10,6 +10,7 @@ import {
 import { constructErrorBody } from './util'
 import { HydratedSecret } from '@/secret/secret.types'
 import { HydratedVariable } from '@/variable/variable.types'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 const INFINITE = -1 // Used to represent infinite limit
 
@@ -19,7 +20,7 @@ interface TierLimit {
   MAX_SECRETS_PER_PROJECT: number
   MAX_VARIABLES_PER_PROJECT: number
   MAX_INTEGRATIONS_PER_WORKSPACE: number
-  MAX_VERSIONS_PER_CONFIG_PER_ENVIRONMENT: number
+  MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT: number
   MAX_ROLES_PER_WORKSPACE: number
   AUDIT_LOG_RETENTION_DAYS: number
   MAX_SNAPSHOTS_PER_WORKSPACE: number
@@ -37,7 +38,7 @@ const TIER_LIMITS: Record<SubscriptionPlanType, TierLimit> = {
     MAX_SECRETS_PER_PROJECT: 15,
     MAX_VARIABLES_PER_PROJECT: 15,
     MAX_INTEGRATIONS_PER_WORKSPACE: 3,
-    MAX_VERSIONS_PER_CONFIG_PER_ENVIRONMENT: 5,
+    MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT: 5,
     MAX_ROLES_PER_WORKSPACE: 5,
     AUDIT_LOG_RETENTION_DAYS: 7,
     MAX_SNAPSHOTS_PER_WORKSPACE: 0,
@@ -49,7 +50,7 @@ const TIER_LIMITS: Record<SubscriptionPlanType, TierLimit> = {
     MAX_SECRETS_PER_PROJECT: 30,
     MAX_VARIABLES_PER_PROJECT: 30,
     MAX_INTEGRATIONS_PER_WORKSPACE: 10,
-    MAX_VERSIONS_PER_CONFIG_PER_ENVIRONMENT: 20,
+    MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT: 20,
     MAX_ROLES_PER_WORKSPACE: 20,
     AUDIT_LOG_RETENTION_DAYS: 15,
     MAX_SNAPSHOTS_PER_WORKSPACE: 5,
@@ -61,7 +62,7 @@ const TIER_LIMITS: Record<SubscriptionPlanType, TierLimit> = {
     MAX_SECRETS_PER_PROJECT: 100,
     MAX_VARIABLES_PER_PROJECT: 100,
     MAX_INTEGRATIONS_PER_WORKSPACE: 30,
-    MAX_VERSIONS_PER_CONFIG_PER_ENVIRONMENT: 50,
+    MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT: 50,
     MAX_ROLES_PER_WORKSPACE: 50,
     AUDIT_LOG_RETENTION_DAYS: 60,
     MAX_SNAPSHOTS_PER_WORKSPACE: 30,
@@ -73,7 +74,7 @@ const TIER_LIMITS: Record<SubscriptionPlanType, TierLimit> = {
     MAX_SECRETS_PER_PROJECT: INFINITE,
     MAX_VARIABLES_PER_PROJECT: INFINITE,
     MAX_INTEGRATIONS_PER_WORKSPACE: INFINITE,
-    MAX_VERSIONS_PER_CONFIG_PER_ENVIRONMENT: INFINITE,
+    MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT: INFINITE,
     MAX_ROLES_PER_WORKSPACE: INFINITE,
     AUDIT_LOG_RETENTION_DAYS: INFINITE,
     MAX_SNAPSHOTS_PER_WORKSPACE: INFINITE,
@@ -85,47 +86,10 @@ const TIER_LIMITS: Record<SubscriptionPlanType, TierLimit> = {
 export class TierLimitService {
   private readonly logger = new Logger(TierLimitService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
-
-  async getProjectTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_PROJECTS_PER_WORKSPACE
-  }
-
-  async getEnvironmentTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_ENVIRONMENTS_PER_PROJECT
-  }
-
-  async getSecretTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_SECRETS_PER_PROJECT
-  }
-
-  async getVariableTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_VARIABLES_PER_PROJECT
-  }
-
-  async getMemberTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_MEMBERS_PER_WORKSPACE
-  }
-
-  async getIntegrationTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_INTEGRATIONS_PER_WORKSPACE
-  }
-
-  async getConfigurationVersionTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_VERSIONS_PER_CONFIG_PER_ENVIRONMENT
-  }
-
-  async getRoleTierLimit(workspaceId: Workspace['id']) {
-    const tierLimit = await this.getWorkspaceTierLimit(workspaceId)
-    return tierLimit.MAX_ROLES_PER_WORKSPACE
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly workspaceCacheService: WorkspaceCacheService
+  ) {}
 
   /**
    * Check if the workspace has reached the limit of projects. If the limit is
@@ -139,11 +103,13 @@ export class TierLimitService {
       `Checking if workspace ${workspace.id} has reached the limit of projects`
     )
 
-    const tierLimit = await this.getProjectTierLimit(workspace.id)
+    const projectTierLimit = (await this.getWorkspaceTierLimit(workspace.id))
+      .MAX_PROJECTS_PER_WORKSPACE
+
     this.logger.log(
-      `Tier limit for projects in workspace ${workspace.slug} is ${tierLimit}`
+      `Tier limit for projects in workspace ${workspace.slug} is ${projectTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (projectTierLimit === INFINITE) {
       this.logger.log(
         `Workspace ${workspace.id} can have an infinite number of projects`
       )
@@ -162,14 +128,14 @@ export class TierLimitService {
     )
 
     // Check if the workspace has reached the limit of projects
-    if (projectCount >= tierLimit) {
+    if (projectCount >= projectTierLimit) {
       this.logger.error(
         `Workspace ${workspace.id} has reached the limit of maximum projects`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of projects reached',
-          `You can create a maximum of ${tierLimit} projects`
+          `You can create a maximum of ${projectTierLimit} projects`
         )
       )
     } else {
@@ -191,11 +157,14 @@ export class TierLimitService {
       `Checking if project ${project.id} has reached the limit of environments`
     )
 
-    const tierLimit = await this.getEnvironmentTierLimit(project.workspaceId)
+    const environmentTierLimit = (
+      await this.getWorkspaceTierLimit(project.workspaceId)
+    ).MAX_ENVIRONMENTS_PER_PROJECT
+
     this.logger.log(
-      `Tier limit for environments in project ${project.slug} is ${tierLimit}`
+      `Tier limit for environments in project ${project.slug} is ${environmentTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (environmentTierLimit === INFINITE) {
       this.logger.log(
         `Project ${project.id} can have an infinite number of environments`
       )
@@ -214,14 +183,14 @@ export class TierLimitService {
     )
 
     // Check if the project has reached the limit of environments
-    if (environmentCount >= tierLimit) {
+    if (environmentCount >= environmentTierLimit) {
       this.logger.error(
         `Project ${project.id} has reached the limit of maximum environments`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of environments reached',
-          `You can create a maximum of ${tierLimit} environments`
+          `You can create a maximum of ${environmentTierLimit} environments`
         )
       )
     } else {
@@ -243,11 +212,14 @@ export class TierLimitService {
       `Checking if project ${project.id} has reached the limit of secrets`
     )
 
-    const tierLimit = await this.getSecretTierLimit(project.workspaceId)
+    const secretTierLimit = (
+      await this.getWorkspaceTierLimit(project.workspaceId)
+    ).MAX_SECRETS_PER_PROJECT
+
     this.logger.log(
-      `Tier limit for secrets in project ${project.slug} is ${tierLimit}`
+      `Tier limit for secrets in project ${project.slug} is ${secretTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (secretTierLimit === INFINITE) {
       this.logger.log(
         `Project ${project.id} can have an infinite number of secrets`
       )
@@ -264,14 +236,14 @@ export class TierLimitService {
     this.logger.log(`Counted ${secretCount} secrets of project ${project.id}`)
 
     // Check if the project has reached the limit of secrets
-    if (secretCount >= tierLimit) {
+    if (secretCount >= secretTierLimit) {
       this.logger.error(
         `Project ${project.id} has reached the limit of maximum secrets`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of secrets reached',
-          `You can create a maximum of ${tierLimit} secrets`
+          `You can create a maximum of ${secretTierLimit} secrets`
         )
       )
     } else {
@@ -293,11 +265,14 @@ export class TierLimitService {
       `Checking if project ${project.id} has reached the limit of variables`
     )
 
-    const tierLimit = await this.getVariableTierLimit(project.workspaceId)
+    const variableTierLimit = (
+      await this.getWorkspaceTierLimit(project.workspaceId)
+    ).MAX_VARIABLES_PER_PROJECT
+
     this.logger.log(
-      `Tier limit for variables in project ${project.slug} is ${tierLimit}`
+      `Tier limit for variables in project ${project.slug} is ${variableTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (variableTierLimit === INFINITE) {
       this.logger.log(
         `Project ${project.id} can have an infinite number of variables`
       )
@@ -316,14 +291,14 @@ export class TierLimitService {
     )
 
     // Check if the project has reached the limit of variables
-    if (variableCount >= tierLimit) {
+    if (variableCount >= variableTierLimit) {
       this.logger.error(
         `Project ${project.id} has reached the limit of maximum variables`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of variables reached',
-          `You can create a maximum of ${tierLimit} variables`
+          `You can create a maximum of ${variableTierLimit} variables`
         )
       )
     } else {
@@ -345,11 +320,13 @@ export class TierLimitService {
       `Checking if workspace ${workspace.id} has reached the limit of members`
     )
 
-    const tierLimit = await this.getMemberTierLimit(workspace.id)
+    const memberTierLimit = (await this.getWorkspaceTierLimit(workspace.id))
+      .MAX_MEMBERS_PER_WORKSPACE
+
     this.logger.log(
-      `Tier limit for members in workspace ${workspace.slug} is ${tierLimit}`
+      `Tier limit for members in workspace ${workspace.slug} is ${memberTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (memberTierLimit === INFINITE) {
       this.logger.log(
         `Workspace ${workspace.id} can have an infinite number of members`
       )
@@ -368,14 +345,14 @@ export class TierLimitService {
     )
 
     // Check if the workspace has reached the limit of members
-    if (memberCount >= tierLimit) {
+    if (memberCount >= memberTierLimit) {
       this.logger.error(
         `Workspace ${workspace.id} has reached the limit of maximum members`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of members reached',
-          `You can create a maximum of ${tierLimit} members`
+          `You can create a maximum of ${memberTierLimit} members`
         )
       )
     } else {
@@ -390,11 +367,14 @@ export class TierLimitService {
       `Checking if workspace ${workspace.id} has reached the limit of integrations`
     )
 
-    const tierLimit = await this.getIntegrationTierLimit(workspace.id)
+    const integrationTierLimit = (
+      await this.getWorkspaceTierLimit(workspace.id)
+    ).MAX_INTEGRATIONS_PER_WORKSPACE
+
     this.logger.log(
-      `Tier limit for integrations in workspace ${workspace.slug} is ${tierLimit}`
+      `Tier limit for integrations in workspace ${workspace.slug} is ${integrationTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (integrationTierLimit === INFINITE) {
       this.logger.log(
         `Workspace ${workspace.id} can have an infinite number of integrations`
       )
@@ -413,14 +393,14 @@ export class TierLimitService {
     )
 
     // Check if the workspace has reached the limit of integrations
-    if (integrationCount >= tierLimit) {
+    if (integrationCount >= integrationTierLimit) {
       this.logger.error(
         `Workspace ${workspace.id} has reached the limit of maximum integrations`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of integrations reached',
-          `You can create a maximum of ${tierLimit} integrations`
+          `You can create a maximum of ${integrationTierLimit} integrations`
         )
       )
     } else {
@@ -442,11 +422,14 @@ export class TierLimitService {
       `Checking if ${type} ${configurationId} has reached the limit of configuration versions`
     )
 
-    const tierLimit = await this.getConfigurationVersionTierLimit(workspaceId)
+    const configVersiontierLimit = (
+      await this.getWorkspaceTierLimit(workspaceId)
+    ).MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT
+
     this.logger.log(
-      `Tier limit for configuration versions in workspace ${workspaceId} is ${tierLimit}`
+      `Tier limit for configuration versions in workspace ${workspaceId} is ${configVersiontierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (configVersiontierLimit === INFINITE) {
       this.logger.log(
         `${type} ${configurationId} can have an infinite number of revisions`
       )
@@ -479,7 +462,7 @@ export class TierLimitService {
     )
 
     // Check if the configuration has reached the limit of revisions
-    if (count < tierLimit) {
+    if (count < configVersiontierLimit) {
       this.logger.log(
         `${type} ${configurationId} has not reached the limit of configuration versions in environment ${environmentId}`
       )
@@ -544,11 +527,13 @@ export class TierLimitService {
       `Checking if workspace ${workspace.id} has reached the limit of roles`
     )
 
-    const tierLimit = await this.getRoleTierLimit(workspace.id)
+    const roleTierLimit = (await this.getWorkspaceTierLimit(workspace.id))
+      .MAX_MEMBERS_PER_WORKSPACE
+
     this.logger.log(
-      `Tier limit for roles in workspace ${workspace.slug} is ${tierLimit}`
+      `Tier limit for roles in workspace ${workspace.slug} is ${roleTierLimit}`
     )
-    if (tierLimit === INFINITE) {
+    if (roleTierLimit === INFINITE) {
       this.logger.log(
         `Workspace ${workspace.id} can have an infinite number of roles`
       )
@@ -565,14 +550,14 @@ export class TierLimitService {
     this.logger.log(`Fetched ${roleCount} roles of workspace ${workspace.id}`)
 
     // Check if the workspace has reached the limit of roles
-    if (roleCount >= tierLimit) {
+    if (roleCount >= roleTierLimit) {
       this.logger.error(
         `Workspace ${workspace.id} has reached the limit of maximum roles`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Maximum limit of roles reached',
-          `You can create a maximum of ${tierLimit} roles`
+          `You can create a maximum of ${roleTierLimit} roles`
         )
       )
     } else {
@@ -587,18 +572,11 @@ export class TierLimitService {
    * @param workspaceId the ID of the workspace
    * @returns the tier limit for the workspace, including the maximum number of members
    */
-  private async getWorkspaceTierLimit(
+  public async getWorkspaceTierLimit(
     workspaceId: Workspace['id']
   ): Promise<TierLimitWithMembers> {
-    this.logger.log(`Finding subscription for workspace ${workspaceId}`)
-    const subscription = await this.prisma.subscription.findFirst({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(
-      `Found subscription ${subscription.id} for workspace ${workspaceId}`
-    )
+    const subscription =
+      await this.workspaceCacheService.getWorkspaceSubscription(workspaceId)
 
     const subscriptionPlan = subscription.plan
     this.logger.log(

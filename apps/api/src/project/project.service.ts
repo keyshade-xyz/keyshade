@@ -46,6 +46,7 @@ import { ExportService } from './export/export.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
 export class ProjectService {
@@ -54,6 +55,7 @@ export class ProjectService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly secretService: SecretService,
@@ -1024,47 +1026,36 @@ export class ProjectService {
       `Found ${projects.length} projects of workspace ${workspaceSlug}`
     )
 
-    const accessibleProjects = []
+    const hydratedProjects: HydratedProject[] = []
     for (const project of projects) {
-      let hasAuthority = null
       try {
-        hasAuthority =
+        const hydratedProject =
           await this.authorizationService.authorizeUserAccessToProject({
             user,
             slug: project.slug,
             authorities: [Authority.READ_PROJECT]
           })
+        hydratedProjects.push(hydratedProject)
       } catch (_ignored) {
         this.logger.log(
           `User ${user.id} does not have access to project ${project.slug}`
         )
       }
-
-      if (hasAuthority) {
-        accessibleProjects.push(project)
-      }
     }
 
-    const items = await Promise.all(
-      accessibleProjects.map(
-        async (project) =>
-          await this.hydrationService.hydrateProject({
-            project,
-            user,
-            authorizationService: this.authorizationService
-          })
-      )
+    const metadata = paginate(
+      hydratedProjects.length,
+      `/project/all/${workspaceSlug}`,
+      {
+        page,
+        limit,
+        sort,
+        order,
+        search
+      }
     )
 
-    const metadata = paginate(items.length, `/project/all/${workspaceSlug}`, {
-      page,
-      limit,
-      sort,
-      order,
-      search
-    })
-
-    return { items, metadata }
+    return { items: hydratedProjects, metadata }
   }
 
   /**
