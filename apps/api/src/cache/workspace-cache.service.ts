@@ -53,14 +53,14 @@ export class WorkspaceCacheService implements OnModuleDestroy {
       `Removing hydrated workspace cache for workspace ${workspaceId}`
     )
     const key = this.getWorkspaceKeysKey(workspaceId)
-    const keysRaw = await this.redisClient.publisher.get(key)
-    if (keysRaw === null) {
+    const allKeys = await this.redisClient.publisher.sMembers(key)
+    if (allKeys === null) {
       this.logger.log(
         `No workspace keys found in cache for workspace ${workspaceId}`
       )
       return
     } else {
-      const filteredKeys = (JSON.parse(keysRaw) as string[]).filter((k) =>
+      const filteredKeys = allKeys.filter((k) =>
         k.startsWith(
           `${WorkspaceCacheService.HYDRATED_WORKSPACE_PREFIX}-${workspaceId}`
         )
@@ -291,9 +291,9 @@ export class WorkspaceCacheService implements OnModuleDestroy {
       `Attempting to fetch workspace ${workspaceId} authorities from cache`
     )
     const key = this.getCollectiveWorkspaceAuthoritiesKey(workspaceId, userId)
-    const rawAuthorities = await this.redisClient.publisher.get(key)
+    const rawAuthorities = await this.redisClient.publisher.sMembers(key)
 
-    return new Set(rawAuthorities ? JSON.parse(rawAuthorities) : [])
+    return new Set(rawAuthorities as Authority[])
   }
 
   private getWorkspaceSubscriptionKey(workspaceId: Workspace['id']): string {

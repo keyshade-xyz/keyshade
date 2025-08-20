@@ -319,6 +319,7 @@ export class AuthorityCheckerService {
    * Checks if the user has the required authorities to access the given secret.
    *
    * @param params The input object containing the user, slug, authorities
+   * @param authorizationService
    * @returns The secret if the user has the required authorities
    * @throws InternalServerErrorException if there's an error when communicating with the database
    * @throws NotFoundException if the secret is not found
