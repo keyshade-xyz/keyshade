@@ -10,7 +10,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  OnModuleInit
 } from '@nestjs/common'
 import {
   Authority,
@@ -32,17 +33,58 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
 import { HydratedWorkspace } from './workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
-export class WorkspaceService {
+export class WorkspaceService implements OnModuleInit {
   private readonly logger = new Logger(WorkspaceService.name)
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
+    private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService
   ) {}
+
+  /**
+   * Keeps the workspace and its dependent records in sync with
+   * database changes. Here's a list of things it does for now:
+   * - creates a subscription for every workspace that doesn't have one
+   */
+  async onModuleInit() {
+    const currentEnv = process.env.NODE_ENV as unknown as string
+    if (currentEnv !== 'e2e') {
+      // Create default subscriptions for workspaces that don't have one
+      this.logger.log('Fetching workspaces without any subscription...')
+      const workspacesWithoutSubscription =
+        await this.prisma.workspace.findMany({
+          where: {
+            subscription: null
+          }
+        })
+      this.logger.log(
+        `Found ${workspacesWithoutSubscription.length} workspaces without any subscription`
+      )
+
+      const createSubscriptionOps = []
+      for (const workspace of workspacesWithoutSubscription) {
+        this.logger.log(
+          `Creating a subscription for workspace ${workspace.slug}`
+        )
+        createSubscriptionOps.push(
+          this.prisma.subscription.create({
+            data: {
+              workspaceId: workspace.id,
+              userId: workspace.ownerId
+            }
+          })
+        )
+      }
+      await this.prisma.$transaction(createSubscriptionOps)
+      this.logger.log('Finished creating subscriptions for workspaces')
+    }
+  }
 
   /**
    * Creates a new workspace for the given user.
@@ -345,6 +387,18 @@ export class WorkspaceService {
         slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to export workspace data of disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {}
@@ -869,5 +923,102 @@ export class WorkspaceService {
     }
 
     this.logger.log(`Workspace ${name} does not exist for user ${userId}`)
+  }
+
+  /**
+   * Parses the tier limits for a given workspace and returns an object containing
+   * the maximum allowed and current total of members and projects.
+   *
+   * @param workspace The workspace to parse tier limits for.
+   * @param tierLimitService The service used to obtain tier limits.
+   * @param prisma The Prisma client for database operations.
+   * @returns A promise that resolves to an object containing the workspace with
+   * tier limits, including maximum allowed and total members and projects.
+   */
+
+  private async parseWorkspaceItemLimits(
+    workspaceId: Workspace['id']
+  ): Promise<{
+    maxAllowedProjects: number
+    totalProjects: number
+    maxAllowedMembers: number
+    totalMembers: number
+    maxAllowedIntegrations: number
+    totalIntegrations: number
+    maxAllowedRoles: number
+    totalRoles: number
+  }> {
+    this.logger.log(
+      `Parsing workspace item limits for workspace ${workspaceId}`
+    )
+
+    // Get the tier limit for the members in the workspace
+    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
+    const maxAllowedMembers =
+      await this.tierLimitService.getMemberTierLimit(workspaceId)
+
+    // Get total members in the workspace
+    const totalMembers = await this.prisma.workspaceMember.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
+
+    // Get project tier limit
+    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
+    const maxAllowedProjects =
+      await this.tierLimitService.getProjectTierLimit(workspaceId)
+
+    // Get total projects in the workspace
+    const totalProjects = await this.prisma.project.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(
+      `Found ${totalProjects} projects in workspace ${workspaceId}`
+    )
+
+    // Get integration tier limit
+    this.logger.log(
+      `Getting integration tier limit for workspace ${workspaceId}`
+    )
+    const maxAllowedIntegrations =
+      await this.tierLimitService.getIntegrationTierLimit(workspaceId)
+
+    // Get total integrations in the workspace
+    const totalIntegrations = await this.prisma.integration.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(
+      `Found ${totalIntegrations} integrations in workspace ${workspaceId}`
+    )
+
+    // Get roles tier limit
+    this.logger.log(`Getting role tier limit for workspace ${workspaceId}`)
+    const maxAllowedRoles =
+      await this.tierLimitService.getRoleTierLimit(workspaceId)
+
+    // Get total roles in the workspace
+    const totalRoles = await this.prisma.workspaceRole.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(`Found ${totalRoles} roles in workspace ${workspaceId}`)
+
+    return {
+      maxAllowedMembers,
+      totalMembers,
+      maxAllowedProjects,
+      totalProjects,
+      maxAllowedIntegrations,
+      totalIntegrations,
+      maxAllowedRoles,
+      totalRoles
+    }
   }
 }
