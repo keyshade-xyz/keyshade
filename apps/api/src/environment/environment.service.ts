@@ -21,6 +21,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { checkForDisabledWorkspace } from '@/common/workspace'
 import { HydratedEnvironment } from './environment.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
@@ -84,6 +85,12 @@ export class EnvironmentService {
       })
     const projectId = project.id
 
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create environment ${dto.name} in disabled workspace ${project.workspaceId}`
+    )
+
     // Check if more environments can be created in the project
     await this.tierLimitService.checkEnvironmentLimitReached(project)
 
@@ -118,8 +125,6 @@ export class EnvironmentService {
       },
       include: InclusionQuery.Environment
     })
-
-    await this.associateEnvironmentWithAdminRole(project, user, environmentSlug)
 
     this.logger.log(
       `Environment ${environment.name} (${environment.slug}) created in project ${project.name}`
@@ -519,10 +524,14 @@ export class EnvironmentService {
         }
       })) !== null
     ) {
-      const errorMessage = `Environment with name ${name} already exists in project ${slug}`
-      this.logger.error(errorMessage)
+      this.logger.error(
+        `Environment with name ${name} already exists in project ${slug}`
+      )
       throw new ConflictException(
-        constructErrorBody('Environment exists', errorMessage)
+        constructErrorBody(
+          'Environment exists',
+          'An environment with this name already exists in this project. Please choose a different name.'
+        )
       )
     }
 
@@ -577,67 +586,5 @@ export class EnvironmentService {
       `Found ${variableCount} variables in environment ${environmentId}`
     )
     return variableCount
-  }
-
-  private async associateEnvironmentWithAdminRole(
-    project: Partial<Project>,
-    user: AuthenticatedUser,
-    environmentSlug: Environment['slug']
-  ) {
-    this.logger.log(
-      `Associating environment ${environmentSlug} with admin role`
-    )
-
-    // Add the environment to the list of environment in the project of the admin role
-    const adminRole = await this.prisma.workspaceRole.findFirst({
-      where: {
-        workspaceId: project.workspaceId,
-        hasAdminAuthority: true
-      }
-    })
-
-    if (!adminRole) {
-      const errorMessage = `Admin role not found for workspace ${project.workspaceId}`
-      this.logger.error(
-        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
-      )
-      throw new BadRequestException(
-        constructErrorBody('Admin role not found', errorMessage)
-      )
-    }
-
-    this.logger.log(
-      `Admin role for workspace ${project.workspaceId} is ${adminRole.slug}`
-    )
-
-    // Fetch the existing environments associated with the admin role
-    const { environments: existingEnvironments } =
-      await this.prisma.projectWorkspaceRoleAssociation.findUnique({
-        where: {
-          roleId_projectId: {
-            roleId: adminRole.id,
-            projectId: project.id
-          }
-        },
-        include: {
-          environments: true
-        }
-      })
-    const environmentSlugs = existingEnvironments.map((e) => e.slug)
-    environmentSlugs.push(environmentSlug)
-
-    await this.prisma.projectWorkspaceRoleAssociation.update({
-      where: {
-        roleId_projectId: {
-          roleId: adminRole.id,
-          projectId: project.id
-        }
-      },
-      data: {
-        environments: {
-          connect: environmentSlugs.map((slug) => ({ slug }))
-        }
-      }
-    })
   }
 }

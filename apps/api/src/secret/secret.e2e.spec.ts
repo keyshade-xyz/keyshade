@@ -162,7 +162,7 @@ describe('Secret Controller Tests', () => {
       }
     }
 
-    project1 = (await projectService.createProject(user1, workspace1.slug, {
+    project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Project 1 description',
       storePrivateKey: true,
@@ -177,9 +177,9 @@ describe('Secret Controller Tests', () => {
           description: 'Environment 2 description'
         }
       ]
-    })) as Project
+    })
 
-    project2 = (await projectService.createProject(user1, workspace1.slug, {
+    project2 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 2',
       description: 'Project 2 description',
       storePrivateKey: false,
@@ -190,7 +190,7 @@ describe('Secret Controller Tests', () => {
           description: 'Environment 1 description'
         }
       ]
-    })) as Project
+    })
 
     environment1 = await prisma.environment.findFirst({
       where: {
@@ -199,7 +199,7 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    secret1 = (await secretService.createSecret(
+    secret1 = await secretService.createSecret(
       user1,
       {
         name: 'Secret 1',
@@ -213,7 +213,7 @@ describe('Secret Controller Tests', () => {
         ]
       },
       project1.slug
-    )) as Secret
+    )
   })
 
   afterEach(async () => {
@@ -257,13 +257,13 @@ describe('Secret Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.secret.name).toBe('Secret 2')
-      expect(body.secret.note).toBe('Secret 2 note')
-      expect(body.secret.projectId).toBe(project1.id)
-      expect(body.values.length).toBe(1)
-      expect(body.values[0].value).not.toBe('Secret 2 value')
-      expect(body.values[0].environment.id).toBe(environment1.id)
-      expect(body.values[0].environment.slug).toBe(environment1.slug)
+      expect(body.name).toBe('Secret 2')
+      expect(body.note).toBe('Secret 2 note')
+      expect(body.projectId).toBe(project1.id)
+      expect(body.versions.length).toBe(1)
+      expect(body.versions[0].value).not.toBe('Secret 2 value')
+      expect(body.versions[0].environment.id).toBe(environment1.id)
+      expect(body.versions[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should have encrypted value if project does not store private key', async () => {
@@ -302,13 +302,13 @@ describe('Secret Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.secret.name).toBe('Secret 2')
-      expect(body.secret.note).toBe('Secret 2 note')
-      expect(body.secret.projectId).toBe(project1.id)
-      expect(body.values.length).toBe(1)
-      expect(body.values[0].value).not.toBe('Secret 2 value')
-      expect(body.values[0].environment.id).toBe(environment1.id)
-      expect(body.values[0].environment.slug).toBe(environment1.slug)
+      expect(body.name).toBe('Secret 2')
+      expect(body.note).toBe('Secret 2 note')
+      expect(body.projectId).toBe(project1.id)
+      expect(body.versions.length).toBe(1)
+      expect(body.versions[0].value).not.toBe('Secret 2 value')
+      expect(body.versions[0].environment.id).toBe(environment1.id)
+      expect(body.versions[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should bulk create multiple secrets successfully', async () => {
@@ -408,7 +408,10 @@ describe('Secret Controller Tests', () => {
       // Create secrets until tier limit is reached
       for (
         let x = 100;
-        x < 100 + tierLimitService.getSecretTierLimit(project1.id) - 1; // Subtract 1 for the secrets created above
+        x <
+        100 +
+          (await tierLimitService.getSecretTierLimit(project1.workspaceId)) -
+          1; // Subtract 1 for the secrets created above
         x++
       ) {
         await secretService.createSecret(
@@ -584,7 +587,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        `Variable COLLIDE already exists in project ${project1.slug}`
+        `A variable with this name already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -640,9 +643,8 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().secret.name).toEqual('Updated Secret 1')
-      expect(response.json().secret.note).toEqual('Updated Secret 1 note')
-      expect(response.json().updatedVersions.length).toBe(0)
+      expect(response.json().name).toEqual('Updated Secret 1')
+      expect(response.json().note).toEqual('Updated Secret 1 note')
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
@@ -676,8 +678,8 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).not.toBe(
+      expect(response.json().versions.length).toBe(1)
+      expect(response.json().versions[0].value).not.toBe(
         'Updated Secret 1 value'
       )
 
@@ -723,8 +725,8 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).not.toBe(
+      expect(response.json().versions.length).toBe(1)
+      expect(response.json().versions[0].value).not.toBe(
         'Updated Secret 1 value'
       )
 
@@ -808,7 +810,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        `Variable COLLIDE already exists in project ${project1.slug}`
+        `A variable with this name already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -869,7 +871,7 @@ describe('Secret Controller Tests', () => {
     })
 
     it('should not create a secret version entity if value-environmentSlug is not provided during creation', async () => {
-      const secret = (await secretService.createSecret(
+      const secret = await secretService.createSecret(
         user1,
         {
           name: 'Secret 4',
@@ -877,7 +879,7 @@ describe('Secret Controller Tests', () => {
           rotateAfter: '24'
         },
         project1.slug
-      )) as Secret
+      )
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
@@ -928,15 +930,15 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      // expect(response.json().count).toEqual(2)
+      expect(response.json().count).toEqual(2)
 
-      // versions = await prisma.secretVersion.findMany({
-      //   where: {
-      //     secretId: secret1.id
-      //   }
-      // })
+      versions = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id
+        }
+      })
 
-      // expect(versions.length).toBe(1)
+      expect(versions.length).toBe(1)
     })
   })
 
@@ -953,27 +955,13 @@ describe('Secret Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { secret, values } = response.json().items[0]
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: secret1.updatedAt.toISOString(),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
-      expect(values.length).toBe(1)
+      const secret = response.json().items[0]
+      expect(secret.id).toBe(secret1.id)
+      expect(secret.name).toBe(secret1.name)
+      expect(secret.slug).toBe(secret1.slug)
+      expect(secret.versions.length).toBe(1)
 
-      const value = values[0]
+      const value = secret.versions[0]
       expect(value.version).toBe(1)
       expect(value.environment.id).toBe(environment1.id)
       expect(value.environment.slug).toBe(environment1.slug)
@@ -1018,28 +1006,14 @@ describe('Secret Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { secret, values } = response.json().items[0]
+      const secret = response.json().items[0]
 
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: expect.any(String),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
-      expect(values.length).toBe(1)
+      expect(secret.id).toBe(secret1.id)
+      expect(secret.name).toBe(secret1.name)
+      expect(secret.slug).toBe(secret1.slug)
+      expect(secret.versions.length).toBe(1)
 
-      const value = values[0]
+      const value = secret.versions[0]
       expect(value.version).toBe(2)
       expect(value.environment.id).toBe(environment1.id)
       expect(value.environment.slug).toBe(environment1.slug)
@@ -1239,7 +1213,7 @@ describe('Secret Controller Tests', () => {
 
   describe('Rotate Secrets Tests', () => {
     it('should have not created a new secret version when there is no rotation defined', async () => {
-      const secretWithoutRotation = (await secretService.createSecret(
+      const secretWithoutRotation = await secretService.createSecret(
         user1,
         {
           name: 'Secret',
@@ -1253,7 +1227,7 @@ describe('Secret Controller Tests', () => {
           ]
         },
         project1.slug
-      )) as Secret
+      )
 
       await secretService.rotateSecrets()
 

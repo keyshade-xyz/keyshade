@@ -30,10 +30,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
-import {
-  HydratedWorkspaceMember,
-  RawWorkspaceMember
-} from './workspace-membership.types'
+import { HydratedWorkspaceMember } from './workspace-membership.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 
@@ -233,6 +230,18 @@ export class WorkspaceMembershipService {
         slug: workspaceSlug,
         authorities: [Authority.ADD_USER]
       })
+
+    if (workspace.isDisabled) {
+      this.log.log(
+        `User ${user.id} attempted to invite users to disabled workspace ${workspace.name} (${workspace.slug})`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     if (workspace.isDefault) {
       this.log.error(
@@ -646,6 +655,18 @@ export class WorkspaceMembershipService {
       }
     })
 
+    if (workspace.isDisabled) {
+      this.log.log(
+        `User ${user.id} attempted to accept invitation to disabled workspace ${workspace.name} (${workspace.slug})`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
+
     // Update the membership
     await this.prisma.workspaceMember.update({
       where: {
@@ -993,7 +1014,7 @@ export class WorkspaceMembershipService {
         )
       }
 
-      let memberUser: User | null
+      let memberUser: User = null
 
       try {
         memberUser = await this.prisma.user.findUnique({
@@ -1004,10 +1025,11 @@ export class WorkspaceMembershipService {
       } catch (_ignored) {}
 
       const userId = memberUser?.id ?? v4()
+      const isExistingUser = memberUser !== null
 
       // Check if the user is already a member of the workspace
       if (
-        memberUser &&
+        isExistingUser &&
         (await this.memberExistsInWorkspace(workspace.id, userId))
       ) {
         this.log.warn(
@@ -1047,9 +1069,31 @@ export class WorkspaceMembershipService {
       }
 
       const invitedOn = new Date()
+      const inviteeName = memberUser?.name
+
+      if (isExistingUser) {
+        this.log.log(
+          `Invitee ${member.email} already exists. Skipping new user creation.`
+        )
+      } else {
+        this.log.log(
+          `Invitee ${member.email} is a new user. Creating new user.`
+        )
+        // Create the user
+        await createUser(
+          {
+            id: userId,
+            email: member.email,
+            authProvider: AuthProvider.EMAIL_OTP
+          },
+          this.prisma,
+          this.slugGenerator,
+          this.hydrationService
+        )
+      }
 
       // Create the workspace membership
-      const createMembership = this.prisma.workspaceMember.create({
+      const rawWorkspaceMember = await this.prisma.workspaceMember.create({
         data: {
           workspaceId: workspace.id,
           userId,
@@ -1067,58 +1111,14 @@ export class WorkspaceMembershipService {
         include: InclusionQuery.WorkspaceMember
       })
 
-      let rawWorkspaceMember: RawWorkspaceMember
-
-      if (memberUser) {
-        rawWorkspaceMember = (
-          await this.prisma.$transaction([createMembership])
-        )[0]
-
-        const inviteeName = memberUser.name ?? undefined
-
-        this.mailService.invitedToWorkspace(
-          member.email,
-          workspace.name,
-          `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
-          currentUser.name,
-          true,
-          inviteeName
-        )
-
-        this.log.debug(
-          `Sent workspace invitation mail to registered user ${memberUser}`
-        )
-      } else {
-        // Create the user
-        await createUser(
-          {
-            id: userId,
-            email: member.email,
-            authProvider: AuthProvider.EMAIL_OTP
-          },
-          this.prisma,
-          this.slugGenerator,
-          this.hydrationService
-        )
-
-        rawWorkspaceMember = await this.prisma.$transaction([
-          createMembership
-        ])[0]
-
-        this.log.debug(`Created non-registered user ${memberUser}`)
-
-        this.mailService.invitedToWorkspace(
-          member.email,
-          workspace.name,
-          `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
-          currentUser.name,
-          false
-        )
-
-        this.log.debug(
-          `Sent workspace invitation mail to non-registered user ${memberUser}`
-        )
-      }
+      this.mailService.invitedToWorkspace(
+        member.email,
+        workspace.name,
+        `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
+        currentUser.name,
+        isExistingUser,
+        inviteeName
+      )
 
       hydratedMembers.push(
         await this.hydrationService.hydrateWorkspaceMember({

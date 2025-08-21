@@ -449,27 +449,6 @@ export class UserService {
     await this.deleteUserById(userId)
   }
 
-  private async deleteUserById(userId: User['id']) {
-    await this.prisma.$transaction([
-      // Delete the user
-      this.prisma.user.delete({
-        where: {
-          id: userId
-        }
-      }),
-
-      // Delete the default workspace of this user
-      this.prisma.workspace.deleteMany({
-        where: {
-          ownerId: userId,
-          isDefault: true
-        }
-      })
-    ])
-
-    this.log.log(`Deleted user ${userId}`)
-  }
-
   async createUser(dto: CreateUserDto) {
     this.log.log(`Creating user with email ${dto.email}`)
 
@@ -499,7 +478,7 @@ export class UserService {
     )
     this.log.log(`Created user with email ${createdUser.email}`)
 
-    await this.mailService.accountLoginEmail(
+    this.mailService.accountLoginEmail(
       createdUser.email,
       createdUser.name,
       process.env.PLATFORM_FRONTEND_URL
@@ -507,69 +486,6 @@ export class UserService {
     this.log.log(`Sent login email to ${createdUser.email}`)
 
     return createdUser
-  }
-
-  private async createDummyUser() {
-    // @ts-expect-error - This is a test environment
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2e') {
-      this.log.log('Creating dummy user')
-
-      const user = await this.prisma.user.create({
-        data: {
-          email: 'johndoe@example.com',
-          name: 'John Doe',
-          referralCode: await generateReferralCode(this.prisma),
-          isActive: true,
-          isOnboardingFinished: true
-        }
-      })
-
-      this.log.log('Created dummy user: ', user)
-    }
-  }
-
-  private async checkIfAdminExistsOrCreate() {
-    const parsedEnv = EnvSchema.safeParse(process.env)
-    let nodeEnv
-
-    if (!parsedEnv.success) {
-      nodeEnv = 'dev' // Default to a valid value or handle appropriately
-    } else {
-      nodeEnv = parsedEnv.data.NODE_ENV
-    }
-
-    if (nodeEnv === 'test' || nodeEnv === 'e2e') {
-      return
-    }
-
-    const adminExists =
-      (await this.prisma.user.count({
-        where: {
-          isAdmin: true
-        }
-      })) > 0
-
-    if (!adminExists) {
-      this.log.warn('No admin user found', 'UserService')
-      this.log.log('Creating admin user', 'UserService')
-
-      // Create the admin user
-      const adminUser = await this.prisma.user.create({
-        data: {
-          name: 'Admin',
-          email: process.env.ADMIN_EMAIL,
-          isAdmin: true,
-          referralCode: await generateReferralCode(this.prisma),
-          isActive: true,
-          isOnboardingFinished: true
-        }
-      })
-
-      await this.mailService.adminUserCreateEmail(adminUser.email)
-      this.log.log('Created admin user', 'UserService')
-      return
-    }
-    this.log.log('Admin user found', 'UserService')
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
@@ -620,5 +536,97 @@ export class UserService {
         )
       }
     }
+  }
+
+  private async deleteUserById(userId: User['id']) {
+    await this.prisma.$transaction([
+      // Delete the user
+      this.prisma.user.delete({
+        where: {
+          id: userId
+        }
+      }),
+
+      // Delete the default workspace of this user
+      this.prisma.workspace.deleteMany({
+        where: {
+          ownerId: userId,
+          isDefault: true
+        }
+      })
+    ])
+
+    this.log.log(`Deleted user ${userId}`)
+  }
+
+  private async createDummyUser() {
+    // @ts-expect-error - This is a test environment
+    if (process.env.NODE_ENV === 'e2e') {
+      this.log.log('Creating dummy user')
+      const email = 'johndoe@example.com'
+
+      const userExists = await this.prisma.user.count({
+        where: {
+          email: email.toLowerCase()
+        }
+      })
+      if (userExists > 0) {
+        this.log.log('Dummy user already exists')
+        return
+      }
+
+      const user = await this.createUser({
+        email: 'johndoe@example.com',
+        name: 'John Doe',
+        isOnboardingFinished: true,
+        isActive: true
+      })
+
+      this.log.log('Created dummy user: ', user)
+    }
+  }
+
+  private async checkIfAdminExistsOrCreate() {
+    const parsedEnv = EnvSchema.safeParse(process.env)
+    let nodeEnv
+
+    if (!parsedEnv.success) {
+      nodeEnv = 'dev' // Default to a valid value or handle appropriately
+    } else {
+      nodeEnv = parsedEnv.data.NODE_ENV
+    }
+
+    if (nodeEnv === 'test' || nodeEnv === 'e2e') {
+      return
+    }
+
+    const adminExists =
+      (await this.prisma.user.count({
+        where: {
+          isAdmin: true
+        }
+      })) > 0
+
+    if (!adminExists) {
+      this.log.warn('No admin user found', 'UserService')
+      this.log.log('Creating admin user', 'UserService')
+
+      // Create the admin user
+      const adminUser = await this.prisma.user.create({
+        data: {
+          name: 'Admin',
+          email: process.env.ADMIN_EMAIL,
+          isAdmin: true,
+          referralCode: await generateReferralCode(this.prisma),
+          isActive: true,
+          isOnboardingFinished: true
+        }
+      })
+
+      await this.mailService.adminUserCreateEmail(adminUser.email)
+      this.log.log('Created admin user', 'UserService')
+      return
+    }
+    this.log.log('Admin user found', 'UserService')
   }
 }
