@@ -27,10 +27,21 @@ export const h1: CSSProperties = {
   fontSize: '40px',
   fontWeight: '700'
 }
+export const h2: CSSProperties = {
+  color: '#125D67',
+  marginBottom: '20px',
+  fontSize: '24px',
+  fontWeight: '600'
+}
 
 export const text: CSSProperties = {
   marginBottom: '5px',
   color: '#666'
+}
+export const textLogin: CSSProperties = {
+  margin: 0,
+  color: '#666',
+  lineHeight: '1.4'
 }
 
 export const workspaceDetails: CSSProperties = {
@@ -135,4 +146,13 @@ export const footerTextHead: CSSProperties = {
 export const link: CSSProperties = {
   color: '#000',
   textDecoration: 'underline'
+}
+
+export const iconStyle = {
+  width: '24px',
+  height: '24px',
+  padding: '5px',
+  borderRadius: '16px',
+  backgroundColor: '#F7FAFF',
+  marginRight: '10px'
 }

@@ -1,6 +1,34 @@
-import { Button, Text } from '@react-email/components'
+import { Button, Text, Img } from '@react-email/components'
 import { BaseEmailTemplate } from './components/base-email-template'
-import { ctaButton, text } from './styles/common-styles'
+import { ctaButton, h2, iconStyle, text } from './styles/common-styles'
+
+const infoGrid = {
+  width: '100%',
+  display: 'table',
+  marginBottom: '15px',
+  tableLayout: 'fixed' as const
+}
+
+const infoItem = {
+  display: 'table-cell',
+  width: '50%',
+  verticalAlign: 'top',
+  paddingRight: '10px'
+}
+
+const infoItemContent = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '10px'
+}
+
+const infoContent = {
+  flex: '1'
+}
+
+const iconContainer = {
+  flexShrink: '0'
+}
 
 export const LoginNotificationEmail = ({
   ip,
@@ -33,48 +61,161 @@ export const LoginNotificationEmail = ({
         signed-in from a new location, device or browser.
       </Text>
 
-      <ul>
-        <li>
-          <strong>Location:</strong> {location}
-        </li>
-        <li>
-          <strong>IP address:</strong> {ip}
-        </li>
-        <li>
-          <strong>Date:</strong> {date}
-        </li>
-        <li>
-          <strong>Time:</strong> {time}
-        </li>
-        <li>
-          <strong>OS:</strong> {os}
-        </li>
-        <li>
-          <strong>Browser:</strong> {browser}
-        </li>
-      </ul>
+      <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+        {/* Row 1: Location and IP */}
+        <div style={infoGrid}>
+          <div style={infoItem}>
+            <div style={infoItemContent}>
+              <div style={iconContainer}>
+                <Img
+                  src="https://keyshadeglobal.blob.core.windows.net/assets/map.png"
+                  alt="Location"
+                  style={iconStyle}
+                />
+              </div>
+              <div style={infoContent}>
+                <Text style={{ ...text, margin: '0', lineHeight: '1.3' }}>
+                  Location
+                  <br />
+                  <strong>{location}</strong>
+                </Text>
+              </div>
+            </div>
+          </div>
 
+          <div style={infoItem}>
+            <div style={infoItemContent}>
+              <div style={iconContainer}>
+                <Img
+                  src="https://keyshadeglobal.blob.core.windows.net/assets/laptop.png"
+                  alt="IP Address"
+                  style={iconStyle}
+                />
+              </div>
+              <div style={infoContent}>
+                <Text style={{ ...text, margin: '0', lineHeight: '1.3' }}>
+                  IP address
+                  <br />
+                  <strong>{ip}</strong>
+                </Text>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Date and Time */}
+        <div style={infoGrid}>
+          <div style={infoItem}>
+            <div style={infoItemContent}>
+              <div style={iconContainer}>
+                <Img
+                  src="https://keyshadeglobal.blob.core.windows.net/assets/calendar.png"
+                  alt="Date"
+                  style={iconStyle}
+                />
+              </div>
+              <div style={infoContent}>
+                <Text style={{ ...text, margin: '0', lineHeight: '1.3' }}>
+                  Date
+                  <br />
+                  <strong>{date}</strong>
+                </Text>
+              </div>
+            </div>
+          </div>
+
+          <div style={infoItem}>
+            <div style={infoItemContent}>
+              <div style={iconContainer}>
+                <Img
+                  src="https://keyshadeglobal.blob.core.windows.net/assets/timer.png"
+                  alt="Time"
+                  style={iconStyle}
+                />
+              </div>
+              <div style={infoContent}>
+                <Text style={{ ...text, margin: '0', lineHeight: '1.3' }}>
+                  Time
+                  <br />
+                  <strong>{time}</strong>
+                </Text>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: OS and Browser */}
+        <div style={infoGrid}>
+          <div style={infoItem}>
+            <div style={infoItemContent}>
+              <div style={iconContainer}>
+                <Img
+                  src="https://keyshadeglobal.blob.core.windows.net/assets/cpu.png"
+                  alt="Operating System"
+                  style={iconStyle}
+                />
+              </div>
+              <div style={infoContent}>
+                <Text style={{ ...text, margin: '0', lineHeight: '1.3' }}>
+                  OS
+                  <br />
+                  <strong>{os}</strong>
+                </Text>
+              </div>
+            </div>
+          </div>
+
+          <div style={infoItem}>
+            <div style={infoItemContent}>
+              <div style={iconContainer}>
+                <Img
+                  src="https://keyshadeglobal.blob.core.windows.net/assets/global.png"
+                  alt="Browser"
+                  style={iconStyle}
+                />
+              </div>
+              <div style={infoContent}>
+                <Text style={{ ...text, margin: '0', lineHeight: '1.3' }}>
+                  Browser
+                  <br />
+                  <strong>{browser}</strong>
+                </Text>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Security notice section */}
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          marginTop: '30px',
+          marginBottom: '20px',
+          gap: '15px'
         }}
       >
-        <img src="https://via.placeholder.com/150" alt="123" />
-        <Text style={text}>
-          Not you?
-          <br />
-          take a few minutes to secure your account.
-        </Text>
+        <div style={iconContainer}>
+          <Img
+            src="https://keyshadeglobal.blob.core.windows.net/assets/alert.png"
+            alt="Security"
+            style={{ width: '45px', height: '45px', marginRight: '16px' }}
+          />
+        </div>
+        <div>
+          <Text style={{ ...text, margin: '0' }}>
+            <span style={h2}>Not you?</span>
+            <br />
+            take a few minutes to secure your account.
+          </Text>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
         <Button href="#" style={ctaButton}>
-          Secure Account
-        </Button>
-        <Button href="#" style={ctaButton}>
-          Check access token
+          Check Login Activity
         </Button>
       </div>
     </BaseEmailTemplate>
