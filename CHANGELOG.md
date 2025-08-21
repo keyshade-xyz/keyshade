@@ -64,6 +64,20 @@
 
 * **cli:** Bump CLI to 3.2.2 ([4b13622](https://github.com/keyshade-xyz/keyshade/commit/4b1362204414d9680d29a562611c063e64d31452))
 
+## [2.32.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.14...v2.32.0-stage.15) (2025-08-21)
+
+### 🚀 Features
+
+* **api:** Update email design ([#1115](https://github.com/keyshade-xyz/keyshade/issues/1115)) ([d47f7bd](https://github.com/keyshade-xyz/keyshade/commit/d47f7bdb8c655468724b89d57a345b9538d90cd3))
+
+### 📚 Documentation
+
+* Update CONTRIBUTING.md ([#1110](https://github.com/keyshade-xyz/keyshade/issues/1110)) ([ba6f98b](https://github.com/keyshade-xyz/keyshade/commit/ba6f98b074c9407408cd47299af46ec86f619b31))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** Bump CLI to 3.2.2 ([4b13622](https://github.com/keyshade-xyz/keyshade/commit/4b1362204414d9680d29a562611c063e64d31452))
+
 ## [2.32.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.13...v2.32.0-stage.14) (2025-08-13)
 
 ### 🐛 Bug Fixes
