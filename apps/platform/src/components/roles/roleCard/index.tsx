@@ -144,7 +144,7 @@ export default function RoleCard({
                         {isInvited ? 'Invited' : 'Joined'}
                       </div>
                       <div className="text-sm text-white/60">
-                        {dayjs(String(member.memberSince ?? '')).format(
+                        {dayjs(String(member.memberSince)).format(
                           'MMM D, YYYY'
                         )}
                       </div>
