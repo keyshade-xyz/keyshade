@@ -1,6 +1,10 @@
 {
   "name": "keyshade-xyz",
+<<<<<<< HEAD
   "version": "2.32.0",
+=======
+  "version": "2.32.0-stage.16",
+>>>>>>> 888d69fb (chore(release): 2.32.0-stage.16 [skip ci])
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
