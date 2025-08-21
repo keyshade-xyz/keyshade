@@ -27,14 +27,14 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
-import nock = require('nock')
 import { CreateIntegration } from './dto/create.integration/create.integration'
 import { mockClient } from 'aws-sdk-client-mock'
 import {
-  LambdaClient,
-  GetFunctionConfigurationCommand
+  GetFunctionConfigurationCommand,
+  LambdaClient
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
+import nock = require('nock')
 
 jest.mock('@vercel/sdk', () => {
   const getEnvMock = jest.fn()
@@ -162,33 +162,33 @@ describe('Integration Controller Tests', () => {
       }
     }
 
-    project1 = (await projectService.createProject(user1, workspace1.slug, {
+    project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Description 1'
-    })) as Project
+    })
 
-    project2 = (await projectService.createProject(user2, workspace2.slug, {
+    project2 = await projectService.createProject(user2, workspace2.slug, {
       name: 'Project 2',
       description: 'Description 2'
-    })) as Project
+    })
 
-    environment1 = (await environmentService.createEnvironment(
+    environment1 = await environmentService.createEnvironment(
       user1,
       {
         name: 'Environment 1',
         description: 'Description 1'
       },
       project1.slug
-    )) as Environment
+    )
 
-    environment2 = (await environmentService.createEnvironment(
+    environment2 = await environmentService.createEnvironment(
       user2,
       {
         name: 'Environment 2',
         description: 'Description 2'
       },
       project2.slug
-    )) as Environment
+    )
 
     createDiscordIntegration = async () => {
       return await integrationService.createIntegration(

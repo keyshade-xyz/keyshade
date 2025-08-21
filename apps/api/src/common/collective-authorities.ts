@@ -21,15 +21,14 @@ export const getCollectiveWorkspaceAuthorities = async (
   userId: User['id'],
   prisma: PrismaClient
 ): Promise<Set<Authority>> => {
-  const logger = new Logger('getCollectiveWorkspaceAuthorities')
-  logger.log(
-    `Getting collective workspace authorities for workspaceId: ${workspaceId} and userId: ${userId}`
+  const isUserAdmin = await checkUserHasAdminRoleAssociation(
+    userId,
+    workspaceId,
+    prisma
   )
-  const authorities = new Set<Authority>()
+  if (isUserAdmin) return new Set(['WORKSPACE_ADMIN'])
 
-  logger.log(
-    `Fetching workspaceMemberRoleAssociation for workspaceId: ${workspaceId} and userId: ${userId}`
-  )
+  const authorities = new Set<Authority>()
   const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
     {
       where: {
@@ -43,7 +42,6 @@ export const getCollectiveWorkspaceAuthorities = async (
       }
     }
   )
-  logger.log(`Found ${roleAssociations.length} workspaceMemberRoleAssociations`)
 
   roleAssociations.forEach((roleAssociation) => {
     roleAssociation.role.authorities.forEach((authority) => {
@@ -51,9 +49,6 @@ export const getCollectiveWorkspaceAuthorities = async (
     })
   })
 
-  logger.log(
-    `Found ${authorities.size} authorities: ${Array.from(authorities)}`
-  )
   return authorities
 }
 
@@ -72,16 +67,15 @@ export const getCollectiveProjectAuthorities = async (
   project: Partial<Project>,
   prisma: PrismaClient
 ): Promise<Set<Authority>> => {
-  const logger = new Logger('getCollectiveProjectAuthorities')
-
-  logger.log(
-    `Getting collective project authorities for userId: ${userId} and projectId: ${project.id}`
+  const isUserAdmin = await checkUserHasAdminRoleAssociation(
+    userId,
+    project.workspaceId,
+    prisma
   )
+  if (isUserAdmin) return new Set(['WORKSPACE_ADMIN'])
+
   const authorities = new Set<Authority>()
 
-  logger.log(
-    `Fetching workspaceMemberRoleAssociation for userId: ${userId} and projectId: ${project.id}`
-  )
   const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
     {
       where: {
@@ -107,18 +101,12 @@ export const getCollectiveProjectAuthorities = async (
     }
   )
 
-  logger.log(
-    `Found ${roleAssociations.length} workspaceMemberRoleAssociations for userId: ${userId} and projectId: ${project.id}`
-  )
   roleAssociations.forEach((roleAssociation) => {
     roleAssociation.role.authorities.forEach((authority) => {
       authorities.add(authority)
     })
   })
 
-  logger.log(
-    `Found ${authorities.size} authorities for userId: ${userId} and projectId: ${project.id}`
-  )
   return authorities
 }
 
@@ -137,16 +125,15 @@ export const getCollectiveEnvironmentAuthorities = async (
   environment: RawEnvironment,
   prisma: PrismaClient
 ): Promise<Set<Authority>> => {
-  const logger = new Logger('getCollectiveEnvironmentAuthorities')
-
-  logger.log(
-    `Getting collective environment authorities for userId: ${userId} and environmentId: ${environment.id}`
+  const isUserAdmin = await checkUserHasAdminRoleAssociation(
+    userId,
+    environment.project.workspaceId,
+    prisma
   )
+  if (isUserAdmin) return new Set(['WORKSPACE_ADMIN'])
+
   const authorities = new Set<Authority>()
 
-  logger.log(
-    `Fetching workspaceMemberRoleAssociation for userId: ${userId} and environmentId: ${environment.id}`
-  )
   const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
     {
       where: {
@@ -187,17 +174,52 @@ export const getCollectiveEnvironmentAuthorities = async (
     }
   )
 
-  logger.log(
-    `Found ${roleAssociations.length} workspaceMemberRoleAssociations for userId: ${userId} and environmentId: ${environment.id}`
-  )
   roleAssociations.forEach((roleAssociation) => {
     roleAssociation.role.authorities.forEach((authority) => {
       authorities.add(authority)
     })
   })
 
-  logger.log(
-    `Found ${authorities.size} authorities for userId: ${userId} and environmentId: ${environment.id}`
-  )
   return authorities
+}
+
+const checkUserHasAdminRoleAssociation = async (
+  userId: User['id'],
+  workspaceId: Workspace['id'],
+  prisma: PrismaClient
+): Promise<boolean> => {
+  const logger = new Logger('checkUserHasAdminRoleAssociation')
+  logger.log(
+    `Checking if user ${userId} is associated to the admin role of workspace ${workspaceId}`
+  )
+
+  // Fetch the admin role for the workspace
+  const adminRole = await prisma.workspaceRole.findFirst({
+    where: {
+      workspaceId: workspaceId,
+      hasAdminAuthority: true
+    },
+    include: {
+      workspaceMembers: {
+        include: {
+          workspaceMember: {
+            select: {
+              userId: true
+            }
+          }
+        }
+      }
+    }
+  })
+
+  // Check if the user has an associations to this role
+  for (const roleAssociation of adminRole.workspaceMembers) {
+    if (roleAssociation.workspaceMember.userId === userId) {
+      logger.log(`User ${userId} is associated to the admin role`)
+      return true
+    }
+  }
+
+  logger.log(`User ${userId} is not associated to the admin role`)
+  return false
 }

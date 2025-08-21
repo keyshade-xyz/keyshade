@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import React, { useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
@@ -6,29 +6,28 @@ import { Integrations } from '@keyshade/common'
 import { KeyshadeBigSVG } from '@public/svg/auth'
 import IntegrationIcon from '../integrationIcon'
 import SetupIntegration from '../integrationSetup'
-import { formatText } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog'
 import { createIntegrationTypeAtom, createIntegrationOpenAtom } from '@/store'
+
 function CreateIntegration(): React.JSX.Element {
   const integrationType = useAtomValue(createIntegrationTypeAtom)
   const setCreateIntegrationModalOpen = useSetAtom(createIntegrationOpenAtom)
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false)
-}
+
   if (!integrationType) {
     return (
       <div className="text-center text-gray-500">No integration selected</div>
     )
   }
-  const integrationName = formatText(integrationType)
   const integrationConfig = Integrations[integrationType]
   const integrationPermissions =
-    integrationConfig.events?.map(
+    integrationConfig.events?.map(  
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
   const handleNext = () => {
@@ -62,10 +61,10 @@ function CreateIntegration(): React.JSX.Element {
             <DialogTitle>
               <div className="flex flex-col items-center justify-center text-center">
                 <h2 className="mb-2 text-xl font-semibold">
-                  Integrate Keyshade with {integrationName}
+                  Integrate Keyshade with {integrationConfig.name}
                 </h2>
                 <p className="text-sm text-gray-400">
-                  Connect Keyshade with {integrationName} to send real-time
+                  Connect Keyshade with {integrationConfig.name} to send real-time
                   project updates directly to your server.
                 </p>
               </div>
@@ -95,11 +94,13 @@ function CreateIntegration(): React.JSX.Element {
         </DialogContent>
       </Dialog>
       <SetupIntegration
-        integrationName={integrationName}
+        integrationName={integrationConfig.name}
         integrationType={integrationType}
         onOpenChange={handleSetupOpenChange}
         open={setupModalOpen}
       />
     </div>
   )
+}
+
 export default CreateIntegration
