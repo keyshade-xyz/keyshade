@@ -56,6 +56,22 @@ export default function PlanCard({
     return null
   }
 
+  const calculateTotalPrice = () => {
+    if (tierName === 'Enterprise') {
+      return 'Custom Plan'
+    }
+
+    const priceString = PricingTiers[tierName][selectedPlan]
+    const price = parseFloat(priceString.replace('$', ''))
+    const totalPrice = price * seats
+
+    return `$${totalPrice.toFixed(2)}`
+  }
+
+  const getBasePrice = () => {
+    return PricingTiers[tierName][selectedPlan]
+  }
+
   const generatePaymentLink = useHttp(() =>
     ControllerInstance.getInstance().paymentController.generatePaymentLink({
       isAnnual: isAnually,
@@ -109,6 +125,10 @@ export default function PlanCard({
   }
 
   const isNotEnterprise = tierName !== 'Enterprise'
+  const totalPrice = calculateTotalPrice()
+  const basePrice = getBasePrice()
+  const showTotalCalculation = isNotEnterprise && seats > 1
+
   return (
     <div className=" w-full  rounded-[28px] bg-white/5 px-1 py-1 shadow-lg">
       <div className="flex h-full w-full flex-col justify-between rounded-[23px] bg-gradient-to-br from-black/80 via-white/5 to-transparent p-5">
@@ -131,14 +151,17 @@ export default function PlanCard({
             </button>
           </div>
           <div className="mt-4">
-            <div>
-              <span className="text-4xl font-semibold">
-                {PricingTiers[tierName][selectedPlan]}
-              </span>{' '}
-              <Visible if={isNotEnterprise}>
-                {' '}
-                <span className="text-sm text-neutral-300">per user/month</span>
-              </Visible>
+            <div className="flex flex-col gap-2">
+              <div>
+                <span
+                  className={`${isNotEnterprise ? 'text-5xl' : 'text-4xl'} font-semibold`}
+                >
+                  {showTotalCalculation ? totalPrice : basePrice}
+                </span>{' '}
+                <Visible if={isNotEnterprise}>
+                  <span className="text-sm text-neutral-300">/month</span>
+                </Visible>
+              </div>
             </div>
             <div className="mt-3 max-w-[318px] text-sm text-neutral-300">
               {TierDescription[tierName]}
@@ -149,6 +172,7 @@ export default function PlanCard({
               <Slider
                 defaultValue={[DEFAULT_SEAT_VALUE]}
                 max={MaxSeatPerTier[tierName]}
+                min={1}
                 onValueChange={(value) => setSeats(value[0])}
                 step={1}
               />
