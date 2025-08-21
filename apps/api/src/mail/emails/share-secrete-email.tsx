@@ -1,6 +1,6 @@
 import { Text } from '@react-email/components'
 import { text } from './styles/common-styles'
-import BaseEmailTemplate from './components/base-email-template'
+import ShareBaseEmailTemplate from './components/share-base-email-template'
 
 interface ShareSecretEmailTemplateProps {
   data: {
@@ -14,7 +14,7 @@ export const ShareSecretEmailTemplate = ({
   data: { expiresAt, isPasswordProtected, url }
 }: ShareSecretEmailTemplateProps) => {
   return (
-    <BaseEmailTemplate
+    <ShareBaseEmailTemplate
       previewText="A secret is waiting for you!"
       heading="A secret is waiting for you!"
     >
@@ -39,7 +39,7 @@ export const ShareSecretEmailTemplate = ({
           })}
         </strong>
       </Text>
-    </BaseEmailTemplate>
+    </ShareBaseEmailTemplate>
   )
 }
 

@@ -3,8 +3,7 @@ import { CSSProperties } from 'react'
 export const main: CSSProperties = {
   fontFamily: "'Segoe UI', 'Roboto', sans-serif",
   lineHeight: '1.6',
-  color: '#04050a',
-  backgroundColor: '#fafafa',
+  color: '#000000',
   margin: '0',
   padding: '20px'
 }
@@ -12,20 +11,21 @@ export const main: CSSProperties = {
 export const container: CSSProperties = {
   maxWidth: '600px',
   margin: '0 auto',
-  backgroundColor: '#fff',
+  backgroundColor: '#EFFCFF',
   borderRadius: '5px',
   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
 }
 
 export const content: CSSProperties = {
-  padding: '20px 40px'
+  padding: '0 50px',
+  paddingBottom: '20px'
 }
 
 export const h1: CSSProperties = {
-  color: '#000',
+  color: '#125D67',
   marginBottom: '20px',
-  fontSize: '24px',
-  fontWeight: '600'
+  fontSize: '40px',
+  fontWeight: '700'
 }
 
 export const text: CSSProperties = {
@@ -47,15 +47,16 @@ export const workspaceInfo: CSSProperties = {
 }
 
 export const ctaButton: CSSProperties = {
-  width: '100px',
-  color: '#ffffff',
+  width: 'fit-content',
+  color: '#FFFFFF',
   fontSize: '14px',
   fontWeight: '500',
   textAlign: 'center',
   marginTop: '10px',
+  marginRight: '10px',
   cursor: 'pointer',
   display: 'inline-block',
-  backgroundColor: '#000',
+  backgroundColor: '#125D67',
   textDecoration: 'none',
   padding: '10px 22px',
   borderRadius: '5px'
@@ -68,15 +69,66 @@ export const otpStyle: CSSProperties = {
   letterSpacing: '8px'
 }
 
-export const footer: CSSProperties = {
-  borderTop: '1px solid #eaeaea',
-  padding: '20px'
+export const banner: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: '10px 20px',
+  width: '100%'
 }
 
-export const footerText: CSSProperties = {
+export const footer: CSSProperties = {
+  borderTop: '1px solid #eaeaea',
+  padding: '20px',
+  width: '95%',
+  margin: '0, auto',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
+}
+
+export const footerBanner: CSSProperties = {
+  borderTop: '1px solid #eaeaea',
+  borderBottom: '1px solid #eaeaea',
+  padding: '20px',
+  margin: '0 auto',
+  width: '90%',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center'
+}
+
+export const footerlogo: CSSProperties = {
+  width: '75%',
+  display: 'flex',
+  justifyContent: 'end',
+  alignItems: 'center',
+  height: '25px'
+}
+
+export const footerSocial: CSSProperties = {
+  display: 'flex',
+  width: '100%',
+  justifyContent: 'space-between',
+  gap: '10px'
+}
+export const footerSocialIcon: CSSProperties = {
+  padding: '10px',
+  justifyContent: 'center',
+  alignItems: 'center',
+  display: 'flex',
+  borderRadius: '50%',
+  border: '1px solid #ccc'
+}
+
+export const footerTextBody: CSSProperties = {
   fontSize: '12px',
-  color: '#999',
-  textAlign: 'center' as const,
+  color: '#00000099',
+  margin: '0'
+}
+export const footerTextHead: CSSProperties = {
+  fontSize: '13px',
+  color: '#000000',
   margin: '0'
 }
 

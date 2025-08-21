@@ -117,14 +117,19 @@ export class MailService implements IMailService {
     data: {
       ip: string
       device: string
-      location?: string
+      location: string
+      date: string
+      time: string
     }
   ) {
     const html = await render(
       LoginNotificationEmail({
         ip: data.ip,
         device: data.device,
-        location: data.location
+        location: data.location,
+        userEmail: email,
+        date: data.date,
+        time: data.time
       })
     )
 
