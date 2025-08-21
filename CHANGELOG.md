@@ -1,3 +1,9 @@
+## [2.32.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.15...v2.32.0-stage.16) (2025-08-21)
+
+### 🚀 Features
+
+* **cli:** request and response validation for `environment` commands ([#1075](https://github.com/keyshade-xyz/keyshade/issues/1075)) ([ec76bb3](https://github.com/keyshade-xyz/keyshade/commit/ec76bb39f0e13df72853b5f4a93745f6d7da7fc1))
+
 ## [2.32.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.14...v2.32.0-stage.15) (2025-08-21)
 
 ### 🚀 Features
