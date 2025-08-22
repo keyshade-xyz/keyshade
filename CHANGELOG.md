@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## [2.32.0](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0) (2025-08-20)
 
 ### 🚀 Features
@@ -43,14 +42,6 @@
 * **release:** 2.32.0-stage.7 [skip ci] ([86687e3](https://github.com/keyshade-xyz/keyshade/commit/86687e31962bc79633373c23ad7e29f2e493d0b5))
 * **release:** 2.32.0-stage.8 [skip ci] ([fc45b27](https://github.com/keyshade-xyz/keyshade/commit/fc45b27b21245f45c35dde11946920c4af3cfb74))
 * **release:** 2.32.0-stage.9 [skip ci] ([365b10b](https://github.com/keyshade-xyz/keyshade/commit/365b10b4e9db9392046ed0193c120645fa6cff7e))
-* Upgrade conventional-changelog-writer from 8.1.0 to 8.2.0 ([#1095](https://github.com/keyshade-xyz/keyshade/issues/1095)) ([7d092bf](https://github.com/keyshade-xyz/keyshade/commit/7d092bf1818978ecded4beed719c0831e106c531))
-=======
-## [2.32.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.15...v2.32.0-stage.16) (2025-08-21)
-
-### 🚀 Features
-
-* **cli:** request and response validation for `environment` commands ([#1075](https://github.com/keyshade-xyz/keyshade/issues/1075)) ([ec76bb3](https://github.com/keyshade-xyz/keyshade/commit/ec76bb39f0e13df72853b5f4a93745f6d7da7fc1))
->>>>>>> 888d69fb (chore(release): 2.32.0-stage.16 [skip ci])
 
 ## [2.32.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.15...v2.32.0-stage.16) (2025-08-21)
 
