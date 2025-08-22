@@ -779,7 +779,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tsconfig
 
-  packages/api-client: {}
+  packages/api-client:
+    dependencies:
+      '@keyshade/schema':
+        specifier: workspace:*
+        version: link:../schema
 
   packages/common:
     dependencies:
