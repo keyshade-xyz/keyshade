@@ -383,10 +383,14 @@ describe('Workspace Membership Controller Tests', () => {
     })
 
     it('should not be able to invite users if tier limit is reached', async () => {
+      const maxMembers = (
+        await tierLimitService.getWorkspaceTierLimit(workspace1.id)
+      ).MAX_MEMBERS_PER_WORKSPACE
+
       // Invite users until the tier limit is reached
       for (
         let i = 0;
-        i < (await tierLimitService.getMemberTierLimit(workspace1.id)) - 1; // Subtract 1 for the user who owns the workspace
+        i < maxMembers - 1; // Subtract 1 for the user who owns the workspace
         i++
       ) {
         // Create a user
@@ -586,6 +590,8 @@ describe('Workspace Membership Controller Tests', () => {
 
   describe('Remove Users Tests', () => {
     it('should be able to remove users from workspace', async () => {
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
       const response = await app.inject({
         method: 'DELETE',
         headers: {

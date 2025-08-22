@@ -225,15 +225,13 @@ describe('Environment Controller Tests', () => {
     })
 
     it('should not be able to create more environments if tier limit is reached', async () => {
+      const maxEnvironments = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_ENVIRONMENTS_PER_PROJECT
       // Create the number of environments that the tier limit allows
       for (
         let x = 100;
-        x <
-        100 +
-          (await tierLimitService.getEnvironmentTierLimit(
-            project1.workspaceId
-          )) -
-          2; // Subtract 2 for the environments created above
+        x < 100 + maxEnvironments - 2; // Subtract 2 for the environments created above
         x++
       ) {
         await environmentService.createEnvironment(
