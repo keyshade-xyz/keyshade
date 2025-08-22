@@ -13,6 +13,7 @@ import {
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
+import { Button } from '@/components/ui/button'
 
 export interface PlanCardProps {
   selectedPlan: 'monthly' | 'annually'
@@ -153,9 +154,7 @@ export default function PlanCard({
           <div className="mt-4">
             <div className="flex flex-col gap-2">
               <div>
-                <span
-                  className={`${isNotEnterprise ? 'text-5xl' : 'text-4xl'} font-semibold`}
-                >
+                <span className="text-4xl font-semibold">
                   {showTotalCalculation ? totalPrice : basePrice}
                 </span>{' '}
                 <Visible if={isNotEnterprise}>
@@ -183,14 +182,16 @@ export default function PlanCard({
             </div>
           </Visible>
         </div>
-        <button
-          className=" mt-5 w-full rounded-md bg-white px-2  py-1 text-sm text-[#09090B] shadow-[inset_0_2px_2px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:bg-neutral-300 disabled:text-neutral-500"
+
+        <Button
+          className="mt-5 h-fit bg-white text-[#09090B] shadow-[inset_0_2px_2px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-[#09090B]/80"
           disabled={NO_SEATS_SELECTED || isLoading}
           onClick={redirectToPayment}
           type="button"
+          variant="secondary"
         >
           {isLoading ? 'Generating payment link...' : 'Continue to payment'}
-        </button>
+        </Button>
       </div>
     </div>
   )
