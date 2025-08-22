@@ -1,3 +1,9 @@
+## [2.32.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.18...v2.32.0-stage.19) (2025-08-22)
+
+### 🚀 Features
+
+* **platform, web:** Payment & UI fixes ([#1116](https://github.com/keyshade-xyz/keyshade/issues/1116)) ([c0e4fb9](https://github.com/keyshade-xyz/keyshade/commit/c0e4fb9cd85efb9a857b72060ebe7620bea95395))
+
 ## [2.32.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.17...v2.32.0-stage.18) (2025-08-22)
 
 ### 🚀 Features
