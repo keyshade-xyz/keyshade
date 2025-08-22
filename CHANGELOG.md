@@ -1,3 +1,9 @@
+## [2.32.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.17...v2.32.0-stage.18) (2025-08-22)
+
+### 🚀 Features
+
+* **api:** add caching to workspace ([#1117](https://github.com/keyshade-xyz/keyshade/issues/1117)) ([35240ae](https://github.com/keyshade-xyz/keyshade/commit/35240aed501b8e2ade3b85ef225b27bae8cf466a))
+
 ## [2.32.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.16...v2.32.0-stage.17) (2025-08-22)
 
 ### 🐛 Bug Fixes
