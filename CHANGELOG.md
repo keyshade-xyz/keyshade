@@ -1,3 +1,16 @@
+## [2.32.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.16...v2.32.0-stage.17) (2025-08-22)
+
+### 🐛 Bug Fixes
+
+* **platform:** broken authority width in platform ([#1112](https://github.com/keyshade-xyz/keyshade/issues/1112)) ([6b37c0b](https://github.com/keyshade-xyz/keyshade/commit/6b37c0bc12669fed991162c2e439a94d4865f04e))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.32.0 [skip ci] ([567c1ec](https://github.com/keyshade-xyz/keyshade/commit/567c1ec5a4ab0f79cfce1ca1150304fe6b094801))
+* **release:** 2.32.0-stage.15 [skip ci] ([d1df1c8](https://github.com/keyshade-xyz/keyshade/commit/d1df1c815c459a09db4c09e834dfda372e21ab1c))
+* **release:** 2.32.0-stage.16 [skip ci] ([6f294d4](https://github.com/keyshade-xyz/keyshade/commit/6f294d45707fa1a21de10afe1cc4dae12321605a))
+* removed merge conflicts ([f07a67b](https://github.com/keyshade-xyz/keyshade/commit/f07a67b6e9eddcf238a7dbd812a00c8d95ce4abf))
+
 ## [2.32.0](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0) (2025-08-20)
 
 ### 🚀 Features

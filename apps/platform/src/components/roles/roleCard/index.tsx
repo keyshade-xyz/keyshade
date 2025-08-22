@@ -170,7 +170,7 @@ export default function RoleCard({
                 <Button
                   aria-controls="authorities-list"
                   aria-expanded={showAllAuthorities}
-                  className="h-auto justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
+                  className="h-auto w-fit justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
                   onClick={() => setShowAllAuthorities(!showAllAuthorities)}
                 >
                   {showAllAuthorities ? 'Show less' : 'Show more'}
@@ -213,7 +213,7 @@ export default function RoleCard({
                 hover:bg-white/5 hover:text-white "
                 onClick={() =>
                   copyToClipboard(
-                    role.slug,
+                    String(role.slug),
                     'The slug got copied to your clipboard.',
                     'Failed to copy slug'
                   )
