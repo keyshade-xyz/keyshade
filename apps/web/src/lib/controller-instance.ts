@@ -1,5 +1,3 @@
- 
- 
 import { ShareSecretController } from '@keyshade/api-client'
 
 export default class ControllerInstance {
