@@ -1,7 +1,7 @@
-import { Authority, EventSource, EventType } from '@prisma/client'
+import { Authority, EventSource, EventType, Workspace } from '@prisma/client'
 import { CreateWorkspace } from '@/workspace/dto/create.workspace/create.workspace'
 import { PrismaService } from '@/prisma/prisma.service'
-import { Logger } from '@nestjs/common'
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common'
 import { v4 } from 'uuid'
 import { createEvent } from './event'
 import SlugGenerator from './slug-generator.service'
@@ -9,12 +9,15 @@ import { HydratedWorkspace } from '@/workspace/workspace.types'
 import { InclusionQuery } from './inclusion-query'
 import { HydrationService } from './hydration.service'
 import { AuthenticatedUser } from '@/user/user.types'
+import { constructErrorBody } from './util'
 
 /**
  * Creates a new workspace and adds the user as the owner.
  * @param user The user creating the workspace
  * @param dto The workspace data
  * @param prisma The Prisma client
+ * @param slugGenerator
+ * @param hydrationService
  * @param isDefault Whether the workspace should be the default workspace
  * @returns The created workspace
  */
@@ -48,7 +51,6 @@ export const createWorkspace = async (
       slug: workspaceSlug,
       name: dto.name,
       icon: dto.icon,
-      isFreeTier: true,
       ownerId: user.id,
       isDefault,
       roles: {
@@ -62,6 +64,11 @@ export const createWorkspace = async (
               colorCode: '#FF0000'
             }
           ]
+        }
+      },
+      subscription: {
+        create: {
+          userId: user.id
         }
       }
     },
@@ -136,4 +143,50 @@ export const createWorkspace = async (
     user,
     workspace
   })
+}
+
+/**
+ * Checks if a workspace is disabled.
+ *
+ * @param workspaceId - The ID of the workspace to check.
+ * @param prisma - The Prisma service used to access the database.
+ * @param logMessage - Optional custom log message to use if the workspace is disabled.
+ * @throws NotFoundException if the workspace is not found.
+ * @throws BadRequestException if the workspace is disabled.
+ */
+export async function checkForDisabledWorkspace(
+  workspaceId: Workspace['id'],
+  prisma: PrismaService,
+  logMessage?: string
+) {
+  const logger = new Logger('checkForDisabledWorkspace')
+
+  logger.log(`Fetching workspace ${workspaceId} to check if it is disabled`)
+  const workspace = await prisma.workspace.findUnique({
+    where: {
+      id: workspaceId
+    }
+  })
+
+  if (!workspace) {
+    throw new NotFoundException(
+      constructErrorBody(
+        'Workspace not found',
+        'The specified workspace was not found'
+      )
+    )
+  }
+
+  if (workspace.isDisabled) {
+    logger.log(
+      logMessage ||
+        `Attempted to perform a forbidden operation on a disabled workspace ${workspaceId}`
+    )
+    throw new BadRequestException(
+      constructErrorBody(
+        'This workspace has been disabled',
+        'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+      )
+    )
+  }
 }

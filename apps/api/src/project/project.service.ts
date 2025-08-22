@@ -45,6 +45,7 @@ import { VariableService } from '@/variable/variable.service'
 import { ExportService } from './export/export.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
+import { checkForDisabledWorkspace } from '@/common/workspace'
 
 @Injectable()
 export class ProjectService {
@@ -85,6 +86,18 @@ export class ProjectService {
         authorities: [Authority.CREATE_PROJECT]
       })
     const workspaceId = workspace.id
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create a project in disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // Check if more workspaces can be created under the workspace
     await this.tierLimitService.checkProjectLimitReached(workspace)
@@ -197,13 +210,6 @@ export class ProjectService {
       createNewProject,
       ...createEnvironmentOps
     ])
-
-    await this.associateProjectWithAdminRole(
-      workspace,
-      user,
-      newProject.id,
-      newEnvironmentSlugs
-    )
 
     await createEvent(
       {
@@ -479,6 +485,12 @@ export class ProjectService {
         authorities: [Authority.READ_PROJECT]
       })
 
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to fork project ${projectSlug} in disabled workspace ${project.workspaceId}`
+    )
+
     let workspaceId = null
 
     if (forkMetadata.workspaceSlug) {
@@ -491,6 +503,18 @@ export class ProjectService {
           slug: forkMetadata.workspaceSlug,
           authorities: [Authority.CREATE_PROJECT]
         })
+
+      if (workspace.isDisabled) {
+        this.logger.log(
+          `User ${user.id} attempted to fork project ${projectSlug} in disabled workspace`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'This workspace has been disabled',
+            'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+          )
+        )
+      }
 
       workspaceId = workspace.id
     } else {
@@ -691,6 +715,12 @@ export class ProjectService {
         authorities: [Authority.UPDATE_PROJECT]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to sync project ${projectSlug} in a disabled workspace ${project.workspaceId}`
+    )
 
     this.isProjectForked(project)
 
@@ -1035,6 +1065,65 @@ export class ProjectService {
     })
 
     return { items, metadata }
+  }
+
+  /**
+   * Returns an export of the project configurations (secrets and variables)
+   * in the desired format
+   *
+   * @param user The user who is requesting the project secrets
+   * @param projectSlug The slug of the project to export secrets from
+   * @param environmentSlug The slug of the environment to export secrets from
+   * @param format The format to export the secrets in
+   * @param privateKey The private key to use for secret decryption
+   * @returns The secrets exported in the desired format
+   *
+   * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
+   * @throws BadRequestException If the private key is required but not supplied
+   */
+  async exportProjectConfigurations(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug'],
+    environmentSlugs: Environment['slug'][],
+    format: ExportFormat
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to export secrets in project ${projectSlug}`
+    )
+
+    const environmentExports = await Promise.all(
+      environmentSlugs.map(async (environmentSlug) => {
+        const rawSecrets =
+          await this.secretService.getAllSecretsOfProjectAndEnvironment(
+            user,
+            projectSlug,
+            environmentSlug
+          )
+
+        const secrets = rawSecrets.map((secret) => ({
+          name: secret.name,
+          value: secret.value
+        }))
+
+        const variables = (
+          await this.variableService.getAllVariablesOfProjectAndEnvironment(
+            user,
+            projectSlug,
+            environmentSlug
+          )
+        ).map((variable) => ({
+          name: variable.name,
+          value: variable.value
+        }))
+
+        return [
+          environmentSlug,
+          this.exportService.format({ secrets, variables }, format)
+        ]
+      })
+    )
+
+    return Object.fromEntries(environmentExports)
   }
 
   private isProjectForked(project: Project) {
@@ -1467,133 +1556,5 @@ export class ProjectService {
     )
 
     return { txs, newPrivateKey, newPublicKey }
-  }
-
-  /**
-   * Returns an export of the project configurations (secrets and variables)
-   * in the desidered format
-   *
-   * @param user The user who is requesting the project secrets
-   * @param projectSlug The slug of the project to export secrets from
-   * @param environmentSlug The slug of the environment to export secrets from
-   * @param format The format to export the secrets in
-   * @param privateKey The private key to use for secret decryption
-   * @returns The secrets exported in the desired format
-   *
-   * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
-   * @throws BadRequestException If the private key is required but not supplied
-   */
-  async exportProjectConfigurations(
-    user: AuthenticatedUser,
-    projectSlug: Project['slug'],
-    environmentSlugs: Environment['slug'][],
-    format: ExportFormat
-  ) {
-    this.logger.log(
-      `User ${user.id} attempted to export secrets in project ${projectSlug}`
-    )
-
-    const environmentExports = await Promise.all(
-      environmentSlugs.map(async (environmentSlug) => {
-        const rawSecrets =
-          await this.secretService.getAllSecretsOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-
-        const secrets = rawSecrets.map((secret) => ({
-          name: secret.name,
-          value: secret.value
-        }))
-
-        const variables = (
-          await this.variableService.getAllVariablesOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-        ).map((variable) => ({
-          name: variable.name,
-          value: variable.value
-        }))
-
-        return [
-          environmentSlug,
-          this.exportService.format({ secrets, variables }, format)
-        ]
-      })
-    )
-
-    const fileData = Object.fromEntries(environmentExports)
-
-    return fileData
-  }
-
-  /**
-   * Associates a newly created project with the admin role of a workspace.
-   * This is necessary because the admin role is the only role that can be
-   * associated with a project.
-   *
-   * @param workspace The workspace of the project
-   * @param user The user who is creating the project
-   * @param newProjectId The ID of the newly created project
-   * @param newEnvironmentSlugs The slug of the environments of the newly created project
-   *
-   * @throws BadRequestException if the admin role does not exist
-   */
-  private async associateProjectWithAdminRole(
-    workspace: Workspace,
-    user: AuthenticatedUser,
-    newProjectId: Project['id'],
-    newEnvironmentSlugs: Environment['slug'][]
-  ) {
-    this.logger.log(`Associating project ${newProjectId} with admin role`)
-
-    const workspaceId = workspace.id
-
-    this.logger.log(`Fetching admin role for workspace ${workspace.slug}`)
-    const adminRole = await this.prisma.workspaceRole.findFirst({
-      where: {
-        workspaceId,
-        hasAdminAuthority: true
-      }
-    })
-
-    if (!adminRole) {
-      const errorMessage = `Admin role not found for workspace ${workspace.slug}`
-      this.logger.error(
-        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
-      )
-      throw new BadRequestException(
-        constructErrorBody('Admin role not found', errorMessage)
-      )
-    }
-
-    this.logger.log(
-      `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
-    )
-
-    await this.prisma.workspaceRole.update({
-      where: {
-        id: adminRole.id
-      },
-      data: {
-        projects: {
-          create: {
-            project: {
-              connect: {
-                id: newProjectId
-              }
-            },
-            environments: {
-              connect: newEnvironmentSlugs.map((slug) => ({
-                slug
-              }))
-            }
-          }
-        }
-      }
-    })
   }
 }

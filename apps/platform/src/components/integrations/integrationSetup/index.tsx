@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import type { IntegrationTypeEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { useSetAtom } from 'jotai'
 import ProjectEnvironmentInput from '../projectEnvironmentInput'
 import ProjectEnvironmentSelect from '../projectEnvironmentSelect'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import Visible from '@/components/common/visible'
+import { workspaceIntegrationCountAtom } from '@/store'
 
 interface SetupIntegrationProps {
   integrationType: IntegrationTypeEnum
@@ -49,6 +51,7 @@ export default function SetupIntegration({
     privateKeyLoading,
     handlers
   } = useSetupIntegration(integrationType, integrationName)
+  const setWorkspaceIntegrationCount = useSetAtom(workspaceIntegrationCountAtom)
 
   const handleNext = () => {
     const isNameEmpty = formState.name.trim() === ''
@@ -87,6 +90,7 @@ export default function SetupIntegration({
     const success = await handlers.handleSubmit(e)
 
     if (success) {
+      setWorkspaceIntegrationCount((prev) => prev + 1)
       onOpenChange?.(false)
       setCurrentStep(Step.IntegrationSetupStep)
     }
@@ -194,7 +198,6 @@ export default function SetupIntegration({
               </Button>
             </div>
           </Visible>
-          
         </div>
       </DialogContent>
     </Dialog>
