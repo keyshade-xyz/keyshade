@@ -783,6 +783,9 @@ importers:
 
   packages/common:
     dependencies:
+      '@keyshade/schema':
+        specifier: workspace:*
+        version: link:../schema
       eccrypto:
         specifier: ^1.1.6
         version: 1.1.6
