@@ -5,7 +5,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  OnApplicationBootstrap,
   UnauthorizedException
 } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -31,7 +30,7 @@ import dayjs from 'dayjs'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
-export class UserService implements OnApplicationBootstrap {
+export class UserService {
   private readonly log = new Logger(UserService.name)
 
   constructor(

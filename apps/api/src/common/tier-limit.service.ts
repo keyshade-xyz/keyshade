@@ -422,14 +422,14 @@ export class TierLimitService {
       `Checking if ${type} ${configurationId} has reached the limit of configuration versions`
     )
 
-    const configVersiontierLimit = (
+    const configVersionTierLimit = (
       await this.getWorkspaceTierLimit(workspaceId)
     ).MAX_REVISIONS_PER_CONFIG_PER_ENVIRONMENT
 
     this.logger.log(
-      `Tier limit for configuration versions in workspace ${workspaceId} is ${configVersiontierLimit}`
+      `Tier limit for configuration versions in workspace ${workspaceId} is ${configVersionTierLimit}`
     )
-    if (configVersiontierLimit === INFINITE) {
+    if (configVersionTierLimit === INFINITE) {
       this.logger.log(
         `${type} ${configurationId} can have an infinite number of revisions`
       )
@@ -462,7 +462,7 @@ export class TierLimitService {
     )
 
     // Check if the configuration has reached the limit of revisions
-    if (count < configVersiontierLimit) {
+    if (count < configVersionTierLimit) {
       this.logger.log(
         `${type} ${configurationId} has not reached the limit of configuration versions in environment ${environmentId}`
       )
@@ -528,7 +528,7 @@ export class TierLimitService {
     )
 
     const roleTierLimit = (await this.getWorkspaceTierLimit(workspace.id))
-      .MAX_MEMBERS_PER_WORKSPACE
+      .MAX_ROLES_PER_WORKSPACE
 
     this.logger.log(
       `Tier limit for roles in workspace ${workspace.slug} is ${roleTierLimit}`
