@@ -113,7 +113,7 @@ export default function RoleCard({
       <TableCell className="h-full">
         <div className="mt-1 flex h-full flex-wrap items-start">
           {role.members.map((member) => {
-            const isInvited = member.invitationAccepted === false
+            const isInvited = !member.invitationAccepted
             return (
               <TooltipProvider key={member.email}>
                 <Tooltip>
