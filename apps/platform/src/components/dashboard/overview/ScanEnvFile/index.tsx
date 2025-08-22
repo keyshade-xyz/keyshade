@@ -93,7 +93,7 @@ function ScanEnvModal({
       e.preventDefault()
       e.stopPropagation()
       const key = e.dataTransfer.getData('text/plain')
-      if (!key) return
+      if (!key || !(key in allItems)) return
       setSelectedItems((prev) =>
         prev[key] === target ? prev : { ...prev, [key]: target }
       )
