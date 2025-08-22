@@ -186,17 +186,20 @@ export const InclusionQuery = {
     },
     roles: {
       select: {
-        id: true
+        id: true,
+        slug: true
       }
     },
     projects: {
       select: {
-        id: true
+        id: true,
+        slug: true
       }
     },
     integrations: {
       select: {
-        id: true
+        id: true,
+        slug: true
       }
     }
   }

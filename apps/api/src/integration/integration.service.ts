@@ -34,6 +34,8 @@ import { BaseIntegration } from './plugins/base.integration'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydratedIntegration } from './integration.types'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class IntegrationService {
@@ -43,7 +45,9 @@ export class IntegrationService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -131,6 +135,8 @@ export class IntegrationService {
         authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE]
       })
     const workspaceId = workspace.id
+
+    await this.tierLimitService.checkIntegrationLimitReached(workspace)
 
     if (workspace.isDisabled) {
       this.logger.log(
@@ -257,7 +263,12 @@ export class IntegrationService {
       hydratedIntegration,
       this.prisma
     )
-    integrationObject.init(privateKey, event.id)
+    await integrationObject.init(privateKey, event.id)
+
+    await this.workspaceCacheService.addIntegrationToRawWorkspace(
+      workspace,
+      integration
+    )
 
     // integration.metadata = decryptMetadata(integration.metadata)
     delete hydratedIntegration.workspace
@@ -630,6 +641,16 @@ export class IntegrationService {
 
     this.logger.log(
       `Integration ${integrationId} deleted by user ${user.id} in workspace ${integration.workspaceId}`
+    )
+
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: integration.workspaceId
+      }
+    })
+    await this.workspaceCacheService.removeIntegrationFromRawWorkspace(
+      workspace,
+      integration.id
     )
 
     await createEvent(

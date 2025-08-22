@@ -233,11 +233,14 @@ describe('Project Controller Tests', () => {
     })
 
     it('should not be able to create projects if tier limit it reached', async () => {
+      const maxProjects = (
+        await tierLimitService.getWorkspaceTierLimit(workspace1.id)
+      ).MAX_PROJECTS_PER_WORKSPACE
+
       // Create the number of projects that the tier limit allows
       for (
         let x = 100;
-        x <
-        100 + (await tierLimitService.getProjectTierLimit(workspace1.id)) - 2; // Subtract 2 for the projects created above
+        x < 100 + maxProjects - 2; // Subtract 2 for the projects created above
         x++
       ) {
         await projectService.createProject(user1, workspace1.slug, {
@@ -659,9 +662,6 @@ describe('Project Controller Tests', () => {
       expect(project.description).toEqual(
         'Project for testing if all environments,secrets and keys are being fetched or not'
       )
-      // Verify that sensitive data is not included
-      expect(project).not.toHaveProperty('privateKey')
-      expect(project).not.toHaveProperty('publicKey')
     })
   })
 

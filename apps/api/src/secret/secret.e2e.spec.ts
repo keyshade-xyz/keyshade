@@ -406,12 +406,13 @@ describe('Secret Controller Tests', () => {
 
     it('should not be able to create secrets if tier limit is reached', async () => {
       // Create secrets until tier limit is reached
+      const maxSecrets = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_SECRETS_PER_PROJECT
+
       for (
         let x = 100;
-        x <
-        100 +
-          (await tierLimitService.getSecretTierLimit(project1.workspaceId)) -
-          1; // Subtract 1 for the secrets created above
+        x < 100 + maxSecrets - 1; // Subtract 1 for the secrets created above
         x++
       ) {
         await secretService.createSecret(

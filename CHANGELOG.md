@@ -1,3 +1,22 @@
+## [2.32.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.17...v2.32.0-stage.18) (2025-08-22)
+
+### 🚀 Features
+
+* **api:** add caching to workspace ([#1117](https://github.com/keyshade-xyz/keyshade/issues/1117)) ([35240ae](https://github.com/keyshade-xyz/keyshade/commit/35240aed501b8e2ade3b85ef225b27bae8cf466a))
+
+## [2.32.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.16...v2.32.0-stage.17) (2025-08-22)
+
+### 🐛 Bug Fixes
+
+* **platform:** broken authority width in platform ([#1112](https://github.com/keyshade-xyz/keyshade/issues/1112)) ([6b37c0b](https://github.com/keyshade-xyz/keyshade/commit/6b37c0bc12669fed991162c2e439a94d4865f04e))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.32.0 [skip ci] ([567c1ec](https://github.com/keyshade-xyz/keyshade/commit/567c1ec5a4ab0f79cfce1ca1150304fe6b094801))
+* **release:** 2.32.0-stage.15 [skip ci] ([d1df1c8](https://github.com/keyshade-xyz/keyshade/commit/d1df1c815c459a09db4c09e834dfda372e21ab1c))
+* **release:** 2.32.0-stage.16 [skip ci] ([6f294d4](https://github.com/keyshade-xyz/keyshade/commit/6f294d45707fa1a21de10afe1cc4dae12321605a))
+* removed merge conflicts ([f07a67b](https://github.com/keyshade-xyz/keyshade/commit/f07a67b6e9eddcf238a7dbd812a00c8d95ce4abf))
+
 ## [2.32.0](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0) (2025-08-20)
 
 ### 🚀 Features
@@ -23,26 +42,25 @@
 
 ### 📚 Documentation
 
-- added slack and discord integration docs ([#1093](https://github.com/keyshade-xyz/keyshade/issues/1093)) ([14bcc3d](https://github.com/keyshade-xyz/keyshade/commit/14bcc3d67d49f9d2259eec1054d1a38e164601ea))
+* added slack and discord integration docs ([#1093](https://github.com/keyshade-xyz/keyshade/issues/1093)) ([14bcc3d](https://github.com/keyshade-xyz/keyshade/commit/14bcc3d67d49f9d2259eec1054d1a38e164601ea))
 
 ### 🔧 Miscellaneous Chores
 
-- **cli:** Bump CLI to 3.2.2 ([4b13622](https://github.com/keyshade-xyz/keyshade/commit/4b1362204414d9680d29a562611c063e64d31452))
-- **release:** 2.32.0-stage.1 [skip ci] ([9750d71](https://github.com/keyshade-xyz/keyshade/commit/9750d712c548f502286350cecd6ba038214560ab))
-- **release:** 2.32.0-stage.10 [skip ci] ([e43686e](https://github.com/keyshade-xyz/keyshade/commit/e43686e5dfce7e0a7e3bc2a22a47bf6bb055a48c))
-- **release:** 2.32.0-stage.11 [skip ci] ([9e35cef](https://github.com/keyshade-xyz/keyshade/commit/9e35cefdbc62e41b28fb5ad4af781cb43bec3fe7))
-- **release:** 2.32.0-stage.12 [skip ci] ([cbbb834](https://github.com/keyshade-xyz/keyshade/commit/cbbb834af2955f26e8a3381d38d1a6558cff26aa))
-- **release:** 2.32.0-stage.13 [skip ci] ([8663a1e](https://github.com/keyshade-xyz/keyshade/commit/8663a1e215b32b3977e0590930f68da58b76437c))
-- **release:** 2.32.0-stage.14 [skip ci] ([aaeb2aa](https://github.com/keyshade-xyz/keyshade/commit/aaeb2aa40652f5d054a3bf83b54b8a3e6d83ceb3))
-- **release:** 2.32.0-stage.2 [skip ci] ([effcd67](https://github.com/keyshade-xyz/keyshade/commit/effcd676294821598d65dbd078ddee5ff4e2af45))
-- **release:** 2.32.0-stage.3 [skip ci] ([cd07c8a](https://github.com/keyshade-xyz/keyshade/commit/cd07c8aeb5054217c4c373f890575c1baea51059))
-- **release:** 2.32.0-stage.4 [skip ci] ([5ca65e7](https://github.com/keyshade-xyz/keyshade/commit/5ca65e771f0b23ebadbdd60eae23a641ce19aafe))
-- **release:** 2.32.0-stage.5 [skip ci] ([55f3e14](https://github.com/keyshade-xyz/keyshade/commit/55f3e14ce63b073a8548d197d6f4f167ad594fe3))
-- **release:** 2.32.0-stage.6 [skip ci] ([c7cce1f](https://github.com/keyshade-xyz/keyshade/commit/c7cce1f3623fdb08c1fbd36af10b503a7f379478))
-- **release:** 2.32.0-stage.7 [skip ci] ([86687e3](https://github.com/keyshade-xyz/keyshade/commit/86687e31962bc79633373c23ad7e29f2e493d0b5))
-- **release:** 2.32.0-stage.8 [skip ci] ([fc45b27](https://github.com/keyshade-xyz/keyshade/commit/fc45b27b21245f45c35dde11946920c4af3cfb74))
-- **release:** 2.32.0-stage.9 [skip ci] ([365b10b](https://github.com/keyshade-xyz/keyshade/commit/365b10b4e9db9392046ed0193c120645fa6cff7e))
-- Upgrade conventional-changelog-writer from 8.1.0 to 8.2.0 ([#1095](https://github.com/keyshade-xyz/keyshade/issues/1095)) ([7d092bf](https://github.com/keyshade-xyz/keyshade/commit/7d092bf1818978ecded4beed719c0831e106c531))
+* **cli:** Bump CLI to 3.2.2 ([4b13622](https://github.com/keyshade-xyz/keyshade/commit/4b1362204414d9680d29a562611c063e64d31452))
+* **release:** 2.32.0-stage.1 [skip ci] ([9750d71](https://github.com/keyshade-xyz/keyshade/commit/9750d712c548f502286350cecd6ba038214560ab))
+* **release:** 2.32.0-stage.10 [skip ci] ([e43686e](https://github.com/keyshade-xyz/keyshade/commit/e43686e5dfce7e0a7e3bc2a22a47bf6bb055a48c))
+* **release:** 2.32.0-stage.11 [skip ci] ([9e35cef](https://github.com/keyshade-xyz/keyshade/commit/9e35cefdbc62e41b28fb5ad4af781cb43bec3fe7))
+* **release:** 2.32.0-stage.12 [skip ci] ([cbbb834](https://github.com/keyshade-xyz/keyshade/commit/cbbb834af2955f26e8a3381d38d1a6558cff26aa))
+* **release:** 2.32.0-stage.13 [skip ci] ([8663a1e](https://github.com/keyshade-xyz/keyshade/commit/8663a1e215b32b3977e0590930f68da58b76437c))
+* **release:** 2.32.0-stage.14 [skip ci] ([aaeb2aa](https://github.com/keyshade-xyz/keyshade/commit/aaeb2aa40652f5d054a3bf83b54b8a3e6d83ceb3))
+* **release:** 2.32.0-stage.2 [skip ci] ([effcd67](https://github.com/keyshade-xyz/keyshade/commit/effcd676294821598d65dbd078ddee5ff4e2af45))
+* **release:** 2.32.0-stage.3 [skip ci] ([cd07c8a](https://github.com/keyshade-xyz/keyshade/commit/cd07c8aeb5054217c4c373f890575c1baea51059))
+* **release:** 2.32.0-stage.4 [skip ci] ([5ca65e7](https://github.com/keyshade-xyz/keyshade/commit/5ca65e771f0b23ebadbdd60eae23a641ce19aafe))
+* **release:** 2.32.0-stage.5 [skip ci] ([55f3e14](https://github.com/keyshade-xyz/keyshade/commit/55f3e14ce63b073a8548d197d6f4f167ad594fe3))
+* **release:** 2.32.0-stage.6 [skip ci] ([c7cce1f](https://github.com/keyshade-xyz/keyshade/commit/c7cce1f3623fdb08c1fbd36af10b503a7f379478))
+* **release:** 2.32.0-stage.7 [skip ci] ([86687e3](https://github.com/keyshade-xyz/keyshade/commit/86687e31962bc79633373c23ad7e29f2e493d0b5))
+* **release:** 2.32.0-stage.8 [skip ci] ([fc45b27](https://github.com/keyshade-xyz/keyshade/commit/fc45b27b21245f45c35dde11946920c4af3cfb74))
+* **release:** 2.32.0-stage.9 [skip ci] ([365b10b](https://github.com/keyshade-xyz/keyshade/commit/365b10b4e9db9392046ed0193c120645fa6cff7e))
 
 ## [2.32.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.15...v2.32.0-stage.16) (2025-08-21)
 

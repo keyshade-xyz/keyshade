@@ -4,19 +4,15 @@ import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { UserWithWorkspace } from '@/user/user.types'
 
 @Injectable()
-export class CacheService implements OnModuleDestroy {
-  private static readonly USER_PREFIX = 'user-'
+export class UserCacheService implements OnModuleDestroy {
+  private static readonly PREFIX = 'user-'
 
-  private readonly logger = new Logger(CacheService.name)
+  private readonly logger = new Logger(UserCacheService.name)
 
   constructor(
     @Inject(REDIS_CLIENT)
     private readonly redisClient: { publisher: RedisClientType }
   ) {}
-
-  private getUserKey(userId: string): string {
-    return `${CacheService.USER_PREFIX}${userId}`
-  }
 
   async setUser(
     user: UserWithWorkspace,
@@ -53,7 +49,7 @@ export class CacheService implements OnModuleDestroy {
 
   async clearAllUserCache(): Promise<void> {
     const keys = await this.redisClient.publisher.keys(
-      `${CacheService.USER_PREFIX}*`
+      `${UserCacheService.PREFIX}*`
     )
     if (keys.length > 0) {
       await this.redisClient.publisher.del(keys)
@@ -62,5 +58,9 @@ export class CacheService implements OnModuleDestroy {
 
   async onModuleDestroy() {
     await this.redisClient.publisher.quit()
+  }
+
+  private getUserKey(userId: string): string {
+    return `${UserCacheService.PREFIX}${userId}`
   }
 }

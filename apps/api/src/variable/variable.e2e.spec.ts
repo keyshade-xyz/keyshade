@@ -351,13 +351,14 @@ describe('Variable Controller Tests', () => {
     })
 
     it('should not be able to create variables if tier limit is reached', async () => {
+      const maxVariables = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_VARIABLES_PER_PROJECT
+
       // Create variables until tier limit is reached
       for (
         let x = 100;
-        x <
-        100 +
-          (await tierLimitService.getVariableTierLimit(project1.workspaceId)) -
-          1; // Subtract 1 for the variables created above
+        x < 100 + maxVariables - 1; // Subtract 1 for the variables created above
         x++
       ) {
         await variableService.createVariable(
