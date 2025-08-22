@@ -90,7 +90,7 @@ export async function createUser(
     throw new InternalServerErrorException(
       constructErrorBody(
         'Error creating user',
-        'An error occurred while creating the user.'
+        'An error occurred while creating the user'
       )
     )
   }

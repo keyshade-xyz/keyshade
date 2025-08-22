@@ -237,6 +237,11 @@ export class ProjectService {
     // in order to not log the private key
     newProject.privateKey = privateKey
 
+    await this.workspaceCacheService.addProjectToRawWorkspace(
+      workspace,
+      newProject
+    )
+
     return await this.hydrationService.hydrateProject({
       project: newProject,
       user,
@@ -493,13 +498,13 @@ export class ProjectService {
       `User ${user.id} attempted to fork project ${projectSlug} in disabled workspace ${project.workspaceId}`
     )
 
-    let workspaceId = null
+    let workspace: Workspace
 
     if (forkMetadata.workspaceSlug) {
       this.logger.log(
         `Project to be forked inside workspace ${forkMetadata.workspaceSlug}. Checking for authority`
       )
-      const workspace =
+      workspace =
         await this.authorizationService.authorizeUserAccessToWorkspace({
           user,
           slug: forkMetadata.workspaceSlug,
@@ -517,23 +522,19 @@ export class ProjectService {
           )
         )
       }
-
-      workspaceId = workspace.id
     } else {
       this.logger.log(
         `Project to be forked in default workspace. Fetching default workspace`
       )
-      const defaultWorkspace = await this.prisma.workspaceMember.findFirst({
+      workspace = await this.prisma.workspace.findFirst({
         where: {
-          userId: user.id,
-          workspace: {
-            isDefault: true
-          }
+          ownerId: user.id,
+          isDefault: true
         }
       })
-      workspaceId = defaultWorkspace.workspaceId
     }
 
+    const workspaceId = workspace.id
     const newProjectName = forkMetadata.name || project.name
     this.logger.log(`Forking project ${projectSlug} as ${newProjectName}`)
 
@@ -635,6 +636,11 @@ export class ProjectService {
     )
 
     this.logger.debug(`Forked project ${newProject} (${newProject.slug})`)
+
+    await this.workspaceCacheService.addProjectToRawWorkspace(
+      workspace,
+      newProject
+    )
 
     return await this.hydrationService.hydrateProject({
       user,
@@ -829,6 +835,15 @@ export class ProjectService {
       this.prisma
     )
 
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: project.workspaceId
+      }
+    })
+    await this.workspaceCacheService.removeProjectFromRawWorkspace(
+      workspace,
+      project.id
+    )
     this.logger.debug(`Deleted project ${project.slug}`)
   }
 
@@ -1064,9 +1079,8 @@ export class ProjectService {
    *
    * @param user The user who is requesting the project secrets
    * @param projectSlug The slug of the project to export secrets from
-   * @param environmentSlug The slug of the environment to export secrets from
+   * @param environmentSlugs
    * @param format The format to export the secrets in
-   * @param privateKey The private key to use for secret decryption
    * @returns The secrets exported in the desired format
    *
    * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments

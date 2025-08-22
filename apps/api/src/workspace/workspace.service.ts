@@ -202,12 +202,7 @@ export class WorkspaceService implements OnModuleInit {
       authorizationService: this.authorizationService
     })
 
-    await this.workspaceCacheService.removeHydratedWorkspaceCache(workspace)
     await this.workspaceCacheService.setRawWorkspace(updatedWorkspace)
-    await this.workspaceCacheService.setHydratedWorkspace(
-      hydratedWorkspace,
-      user.id
-    )
 
     return hydratedWorkspace
   }
@@ -752,7 +747,6 @@ export class WorkspaceService implements OnModuleInit {
       this.prisma
     )
 
-    await this.workspaceCacheService.removeHydratedWorkspaceCache(workspace)
     await this.workspaceCacheService.setRawWorkspace(updatedWorkspace)
 
     return updatedWorkspace.blacklistedIpAddresses

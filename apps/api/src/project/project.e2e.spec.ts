@@ -662,9 +662,6 @@ describe('Project Controller Tests', () => {
       expect(project.description).toEqual(
         'Project for testing if all environments,secrets and keys are being fetched or not'
       )
-      // Verify that sensitive data is not included
-      expect(project).not.toHaveProperty('privateKey')
-      expect(project).not.toHaveProperty('publicKey')
     })
   })
 

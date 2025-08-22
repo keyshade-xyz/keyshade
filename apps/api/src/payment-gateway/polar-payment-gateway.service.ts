@@ -27,16 +27,13 @@ import {
   PRODUCT_DESCRIPTION
 } from './payment-gateway.constants'
 import { constructErrorBody } from '@/common/util'
-import { validateEvent } from '@polar-sh/sdk/webhooks.js'
-import { WebhookOrderCreatedPayload } from '@polar-sh/sdk/models/components/webhookordercreatedpayload.js'
-import { WebhookSubscriptionCanceledPayload } from '@polar-sh/sdk/models/components/webhooksubscriptioncanceledpayload.js'
-import { WebhookSubscriptionUncanceledPayload } from '@polar-sh/sdk/models/components/webhooksubscriptionuncanceledpayload.js'
-import { WebhookSubscriptionRevokedPayload } from '@polar-sh/sdk/models/components/webhooksubscriptionrevokedpayload.js'
 import { randomUUID } from 'crypto'
 import { SubscriptionCancellation } from './dto/subscription-cancellation.dto'
 import dayjs from 'dayjs'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { Order } from '@polar-sh/sdk/models/components/order.js'
+import { Order } from '@polar-sh/sdk/models/components/order'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { validateEvent } from '@polar-sh/sdk/webhooks'
 
 @Injectable()
 export class PolarPaymentGatewayService extends PaymentGatewayService {
@@ -421,13 +418,13 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         JSON.stringify(req.body),
         req.headers,
         process.env.POLAR_WEBHOOK_SECRET
-      )
+      ) as any
 
       this.logger.log(`Polar caught event type: ${event.type}`)
 
       switch (event.type) {
         case PolarPaymentGatewayService.EventType.ORDER_CREATED:
-          const { data: eventData } = event as WebhookOrderCreatedPayload
+          const { data: eventData } = event
           switch (eventData.billingReason) {
             case PolarPaymentGatewayService.OrderBillingReason
               .SUBSCRIPTION_CREATED:
@@ -444,19 +441,13 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
           }
           break
         case PolarPaymentGatewayService.EventType.SUBSCRIPTION_CANCELLED:
-          await this.processSubscriptionCancelled(
-            (event as WebhookSubscriptionCanceledPayload).data
-          )
+          await this.processSubscriptionCancelled(event.data)
           break
         case PolarPaymentGatewayService.EventType.SUBSCRIPTION_UNCANCELLED:
-          await this.processSubscriptionUncancelled(
-            (event as WebhookSubscriptionUncanceledPayload).data
-          )
+          await this.processSubscriptionUncancelled(event.data)
           break
         case PolarPaymentGatewayService.EventType.SUBSCRIPTION_REVOKED:
-          await this.processSubscriptionRevoked(
-            (event as WebhookSubscriptionRevokedPayload).data
-          )
+          await this.processSubscriptionRevoked(event.data)
           break
       }
 
@@ -490,16 +481,13 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     this.logger.log('Unused payment links deleted')
   }
 
-  private async processSubscriptionCancelled(
-    data: WebhookSubscriptionCanceledPayload['data']
-  ): Promise<void> {
+  private async processSubscriptionCancelled(data: any): Promise<void> {
     const subscriptionId = data.id
 
     this.logger.log(
       `Processing subscription cancelled event for subscription ID ${subscriptionId}`
     )
 
-    // @ts-expect-error -- Metadata set while creating payment link
     const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription cancellation: ${subscriptionId}`
@@ -510,7 +498,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
 
     const workspace = await this.getWorkspace(workspaceId)
 
-    await this.prisma.subscription.update({
+    const subscription = await this.prisma.subscription.update({
       where: {
         workspaceId: workspace.id
       },
@@ -518,20 +506,18 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         status: SubscriptionStatus.CANCELLED
       }
     })
+    await this.updateSubscriptionCache(workspace, subscription)
 
     this.logger.log(`Subscription cancelled for workspace ${workspaceId}`)
   }
 
-  private async processSubscriptionUncancelled(
-    data: WebhookSubscriptionUncanceledPayload['data']
-  ): Promise<void> {
+  private async processSubscriptionUncancelled(data: any): Promise<void> {
     const subscriptionId = data.id
 
     this.logger.log(
       `Processing subscription uncancelled event for subscription ID ${subscriptionId}`
     )
 
-    // @ts-expect-error -- Metadata set while creating payment link
     const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription uncancellation: ${subscriptionId}`
@@ -542,7 +528,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
 
     const workspace = await this.getWorkspace(workspaceId)
 
-    await this.prisma.subscription.update({
+    const subscription = await this.prisma.subscription.update({
       where: {
         workspaceId: workspace.id
       },
@@ -550,20 +536,18 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         status: SubscriptionStatus.ACTIVE
       }
     })
+    await this.updateSubscriptionCache(workspace, subscription)
 
     this.logger.log(`Subscription uncancelled for workspace ${workspaceId}`)
   }
 
-  private async processSubscriptionRevoked(
-    data: WebhookSubscriptionRevokedPayload['data']
-  ): Promise<void> {
+  private async processSubscriptionRevoked(data: any): Promise<void> {
     const subscriptionId = data.id
 
     this.logger.log(
       `Processing subscription revoked event for subscription ID ${subscriptionId}`
     )
 
-    // @ts-expect-error -- Metadata set while creating payment link
     const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription revokation: ${subscriptionId}`
@@ -576,7 +560,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
 
     const workspace = await this.getWorkspace(workspaceId)
 
-    await this.prisma.$transaction([
+    const results = await this.prisma.$transaction([
       // Update subscription
       this.prisma.subscription.update({
         where: {
@@ -598,23 +582,23 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         where: {
           id: workspace.id
         },
+        include: InclusionQuery.Workspace,
         data: {
           workspaceLockdownIn: dayjs().add(1, 'month').toDate()
         }
       })
     ])
 
+    await this.updateSubscriptionCache(workspace, results[0])
+
     this.logger.log(`Subscription reset to free for workspace ${workspaceId}`)
   }
 
-  private async processSubscriptionUpdated(
-    data: WebhookOrderCreatedPayload['data']
-  ): Promise<void> {
+  private async processSubscriptionUpdated(data: any): Promise<void> {
     this.logger.log(
       `Processing subscription updated event for subscription ID ${data.subscriptionId}`
     )
 
-    // @ts-expect-error -- Metadata set while creating a product
     const productMetadata = data.product.metadata as ProductMetadata
     this.logger.log(
       `Metadata received for subscription: ${JSON.stringify(productMetadata)}`
@@ -633,17 +617,26 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         plan: productMetadata.plan
       }
     })
+    const updatedSubscription = await this.prisma.subscription.findFirst({
+      where: {
+        vendorSubscriptionId: data.subscriptionId
+      },
+      include: {
+        workspace: true
+      }
+    })
+    await this.updateSubscriptionCache(
+      updatedSubscription.workspace,
+      updatedSubscription
+    )
     this.logger.log('Subscription updated successfully')
   }
 
-  private async processSubscriptionCreated(
-    data: WebhookOrderCreatedPayload['data']
-  ): Promise<void> {
+  private async processSubscriptionCreated(data: any): Promise<void> {
     this.logger.log(
       `Processing subscription created event for subscription ID ${data.subscriptionId}`
     )
 
-    // @ts-expect-error -- Metadata set while creating payment link
     const paymentLinkMetadata = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription: ${JSON.stringify(paymentLinkMetadata)}`
@@ -654,7 +647,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
 
     // Update the subscription
     this.logger.log('Updating subscription...')
-    await this.prisma.subscription.update({
+    const subscription = await this.prisma.subscription.update({
       where: {
         workspaceId: workspace.id
       },
@@ -682,18 +675,17 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       id: paymentLinkMetadata.paymentLinkId
     })
     this.logger.log('Payment link deleted successfully.')
+
+    await this.updateSubscriptionCache(workspace, subscription)
   }
 
-  private async processSubscriptionRenewed(
-    data: WebhookOrderCreatedPayload['data']
-  ): Promise<void> {
+  private async processSubscriptionRenewed(data: any): Promise<void> {
     const subscriptionId = data.id
 
     this.logger.log(
       `Processing subscription renewed event for subscription ID ${subscriptionId}`
     )
 
-    // @ts-expect-error -- Metadata set while creating payment link
     const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription renewed: ${subscriptionId}`
@@ -704,7 +696,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
 
     const workspace = await this.getWorkspace(workspaceId)
 
-    await this.prisma.subscription.update({
+    const subscription = await this.prisma.subscription.update({
       where: {
         workspaceId: workspace.id
       },
@@ -713,6 +705,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       }
     })
 
+    await this.updateSubscriptionCache(workspace, subscription)
     this.logger.log(`Subscription uncancelled for workspace ${workspaceId}`)
   }
 

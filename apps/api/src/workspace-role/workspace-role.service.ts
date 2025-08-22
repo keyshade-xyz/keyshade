@@ -27,6 +27,7 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedWorkspaceRole, RawWorkspaceRole } from './workspace-role.types'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -36,7 +37,8 @@ export class WorkspaceRoleService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService
   ) {}
 
   /**
@@ -151,6 +153,11 @@ export class WorkspaceRoleService {
         workspaceId
       },
       this.prisma
+    )
+
+    await this.workspaceCacheService.addRoleToRawWorkspace(
+      workspace,
+      workspaceRole
     )
 
     this.logger.log(
@@ -316,6 +323,16 @@ export class WorkspaceRoleService {
         workspaceId: workspaceRole.workspaceId
       },
       this.prisma
+    )
+
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: workspaceRole.workspaceId
+      }
+    })
+    await this.workspaceCacheService.removeRoleFromRawWorkspace(
+      workspace,
+      workspaceRole.id
     )
 
     this.logger.log(

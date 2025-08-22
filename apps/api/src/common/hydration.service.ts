@@ -521,15 +521,6 @@ export class HydrationService {
     permittedAuthorities,
     authorizationService
   }: WorkspaceHydrationParams): Promise<HydratedWorkspace> {
-    const cachedHydratedWorkspace =
-      await this.workspaceCacheService.getHydratedWorkspace(
-        workspace.id,
-        user.id
-      )
-    if (cachedHydratedWorkspace) {
-      return cachedHydratedWorkspace
-    }
-
     if (!permittedAuthorities) {
       permittedAuthorities = await getCollectiveWorkspaceAuthorities(
         workspace.id,
@@ -609,20 +600,13 @@ export class HydrationService {
     delete workspace.members
     delete workspace.roles
 
-    const hydratedWorkspace: HydratedWorkspace = {
+    return {
       ...workspace,
       ...tierLimits,
       ...workspaceResources,
       entitlements,
       isDefault: workspace.isDefault && workspace.ownerId === user.id
     }
-
-    await this.workspaceCacheService.setHydratedWorkspace(
-      hydratedWorkspace,
-      user.id
-    )
-
-    return hydratedWorkspace
   }
 
   /**
@@ -890,14 +874,8 @@ export class HydrationService {
     projects: number
     integrations: number
   }> {
-    const projects = await this.prisma.project.findMany({
-      where: {
-        workspaceId: workspace.id
-      }
-    })
-
-    const accessibleProjects: Project[] = []
-    for (const project of projects) {
+    const accessibleProjectIds: Project['id'][] = []
+    for (const project of workspace.projects) {
       let hasAuthority = null
       try {
         hasAuthority = await authorizationService.authorizeUserAccessToProject({
@@ -912,27 +890,12 @@ export class HydrationService {
       }
 
       if (hasAuthority) {
-        accessibleProjects.push(project)
+        accessibleProjectIds.push(project.id)
       }
     }
 
-    const integrations = await this.prisma.integration.findMany({
-      where: {
-        workspaceId: workspace.id,
-        OR: [
-          {
-            project: {
-              id: {
-                in: accessibleProjects.map((p) => p.id)
-              }
-            }
-          }
-        ]
-      }
-    })
-
     let accessibleIntegrationCount = 0
-    for (const integration of integrations) {
+    for (const integration of workspace.integrations) {
       let hasAuthority = null
       try {
         hasAuthority =
@@ -953,7 +916,7 @@ export class HydrationService {
     }
 
     return {
-      projects: accessibleProjects.length,
+      projects: accessibleProjectIds.length,
       integrations: accessibleIntegrationCount
     }
   }

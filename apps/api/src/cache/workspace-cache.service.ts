@@ -10,9 +10,12 @@ import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { Authority, Subscription, User, Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
-import { HydratedWorkspace, RawWorkspace } from '@/workspace/workspace.types'
+import { RawWorkspace } from '@/workspace/workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { constructErrorBody } from '@/common/util'
+import { RawProject } from '@/project/project.types'
+import { RawIntegration } from '@/integration/integration.types'
+import { RawWorkspaceRole } from '@/workspace-role/workspace-role.types'
 
 @Injectable()
 export class WorkspaceCacheService implements OnModuleDestroy {
@@ -20,7 +23,6 @@ export class WorkspaceCacheService implements OnModuleDestroy {
   private static readonly WORKSPACE_COLLECTIVE_AUTHORITIES_PREFIX =
     'user-workspace-collective-authorities-'
   private static readonly RAW_WORKSPACE_PREFIX = 'raw-workspace-'
-  private static readonly HYDRATED_WORKSPACE_PREFIX = 'hydrated-workspace-'
   private static readonly WORKSPACE_ADMIN_PREFIX = 'workspace-admin-'
   private static readonly WORKSPACE_KEYS_PREFIX = 'workspace-keys-' // Stores all the keys associated with this workspace
 
@@ -33,7 +35,21 @@ export class WorkspaceCacheService implements OnModuleDestroy {
   ) {}
 
   async onModuleDestroy() {
-    await this.redisClient.publisher.quit()
+    const pub = this.redisClient.publisher
+
+    if (!pub) return
+
+    // node-redis v4 exposes `isOpen`; only quit when connected
+    if (typeof pub.isOpen === 'boolean' && !pub.isOpen) return
+
+    try {
+      await pub.quit()
+    } catch (err: any) {
+      // Ignore "The client is closed" during shutdown
+      if (!err || !/The client is closed/i.test(String(err.message))) {
+        throw err
+      }
+    }
   }
 
   async addWorkspaceKey(workspaceId: Workspace['id'], newKey: string) {
@@ -47,31 +63,6 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     )
   }
 
-  async removeHydratedWorkspaceCache(workspace: Workspace) {
-    const workspaceId = workspace.id
-    this.logger.log(
-      `Removing hydrated workspace cache for workspace ${workspaceId}`
-    )
-    const key = this.getWorkspaceKeysKey(workspaceId)
-    const allKeys = await this.redisClient.publisher.sMembers(key)
-    if (allKeys === null) {
-      this.logger.log(
-        `No workspace keys found in cache for workspace ${workspaceId}`
-      )
-      return
-    } else {
-      const filteredKeys = allKeys.filter((k) =>
-        k.startsWith(
-          `${WorkspaceCacheService.HYDRATED_WORKSPACE_PREFIX}-${workspaceId}`
-        )
-      )
-      await this.redisClient.publisher.del(filteredKeys)
-      this.logger.log(
-        `${filteredKeys.length} hydrated workspace keys removed from cache for workspace ${workspaceId}`
-      )
-    }
-  }
-
   async removeWorkspaceCache(workspace: Workspace) {
     const workspaceSlug = workspace.slug
 
@@ -80,7 +71,7 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     const key = this.getWorkspaceKeysKey(workspaceSlug)
     const workspaceKeysRaw = await this.redisClient.publisher.get(key)
 
-    if (workspaceKeysRaw === null) {
+    if (!workspaceKeysRaw) {
       this.logger.log(
         `No workspace keys found in cache for workspace ${workspaceSlug}`
       )
@@ -106,7 +97,7 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     const subscriptionJson = await this.redisClient.publisher.get(key)
 
     let subscription: Subscription | null
-    if (subscriptionJson === null) {
+    if (!subscriptionJson) {
       this.logger.log(
         `Subscription not found in cache for ${workspaceId}. Fetching from database...`
       )
@@ -142,41 +133,6 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     this.logger.log(`Subscription cache set for workspace ${workspaceId}`)
   }
 
-  async getHydratedWorkspace(
-    workspaceSlug: Workspace['slug'],
-    userId: User['id']
-  ): Promise<HydratedWorkspace | null> {
-    this.logger.log(`Attempting to fetch workspace ${workspaceSlug} from cache`)
-
-    const key = this.getHydratedWorkspaceKey(workspaceSlug, userId)
-    const hydratedWorkspaceJson = await this.redisClient.publisher.get(key)
-
-    if (hydratedWorkspaceJson === null) {
-      this.logger.log(
-        `Hydrated workspace not found in cache for ${workspaceSlug}. Fetching from database...`
-      )
-      return null
-    } else {
-      this.logger.log(`Hydrated workspace found in cache for ${workspaceSlug}`)
-      return JSON.parse(hydratedWorkspaceJson) as HydratedWorkspace
-    }
-  }
-
-  async setHydratedWorkspace(
-    hydratedWorkspace: HydratedWorkspace,
-    userId: User['id']
-  ): Promise<void> {
-    const workspaceSlug = hydratedWorkspace.id
-    this.logger.log(`Caching hydrated workspace ${workspaceSlug}`)
-
-    const key = this.getHydratedWorkspaceKey(workspaceSlug, userId)
-    const hydratedWorkspaceJson = JSON.stringify(hydratedWorkspace)
-    await this.redisClient.publisher.set(key, hydratedWorkspaceJson)
-    await this.addWorkspaceKey(hydratedWorkspace.id, key)
-
-    this.logger.log(`Hydrated workspace ${workspaceSlug} cached`)
-  }
-
   async getRawWorkspace(
     workspaceSlug: Workspace['slug']
   ): Promise<RawWorkspace | null> {
@@ -186,7 +142,7 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     const rawWorkspaceJson = await this.redisClient.publisher.get(key)
     let rawWorkspace: RawWorkspace | null
 
-    if (rawWorkspaceJson === null) {
+    if (!rawWorkspaceJson) {
       this.logger.log(
         `Raw workspace not found in cache for ${workspaceSlug}. Fetching from database...`
       )
@@ -276,7 +232,15 @@ export class WorkspaceCacheService implements OnModuleDestroy {
       `Updating user ${userId} workspace ${workspaceId} authorities cache`
     )
     const key = this.getCollectiveWorkspaceAuthoritiesKey(workspaceId, userId)
-    await this.redisClient.publisher.sAdd(key, Array.from(authorities))
+    const values = Array.from(authorities ?? []).map((a) => String(a))
+    if (values.length > 0) {
+      await this.redisClient.publisher.sAdd(key, values)
+    } else {
+      this.logger.log(
+        `No authorities provided for user ${userId} in workspace ${workspaceId}; cache cleared`
+      )
+    }
+
     await this.addWorkspaceKey(workspaceId, key)
     this.logger.log(
       `User ${userId} workspace ${workspaceId} authorities cache updated`
@@ -296,19 +260,164 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     return new Set(rawAuthorities as Authority[])
   }
 
+  async addProjectToRawWorkspace(workspace: Workspace, project: RawProject) {
+    const workspaceSlug = workspace.slug
+    const projectId = project.id
+
+    this.logger.log(
+      `Adding project ${projectId} to workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.projects.push({
+        id: projectId,
+        slug: project.slug
+      })
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async removeProjectFromRawWorkspace(
+    workspace: Workspace,
+    projectId: RawProject['id']
+  ) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Removing project ${projectId} from workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.projects = rawWorkspace.projects.filter(
+        (p) => p.id !== projectId
+      )
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async addMemberToRawWorkspace(workspace: Workspace, memberId: User['id']) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Adding member ${memberId} to workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.members.push({
+        id: memberId
+      })
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async removeMemberFromRawWorkspace(
+    workspace: Workspace,
+    memberId: User['id']
+  ) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Removing member ${memberId} from workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.members = rawWorkspace.members.filter(
+        (m) => m.id !== memberId
+      )
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async addRoleToRawWorkspace(workspace: Workspace, role: RawWorkspaceRole) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Adding role ${role.id} to workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.roles.push({
+        id: role.id,
+        slug: role.slug
+      })
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async removeRoleFromRawWorkspace(
+    workspace: Workspace,
+    roleId: RawWorkspaceRole['id']
+  ) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Removing role ${roleId} from workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.roles = rawWorkspace.roles.filter((r) => r.id !== roleId)
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async addIntegrationToRawWorkspace(
+    workspace: Workspace,
+    integration: RawIntegration
+  ) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Adding integration ${integration.id} to workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.integrations.push({
+        id: integration.id,
+        slug: integration.slug
+      })
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async removeIntegrationFromRawWorkspace(
+    workspace: Workspace,
+    integrationId: RawIntegration['id']
+  ) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(
+      `Removing integration ${integrationId} from workspace ${workspaceSlug} in cache`
+    )
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.integrations = rawWorkspace.integrations.filter(
+        (i) => i.id !== integrationId
+      )
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
+  async updateRawWorkspaceSubscription(
+    workspace: Workspace,
+    subscription: Subscription
+  ) {
+    const workspaceSlug = workspace.slug
+    this.logger.log(`Updating workspace ${workspaceSlug} subscription in cache`)
+
+    const rawWorkspace = await this.getRawWorkspace(workspaceSlug)
+    if (rawWorkspace !== null) {
+      rawWorkspace.subscription = subscription
+      await this.setRawWorkspace(rawWorkspace)
+    }
+  }
+
   private getWorkspaceSubscriptionKey(workspaceId: Workspace['id']): string {
     return `${WorkspaceCacheService.SUBSCRIPTION_PREFIX}${workspaceId}`
   }
 
   private getRawWorkspaceKey(workspaceSlug: Workspace['slug']): string {
     return `${WorkspaceCacheService.RAW_WORKSPACE_PREFIX}${workspaceSlug}`
-  }
-
-  private getHydratedWorkspaceKey(
-    workspaceSlug: Workspace['slug'],
-    userId: User['id']
-  ): string {
-    return `${WorkspaceCacheService.HYDRATED_WORKSPACE_PREFIX}${workspaceSlug}-${userId}`
   }
 
   private getCollectiveWorkspaceAuthoritiesKey(

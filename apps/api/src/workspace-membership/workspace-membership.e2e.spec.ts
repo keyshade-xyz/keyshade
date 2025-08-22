@@ -590,6 +590,8 @@ describe('Workspace Membership Controller Tests', () => {
 
   describe('Remove Users Tests', () => {
     it('should be able to remove users from workspace', async () => {
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
       const response = await app.inject({
         method: 'DELETE',
         headers: {
