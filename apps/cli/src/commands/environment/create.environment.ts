@@ -7,6 +7,10 @@ import {
 } from 'src/types/command/command.types'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
+import {
+  CreateEnvironmentRequestSchema,
+  CreateEnvironmentResponseSchema
+} from '@keyshade/schema/raw'
 
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
@@ -50,8 +54,13 @@ export class CreateEnvironment extends BaseCommand {
     const [projectSlug] = args
     const { name, description } = await this.parseInput(options)
 
-    if (!projectSlug) {
-      Logger.error('Project slug is required')
+    const request = CreateEnvironmentRequestSchema.safeParse({
+      name,
+      description,
+      projectSlug
+    })
+    if (!request.success) {
+      Logger.error(request.error.toString())
       return
     }
 
@@ -62,16 +71,22 @@ export class CreateEnvironment extends BaseCommand {
       error,
       success
     } = await ControllerInstance.getInstance().environmentController.createEnvironment(
-      { name, description, projectSlug },
+      request.data,
       this.headers
     )
 
-    if (success) {
+    if (!success) {
+      this.logError(error)
+      return
+    }
+
+    const response = CreateEnvironmentResponseSchema.safeParse(environment)
+    if (response.success) {
       Logger.info(
-        `Environment created:${environment.name} (${environment.slug})`
+        `Environment created: ${environment.name} (${environment.slug})`
       )
     } else {
-      this.logError(error)
+      Logger.error('Invalid server response')
     }
   }
 

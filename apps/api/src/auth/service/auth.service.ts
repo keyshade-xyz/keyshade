@@ -50,6 +50,8 @@ export class AuthService {
     ip: string
     device: string
     location: string
+    date: string
+    time: string
   }> {
     const rawIp = (
       (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
@@ -100,8 +102,24 @@ export class AuthService {
       }
       location = 'Unknown'
     }
+    const now = new Date()
+    const date = now
+      .toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
+      .replace(/,/g, '')
 
-    return { ip: rawIp, device, location }
+    const time = now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    })
+
+    return { ip: rawIp, device, location, date, time }
   }
 
   // Static helper to normalize IPs
@@ -233,9 +251,16 @@ export class AuthService {
     })
     this.logger.log(`OTP deleted for ${email}`)
 
-    const { ip, device, location } = await AuthService.parseLoginRequest(req)
+    const { ip, device, location, date, time } =
+      await AuthService.parseLoginRequest(req)
 
-    await this.sendLoginNotification(email, { ip, device, location })
+    await this.sendLoginNotification(email, {
+      ip,
+      device,
+      location,
+      date,
+      time
+    })
 
     this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
@@ -262,7 +287,13 @@ export class AuthService {
     name: string,
     profilePictureUrl: string,
     oauthProvider: AuthProvider,
-    metadata?: { ip: string; device: string; location?: string }
+    metadata?: {
+      ip: string
+      device: string
+      location?: string
+      date: string
+      time: string
+    }
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(
       `Handling OAuth login. Email: ${email}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}, OAuthProvider: ${oauthProvider}`
@@ -319,10 +350,12 @@ export class AuthService {
     data: {
       ip: string
       device: string
+      date: string
+      time: string
       location?: string
     }
   ) {
-    const { ip, device, location } = data
+    const { ip, device, location, date, time } = data
     try {
       const user = await this.prisma.user.findUnique({
         where: { email },
@@ -341,6 +374,7 @@ export class AuthService {
       const normalizedIp = AuthService.normalizeIp(ip)
       const ipHash = toSHA256(normalizedIp)
       const deviceFingerprint = device || 'Unknown'
+      const deviceLocation = location || 'Unknown'
 
       const existingSession = await this.prisma.loginSession.findUnique({
         where: {
@@ -358,7 +392,9 @@ export class AuthService {
         await this.mailService.sendLoginNotification(user.email, {
           ip: normalizedIp,
           device: deviceFingerprint,
-          location
+          location: deviceLocation,
+          date,
+          time
         })
         this.logger.log(`Login notification sent to ${email} (new env).`)
       } else {

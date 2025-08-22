@@ -26,13 +26,13 @@ import {
   main
 } from '../styles/common-styles'
 
-interface BaseEmailTemplateProps {
+interface ShareBaseEmailTemplateProps {
   previewText: string
   heading: string
   children: React.ReactNode
 }
 
-export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
+export const ShareBaseEmailTemplate: React.FC<ShareBaseEmailTemplateProps> = ({
   previewText,
   heading,
   children
@@ -177,10 +177,7 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
               >
                 Terms and Conditions
               </Link>{' '}
-              for more information on how we manage your data and services.{' '}
-              <Link href="#" style={link}>
-                Unsubscribe
-              </Link>
+              for more information on how we manage your data and services.
             </Text>
           </Section>
         </Container>
@@ -189,4 +186,4 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
   )
 }
 
-export default BaseEmailTemplate
+export default ShareBaseEmailTemplate
