@@ -13,8 +13,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "dependencies": {
-    "eccrypto": "^1.1.6",
-    "@keyshade/schemas": "workspace:*"
+    "eccrypto": "^1.1.6"
   },
   "devDependencies": {
     "@types/eccrypto": "^1.1.6"
