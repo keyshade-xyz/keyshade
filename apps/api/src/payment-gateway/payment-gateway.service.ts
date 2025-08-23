@@ -1,7 +1,12 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { PurchaseDto } from './dto/purchase.dto'
 import { AuthenticatedUser } from '@/user/user.types'
-import { Authority, SubscriptionPlanType, Workspace } from '@prisma/client'
+import {
+  Authority,
+  Subscription,
+  SubscriptionPlanType,
+  Workspace
+} from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import dayjs from 'dayjs'
@@ -11,6 +16,7 @@ import { POLAR_CLIENT } from '@/provider/polar.provider'
 import { Polar } from '@polar-sh/sdk'
 import { Invoice, PaymentHistory } from './payment-gateway.types'
 import { SubscriptionCancellation } from './dto/subscription-cancellation.dto'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
 export abstract class PaymentGatewayService {
@@ -18,6 +24,7 @@ export abstract class PaymentGatewayService {
 
   constructor(
     private readonly authorizationService: AuthorizationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
     protected readonly prisma: PrismaService,
     @Inject(POLAR_CLIENT) protected readonly polarClient: Polar
   ) {}
@@ -239,5 +246,15 @@ export abstract class PaymentGatewayService {
     this.logger.log(`Workspace ${workspaceSlug} has an active subscription`)
 
     return workspace
+  }
+
+  protected async updateSubscriptionCache(
+    workspace: Workspace,
+    subscription: Subscription
+  ) {
+    await this.workspaceCacheService.updateRawWorkspaceSubscription(
+      workspace,
+      subscription
+    )
   }
 }

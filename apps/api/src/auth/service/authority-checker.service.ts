@@ -24,16 +24,18 @@ import {
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
-import { HydratedWorkspace, RawWorkspace } from '@/workspace/workspace.types'
+import { HydratedWorkspace } from '@/workspace/workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import {
   HydratedWorkspaceRole,
   RawWorkspaceRole
 } from '@/workspace-role/workspace-role.types'
 import { HydratedProject, RawProject } from '@/project/project.types'
-import { TierLimitService } from '@/common/tier-limit.service'
 import { AuthorizationService } from './authorization.service'
 import { HydrationService } from '@/common/hydration.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class AuthorityCheckerService {
@@ -42,13 +44,16 @@ export class AuthorityCheckerService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly hydrationService: HydrationService,
-    private readonly tierLimitService: TierLimitService
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly projectCacheService: ProjectCacheService,
+    private readonly collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
   ) {}
 
   /**
    * Checks if the user has the required authorities to access the given workspace.
    *
    * @param params The input object containing the user, slug, authorities
+   * @param authorizationService The authorization service to use for hydration
    * @returns The workspace if the user has the required authorities
    * @throws InternalServerErrorException if there's an error when communicating with the database
    * @throws NotFoundException if the workspace is not found
@@ -63,31 +68,16 @@ export class AuthorityCheckerService {
       `Checking authority over workspace for user ${user.id}, slug ${JSON.stringify(slug)} and authorities ${authorities}`
     )
 
-    let workspace: RawWorkspace
-
-    try {
-      workspace = await this.prisma.workspace.findUnique({
-        where: {
-          slug: slug
-        },
-        include: InclusionQuery.Workspace
-      })
-    } catch (error) {
-      this.logger.error(error)
-      throw new InternalServerErrorException(error)
-    }
-
-    if (!workspace) {
-      this.logger.warn(`Workspace ${slug} not found`)
-      throw new NotFoundException(
-        constructErrorBody('Workspace not found', `Workspace ${slug} not found`)
-      )
-    }
+    const workspace = await this.workspaceCacheService.getRawWorkspace(
+      params.slug
+    )
 
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       workspace.id,
       user.id,
-      this.prisma
+      this.prisma,
+      this.workspaceCacheService,
+      this.collectiveAuthoritiesCacheService
     )
 
     this.checkHasPermissionOverEntity(
@@ -112,6 +102,7 @@ export class AuthorityCheckerService {
    * Checks if the user has the required authorities to access the given project.
    *
    * @param params The input object containing the user, slug, authorities
+   * @param authorizationService
    * @returns The project if the user has the required authorities
    * @throws InternalServerErrorException if there's an error when communicating with the database
    * @throws NotFoundException if the project is not found
@@ -126,43 +117,26 @@ export class AuthorityCheckerService {
       `Checking authority over project for user ${user.id}, slug ${JSON.stringify(slug)} and authorities ${authorities}`
     )
 
-    let project: RawProject
-
-    try {
-      project = await this.prisma.project.findUnique({
-        where: {
-          slug: slug
-        },
-        include: InclusionQuery.Project
-      })
-    } catch (error) {
-      this.logger.error('Error while fetching project: ', error)
-      throw new InternalServerErrorException(
-        constructErrorBody(
-          'Uh-oh, something went wrong',
-          'Something went wrong on our end. If the problem persists, please contact us.'
-        )
-      )
-    }
-
-    if (!project) {
-      this.logger.warn(`Project ${slug} not found`)
-      throw new NotFoundException(
-        constructErrorBody(
-          'Project not found',
-          `Project ${slug} does not exist`
-        )
-      )
-    }
+    const project: RawProject = await this.projectCacheService.getRawProject(
+      params.slug
+    )
 
     const projectAccessLevel = project.accessLevel
     const permittedAuthorities =
       projectAccessLevel === ProjectAccessLevel.PRIVATE
-        ? await getCollectiveProjectAuthorities(user.id, project, this.prisma)
+        ? await getCollectiveProjectAuthorities(
+            user.id,
+            project,
+            this.prisma,
+            this.workspaceCacheService,
+            this.collectiveAuthoritiesCacheService
+          )
         : await getCollectiveWorkspaceAuthorities(
             project.workspaceId,
             user.id,
-            this.prisma
+            this.prisma,
+            this.workspaceCacheService,
+            this.collectiveAuthoritiesCacheService
           )
 
     if (
@@ -213,7 +187,7 @@ export class AuthorityCheckerService {
     try {
       environment = await this.prisma.environment.findUnique({
         where: {
-          slug: slug
+          slug
         },
         include: InclusionQuery.Environment
       })
@@ -235,7 +209,8 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveEnvironmentAuthorities(
       user.id,
       environment,
-      this.prisma
+      this.prisma,
+      this.workspaceCacheService
     )
 
     this.checkHasPermissionOverEntity(
@@ -301,7 +276,9 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveProjectAuthorities(
       user.id,
       variable.project,
-      this.prisma
+      this.prisma,
+      this.workspaceCacheService,
+      this.collectiveAuthoritiesCacheService
     )
 
     this.checkHasPermissionOverEntity(
@@ -326,6 +303,7 @@ export class AuthorityCheckerService {
    * Checks if the user has the required authorities to access the given secret.
    *
    * @param params The input object containing the user, slug, authorities
+   * @param authorizationService
    * @returns The secret if the user has the required authorities
    * @throws InternalServerErrorException if there's an error when communicating with the database
    * @throws NotFoundException if the secret is not found
@@ -367,7 +345,9 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveProjectAuthorities(
       user.id,
       secret.project,
-      this.prisma
+      this.prisma,
+      this.workspaceCacheService,
+      this.collectiveAuthoritiesCacheService
     )
 
     this.checkHasPermissionOverEntity(
@@ -432,7 +412,9 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       integration.workspaceId,
       user.id,
-      this.prisma
+      this.prisma,
+      this.workspaceCacheService,
+      this.collectiveAuthoritiesCacheService
     )
 
     this.checkHasPermissionOverEntity(
@@ -458,7 +440,9 @@ export class AuthorityCheckerService {
       const projectAuthorities = await getCollectiveProjectAuthorities(
         user.id,
         project,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
 
       this.checkHasPermissionOverEntity(
@@ -514,7 +498,9 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       workspaceRole.workspaceId,
       user.id,
-      this.prisma
+      this.prisma,
+      this.workspaceCacheService,
+      this.collectiveAuthoritiesCacheService
     )
 
     this.checkHasPermissionOverEntity(

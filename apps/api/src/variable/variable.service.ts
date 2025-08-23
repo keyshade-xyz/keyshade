@@ -44,6 +44,7 @@ import { SecretService } from '@/secret/secret.service'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { checkForDisabledWorkspace } from '@/common/workspace'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class VariableService {
@@ -61,7 +62,8 @@ export class VariableService {
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    private readonly projectCacheService: ProjectCacheService
   ) {
     this.redis = redisClient.publisher
   }
@@ -191,6 +193,11 @@ export class VariableService {
       }
     }
 
+    await this.projectCacheService.addVariableToProjectCache(
+      projectSlug,
+      variable
+    )
+
     await createEvent(
       {
         triggeredBy: user,
@@ -210,6 +217,7 @@ export class VariableService {
       this.prisma
     )
 
+    delete hydratedVariable.project
     return hydratedVariable
   }
 
@@ -859,6 +867,11 @@ export class VariableService {
       }
     })
     this.logger.log(`Deleted variable ${variable.slug}`)
+
+    await this.projectCacheService.removeVariableFromProjectCache(
+      variable.project.slug,
+      variable.id
+    )
 
     await createEvent(
       {

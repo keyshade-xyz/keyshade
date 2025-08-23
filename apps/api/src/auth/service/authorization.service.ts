@@ -1,25 +1,30 @@
-import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
 import { HydratedProject } from '@/project/project.types'
 import { HydratedEnvironment } from '@/environment/environment.types'
 import { HydratedIntegration } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
-import { PrismaService } from '@/prisma/prisma.service'
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { AuthorizationParams } from '../auth.types'
 import { HydratedWorkspaceRole } from '@/workspace-role/workspace-role.types'
 import { HydratedVariable } from '@/variable/variable.types'
 import { HydratedSecret } from '@/secret/secret.types'
 import { HydratedWorkspace } from '@/workspace/workspace.types'
+import { PrismaService } from '@/prisma/prisma.service'
 
 @Injectable()
 export class AuthorizationService {
   private readonly logger = new Logger(AuthorizationService.name)
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService,
+    private readonly prisma: PrismaService
   ) {}
 
   /**
@@ -182,11 +187,10 @@ export class AuthorizationService {
 
   /**
    * Fetches the requested workspace specified by userId and the filter.
-   * @param userId The id of the user
-   * @param filter The filter optionally including the workspace id, slug or name
    * @returns The requested workspace
    * @throws InternalServerErrorException if there's an error when communicating with the database
    * @throws NotFoundException if the workspace is not found
+   * @param workspaceId
    */
   private async getWorkspace(workspaceId: Workspace['id']): Promise<Workspace> {
     let workspace: Workspace

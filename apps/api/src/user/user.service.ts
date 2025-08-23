@@ -21,12 +21,13 @@ import {
   limitMaxItemsPerPage
 } from '@/common/util'
 import { createUser } from '@/common/user'
-import { CacheService } from '@/cache/cache.service'
+import { UserCacheService } from '@/cache/user-cache.service'
 import { UserWithWorkspace } from './user.types'
 import SlugGenerator from '@/common/slug-generator.service'
 import { OnboardingAnswersDto } from './dto/onboarding-answers/onboarding-answers'
 import { HydrationService } from '@/common/hydration.service'
 import dayjs from 'dayjs'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
 export class UserService {
@@ -34,10 +35,11 @@ export class UserService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
+    private readonly cache: UserCacheService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService
   ) {}
 
   async onApplicationBootstrap() {
@@ -474,7 +476,8 @@ export class UserService {
       { authProvider: AuthProvider.EMAIL_OTP, ...dto },
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
     this.log.log(`Created user with email ${createdUser.email}`)
 

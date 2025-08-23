@@ -23,7 +23,7 @@ function PlanNameBadge({
   }
 
   return (
-    <div className="flex items-center justify-around rounded-lg border border-white/20 bg-white/5 p-1.5">
+    <div className="mx-auto flex w-fit items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 p-1.5 px-3">
       <div className={`h-1.5 w-1.5 rounded-full ${bgColor(planName)}`} />
       <div>{formatText(planName)}</div>
     </div>

@@ -3,17 +3,15 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().trim().min(3),
   slug: z.string(),
   description: z.string().nullable(),
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   projectId: z.string(),
   lastUpdatedById: z.string(),
-  secrets: z.number(),
-  variables: z.number(),
   entitlements: z.object({
-    canWrite: z.boolean(),
+    canUpdate: z.boolean(),
     canDelete: z.boolean()
   }),
   project: z.object({
@@ -25,7 +23,6 @@ export const EnvironmentSchema = z.object({
   lastUpdatedBy: z.object({
     id: z.string(),
     name: z.string(),
-    email: z.string().email(),
     profilePictureUrl: z.string().nullable()
   })
 })
@@ -36,31 +33,38 @@ export const CreateEnvironmentRequestSchema = z.object({
   projectSlug: z.string()
 })
 
-export const CreateEnvironmentResponseSchema = EnvironmentSchema
+export const CreateEnvironmentResponseSchema = EnvironmentSchema.omit({
+  project: true
+})
 
 export const UpdateEnvironmentRequestSchema =
   CreateEnvironmentRequestSchema.omit({ projectSlug: true })
     .partial()
     .extend({ slug: EnvironmentSchema.shape.slug })
 
-export const UpdateEnvironmentResponseSchema = EnvironmentSchema
+export const UpdateEnvironmentResponseSchema = EnvironmentSchema.omit({
+  project: true
+})
 
 export const GetEnvironmentRequestSchema = z.object({
   slug: EnvironmentSchema.shape.slug
 })
 
-export const GetEnvironmentResponseSchema = EnvironmentSchema
+export const GetEnvironmentResponseSchema = EnvironmentSchema.omit({
+  project: true
+})
 
 export const GetAllEnvironmentsOfProjectRequestSchema =
   PageRequestSchema.extend({
     projectSlug: z.string()
   })
 
-export const GetAllEnvironmentsOfProjectResponseSchema =
-  PageResponseSchema(EnvironmentSchema)
+export const GetAllEnvironmentsOfProjectResponseSchema = PageResponseSchema(
+  EnvironmentSchema.omit({ project: true })
+)
 
 export const DeleteEnvironmentRequestSchema = z.object({
   slug: EnvironmentSchema.shape.slug
 })
 
-export const DeleteEnvironmentResponseSchema = z.void()
+export const DeleteEnvironmentResponseSchema = z.null()

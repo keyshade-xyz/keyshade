@@ -33,7 +33,8 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
 import { HydratedWorkspace } from './workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
-import { TierLimitService } from '@/common/tier-limit.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 @Injectable()
 export class WorkspaceService implements OnModuleInit {
@@ -42,9 +43,10 @@ export class WorkspaceService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthorityCacheService: CollectiveAuthoritiesCacheService
   ) {}
 
   /**
@@ -108,7 +110,8 @@ export class WorkspaceService implements OnModuleInit {
       dto,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
   }
 
@@ -193,11 +196,15 @@ export class WorkspaceService implements OnModuleInit {
       this.prisma
     )
 
-    return this.hydrationService.hydrateWorkspace({
+    const hydratedWorkspace = await this.hydrationService.hydrateWorkspace({
       workspace: updatedWorkspace,
       user,
       authorizationService: this.authorizationService
     })
+
+    await this.workspaceCacheService.setRawWorkspace(updatedWorkspace)
+
+    return hydratedWorkspace
   }
 
   /**
@@ -249,6 +256,10 @@ export class WorkspaceService implements OnModuleInit {
       }
     })
 
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
+    await this.collectiveAuthorityCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspace.id
+    )
     this.logger.log(`Deleted workspace ${workspace.name} (${workspace.slug})`)
   }
 
@@ -739,6 +750,8 @@ export class WorkspaceService implements OnModuleInit {
       this.prisma
     )
 
+    await this.workspaceCacheService.setRawWorkspace(updatedWorkspace)
+
     return updatedWorkspace.blacklistedIpAddresses
   }
 
@@ -767,7 +780,9 @@ export class WorkspaceService implements OnModuleInit {
       const authorities = await getCollectiveProjectAuthorities(
         userId,
         project,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService,
+        this.collectiveAuthorityCacheService
       )
       if (
         authorities.has(Authority.READ_PROJECT) ||
@@ -923,102 +938,5 @@ export class WorkspaceService implements OnModuleInit {
     }
 
     this.logger.log(`Workspace ${name} does not exist for user ${userId}`)
-  }
-
-  /**
-   * Parses the tier limits for a given workspace and returns an object containing
-   * the maximum allowed and current total of members and projects.
-   *
-   * @param workspace The workspace to parse tier limits for.
-   * @param tierLimitService The service used to obtain tier limits.
-   * @param prisma The Prisma client for database operations.
-   * @returns A promise that resolves to an object containing the workspace with
-   * tier limits, including maximum allowed and total members and projects.
-   */
-
-  private async parseWorkspaceItemLimits(
-    workspaceId: Workspace['id']
-  ): Promise<{
-    maxAllowedProjects: number
-    totalProjects: number
-    maxAllowedMembers: number
-    totalMembers: number
-    maxAllowedIntegrations: number
-    totalIntegrations: number
-    maxAllowedRoles: number
-    totalRoles: number
-  }> {
-    this.logger.log(
-      `Parsing workspace item limits for workspace ${workspaceId}`
-    )
-
-    // Get the tier limit for the members in the workspace
-    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
-    const maxAllowedMembers =
-      await this.tierLimitService.getMemberTierLimit(workspaceId)
-
-    // Get total members in the workspace
-    const totalMembers = await this.prisma.workspaceMember.count({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
-
-    // Get project tier limit
-    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
-    const maxAllowedProjects =
-      await this.tierLimitService.getProjectTierLimit(workspaceId)
-
-    // Get total projects in the workspace
-    const totalProjects = await this.prisma.project.count({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(
-      `Found ${totalProjects} projects in workspace ${workspaceId}`
-    )
-
-    // Get integration tier limit
-    this.logger.log(
-      `Getting integration tier limit for workspace ${workspaceId}`
-    )
-    const maxAllowedIntegrations =
-      await this.tierLimitService.getIntegrationTierLimit(workspaceId)
-
-    // Get total integrations in the workspace
-    const totalIntegrations = await this.prisma.integration.count({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(
-      `Found ${totalIntegrations} integrations in workspace ${workspaceId}`
-    )
-
-    // Get roles tier limit
-    this.logger.log(`Getting role tier limit for workspace ${workspaceId}`)
-    const maxAllowedRoles =
-      await this.tierLimitService.getRoleTierLimit(workspaceId)
-
-    // Get total roles in the workspace
-    const totalRoles = await this.prisma.workspaceRole.count({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(`Found ${totalRoles} roles in workspace ${workspaceId}`)
-
-    return {
-      maxAllowedMembers,
-      totalMembers,
-      maxAllowedProjects,
-      totalProjects,
-      maxAllowedIntegrations,
-      totalIntegrations,
-      maxAllowedRoles,
-      totalRoles
-    }
   }
 }

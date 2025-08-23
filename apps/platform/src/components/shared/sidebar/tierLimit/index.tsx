@@ -18,7 +18,7 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 
-function Tiers() {
+function Tiers({ hideTiers }: { hideTiers: boolean }) {
   const [loading, setLoading] = useState<boolean>(true)
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -162,6 +162,9 @@ function Tiers() {
       }
     ]
   }
+  if (hideTiers) {
+    return null
+  }
 
   return (
     <div>
@@ -198,9 +201,8 @@ export default function TierLimit() {
     return `${selectedWorkspace.subscription.plan[0].toUpperCase()}${selectedWorkspace.subscription.plan.slice(1).toLowerCase()}`
   }
 
-  if (pathname.endsWith('/billing') || pathname.endsWith('/settings')) {
-    return null
-  }
+  const shouldHideTiers =
+    pathname.endsWith('/billing') || pathname.endsWith('/settings')
   return (
     <div className="absolute bottom-12 w-[16rem] rounded-lg border border-white/10 bg-white/5 p-4">
       <div className="mb-5 flex items-center gap-3">
@@ -212,8 +214,7 @@ export default function TierLimit() {
           )}
         </Button>
       </div>
-
-      <Tiers />
+      <Tiers hideTiers={shouldHideTiers} />
     </div>
   )
 }

@@ -49,6 +49,7 @@ import {
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class SecretService {
@@ -66,7 +67,8 @@ export class SecretService {
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    private readonly projectCacheService: ProjectCacheService
   ) {
     this.redis = redisClient.publisher
   }
@@ -216,6 +218,11 @@ export class SecretService {
         workspaceId: project.workspaceId
       },
       this.prisma
+    )
+
+    await this.projectCacheService.addSecretToProjectCache(
+      projectSlug,
+      secretData
     )
 
     delete hydratedSecret.project
@@ -855,6 +862,11 @@ export class SecretService {
       }
     })
     this.logger.log(`Deleted secret ${secretSlug}`)
+
+    await this.projectCacheService.removeSecretFromProjectCache(
+      secret.project.slug,
+      secret.id
+    )
 
     await createEvent(
       {

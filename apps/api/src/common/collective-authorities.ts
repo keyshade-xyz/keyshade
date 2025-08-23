@@ -7,6 +7,8 @@ import {
   User,
   Workspace
 } from '@prisma/client'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 /**
  * Given the userId and workspaceId, this function returns the set of authorities
@@ -15,41 +17,66 @@ import {
  * @param workspaceId The id of the workspace
  * @param userId The id of the user
  * @param prisma The prisma client
+ * @param workspaceCacheService The cache service for workspaces
+ * @param collectiveAuthoritiesCacheService The cache service for collective authorities
+ * @returns The set of authorities that the user has in the workspace
  */
 export const getCollectiveWorkspaceAuthorities = async (
   workspaceId: Workspace['id'],
   userId: User['id'],
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  workspaceCacheService: WorkspaceCacheService,
+  collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
 ): Promise<Set<Authority>> => {
+  const cachedWorkspaceCollectiveAuthorities =
+    await collectiveAuthoritiesCacheService.getCollectiveWorkspaceAuthorities(
+      workspaceId,
+      userId
+    )
+
+  if (cachedWorkspaceCollectiveAuthorities.size > 0) {
+    return cachedWorkspaceCollectiveAuthorities
+  }
+
+  const collectiveWorkspaceAuthorities = new Set<Authority>()
+
   const isUserAdmin = await checkUserHasAdminRoleAssociation(
     userId,
     workspaceId,
-    prisma
+    prisma,
+    workspaceCacheService
   )
-  if (isUserAdmin) return new Set(['WORKSPACE_ADMIN'])
 
-  const authorities = new Set<Authority>()
-  const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
-    {
-      where: {
-        workspaceMember: {
-          userId,
-          workspaceId
+  if (isUserAdmin) {
+    collectiveWorkspaceAuthorities.add('WORKSPACE_ADMIN')
+  } else {
+    const roleAssociations =
+      await prisma.workspaceMemberRoleAssociation.findMany({
+        where: {
+          workspaceMember: {
+            userId,
+            workspaceId
+          }
+        },
+        include: {
+          role: true
         }
-      },
-      include: {
-        role: true
-      }
-    }
+      })
+
+    roleAssociations.forEach((roleAssociation) => {
+      roleAssociation.role.authorities.forEach((authority) => {
+        collectiveWorkspaceAuthorities.add(authority)
+      })
+    })
+  }
+
+  await collectiveAuthoritiesCacheService.setCollectiveWorkspaceAuthorities(
+    workspaceId,
+    userId,
+    collectiveWorkspaceAuthorities
   )
 
-  roleAssociations.forEach((roleAssociation) => {
-    roleAssociation.role.authorities.forEach((authority) => {
-      authorities.add(authority)
-    })
-  })
-
-  return authorities
+  return collectiveWorkspaceAuthorities
 }
 
 /**
@@ -60,17 +87,32 @@ export const getCollectiveWorkspaceAuthorities = async (
  * @param userId The id of the user
  * @param project The project
  * @param prisma The prisma client
+ * @param workspaceCacheService
+ * @param collectiveAuthoritiesCacheService
  * @returns
  */
 export const getCollectiveProjectAuthorities = async (
   userId: User['id'],
   project: Partial<Project>,
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  workspaceCacheService: WorkspaceCacheService,
+  collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
 ): Promise<Set<Authority>> => {
+  const cachedProjectCollectiveAuthorities =
+    await collectiveAuthoritiesCacheService.getCollectiveProjectAuthorities(
+      project.id,
+      userId
+    )
+
+  if (cachedProjectCollectiveAuthorities.size > 0) {
+    return cachedProjectCollectiveAuthorities
+  }
+
   const isUserAdmin = await checkUserHasAdminRoleAssociation(
     userId,
     project.workspaceId,
-    prisma
+    prisma,
+    workspaceCacheService
   )
   if (isUserAdmin) return new Set(['WORKSPACE_ADMIN'])
 
@@ -107,6 +149,13 @@ export const getCollectiveProjectAuthorities = async (
     })
   })
 
+  await collectiveAuthoritiesCacheService.setCollectiveProjectAuthorities(
+    project.id,
+    userId,
+    project.workspaceId,
+    authorities
+  )
+
   return authorities
 }
 
@@ -118,17 +167,20 @@ export const getCollectiveProjectAuthorities = async (
  * @param userId The id of the user
  * @param environment The environment with the project
  * @param prisma The prisma client
+ * @param workspaceCacheService
  * @returns
  */
 export const getCollectiveEnvironmentAuthorities = async (
   userId: User['id'],
   environment: RawEnvironment,
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  workspaceCacheService: WorkspaceCacheService
 ): Promise<Set<Authority>> => {
   const isUserAdmin = await checkUserHasAdminRoleAssociation(
     userId,
     environment.project.workspaceId,
-    prisma
+    prisma,
+    workspaceCacheService
   )
   if (isUserAdmin) return new Set(['WORKSPACE_ADMIN'])
 
@@ -186,8 +238,16 @@ export const getCollectiveEnvironmentAuthorities = async (
 const checkUserHasAdminRoleAssociation = async (
   userId: User['id'],
   workspaceId: Workspace['id'],
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  workspaceCacheService: WorkspaceCacheService
 ): Promise<boolean> => {
+  const cachedWorkspaceAdminUserId =
+    await workspaceCacheService.getWorkspaceAdmin(workspaceId)
+
+  if (cachedWorkspaceAdminUserId === userId) {
+    return true
+  }
+
   const logger = new Logger('checkUserHasAdminRoleAssociation')
   logger.log(
     `Checking if user ${userId} is associated to the admin role of workspace ${workspaceId}`
@@ -212,10 +272,18 @@ const checkUserHasAdminRoleAssociation = async (
     }
   })
 
-  // Check if the user has an associations to this role
+  if (!adminRole.workspaceMembers) {
+    logger.log(
+      `Admin role for workspace ${workspaceId} not found or no associations found`
+    )
+    return false
+  }
+
+  // Check if the user has associations to this role
   for (const roleAssociation of adminRole.workspaceMembers) {
     if (roleAssociation.workspaceMember.userId === userId) {
       logger.log(`User ${userId} is associated to the admin role`)
+      await workspaceCacheService.setWorkspaceAdmin(workspaceId, userId)
       return true
     }
   }
