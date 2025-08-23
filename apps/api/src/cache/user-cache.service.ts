@@ -57,7 +57,21 @@ export class UserCacheService implements OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this.redisClient.publisher.quit()
+    const pub = this.redisClient.publisher
+
+    if (!pub) return
+
+    // node-redis v4 exposes `isOpen`; only quit when connected
+    if (typeof pub.isOpen === 'boolean' && !pub.isOpen) return
+
+    try {
+      await pub.quit()
+    } catch (err: any) {
+      // Ignore "The client is closed" during shutdown
+      if (!err || !/The client is closed/i.test(String(err.message))) {
+        throw err
+      }
+    }
   }
 
   private getUserKey(userId: string): string {
