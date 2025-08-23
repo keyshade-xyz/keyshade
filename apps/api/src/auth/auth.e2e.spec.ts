@@ -9,6 +9,7 @@ import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { AppModule } from '@/app/app.module'
 import { AuthService } from './service/auth.service'
+import { UserModule } from '@/user/user.module'
 
 describe('Auth Controller Tests', () => {
   let app: NestFastifyApplication
@@ -17,7 +18,7 @@ describe('Auth Controller Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, AuthModule]
+      imports: [AppModule, AuthModule, UserModule]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)

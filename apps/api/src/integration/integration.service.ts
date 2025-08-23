@@ -487,126 +487,39 @@ export class IntegrationService {
         slug: workspaceSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
-    const workspaceId = workspace.id
 
-    // We need to return only those integrations that have the following properties:
-    // - belong to the workspace
-    // - does not belong to any project
-    // - does not belong to any project where the user does not have READ authority
-
-    // Get the projects the user has READ authority over
-    const membership = await this.prisma.workspaceMember.findUnique({
-      where: {
-        workspaceId_userId: {
-          userId: user.id,
-          workspaceId
-        }
-      }
-    })
-    const workspaceRoles = await this.prisma.workspaceRole.findMany({
-      where: {
-        workspaceId,
-        workspaceMembers: {
-          some: {
-            workspaceMemberId: membership.id
-          }
-        }
-      },
-      include: {
-        projects: {
-          include: {
-            project: true,
-            environments: true
-          }
-        }
-      }
-    })
-    const projectIds: Project['id'][] = []
-    const environmentIds: Environment['id'][] = []
-
-    for (const { projects } of workspaceRoles) {
-      projectIds.push(...projects.map((p) => p.projectId))
-      environmentIds.push(
-        ...projects.flatMap((p) => p.environments.map((e) => e.id))
-      )
-    }
-
-    // Get all integrations in the workspace
-    const integrations = await this.prisma.integration.findMany({
-      where: {
-        name: {
-          contains: search
-        },
-        workspaceId,
-        OR: [
-          {
-            projectId: null
-          },
-          {
-            projectId: {
-              in: projectIds
-            }
-          },
-          {
-            environments: {
-              every: {
-                id: {
-                  in: environmentIds
-                }
-              }
-            }
-          }
-        ]
-      },
-      skip: page * limit,
-      take: limitMaxItemsPerPage(limit),
-      orderBy: {
-        [sort]: order
-      },
-      include: InclusionQuery.Integration
-    })
-
-    // Calculate metadata for pagination
-    const totalCount = await this.prisma.integration.count({
-      where: {
-        name: {
-          contains: search
-        },
-        workspaceId,
-        OR: [
-          {
-            projectId: null
-          },
-          {
-            projectId: {
-              in: projectIds
-            }
-          }
-        ]
-      }
-    })
-    const metadata = paginate(totalCount, `/integration/all/${workspaceSlug}`, {
-      page,
-      limit: limitMaxItemsPerPage(limit),
-      sort,
-      order,
-      search
-    })
+    const rawWorkspace = await this.workspaceCacheService.getRawWorkspace(
+      workspace.slug
+    )
 
     const hydratedIntegrations: HydratedIntegration[] = []
 
-    // Decrypt the metadata
-    for (const integration of integrations) {
-      // @ts-expect-error -- We expect the metadata to be in JSON format
-      integration.metadata = decryptMetadata(integration.metadata)
-      delete integration.workspace
-      hydratedIntegrations.push(
-        await this.hydrationService.hydrateIntegration({
-          user,
-          integration
-        })
-      )
+    for (const integration of rawWorkspace.integrations) {
+      try {
+        const hydratedIntegration =
+          await this.authorizationService.authorizeUserAccessToIntegration({
+            user,
+            slug: integration.slug,
+            authorities: [Authority.READ_INTEGRATION]
+          })
+        // @ts-expect-error -- We expect the metadata to be in JSON format
+        hydratedIntegration.metadata = decryptMetadata(integration.metadata)
+        delete hydratedIntegration.workspace
+        hydratedIntegrations.push(hydratedIntegration)
+      } catch (_ignored) {}
     }
+
+    const metadata = paginate(
+      hydratedIntegrations.length,
+      `/integration/all/${workspaceSlug}`,
+      {
+        page,
+        limit: limitMaxItemsPerPage(limit),
+        sort,
+        order,
+        search
+      }
+    )
 
     return { items: hydratedIntegrations, metadata }
   }
