@@ -1,3 +1,9 @@
+## [2.32.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.20...v2.32.0-stage.21) (2025-08-23)
+
+### 🚀 Features
+
+* **api:** obfuscate [secure] share records instead of deleting them ([9f79b1c](https://github.com/keyshade-xyz/keyshade/commit/9f79b1cd21b660abcd7e2cf046a3b311a39ccae6))
+
 ## [2.32.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.19...v2.32.0-stage.20) (2025-08-23)
 
 ### 🚀 Features
