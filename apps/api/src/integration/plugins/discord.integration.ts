@@ -72,43 +72,44 @@ export class DiscordIntegration extends BaseIntegration {
     })
 
     try {
+      const body = {
+        content: '🥁 Keyshade is now configured with this channel',
+        embeds: [
+          {
+            title: '🎉 Keyshade Integration Successful!',
+            description:
+              'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.',
+            color: 0x00ff00,
+            author: {
+              name: 'Keyshade',
+              url: 'https://keyshade.xyz'
+            },
+            fields: [
+              {
+                name: 'Status',
+                value: '✅ Connected',
+                inline: true
+              },
+              {
+                name: 'Webhook',
+                value: '✅ Valid',
+                inline: true
+              }
+            ],
+            footer: {
+              text: 'Keyshade Integration'
+            },
+            timestamp: new Date().toISOString()
+          }
+        ]
+      }
       const { response, duration } = await makeTimedRequest(() =>
         fetch(integration.metadata.webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            content: '🥁 Keyshade is now configured with this channel',
-            embeds: [
-              {
-                title: '🎉 Keyshade Integration Successful!',
-                description:
-                  'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.',
-                color: 0x00ff00,
-                author: {
-                  name: 'Keyshade',
-                  url: 'https://keyshade.xyz'
-                },
-                fields: [
-                  {
-                    name: 'Status',
-                    value: '✅ Connected',
-                    inline: true
-                  },
-                  {
-                    name: 'Webhook',
-                    value: '✅ Valid',
-                    inline: true
-                  }
-                ],
-                footer: {
-                  text: 'Keyshade Integration'
-                },
-                timestamp: new Date().toISOString()
-              }
-            ]
-          })
+          body: JSON.stringify(body)
         })
       )
 
@@ -145,7 +146,7 @@ export class DiscordIntegration extends BaseIntegration {
         integrationRunId,
         IntegrationRunStatus.FAILED,
         0,
-        JSON.stringify(error)
+        error instanceof Error ? error.message : String(error)
       )
 
       throw new BadRequestException(
