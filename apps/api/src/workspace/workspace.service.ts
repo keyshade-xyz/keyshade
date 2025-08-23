@@ -33,8 +33,8 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
 import { HydratedWorkspace } from './workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
-import { TierLimitService } from '@/common/tier-limit.service'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 @Injectable()
 export class WorkspaceService implements OnModuleInit {
@@ -43,10 +43,10 @@ export class WorkspaceService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
-    private readonly workspaceCacheService: WorkspaceCacheService
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthorityCacheService: CollectiveAuthoritiesCacheService
   ) {}
 
   /**
@@ -257,6 +257,9 @@ export class WorkspaceService implements OnModuleInit {
     })
 
     await this.workspaceCacheService.removeWorkspaceCache(workspace)
+    await this.collectiveAuthorityCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspace.id
+    )
     this.logger.log(`Deleted workspace ${workspace.name} (${workspace.slug})`)
   }
 
@@ -778,7 +781,8 @@ export class WorkspaceService implements OnModuleInit {
         userId,
         project,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthorityCacheService
       )
       if (
         authorities.has(Authority.READ_PROJECT) ||

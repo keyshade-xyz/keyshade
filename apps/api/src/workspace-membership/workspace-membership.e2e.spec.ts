@@ -150,42 +150,15 @@ describe('Workspace Membership Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user3 = {
       ...createUser3,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser3.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     workspace1 = await workspaceService.createWorkspace(user1, {

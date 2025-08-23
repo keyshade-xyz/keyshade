@@ -166,9 +166,24 @@ export const InclusionQuery = {
         profilePictureUrl: true
       }
     },
-    secrets: true,
-    variables: true,
-    environments: true
+    secrets: {
+      select: {
+        id: true,
+        slug: true
+      }
+    },
+    variables: {
+      select: {
+        id: true,
+        slug: true
+      }
+    },
+    environments: {
+      select: {
+        id: true,
+        slug: true
+      }
+    }
   },
   Workspace: {
     lastUpdatedBy: {

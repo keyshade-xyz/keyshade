@@ -33,6 +33,7 @@ import { HydratedWorkspaceMember } from './workspace-membership.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -45,7 +46,8 @@ export class WorkspaceMembershipService {
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
-    private readonly workspaceCacheService: WorkspaceCacheService
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
   ) {}
 
   /**
@@ -350,13 +352,6 @@ export class WorkspaceMembershipService {
 
       userIds.push(userId)
       await this.deleteMembership(workspace, userId)
-    }
-
-    if (user.emailPreference && !user.emailPreference.activity) {
-      this.log.log(
-        `User ${user.id} has opted out of receiving activity notifications`
-      )
-      return
     }
 
     // Send email to the removed users
@@ -947,13 +942,6 @@ export class WorkspaceMembershipService {
       )
     }
 
-    if (user.emailPreference && !user.emailPreference.critical) {
-      this.log.log(
-        `User ${member.id} has opted out of receiving critical notifications`
-      )
-      return
-    }
-
     // Resend the invitation
     this.log.log(
       `Resending invitation to user ${member.id} for workspace ${workspace.id}`
@@ -1225,6 +1213,9 @@ export class WorkspaceMembershipService {
     await this.workspaceCacheService.removeMemberFromRawWorkspace(
       workspace,
       membership.id
+    )
+    await this.collectiveAuthoritiesCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspace.id
     )
   }
 
