@@ -1,3 +1,9 @@
+## [2.32.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.21...v2.32.0-stage.22) (2025-08-23)
+
+### 🐛 Bug Fixes
+
+* **api:** fetch all integration endpoint wasn't returning all integrations ([d93a020](https://github.com/keyshade-xyz/keyshade/commit/d93a020f930575c6852f39c99551f7679d4ac996))
+
 ## [2.32.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.20...v2.32.0-stage.21) (2025-08-23)
 
 ### 🚀 Features
