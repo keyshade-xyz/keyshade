@@ -27,6 +27,9 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedWorkspaceRole, RawWorkspaceRole } from './workspace-role.types'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { TierLimitService } from '@/common/tier-limit.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -36,7 +39,10 @@ export class WorkspaceRoleService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -66,6 +72,20 @@ export class WorkspaceRoleService {
         authorities: [Authority.CREATE_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
+
+    await this.tierLimitService.checkRoleLimitReached(workspace)
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create workspace role for disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the premium resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     await this.checkWorkspaceRoleExists(workspace.id, dto.name)
 
@@ -139,6 +159,11 @@ export class WorkspaceRoleService {
         workspaceId
       },
       this.prisma
+    )
+
+    await this.workspaceCacheService.addRoleToRawWorkspace(
+      workspace,
+      workspaceRole
     )
 
     this.logger.log(
@@ -246,6 +271,10 @@ export class WorkspaceRoleService {
 
     this.logger.log(`${user.email} updated workspace role ${workspaceRoleSlug}`)
 
+    await this.collectiveAuthoritiesCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspaceRole.workspaceId
+    )
+
     return await this.hydrationService.hydrateWorkspaceRole({
       workspaceRole: updatedWorkspaceRole,
       user
@@ -306,6 +335,20 @@ export class WorkspaceRoleService {
       this.prisma
     )
 
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: workspaceRole.workspaceId
+      }
+    })
+
+    await this.workspaceCacheService.removeRoleFromRawWorkspace(
+      workspace,
+      workspaceRole.id
+    )
+    await this.collectiveAuthoritiesCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspaceRole.workspaceId
+    )
+
     this.logger.log(
       `User ${user.id} deleted workspace role ${workspaceRoleSlug}`
     )
@@ -314,7 +357,7 @@ export class WorkspaceRoleService {
   /**
    * Checks if a workspace role with the given name exists
    * @throws {UnauthorizedException} if the user does not have the required authority
-   * @param workspace the workspace
+   * @param workspaceId
    * @param name the name of the workspace role to check
    * @returns true if a workspace role with the given name exists, false otherwise
    */
@@ -430,6 +473,7 @@ export class WorkspaceRoleService {
    * Retrieves a map of project slugs to their corresponding IDs from the database.
    *
    * @param slugs - An array of project slugs.
+   * @param user
    * @returns A Map where each key is a project slug and the value is the project ID.
    */
   private async getProjectSlugToIdMap(

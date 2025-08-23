@@ -34,6 +34,8 @@ import { BaseIntegration } from './plugins/base.integration'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydratedIntegration } from './integration.types'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class IntegrationService {
@@ -43,7 +45,9 @@ export class IntegrationService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -131,6 +135,20 @@ export class IntegrationService {
         authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE]
       })
     const workspaceId = workspace.id
+
+    await this.tierLimitService.checkIntegrationLimitReached(workspace)
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create integration ${dto.name} in disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // Check if integration with the same name already exists
     await this.existsByNameAndWorkspaceId(dto.name, workspace.id)
@@ -245,7 +263,12 @@ export class IntegrationService {
       hydratedIntegration,
       this.prisma
     )
-    integrationObject.init(privateKey, event.id)
+    await integrationObject.init(privateKey, event.id)
+
+    await this.workspaceCacheService.addIntegrationToRawWorkspace(
+      workspace,
+      integration
+    )
 
     // integration.metadata = decryptMetadata(integration.metadata)
     delete hydratedIntegration.workspace
@@ -620,6 +643,16 @@ export class IntegrationService {
       `Integration ${integrationId} deleted by user ${user.id} in workspace ${integration.workspaceId}`
     )
 
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: integration.workspaceId
+      }
+    })
+    await this.workspaceCacheService.removeIntegrationFromRawWorkspace(
+      workspace,
+      integration.id
+    )
+
     await createEvent(
       {
         triggeredBy: user,
@@ -692,92 +725,6 @@ export class IntegrationService {
   }
 
   /**
-   * Checks if an integration with the same name already exists in the workspace.
-   * Throws a ConflictException if the integration already exists.
-   *
-   * @param name The name of the integration to check
-   * @param workspace The workspace to check in
-   */
-  private async existsByNameAndWorkspaceId(
-    name: Integration['name'],
-    workspaceId: Workspace['id']
-  ) {
-    this.logger.log(
-      `Checking if integration with name ${name} exists in workspace ${workspaceId}`
-    )
-
-    if (
-      (await this.prisma.integration.findUnique({
-        where: {
-          workspaceId_name: {
-            workspaceId,
-            name
-          }
-        }
-      })) !== null
-    ) {
-      const errorMessage = `Integration with name ${name} already exists in workspace ${workspaceId}`
-      this.logger.error(errorMessage)
-      throw new ConflictException(
-        constructErrorBody('Integration already exists', errorMessage)
-      )
-    } else {
-      this.logger.log(
-        `Integration with name ${name} does not exist in workspace ${workspaceId}`
-      )
-    }
-  }
-
-  /**
-   * Validates the environment support for an integration based on its type and environment slugs.
-   * Throws a BadRequestException if the required environment conditions are not met.
-   *
-   * @param integrationObject The integration object to validate.
-   * @param type The type of the integration.
-   * @param environmentSlugs Optional array of environment slugs associated with the integration.
-   */
-
-  private validateEnvironmentSupport(
-    integrationObject: BaseIntegration,
-    type: IntegrationType,
-    environmentSlugs?: Environment['slug'][]
-  ) {
-    this.logger.log(
-      `Environment support is ${integrationObject.environmentSupport()} for integration type ${type}. Supplied enviornment slugs: ${environmentSlugs}`
-    )
-
-    // Validate environment requirement
-    switch (integrationObject.environmentSupport()) {
-      case 'atleast-one':
-        if (!environmentSlugs || environmentSlugs.length < 1) {
-          this.logger.error(
-            `Can not create integration ${type} without environment.`
-          )
-          throw new BadRequestException(
-            constructErrorBody(
-              'Can not create integration without environment',
-              'Environment is required for this integration type'
-            )
-          )
-        }
-        break
-      case 'single':
-        if (!environmentSlugs || environmentSlugs.length !== 1) {
-          this.logger.error(
-            `Can not create integration ${type} with multiple environments.`
-          )
-          throw new BadRequestException(
-            constructErrorBody(
-              'Can not create integration with multiple environments',
-              'Single environment is required for this integration type'
-            )
-          )
-        }
-        break
-    }
-  }
-
-  /**
    * Tests a new integration in the given workspace. The user needs to have
    * `CREATE_INTEGRATION` and `READ_WORKSPACE` authority in the workspace.
    * Validate only metadata and event subscriptions for an integration.
@@ -841,6 +788,96 @@ export class IntegrationService {
     )
 
     return { success: true }
+  }
+
+  /**
+   * Checks if an integration with the same name already exists in the workspace.
+   * Throws a ConflictException if the integration already exists.
+   *
+   * @param name The name of the integration to check
+   * @param workspace The workspace to check in
+   */
+  private async existsByNameAndWorkspaceId(
+    name: Integration['name'],
+    workspaceId: Workspace['id']
+  ) {
+    this.logger.log(
+      `Checking if integration with name ${name} exists in workspace ${workspaceId}`
+    )
+
+    if (
+      (await this.prisma.integration.findUnique({
+        where: {
+          workspaceId_name: {
+            workspaceId,
+            name
+          }
+        }
+      })) !== null
+    ) {
+      this.logger.error(
+        `Integration with name ${name} already exists in workspace ${workspaceId}`
+      )
+      throw new ConflictException(
+        constructErrorBody(
+          'Integration already exists',
+          'An integration with this name already exists in this workspace. Please choose a different name.'
+        )
+      )
+    } else {
+      this.logger.log(
+        `Integration with name ${name} does not exist in workspace ${workspaceId}`
+      )
+    }
+  }
+
+  /**
+   * Validates the environment support for an integration based on its type and environment slugs.
+   * Throws a BadRequestException if the required environment conditions are not met.
+   *
+   * @param integrationObject The integration object to validate.
+   * @param type The type of the integration.
+   * @param environmentSlugs Optional array of environment slugs associated with the integration.
+   */
+
+  private validateEnvironmentSupport(
+    integrationObject: BaseIntegration,
+    type: IntegrationType,
+    environmentSlugs?: Environment['slug'][]
+  ) {
+    this.logger.log(
+      `Environment support is ${integrationObject.environmentSupport()} for integration type ${type}. Supplied enviornment slugs: ${environmentSlugs}`
+    )
+
+    // Validate environment requirement
+    switch (integrationObject.environmentSupport()) {
+      case 'atleast-one':
+        if (!environmentSlugs || environmentSlugs.length < 1) {
+          this.logger.error(
+            `Can not create integration ${type} without environment.`
+          )
+          throw new BadRequestException(
+            constructErrorBody(
+              'Can not create integration without environment',
+              'Environment is required for this integration type'
+            )
+          )
+        }
+        break
+      case 'single':
+        if (!environmentSlugs || environmentSlugs.length !== 1) {
+          this.logger.error(
+            `Can not create integration ${type} with multiple environments.`
+          )
+          throw new BadRequestException(
+            constructErrorBody(
+              'Can not create integration with multiple environments',
+              'Single environment is required for this integration type'
+            )
+          )
+        }
+        break
+    }
   }
 
   /**

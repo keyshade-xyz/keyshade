@@ -11,18 +11,23 @@ import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import { constructErrorBody, generateReferralCode } from './util'
 import SlugGenerator from './slug-generator.service'
 import { HydrationService } from './hydration.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
  * @param dto - The user data to create a user with.
  * @param prisma - The prisma service to use for database operations.
+ * @param slugGenerator
+ * @param hydrationService
+ * @param workspaceCacheService
  * @returns The created user and, if the user is not an admin, a default workspace.
  */
 export async function createUser(
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider; id?: User['id'] },
   prisma: PrismaService,
   slugGenerator: SlugGenerator,
-  hydrationService: HydrationService
+  hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
@@ -71,6 +76,7 @@ export async function createUser(
       prisma,
       slugGenerator,
       hydrationService,
+      workspaceCacheService,
       true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
@@ -84,7 +90,7 @@ export async function createUser(
     throw new InternalServerErrorException(
       constructErrorBody(
         'Error creating user',
-        'An error occurred while creating the user.'
+        'An error occurred while creating the user'
       )
     )
   }
@@ -94,6 +100,9 @@ export async function createUser(
  * Finds a user by their email or ID.
  * @param input The email or ID of the user to find.
  * @param prisma The Prisma client to use for the database operation.
+ * @param slugGenerator
+ * @param hydrationService
+ * @param workspaceCacheService
  * @throws {NotFoundException} If the user is not found.
  * @returns The user with their default workspace.
  */
@@ -101,7 +110,8 @@ export async function getUserByEmailOrId(
   input: User['email'] | User['id'],
   prisma: PrismaService,
   slugGenerator: SlugGenerator,
-  hydrationService: HydrationService
+  hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('getUserByEmailOrId')
 
@@ -176,6 +186,7 @@ export async function getUserByEmailOrId(
         prisma,
         slugGenerator,
         hydrationService,
+        workspaceCacheService,
         true
       )
       logger.log(

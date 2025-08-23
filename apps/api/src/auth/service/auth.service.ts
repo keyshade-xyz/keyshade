@@ -12,7 +12,7 @@ import { UserAuthenticatedResponse } from '../auth.types'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthProvider } from '@prisma/client'
-import { CacheService } from '@/cache/cache.service'
+import { UserCacheService } from '@/cache/user-cache.service'
 import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
@@ -22,6 +22,7 @@ import { HydrationService } from '@/common/hydration.service'
 import { isIP } from 'class-validator'
 import { UAParser } from 'ua-parser-js'
 import { toSHA256 } from '@/common/cryptography'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 @Injectable()
 export class AuthService {
@@ -31,19 +32,12 @@ export class AuthService {
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-    private readonly cache: CacheService,
+    private readonly cache: UserCacheService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService
   ) {
     this.logger = new Logger(AuthService.name)
-  }
-
-  // Static helper to normalize IPs
-  private static normalizeIp(raw: string): string {
-    if (!raw) return 'Unknown'
-    let ip = raw.split(',')[0].trim()
-    if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '')
-    return ip
   }
 
   /**
@@ -56,6 +50,8 @@ export class AuthService {
     ip: string
     device: string
     location: string
+    date: string
+    time: string
   }> {
     const rawIp = (
       (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
@@ -106,8 +102,32 @@ export class AuthService {
       }
       location = 'Unknown'
     }
+    const now = new Date()
+    const date = now
+      .toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
+      .replace(/,/g, '')
 
-    return { ip: rawIp, device, location }
+    const time = now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    })
+
+    return { ip: rawIp, device, location, date, time }
+  }
+
+  // Static helper to normalize IPs
+  private static normalizeIp(raw: string): string {
+    if (!raw) return 'Unknown'
+    let ip = raw.split(',')[0].trim()
+    if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '')
+    return ip
   }
 
   /**
@@ -157,7 +177,8 @@ export class AuthService {
       email,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
     const otp = await generateOtp(email, user.id, this.prisma)
     await this.mailService.sendOtp(email, otp.code)
@@ -189,7 +210,8 @@ export class AuthService {
       email,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     this.logger.log(`Checking if OTP is valid for ${email}`)
@@ -229,9 +251,16 @@ export class AuthService {
     })
     this.logger.log(`OTP deleted for ${email}`)
 
-    const { ip, device, location } = await AuthService.parseLoginRequest(req)
+    const { ip, device, location, date, time } =
+      await AuthService.parseLoginRequest(req)
 
-    await this.sendLoginNotification(email, { ip, device, location })
+    await this.sendLoginNotification(email, {
+      ip,
+      device,
+      location,
+      date,
+      time
+    })
 
     this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
@@ -258,7 +287,13 @@ export class AuthService {
     name: string,
     profilePictureUrl: string,
     oauthProvider: AuthProvider,
-    metadata?: { ip: string; device: string; location?: string }
+    metadata?: {
+      ip: string
+      device: string
+      location?: string
+      date: string
+      time: string
+    }
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(
       `Handling OAuth login. Email: ${email}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}, OAuthProvider: ${oauthProvider}`
@@ -310,101 +345,17 @@ export class AuthService {
     }
   }
 
-  /**
-   * Creates a user if it doesn't exist yet. If the user has signed up with a
-   * different authentication provider, it throws an UnauthorizedException.
-   * @param email The email address of the user
-   * @param authProvider The AuthProvider used
-   * @param name The name of the user
-   * @param profilePictureUrl The profile picture URL of the user
-   * @returns The user
-   * @throws {UnauthorizedException} If the user has signed up with a different
-   * authentication provider
-   */
-  private async createUserIfNotExists(
-    email: string,
-    authProvider: AuthProvider,
-    name?: string,
-    profilePictureUrl?: string
-  ) {
-    this.logger.log(
-      `Creating user if not exists. Email: ${email}, AuthProvider: ${authProvider}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}`
-    )
-
-    let user: UserWithWorkspace | null
-
-    this.logger.log(`Checking if user exists with email: ${email}`)
-    try {
-      user = await getUserByEmailOrId(
-        email,
-        this.prisma,
-        this.slugGenerator,
-        this.hydrationService
-      )
-    } catch (ignored) {}
-
-    // We need to create the user if it doesn't exist yet
-    if (!user) {
-      user = await createUser(
-        {
-          email,
-          name,
-          profilePictureUrl,
-          authProvider
-        },
-        this.prisma,
-        this.slugGenerator,
-        this.hydrationService
-      )
-    }
-
-    // If the user has used OAuth to log in, we need to check if the OAuth provider
-    // used in the current login is different from the one stored in the database
-    if (user.authProvider !== authProvider) {
-      let formattedAuthProvider = ''
-
-      switch (user.authProvider) {
-        case AuthProvider.GOOGLE:
-          formattedAuthProvider = 'Google'
-          break
-        case AuthProvider.GITHUB:
-          formattedAuthProvider = 'GitHub'
-          break
-        case AuthProvider.EMAIL_OTP:
-          formattedAuthProvider = 'Email and OTP'
-          break
-        case AuthProvider.GITLAB:
-          formattedAuthProvider = 'GitLab'
-          break
-      }
-
-      this.logger.error(
-        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Error signing in',
-          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
-        )
-      )
-    }
-
-    return user
-  }
-
-  private async generateToken(id: string) {
-    return await this.jwt.signAsync({ id })
-  }
-
   async sendLoginNotification(
     email: string,
     data: {
       ip: string
       device: string
+      date: string
+      time: string
       location?: string
     }
   ) {
-    const { ip, device, location } = data
+    const { ip, device, location, date, time } = data
     try {
       const user = await this.prisma.user.findUnique({
         where: { email },
@@ -423,6 +374,7 @@ export class AuthService {
       const normalizedIp = AuthService.normalizeIp(ip)
       const ipHash = toSHA256(normalizedIp)
       const deviceFingerprint = device || 'Unknown'
+      const deviceLocation = location || 'Unknown'
 
       const existingSession = await this.prisma.loginSession.findUnique({
         where: {
@@ -440,7 +392,9 @@ export class AuthService {
         await this.mailService.sendLoginNotification(user.email, {
           ip: normalizedIp,
           device: deviceFingerprint,
-          location
+          location: deviceLocation,
+          date,
+          time
         })
         this.logger.log(`Login notification sent to ${email} (new env).`)
       } else {
@@ -487,5 +441,93 @@ export class AuthService {
       domain: process.env.DOMAIN ?? 'localhost'
     })
     this.logger.log('User logged out and token cookie cleared.')
+  }
+
+  /**
+   * Creates a user if it doesn't exist yet. If the user has signed up with a
+   * different authentication provider, it throws an UnauthorizedException.
+   * @param email The email address of the user
+   * @param authProvider The AuthProvider used
+   * @param name The name of the user
+   * @param profilePictureUrl The profile picture URL of the user
+   * @returns The user
+   * @throws {UnauthorizedException} If the user has signed up with a different
+   * authentication provider
+   */
+  private async createUserIfNotExists(
+    email: string,
+    authProvider: AuthProvider,
+    name?: string,
+    profilePictureUrl?: string
+  ) {
+    this.logger.log(
+      `Creating user if not exists. Email: ${email}, AuthProvider: ${authProvider}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}`
+    )
+
+    let user: UserWithWorkspace | null
+
+    this.logger.log(`Checking if user exists with email: ${email}`)
+    try {
+      user = await getUserByEmailOrId(
+        email,
+        this.prisma,
+        this.slugGenerator,
+        this.hydrationService,
+        this.workspaceCacheService
+      )
+    } catch (ignored) {}
+
+    // We need to create the user if it doesn't exist yet
+    if (!user) {
+      user = await createUser(
+        {
+          email,
+          name,
+          profilePictureUrl,
+          authProvider
+        },
+        this.prisma,
+        this.slugGenerator,
+        this.hydrationService,
+        this.workspaceCacheService
+      )
+    }
+
+    // If the user has used OAuth to log in, we need to check if the OAuth provider
+    // used in the current login is different from the one stored in the database
+    if (user.authProvider !== authProvider) {
+      let formattedAuthProvider = ''
+
+      switch (user.authProvider) {
+        case AuthProvider.GOOGLE:
+          formattedAuthProvider = 'Google'
+          break
+        case AuthProvider.GITHUB:
+          formattedAuthProvider = 'GitHub'
+          break
+        case AuthProvider.EMAIL_OTP:
+          formattedAuthProvider = 'Email and OTP'
+          break
+        case AuthProvider.GITLAB:
+          formattedAuthProvider = 'GitLab'
+          break
+      }
+
+      this.logger.error(
+        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Error signing in',
+          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
+        )
+      )
+    }
+
+    return user
+  }
+
+  private async generateToken(id: string) {
+    return await this.jwt.signAsync({ id })
   }
 }

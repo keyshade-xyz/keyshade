@@ -241,3 +241,22 @@
 
 ### Minor Changes
 - Fixed error handling in run command and socket notifier that displayed [object Object]; errors are now properly formatted for clearer CLI output
+
+# 3.2.2
+
+### Minor Changes
+
+- Added `-e/--environment` option to `keyshade run` command to override the environment configuration at runtime
+- Fixed error handling in run command and socket notifier that displayed [object Object]; errors are now properly formatted for clearer CLI output
+
+# 3.2.3-stage.1
+
+### Minor Changes
+
+- Added request and response validation to `keyshade environment` subcommands
+
+# 3.2.3-stage.2
+
+### Minor Changes
+
+- Removed email preference parsing in `keyshade init` command

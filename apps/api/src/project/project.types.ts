@@ -41,9 +41,9 @@ export interface RawProject
     | 'secrets'
     | 'variables'
   > {
-  secrets: Secret[]
-  variables: Variable[]
-  environments: Environment[]
+  secrets: Partial<Secret>[]
+  variables: Partial<Variable>[]
+  environments: Partial<Environment>[]
 }
 
 export { ExportFormat, ExportData } from './export/export.types'
