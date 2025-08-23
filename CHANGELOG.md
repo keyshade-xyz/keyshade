@@ -1,3 +1,9 @@
+## [2.32.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.19...v2.32.0-stage.20) (2025-08-23)
+
+### 🚀 Features
+
+* **api:** add project caching ([#1121](https://github.com/keyshade-xyz/keyshade/issues/1121)) ([49a1484](https://github.com/keyshade-xyz/keyshade/commit/49a1484b1deac74c467d34b36a595b9108bc4cdb))
+
 ## [2.32.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.18...v2.32.0-stage.19) (2025-08-22)
 
 ### 🚀 Features
