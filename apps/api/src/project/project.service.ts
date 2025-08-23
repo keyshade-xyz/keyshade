@@ -47,6 +47,7 @@ import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class ProjectService {
@@ -61,7 +62,8 @@ export class ProjectService {
     private readonly secretService: SecretService,
     private readonly variableService: VariableService,
     private readonly exportService: ExportService,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly projectCacheService: ProjectCacheService
   ) {}
 
   /**
@@ -208,10 +210,17 @@ export class ProjectService {
       )
     }
 
-    const [newProject] = await this.prisma.$transaction([
+    const result = await this.prisma.$transaction([
       createNewProject,
       ...createEnvironmentOps
     ])
+
+    const newProject = result[0]
+    const newEnvironments: Environment[] = result.slice(1)
+    newProject.environments = newEnvironments.map((environment) => ({
+      id: environment.id,
+      slug: environment.slug
+    }))
 
     await createEvent(
       {
@@ -232,6 +241,8 @@ export class ProjectService {
     )
 
     this.logger.debug(`Created project ${newProject.name} (${newProject.slug})`)
+
+    await this.projectCacheService.setRawProject(newProject)
 
     // It is important that we log before the private key is set
     // in order to not log the private key
@@ -453,6 +464,8 @@ export class ProjectService {
 
     this.logger.debug(`Updated project ${updatedProject.slug}`)
 
+    await this.projectCacheService.setRawProject(updatedProject)
+
     updatedProject.privateKey = privateKey
     updatedProject.publicKey = publicKey
 
@@ -641,6 +654,7 @@ export class ProjectService {
       workspace,
       newProject
     )
+    await this.projectCacheService.setRawProject(newProject)
 
     return await this.hydrationService.hydrateProject({
       user,
@@ -681,15 +695,19 @@ export class ProjectService {
     this.isProjectForked(project)
 
     this.logger.log(`Unlinking project ${projectSlug} from its parent`)
-    await this.prisma.project.update({
+    const updatedProject = await this.prisma.project.update({
       where: {
         id: projectId
       },
       data: {
         isForked: false,
         forkedFromId: null
-      }
+      },
+      include: InclusionQuery.Project
     })
+
+    await this.projectCacheService.setRawProject(updatedProject)
+
     this.logger.debug(`Unlinked project ${projectSlug} from its parent`)
   }
 
@@ -844,6 +862,7 @@ export class ProjectService {
       workspace,
       project.id
     )
+    await this.projectCacheService.removeProjectCache(project.slug)
     this.logger.debug(`Deleted project ${project.slug}`)
   }
 
@@ -967,7 +986,7 @@ export class ProjectService {
       })
 
     project.privateKey =
-      project.privateKey != null ? sDecrypt(project.privateKey) : null
+      project.privateKey !== null ? sDecrypt(project.privateKey) : null
 
     return project
   }
@@ -1483,7 +1502,7 @@ export class ProjectService {
   /**
    * Updates the key pair of a project.
    *
-   * @param project The project to update
+   * @param projectId
    * @param oldPrivateKey The old private key of the project
    * @param storePrivateKey Whether to store the new private key in the database
    *

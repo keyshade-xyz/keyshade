@@ -8,6 +8,7 @@ import {
   Workspace
 } from '@prisma/client'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 /**
  * Given the userId and workspaceId, this function returns the set of authorities
@@ -16,17 +17,19 @@ import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
  * @param workspaceId The id of the workspace
  * @param userId The id of the user
  * @param prisma The prisma client
- * @param workspaceCacheService The workspace cache service
+ * @param workspaceCacheService The cache service for workspaces
+ * @param collectiveAuthoritiesCacheService The cache service for collective authorities
  * @returns The set of authorities that the user has in the workspace
  */
 export const getCollectiveWorkspaceAuthorities = async (
   workspaceId: Workspace['id'],
   userId: User['id'],
   prisma: PrismaClient,
-  workspaceCacheService: WorkspaceCacheService
+  workspaceCacheService: WorkspaceCacheService,
+  collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
 ): Promise<Set<Authority>> => {
   const cachedWorkspaceCollectiveAuthorities =
-    await workspaceCacheService.getCollectiveWorkspaceAuthorities(
+    await collectiveAuthoritiesCacheService.getCollectiveWorkspaceAuthorities(
       workspaceId,
       userId
     )
@@ -67,9 +70,9 @@ export const getCollectiveWorkspaceAuthorities = async (
     })
   }
 
-  await workspaceCacheService.setCollectiveWorkspaceAuthorities(
-    userId,
+  await collectiveAuthoritiesCacheService.setCollectiveWorkspaceAuthorities(
     workspaceId,
+    userId,
     collectiveWorkspaceAuthorities
   )
 
@@ -85,14 +88,26 @@ export const getCollectiveWorkspaceAuthorities = async (
  * @param project The project
  * @param prisma The prisma client
  * @param workspaceCacheService
+ * @param collectiveAuthoritiesCacheService
  * @returns
  */
 export const getCollectiveProjectAuthorities = async (
   userId: User['id'],
   project: Partial<Project>,
   prisma: PrismaClient,
-  workspaceCacheService: WorkspaceCacheService
+  workspaceCacheService: WorkspaceCacheService,
+  collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
 ): Promise<Set<Authority>> => {
+  const cachedProjectCollectiveAuthorities =
+    await collectiveAuthoritiesCacheService.getCollectiveProjectAuthorities(
+      project.id,
+      userId
+    )
+
+  if (cachedProjectCollectiveAuthorities.size > 0) {
+    return cachedProjectCollectiveAuthorities
+  }
+
   const isUserAdmin = await checkUserHasAdminRoleAssociation(
     userId,
     project.workspaceId,
@@ -133,6 +148,13 @@ export const getCollectiveProjectAuthorities = async (
       authorities.add(authority)
     })
   })
+
+  await collectiveAuthoritiesCacheService.setCollectiveProjectAuthorities(
+    project.id,
+    userId,
+    project.workspaceId,
+    authorities
+  )
 
   return authorities
 }
@@ -249,6 +271,13 @@ const checkUserHasAdminRoleAssociation = async (
       }
     }
   })
+
+  if (!adminRole.workspaceMembers) {
+    logger.log(
+      `Admin role for workspace ${workspaceId} not found or no associations found`
+    )
+    return false
+  }
 
   // Check if the user has associations to this role
   for (const roleAssociation of adminRole.workspaceMembers) {

@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
-import { Authority, Subscription, User, Workspace } from '@prisma/client'
+import { Subscription, User, Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { RawWorkspace } from '@/workspace/workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
@@ -20,8 +20,6 @@ import { RawWorkspaceRole } from '@/workspace-role/workspace-role.types'
 @Injectable()
 export class WorkspaceCacheService implements OnModuleDestroy {
   private static readonly SUBSCRIPTION_PREFIX = 'workspace-subscription-'
-  private static readonly WORKSPACE_COLLECTIVE_AUTHORITIES_PREFIX =
-    'user-workspace-collective-authorities-'
   private static readonly RAW_WORKSPACE_PREFIX = 'raw-workspace-'
   private static readonly WORKSPACE_ADMIN_PREFIX = 'workspace-admin-'
   private static readonly WORKSPACE_KEYS_PREFIX = 'workspace-keys-' // Stores all the keys associated with this workspace
@@ -223,43 +221,6 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     this.logger.log(`Workspace ${workspaceId} admin set to ${userId} in cache`)
   }
 
-  async setCollectiveWorkspaceAuthorities(
-    userId: User['id'],
-    workspaceId: Workspace['id'],
-    authorities: Set<Authority>
-  ) {
-    this.logger.log(
-      `Updating user ${userId} workspace ${workspaceId} authorities cache`
-    )
-    const key = this.getCollectiveWorkspaceAuthoritiesKey(workspaceId, userId)
-    const values = Array.from(authorities ?? []).map((a) => String(a))
-    if (values.length > 0) {
-      await this.redisClient.publisher.sAdd(key, values)
-    } else {
-      this.logger.log(
-        `No authorities provided for user ${userId} in workspace ${workspaceId}; cache cleared`
-      )
-    }
-
-    await this.addWorkspaceKey(workspaceId, key)
-    this.logger.log(
-      `User ${userId} workspace ${workspaceId} authorities cache updated`
-    )
-  }
-
-  async getCollectiveWorkspaceAuthorities(
-    workspaceId: Workspace['id'],
-    userId: User['id']
-  ): Promise<Set<Authority>> {
-    this.logger.log(
-      `Attempting to fetch workspace ${workspaceId} authorities from cache`
-    )
-    const key = this.getCollectiveWorkspaceAuthoritiesKey(workspaceId, userId)
-    const rawAuthorities = await this.redisClient.publisher.sMembers(key)
-
-    return new Set(rawAuthorities as Authority[])
-  }
-
   async addProjectToRawWorkspace(workspace: Workspace, project: RawProject) {
     const workspaceSlug = workspace.slug
     const projectId = project.id
@@ -418,13 +379,6 @@ export class WorkspaceCacheService implements OnModuleDestroy {
 
   private getRawWorkspaceKey(workspaceSlug: Workspace['slug']): string {
     return `${WorkspaceCacheService.RAW_WORKSPACE_PREFIX}${workspaceSlug}`
-  }
-
-  private getCollectiveWorkspaceAuthoritiesKey(
-    workspaceSlug: Workspace['slug'],
-    userId: User['id']
-  ): string {
-    return `${WorkspaceCacheService.WORKSPACE_COLLECTIVE_AUTHORITIES_PREFIX}${userId}-${workspaceSlug}`
   }
 
   private getWorkspaceAdminKey(workspaceSlug: Workspace['slug']): string {

@@ -29,6 +29,7 @@ import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { TierLimitService } from '@/common/tier-limit.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -40,6 +41,7 @@ export class WorkspaceRoleService {
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
     private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService,
     private readonly tierLimitService: TierLimitService
   ) {}
 
@@ -80,7 +82,7 @@ export class WorkspaceRoleService {
       throw new BadRequestException(
         constructErrorBody(
           'This workspace has been disabled',
-          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+          'To use the workspace again, remove the premium resources, or upgrade to a paid plan'
         )
       )
     }
@@ -269,6 +271,10 @@ export class WorkspaceRoleService {
 
     this.logger.log(`${user.email} updated workspace role ${workspaceRoleSlug}`)
 
+    await this.collectiveAuthoritiesCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspaceRole.workspaceId
+    )
+
     return await this.hydrationService.hydrateWorkspaceRole({
       workspaceRole: updatedWorkspaceRole,
       user
@@ -334,9 +340,13 @@ export class WorkspaceRoleService {
         id: workspaceRole.workspaceId
       }
     })
+
     await this.workspaceCacheService.removeRoleFromRawWorkspace(
       workspace,
       workspaceRole.id
+    )
+    await this.collectiveAuthoritiesCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspaceRole.workspaceId
     )
 
     this.logger.log(
@@ -347,7 +357,7 @@ export class WorkspaceRoleService {
   /**
    * Checks if a workspace role with the given name exists
    * @throws {UnauthorizedException} if the user does not have the required authority
-   * @param workspace the workspace
+   * @param workspaceId
    * @param name the name of the workspace role to check
    * @returns true if a workspace role with the given name exists, false otherwise
    */
@@ -463,6 +473,7 @@ export class WorkspaceRoleService {
    * Retrieves a map of project slugs to their corresponding IDs from the database.
    *
    * @param slugs - An array of project slugs.
+   * @param user
    * @returns A Map where each key is a project slug and the value is the project ID.
    */
   private async getProjectSlugToIdMap(

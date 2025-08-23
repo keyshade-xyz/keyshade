@@ -43,6 +43,7 @@ import { TierLimitService } from './tier-limit.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { HydratedWorkspace, RawWorkspace } from '@/workspace/workspace.types'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 type RootHydrationParams = {
   user: AuthenticatedUser
@@ -92,7 +93,8 @@ export class HydrationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tierLimitService: TierLimitService,
-    private readonly workspaceCacheService: WorkspaceCacheService
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
   ) {}
 
   /**
@@ -115,7 +117,8 @@ export class HydrationService {
         integration.workspaceId,
         user.id,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
     }
 
@@ -167,7 +170,8 @@ export class HydrationService {
         user.id,
         secret.project,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
     }
 
@@ -223,7 +227,8 @@ export class HydrationService {
         user.id,
         variable.project,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
     }
 
@@ -327,7 +332,8 @@ export class HydrationService {
         workspaceRole.workspaceId,
         user.id,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
     }
 
@@ -377,7 +383,8 @@ export class HydrationService {
         workspaceMember.workspaceId,
         user.id,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
     }
 
@@ -441,13 +448,15 @@ export class HydrationService {
               user.id,
               project,
               this.prisma,
-              this.workspaceCacheService
+              this.workspaceCacheService,
+              this.collectiveAuthoritiesCacheService
             )
           : await getCollectiveWorkspaceAuthorities(
               project.workspaceId,
               user.id,
               this.prisma,
-              this.workspaceCacheService
+              this.workspaceCacheService,
+              this.collectiveAuthoritiesCacheService
             )
     }
 
@@ -526,7 +535,8 @@ export class HydrationService {
         workspace.id,
         user.id,
         this.prisma,
-        this.workspaceCacheService
+        this.workspaceCacheService,
+        this.collectiveAuthoritiesCacheService
       )
     }
 
@@ -634,20 +644,11 @@ export class HydrationService {
       `Counting environments, variables and secrets in project ${project.slug}`
     )
 
-    this.logger.log(`Fetching all environments of project ${project.slug}`)
-    const allEnvs = await this.prisma.environment.findMany({
-      where: { projectId: project.id }
-    })
-    this.logger.log(
-      `Found ${allEnvs.length} environments in project ${project.slug}`
-    )
-
     const permittedEnvironments = []
-
     this.logger.log(
       `Checking access to all environments of project ${project.slug}`
     )
-    for (const env of allEnvs) {
+    for (const env of project.environments) {
       this.logger.log(
         `Checking access to environment ${env.slug} of project ${project.slug}`
       )
