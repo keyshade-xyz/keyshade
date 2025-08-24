@@ -1,3 +1,9 @@
+## [2.32.0-stage.26](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.25...v2.32.0-stage.26) (2025-08-24)
+
+### 🚀 Features
+
+* **api:** added init function for discord integration ([#1109](https://github.com/keyshade-xyz/keyshade/issues/1109)) ([f238c93](https://github.com/keyshade-xyz/keyshade/commit/f238c93ab04cb918b74958b2cb2176a066d6da73))
+
 ## [2.32.0-stage.25](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.24...v2.32.0-stage.25) (2025-08-24)
 
 ### 🚀 Features
