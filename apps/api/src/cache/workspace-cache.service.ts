@@ -3,8 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
-  OnModuleDestroy
+  NotFoundException
 } from '@nestjs/common'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
@@ -18,7 +17,7 @@ import { RawIntegration } from '@/integration/integration.types'
 import { RawWorkspaceRole } from '@/workspace-role/workspace-role.types'
 
 @Injectable()
-export class WorkspaceCacheService implements OnModuleDestroy {
+export class WorkspaceCacheService {
   private static readonly SUBSCRIPTION_PREFIX = 'workspace-subscription-'
   private static readonly RAW_WORKSPACE_PREFIX = 'raw-workspace-'
   private static readonly WORKSPACE_ADMIN_PREFIX = 'workspace-admin-'
@@ -31,24 +30,6 @@ export class WorkspaceCacheService implements OnModuleDestroy {
     private readonly redisClient: { publisher: RedisClientType },
     private readonly prisma: PrismaService
   ) {}
-
-  async onModuleDestroy() {
-    const pub = this.redisClient.publisher
-
-    if (!pub) return
-
-    // node-redis v4 exposes `isOpen`; only quit when connected
-    if (typeof pub.isOpen === 'boolean' && !pub.isOpen) return
-
-    try {
-      await pub.quit()
-    } catch (err: any) {
-      // Ignore "The client is closed" during shutdown
-      if (!err || !/The client is closed/i.test(String(err.message))) {
-        throw err
-      }
-    }
-  }
 
   async addWorkspaceKey(workspaceId: Workspace['id'], newKey: string) {
     this.logger.log(

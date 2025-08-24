@@ -1,10 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { Authority, Project, User, Workspace } from '@prisma/client'
 
 @Injectable()
-export class CollectiveAuthoritiesCacheService implements OnModuleDestroy {
+export class CollectiveAuthoritiesCacheService {
   private static readonly WORKSPACE_COLLECTIVE_AUTHORITIES_PREFIX =
     'user-workspace-collective-authorities-'
   private static readonly PROJECT_COLLECTIVE_AUTHORITIES_PREFIX =
@@ -18,24 +18,6 @@ export class CollectiveAuthoritiesCacheService implements OnModuleDestroy {
     @Inject(REDIS_CLIENT)
     private readonly redisClient: { publisher: RedisClientType }
   ) {}
-
-  async onModuleDestroy() {
-    const pub = this.redisClient.publisher
-
-    if (!pub) return
-
-    // node-redis v4 exposes `isOpen`; only quit when connected
-    if (typeof pub.isOpen === 'boolean' && !pub.isOpen) return
-
-    try {
-      await pub.quit()
-    } catch (err: any) {
-      // Ignore "The client is closed" during shutdown
-      if (!err || !/The client is closed/i.test(String(err.message))) {
-        throw err
-      }
-    }
-  }
 
   async addWorkspaceCollectiveAuthorityKey(
     workspaceId: Workspace['id'],
