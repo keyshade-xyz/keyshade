@@ -1,3 +1,9 @@
+## [2.32.0-stage.27](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.26...v2.32.0-stage.27) (2025-08-24)
+
+### 🚀 Features
+
+* **api:** cron job to create default workspaces for messed up users ([a463fac](https://github.com/keyshade-xyz/keyshade/commit/a463fac819c1f9d4cc2618ac75d4dfb56331b1e4))
+
 ## [2.32.0-stage.26](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.25...v2.32.0-stage.26) (2025-08-24)
 
 ### 🚀 Features
