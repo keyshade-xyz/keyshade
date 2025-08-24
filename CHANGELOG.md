@@ -1,3 +1,9 @@
+## [2.32.0-stage.25](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.24...v2.32.0-stage.25) (2025-08-24)
+
+### 🚀 Features
+
+* **api:** increase jwt expiry ([666ee81](https://github.com/keyshade-xyz/keyshade/commit/666ee8122807ee28ca475f7bc6ae3d57bc1a3f46))
+
 ## [2.32.0-stage.24](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.23...v2.32.0-stage.24) (2025-08-24)
 
 ### 🐛 Bug Fixes
