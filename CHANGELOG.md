@@ -1,3 +1,9 @@
+## [2.32.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.22...v2.32.0-stage.23) (2025-08-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** adjust margin for sidebar component ([#1127](https://github.com/keyshade-xyz/keyshade/issues/1127)) ([2ba310e](https://github.com/keyshade-xyz/keyshade/commit/2ba310e31762f02fab43f2bfd19715611d35b527))
+
 ## [2.32.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.21...v2.32.0-stage.22) (2025-08-23)
 
 ### 🐛 Bug Fixes
