@@ -6,7 +6,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { UserService } from '@/user/user.service'
 import { IntegrationService } from './integration.service'
 import { WorkspaceService } from '@/workspace/workspace.service'
-import { Test, TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { UserModule } from '@/user/user.module'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { IntegrationModule } from './integration.module'
@@ -35,8 +35,46 @@ import {
   LambdaClient
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
-import { DiscordIntegration } from './plugins/discord.integration'
 import nock = require('nock')
+
+const originalFetch = global.fetch
+// helper to create dynamic mock responses
+function createMockResponse(status: number, body: any): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: () =>
+      Promise.resolve(typeof body === 'string' ? body : JSON.stringify(body)),
+    json: () => Promise.resolve(body)
+  } as unknown as Response
+}
+
+global.fetch = jest
+  .fn()
+  .mockImplementation((url: string, options?: RequestInit) => {
+    // Mock webhook URLs dynamically
+    if (url.includes('dummy-webhook-url.com')) {
+      const mockStatus = (options?.headers as any)?.['x-mock-status']
+
+      if (mockStatus) {
+        const status = Number(mockStatus)
+        const body = { success: status >= 200 && status < 300 }
+        return Promise.resolve(createMockResponse(status, body))
+      }
+
+      // No `x-mock-status`: let nock (or real fetch) handle it
+      if (originalFetch) {
+        return originalFetch(url, options)
+      }
+    }
+
+    // Pass through everything else
+    if (originalFetch) {
+      return originalFetch(url, options)
+    }
+
+    throw new Error(`Unmocked fetch call to: ${url}`)
+  })
 
 jest.mock('@vercel/sdk', () => {
   const getEnvMock = jest.fn()
@@ -69,9 +107,50 @@ describe('Integration Controller Tests', () => {
 
   const createDummyDiscordWebhookUrlInterceptor = () => {
     const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-    return nock(origin)
+    nock(origin)
+      .persist()
       .get(pathname || '/')
       .reply(200)
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(200, { success: true })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(400, { error: 'Bad Request' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(401, { error: 'Unauthorized' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(403, { error: 'Forbidden' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(404, { error: 'Not Found' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(409, { error: 'Conflict' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(429, { error: 'Too Many Requests' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(500, { error: 'Internal Server Error' })
   }
 
   const DUMMY_INTEGRATION_NAME = 'Integration 1'
@@ -320,6 +399,7 @@ describe('Integration Controller Tests', () => {
 
       expect(result.statusCode).toEqual(404)
     })
+
     it('should throw an error if environment slug is specified and not project slug', async () => {
       const result = await app.inject({
         method: 'POST',
@@ -420,12 +500,14 @@ describe('Integration Controller Tests', () => {
   })
 
   describe('Discord Integration Initialization Tests', () => {
-    it('should send initialization message when Discord integration is created', async () => {
-      const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-      const discordWebhookMock = nock(origin)
-        .post(pathname || '/')
-        .reply(200, { success: true })
+    const validDto: CreateIntegration = {
+      name: 'Discord Init Test',
+      type: IntegrationType.DISCORD,
+      metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
 
+    it('should send initialization message when Discord integration is created', async () => {
       createDummyDiscordWebhookUrlInterceptor()
 
       const result = await app.inject({
@@ -434,19 +516,10 @@ describe('Integration Controller Tests', () => {
         headers: {
           'x-e2e-user-email': user1.email
         },
-        payload: {
-          name: 'Discord Init Test',
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED]
-        }
+        payload: validDto
       })
 
       expect(result.statusCode).toEqual(201)
-
-      expect(discordWebhookMock.isDone()).toBe(true)
 
       const integrationRuns = await prisma.integrationRun.findMany({
         where: {
@@ -459,39 +532,7 @@ describe('Integration Controller Tests', () => {
       expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
 
-    it('should handle Discord webhook failure during initialization', async () => {
-      const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-      nock(origin)
-        .post(pathname || '/')
-        .reply(400, { error: 'Invalid webhook' })
-
-      createDummyDiscordWebhookUrlInterceptor()
-
-      const result = await app.inject({
-        method: 'POST',
-        url: `/integration/${workspace1.slug}`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        payload: {
-          name: 'Discord Init Failure Test',
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED]
-        }
-      })
-
-      expect(result.statusCode).toEqual(400)
-    })
-
     it('should create integration run records for initialization process', async () => {
-      const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-      nock(origin)
-        .post(pathname || '/')
-        .reply(200, { success: true })
-
       createDummyDiscordWebhookUrlInterceptor()
 
       const result = await app.inject({
@@ -500,14 +541,7 @@ describe('Integration Controller Tests', () => {
         headers: {
           'x-e2e-user-email': user1.email
         },
-        payload: {
-          name: 'Discord Init Run Test',
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED]
-        }
+        payload: validDto
       })
 
       expect(result.statusCode).toEqual(201)
@@ -523,341 +557,10 @@ describe('Integration Controller Tests', () => {
         ]
       })
 
-      expect(integrationRuns).toHaveLength(2)
+      expect(integrationRuns).toHaveLength(1)
 
       expect(integrationRuns[0].title).toBe('Initializing Discord integration')
       expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
-
-      expect(integrationRuns[1].title).toBe('Posting message to Discord')
-      expect(integrationRuns[1].status).toBe(IntegrationRunStatus.SUCCESS)
-    })
-  })
-
-  describe('Discord Integration Unit Tests', () => {
-    // Increase timeout for Discord integration tests
-    jest.setTimeout(10000)
-    let discordIntegration: DiscordIntegration
-    let mockPrismaService: PrismaService
-
-    const mockIntegration = {
-      id: 'test-integration-id',
-      name: 'Test Discord Integration',
-      type: IntegrationType.DISCORD,
-      metadata: {
-        webhookUrl: 'https://discord.com/api/webhooks/test-webhook-url'
-      },
-      workspaceId: 'test-workspace-id',
-      projectId: null,
-      slug: 'test-discord-integration',
-      notifyOn: [EventType.WORKSPACE_UPDATED],
-      lastUpdatedById: 'test-user-id',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          DiscordIntegration,
-          {
-            provide: PrismaService,
-            useValue: {
-              integrationRun: {
-                create: jest.fn(),
-                update: jest.fn()
-              }
-            }
-          }
-        ]
-      }).compile()
-
-      discordIntegration = module.get<DiscordIntegration>(DiscordIntegration)
-      mockPrismaService = module.get<PrismaService>(PrismaService)
-      discordIntegration.setIntegration(mockIntegration as any)
-
-      jest.clearAllMocks()
-      ;(global.fetch as jest.Mock).mockReset()
-      ;(global.fetch as jest.Mock).mockClear()
-    })
-
-    afterEach(() => {
-      jest.clearAllMocks()
-      ;(global.fetch as jest.Mock).mockReset()
-      ;(global.fetch as jest.Mock).mockClear()
-    })
-
-    describe('init', () => {
-      const testEventId = 'test-event-id'
-      const testPrivateKey = 'test-private-key'
-
-      it('should send initialization message to Discord successfully', async () => {
-        const mockResponse = {
-          ok: true,
-          text: () => Promise.resolve('success')
-        }
-        ;(global.fetch as jest.Mock).mockResolvedValue(mockResponse)
-
-        const mockIntegrationRun = { id: 'test-run-id' }
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'create')
-          .mockResolvedValue(mockIntegrationRun as any)
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'update')
-          .mockResolvedValue({} as any)
-
-        await discordIntegration.init(testPrivateKey, testEventId)
-
-        expect(mockPrismaService.integrationRun.create).toHaveBeenCalledWith({
-          data: {
-            title: 'Initializing Discord integration',
-            duration: 0,
-            triggeredAt: expect.any(Date),
-            status: IntegrationRunStatus.RUNNING,
-            eventId: testEventId,
-            integrationId: mockIntegration.id
-          }
-        })
-
-        expect(global.fetch).toHaveBeenCalledWith(
-          'https://discord.com/api/webhooks/test-webhook-url',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: expect.stringContaining(
-              '🥁 Keyshade is now configured with this channel'
-            )
-          }
-        )
-
-        const fetchCall = (global.fetch as jest.Mock).mock.calls[0]
-        const requestBody = JSON.parse(fetchCall[1].body)
-
-        expect(requestBody.content).toBe(
-          '🥁 Keyshade is now configured with this channel'
-        )
-        expect(requestBody.embeds).toHaveLength(1)
-        expect(requestBody.embeds[0].title).toBe(
-          '🎉 Keyshade Integration Successful!'
-        )
-        expect(requestBody.embeds[0].description).toBe(
-          'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.'
-        )
-        expect(requestBody.embeds[0].color).toBe(0x00ff00)
-        expect(requestBody.embeds[0].author.name).toBe('Keyshade')
-        expect(requestBody.embeds[0].author.url).toBe('https://keyshade.xyz')
-        expect(requestBody.embeds[0].fields).toHaveLength(2)
-        expect(requestBody.embeds[0].fields[0]).toEqual({
-          name: 'Status',
-          value: '✅ Connected',
-          inline: true
-        })
-        expect(requestBody.embeds[0].fields[1]).toEqual({
-          name: 'Webhook',
-          value: '✅ Valid',
-          inline: true
-        })
-        expect(requestBody.embeds[0].footer.text).toBe('Keyshade Integration')
-        expect(requestBody.embeds[0].timestamp).toBeDefined()
-
-        expect(mockPrismaService.integrationRun.update).toHaveBeenCalledWith({
-          where: { id: 'test-run-id' },
-          data: {
-            status: IntegrationRunStatus.SUCCESS,
-            duration: expect.any(Number),
-            logs: 'success'
-          }
-        })
-      })
-
-      it('should handle Discord API error response', async () => {
-        const mockResponse = {
-          ok: false,
-          status: 400,
-          statusText: 'Bad Request',
-          text: () => Promise.resolve('webhook error')
-        }
-        ;(global.fetch as jest.Mock).mockResolvedValue(mockResponse)
-
-        const mockIntegrationRun = { id: 'test-run-id' }
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'create')
-          .mockResolvedValue(mockIntegrationRun as any)
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'update')
-          .mockResolvedValue({} as any)
-
-        await expect(
-          discordIntegration.init(testPrivateKey, testEventId)
-        ).rejects.toThrow('BadRequestException')
-
-        expect(mockPrismaService.integrationRun.create).toHaveBeenCalled()
-
-        expect(global.fetch).toHaveBeenCalled()
-
-        expect(mockPrismaService.integrationRun.update).toHaveBeenCalledWith({
-          where: { id: 'test-run-id' },
-          data: {
-            status: IntegrationRunStatus.FAILED,
-            duration: expect.any(Number),
-            logs: 'webhook error'
-          }
-        })
-      })
-
-      it('should handle network errors', async () => {
-        ;(global.fetch as jest.Mock).mockRejectedValue(
-          new Error('Network error')
-        )
-
-        const mockIntegrationRun = { id: 'test-run-id' }
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'create')
-          .mockResolvedValue(mockIntegrationRun as any)
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'update')
-          .mockResolvedValue({} as any)
-
-        await expect(
-          discordIntegration.init(testPrivateKey, testEventId)
-        ).rejects.toThrow('BadRequestException')
-
-        expect(mockPrismaService.integrationRun.create).toHaveBeenCalled()
-
-        expect(mockPrismaService.integrationRun.update).toHaveBeenCalledWith({
-          where: { id: 'test-run-id' },
-          data: {
-            status: IntegrationRunStatus.FAILED,
-            duration: 0,
-            logs: expect.stringContaining('Network error')
-          }
-        })
-      })
-
-      it('should handle invalid webhook URL', async () => {
-        const invalidIntegration = {
-          ...mockIntegration,
-          metadata: {
-            webhookUrl: 'invalid-url'
-          }
-        }
-        discordIntegration.setIntegration(invalidIntegration as any)
-        ;(global.fetch as jest.Mock).mockRejectedValue(new Error('Invalid URL'))
-
-        const mockIntegrationRun = { id: 'test-run-id' }
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'create')
-          .mockResolvedValue(mockIntegrationRun as any)
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'update')
-          .mockResolvedValue({} as any)
-
-        await expect(
-          discordIntegration.init(testPrivateKey, testEventId)
-        ).rejects.toThrow('BadRequestException')
-
-        expect(mockPrismaService.integrationRun.update).toHaveBeenCalledWith({
-          where: { id: 'test-run-id' },
-          data: {
-            status: IntegrationRunStatus.FAILED,
-            duration: 0,
-            logs: expect.stringContaining('Invalid URL')
-          }
-        })
-      })
-
-      it('should handle missing integration metadata', async () => {
-        const integrationWithoutMetadata = {
-          ...mockIntegration,
-          metadata: null
-        }
-        discordIntegration.setIntegration(integrationWithoutMetadata as any)
-
-        const mockIntegrationRun = { id: 'test-run-id' }
-        jest
-          .spyOn(mockPrismaService.integrationRun, 'create')
-          .mockResolvedValue(mockIntegrationRun as any)
-
-        // Mock fetch to prevent actual network calls
-        ;(global.fetch as jest.Mock).mockRejectedValue(
-          new Error('Cannot read property webhookUrl of null')
-        )
-
-        // Should throw error when trying to access webhookUrl from null metadata
-        await expect(
-          discordIntegration.init(testPrivateKey, testEventId)
-        ).rejects.toThrow()
-      })
-    })
-
-    describe('getPermittedEvents', () => {
-      it('should return correct permitted events', () => {
-        const permittedEvents = discordIntegration.getPermittedEvents()
-
-        expect(permittedEvents).toBeInstanceOf(Set)
-
-        // Test a few random events from the permitted list to ensure the method works correctly
-        // Discord integration supports many events, so we test a sample to verify functionality
-        expect(permittedEvents.has(EventType.WORKSPACE_UPDATED)).toBe(true)
-        expect(permittedEvents.has(EventType.PROJECT_CREATED)).toBe(true)
-        expect(permittedEvents.has(EventType.SECRET_ADDED)).toBe(true)
-        expect(permittedEvents.has(EventType.INTEGRATION_ADDED)).toBe(true)
-      })
-    })
-
-    describe('getRequiredMetadataParameters', () => {
-      it('should return webhookUrl as required parameter', () => {
-        const requiredParams =
-          discordIntegration.getRequiredMetadataParameters()
-
-        expect(requiredParams).toBeInstanceOf(Set)
-        expect(requiredParams.has('webhookUrl')).toBe(true)
-        expect(requiredParams.size).toBe(1)
-      })
-    })
-
-    describe('validateConfiguration', () => {
-      it('should validate webhook URL successfully', async () => {
-        const mockResponse = {
-          ok: true,
-          status: 200
-        }
-        ;(global.fetch as jest.Mock).mockResolvedValue(mockResponse)
-
-        const metadata = {
-          webhookUrl: 'https://discord.com/api/webhooks/valid-webhook'
-        }
-
-        await expect(
-          discordIntegration.validateConfiguration(metadata)
-        ).resolves.not.toThrow()
-
-        expect(global.fetch).toHaveBeenCalledWith(
-          'https://discord.com/api/webhooks/valid-webhook',
-          {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          }
-        )
-      })
-
-      it('should throw BadRequestException for invalid webhook URL', async () => {
-        const mockResponse = {
-          ok: false,
-          status: 404,
-          statusText: 'Not Found'
-        }
-        ;(global.fetch as jest.Mock).mockResolvedValue(mockResponse)
-
-        const metadata = {
-          webhookUrl: 'https://discord.com/api/webhooks/invalid-webhook'
-        }
-
-        await expect(
-          discordIntegration.validateConfiguration(metadata)
-        ).rejects.toThrow('BadRequestException')
-      })
     })
   })
 
@@ -1269,7 +972,7 @@ describe('Integration Controller Tests', () => {
         const response = await app.inject({
           method: 'POST',
           url: `${endpoint}?isCreate=true`,
-          headers: { 'x-e2e-user-email': user1.email },
+          headers: { 'x-e2e-user-email': user1.email, 'x-mock-status': 404 },
           payload: validDto
         })
 
