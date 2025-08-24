@@ -17,7 +17,8 @@ import {
   Integration,
   IntegrationType,
   Project,
-  Workspace
+  Workspace,
+  IntegrationRunStatus
 } from '@prisma/client'
 import { ProjectService } from '@/project/project.service'
 import { ProjectModule } from '@/project/project.module'
@@ -35,6 +36,45 @@ import {
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
 import nock = require('nock')
+
+const originalFetch = global.fetch
+// helper to create dynamic mock responses
+function createMockResponse(status: number, body: any): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: () =>
+      Promise.resolve(typeof body === 'string' ? body : JSON.stringify(body)),
+    json: () => Promise.resolve(body)
+  } as unknown as Response
+}
+
+global.fetch = jest
+  .fn()
+  .mockImplementation((url: string, options?: RequestInit) => {
+    // Mock webhook URLs dynamically
+    if (url.includes('dummy-webhook-url.com')) {
+      const mockStatus = (options?.headers as any)?.['x-mock-status']
+
+      if (mockStatus) {
+        const status = Number(mockStatus)
+        const body = { success: status >= 200 && status < 300 }
+        return Promise.resolve(createMockResponse(status, body))
+      }
+
+      // No `x-mock-status`: let nock (or real fetch) handle it
+      if (originalFetch) {
+        return originalFetch(url, options)
+      }
+    }
+
+    // Pass through everything else
+    if (originalFetch) {
+      return originalFetch(url, options)
+    }
+
+    throw new Error(`Unmocked fetch call to: ${url}`)
+  })
 
 jest.mock('@vercel/sdk', () => {
   const getEnvMock = jest.fn()
@@ -67,9 +107,50 @@ describe('Integration Controller Tests', () => {
 
   const createDummyDiscordWebhookUrlInterceptor = () => {
     const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-    return nock(origin)
+    nock(origin)
+      .persist()
       .get(pathname || '/')
       .reply(200)
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(200, { success: true })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(400, { error: 'Bad Request' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(401, { error: 'Unauthorized' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(403, { error: 'Forbidden' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(404, { error: 'Not Found' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(409, { error: 'Conflict' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(429, { error: 'Too Many Requests' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(500, { error: 'Internal Server Error' })
   }
 
   const DUMMY_INTEGRATION_NAME = 'Integration 1'
@@ -318,6 +399,7 @@ describe('Integration Controller Tests', () => {
 
       expect(result.statusCode).toEqual(404)
     })
+
     it('should throw an error if environment slug is specified and not project slug', async () => {
       const result = await app.inject({
         method: 'POST',
@@ -414,6 +496,71 @@ describe('Integration Controller Tests', () => {
       })
       expect(integration).toBeDefined()
       expect(integration!.id).toEqual(result.json().id)
+    })
+  })
+
+  describe('Discord Integration Initialization Tests', () => {
+    const validDto: CreateIntegration = {
+      name: 'Discord Init Test',
+      type: IntegrationType.DISCORD,
+      metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    it('should send initialization message when Discord integration is created', async () => {
+      createDummyDiscordWebhookUrlInterceptor()
+
+      const result = await app.inject({
+        method: 'POST',
+        url: `/integration/${workspace1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: validDto
+      })
+
+      expect(result.statusCode).toEqual(201)
+
+      const integrationRuns = await prisma.integrationRun.findMany({
+        where: {
+          integrationId: result.json().id,
+          title: 'Initializing Discord integration'
+        }
+      })
+
+      expect(integrationRuns).toHaveLength(1)
+      expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
+    })
+
+    it('should create integration run records for initialization process', async () => {
+      createDummyDiscordWebhookUrlInterceptor()
+
+      const result = await app.inject({
+        method: 'POST',
+        url: `/integration/${workspace1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: validDto
+      })
+
+      expect(result.statusCode).toEqual(201)
+
+      const integrationRuns = await prisma.integrationRun.findMany({
+        where: {
+          integrationId: result.json().id
+        },
+        orderBy: [
+          {
+            triggeredAt: 'asc'
+          }
+        ]
+      })
+
+      expect(integrationRuns).toHaveLength(1)
+
+      expect(integrationRuns[0].title).toBe('Initializing Discord integration')
+      expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
   })
 
@@ -825,7 +972,7 @@ describe('Integration Controller Tests', () => {
         const response = await app.inject({
           method: 'POST',
           url: `${endpoint}?isCreate=true`,
-          headers: { 'x-e2e-user-email': user1.email },
+          headers: { 'x-e2e-user-email': user1.email, 'x-mock-status': 404 },
           payload: validDto
         })
 
