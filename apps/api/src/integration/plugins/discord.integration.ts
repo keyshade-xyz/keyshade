@@ -14,6 +14,38 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody, makeTimedRequest } from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 
+const DISCORD_INIT_MESSAGE = {
+  content: '🥁 Keyshade is now configured with this channel',
+  embeds: [
+    {
+      title: '🎉 Keyshade Integration Successful!',
+      description:
+        'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.',
+      color: 0x00ff00,
+      author: {
+        name: 'Keyshade',
+        url: 'https://keyshade.xyz'
+      },
+      fields: [
+        {
+          name: 'Status',
+          value: '✅ Connected',
+          inline: true
+        },
+        {
+          name: 'Webhook',
+          value: '✅ Valid',
+          inline: true
+        }
+      ],
+      footer: {
+        text: 'Keyshade Integration'
+      },
+      timestamp: new Date().toISOString()
+    }
+  ]
+}
+
 export class DiscordIntegration extends BaseIntegration {
   constructor(prisma: PrismaService) {
     super(IntegrationType.DISCORD, prisma)
@@ -72,44 +104,13 @@ export class DiscordIntegration extends BaseIntegration {
     })
 
     try {
-      const body = {
-        content: '🥁 Keyshade is now configured with this channel',
-        embeds: [
-          {
-            title: '🎉 Keyshade Integration Successful!',
-            description:
-              'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.',
-            color: 0x00ff00,
-            author: {
-              name: 'Keyshade',
-              url: 'https://keyshade.xyz'
-            },
-            fields: [
-              {
-                name: 'Status',
-                value: '✅ Connected',
-                inline: true
-              },
-              {
-                name: 'Webhook',
-                value: '✅ Valid',
-                inline: true
-              }
-            ],
-            footer: {
-              text: 'Keyshade Integration'
-            },
-            timestamp: new Date().toISOString()
-          }
-        ]
-      }
       const { response, duration } = await makeTimedRequest(() =>
         fetch(integration.metadata.webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(body)
+          body: JSON.stringify(DISCORD_INIT_MESSAGE)
         })
       )
 
