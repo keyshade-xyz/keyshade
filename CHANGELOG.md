@@ -1,3 +1,10 @@
+## [2.32.0-stage.24](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.23...v2.32.0-stage.24) (2025-08-24)
+
+### 🐛 Bug Fixes
+
+* center align workspace name and icon ([#1129](https://github.com/keyshade-xyz/keyshade/issues/1129)) ([e92f4ba](https://github.com/keyshade-xyz/keyshade/commit/e92f4baaf163e2c6e30b4c3237015dc00fd85bf7))
+* remove unnecessary div from workspace settings page layout ([7b97cee](https://github.com/keyshade-xyz/keyshade/commit/7b97ceed98242b48e3d51c9da5cb356538a8384e))
+
 ## [2.32.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.22...v2.32.0-stage.23) (2025-08-24)
 
 ### 🐛 Bug Fixes
