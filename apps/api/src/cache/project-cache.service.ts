@@ -1,10 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-  OnModuleDestroy
-} from '@nestjs/common'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -14,7 +8,7 @@ import { constructErrorBody } from '@/common/util'
 import { Environment, Project, Secret, Variable } from '@prisma/client'
 
 @Injectable()
-export class ProjectCacheService implements OnModuleDestroy {
+export class ProjectCacheService {
   private static readonly RAW_PROJECT_PREFIX = 'raw-project-'
 
   private readonly logger = new Logger(ProjectCacheService.name)
@@ -24,24 +18,6 @@ export class ProjectCacheService implements OnModuleDestroy {
     private readonly redisClient: { publisher: RedisClientType },
     private readonly prisma: PrismaService
   ) {}
-
-  async onModuleDestroy() {
-    const pub = this.redisClient.publisher
-
-    if (!pub) return
-
-    // node-redis v4 exposes `isOpen`; only quit when connected
-    if (typeof pub.isOpen === 'boolean' && !pub.isOpen) return
-
-    try {
-      await pub.quit()
-    } catch (err: any) {
-      // Ignore "The client is closed" during shutdown
-      if (!err || !/The client is closed/i.test(String(err.message))) {
-        throw err
-      }
-    }
-  }
 
   async getRawProject(projectSlug: Project['slug']): Promise<RawProject> {
     this.logger.log(`Attempting to fetch project ${projectSlug} from cache`)

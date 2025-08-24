@@ -1,10 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { UserWithWorkspace } from '@/user/user.types'
 
 @Injectable()
-export class UserCacheService implements OnModuleDestroy {
+export class UserCacheService {
   private static readonly PREFIX = 'user-'
 
   private readonly logger = new Logger(UserCacheService.name)
@@ -53,24 +53,6 @@ export class UserCacheService implements OnModuleDestroy {
     )
     if (keys.length > 0) {
       await this.redisClient.publisher.del(keys)
-    }
-  }
-
-  async onModuleDestroy() {
-    const pub = this.redisClient.publisher
-
-    if (!pub) return
-
-    // node-redis v4 exposes `isOpen`; only quit when connected
-    if (typeof pub.isOpen === 'boolean' && !pub.isOpen) return
-
-    try {
-      await pub.quit()
-    } catch (err: any) {
-      // Ignore "The client is closed" during shutdown
-      if (!err || !/The client is closed/i.test(String(err.message))) {
-        throw err
-      }
     }
   }
 

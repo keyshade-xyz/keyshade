@@ -124,17 +124,11 @@ export async function getUserByEmailOrId(
       (await prisma.user.findUnique({
         where: {
           email: input.toLowerCase()
-        },
-        include: {
-          emailPreference: true
         }
       })) ??
       (await prisma.user.findUnique({
         where: {
           id: input
-        },
-        include: {
-          emailPreference: true
         }
       }))
   } catch (error) {
