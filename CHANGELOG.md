@@ -1,3 +1,9 @@
+## [2.33.0](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0...v2.33.0) (2025-08-25)
+
+### 🚀 Features
+
+* update cli version ([6980f29](https://github.com/keyshade-xyz/keyshade/commit/6980f2960b6b6a7805df1de538c67e534eb1ca4f))
+
 ## [2.32.0](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0) (2025-08-25)
 
 ### 🚀 Features
