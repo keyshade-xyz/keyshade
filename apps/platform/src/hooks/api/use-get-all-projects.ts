@@ -45,6 +45,8 @@ export function useGetAllProjects(): UseGetAllProjectsReturn {
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
 
   const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
+  const isAuthorizedToViewProject =
+    selectedWorkspace?.entitlements.canReadProjects
 
   const getAllProjects = useHttp(() =>
     ControllerInstance.getInstance().projectController.getAllProjects({
@@ -66,18 +68,21 @@ export function useGetAllProjects(): UseGetAllProjectsReturn {
         limit
       })
 
+    const items = response.data?.items ?? []
+    const totalCount = response.data?.metadata.totalCount ?? 0
+
     return {
       success: response.success,
       error: response.error ? { message: response.error.message } : undefined,
-      data: response.data ?? {
-        items: [],
-        metadata: { totalCount: 0 }
+      data: {
+        items,
+        metadata: { totalCount }
       }
     }
   }
 
   useEffect(() => {
-    if (selectedWorkspace) {
+    if (isAuthorizedToViewProject) {
       getAllProjects()
         .then(({ data, success }) => {
           if (success && data) {
@@ -93,8 +98,17 @@ export function useGetAllProjects(): UseGetAllProjectsReturn {
           }
         })
         .finally(() => setLoading(false))
+    } else {
+      setProjects([])
+      setLoading(false)
     }
-  }, [selectedWorkspace, getAllProjects, setGlobalSearchData, setProjects])
+  }, [
+    selectedWorkspace,
+    getAllProjects,
+    setGlobalSearchData,
+    setProjects,
+    isAuthorizedToViewProject
+  ])
 
   return {
     loading,
