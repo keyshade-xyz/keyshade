@@ -260,3 +260,10 @@
 ### Minor Changes
 
 - Removed email preference parsing in `keyshade init` command
+
+# 3.2.3
+
+### Minor Changes
+
+- Added request and response validation to `keyshade environment` subcommands
+- Removed email preference parsing in `keyshade init` command
