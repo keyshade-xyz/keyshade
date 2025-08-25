@@ -284,19 +284,29 @@ describe('Share Secret Tests', () => {
 
       expect(getShareResponse.statusCode).toBe(404)
     })
-    it('should delete a share after viewCount number of times', async () => {
-      const share = await shareSecretService.createShare({
+    it('should obfuscate a share after viewCount number of times', async () => {
+      const { hash } = await shareSecretService.createShare({
         secret: 'secret',
         viewLimit: 2,
         expiresAfterDays: 1
       })
 
-      await shareSecretService.getShare(share.hash)
-      await shareSecretService.getShare(share.hash)
+      const share = await prisma.share.findUnique({
+        where: {
+          hash
+        }
+      })
 
-      const shareCount = await prisma.share.count()
+      await shareSecretService.getShare(hash)
+      await shareSecretService.getShare(hash)
 
-      expect(shareCount).toBe(0)
+      const obfuscatedShare = await prisma.share.findUnique({
+        where: {
+          id: share.id
+        }
+      })
+
+      expect(obfuscatedShare.secret).not.toBe(share.secret)
     })
     it('should not be able to get a non-existing share', async () => {
       const response = await app.inject({

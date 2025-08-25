@@ -106,7 +106,7 @@ export class ShareSecretService {
       }
     })
 
-    if (!share) {
+    if (!share || dayjs(share.expiresAt).isBefore(new Date())) {
       this.logger.log(`Share with hash ${hash} not found`)
       throw new NotFoundException(
         constructErrorBody(
@@ -130,13 +130,18 @@ export class ShareSecretService {
       `Share view count updated with hash ${hash}. View count: ${updatedShare.timesViewed}`
     )
 
-    // If the share has reached its view limit, delete it
+    // If the share has reached its view limit, obfuscate it
     if (updatedShare.timesViewed === updatedShare.viewLimit) {
       this.logger.log(
         `Share with hash ${hash} has reached its view limit. Deleting share`
       )
-      await this.prisma.share.delete({
-        where: { hash }
+      await this.prisma.share.update({
+        where: { hash },
+        data: {
+          secret: toSHA256(share.secret),
+          hash: toSHA256(share.hash),
+          expiresAt: new Date(0)
+        }
       })
       this.logger.log(`Share with hash ${hash} deleted`)
     }
@@ -148,15 +153,36 @@ export class ShareSecretService {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
-  public async deleteExpiredShares() {
+  public async obfuscateExpiredShares() {
     this.logger.log('Deleting expired shares...')
-    await this.prisma.share.deleteMany({
+
+    const expiredShares = await this.prisma.share.findMany({
       where: {
         expiresAt: {
           lte: new Date()
         }
       }
     })
-    this.logger.log('Expired shares deleted')
+
+    const ops = []
+    for (const share of expiredShares) {
+      ops.push(
+        this.prisma.share.update({
+          where: { hash: share.hash },
+          data: {
+            secret: toSHA256(share.secret),
+            hash: toSHA256(share.hash),
+            expiresAt: new Date(0)
+          }
+        })
+      )
+    }
+
+    try {
+      await this.prisma.$transaction(ops)
+      this.logger.log('Expired shares obfuscated')
+    } catch (error) {
+      this.logger.error('Error obfuscating expired shares', error)
+    }
   }
 }

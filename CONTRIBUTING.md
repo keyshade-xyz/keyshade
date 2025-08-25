@@ -22,17 +22,23 @@ If you have ideas for improvements or new features we would love to hear them. P
 `/attempt` I'd like to work on this issue.
 
 ## Code Contribution
+- Before coding, make sure you set your [environment](https://docs.keyshade.xyz/contributing-to-keyshade/setting-things-up) up
 
 Please ensure your pull request adheres to the following guidelines:
-
 - Search the [open pull requests](https://github.com/keyshade-xyz/keyshade/pulls) to ensure someone else has not already submitted the change.
-- Make sure your code follows the style guidelines of the project. For TypeScript, we use ESLint and [Prettier](.prettierrc) for formatting. For Rust, we use Cargo for building and testing.
+- Make sure your code follows the style guidelines of the project. For TypeScript, we use ESLint and [Prettier](.prettierrc) for formatting.
 - Make sure your code passes all the project's tests. You can run tests using `pnpm run test`.
 - For setting up the project, do check the [Getting Started](https://docs.keyshade.xyz/contributing-to-keyshade/prerequisites) guide.
 - Write good commit messages by following [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 - Include relevant issue number if applicable.
 - Your PR should follow this pattern: `fix|feat|chore|docs|style|refactor|perf|test|ci|build|breaking-change|revert: <description>`. For example, `feat: add new feature` or `fix: fix a bug`. Note that description can contain only alphanumeric characters and `-`, `.` and `_` characters.
 - Before you make a push to your branch, make sure you rebase your branch with the latest changes from the `develop` branch.
+
+## Testing your changes
+- Run your changes [locally](https://docs.keyshade.xyz/contributing-to-keyshade/running-things-locally) for testing purposes
+- Run the project in development mode to confirm your changes work as expected: `pnpm run dev`.
+- Use debug logging when reproducing and fixing issues to inspect what's happening under the hood: `DEBUG=* pnpm run dev keyshade run "your-command-here"`
+Example use case: Automated tests don't always catch integration issues or problems that only surface in a live environment. Debug logging can reveal issues like malformed API requests or unexpected data flow that would otherwise be invisible.
 
 ## Documentation
 

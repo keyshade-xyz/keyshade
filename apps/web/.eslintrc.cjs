@@ -7,6 +7,17 @@ module.exports = {
   },
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'off',
-    'turbo/no-undeclared-env-vars': 'off'
-  }
+    'turbo/no-undeclared-env-vars': 'off',
+    'eslint-comments/no-unused-disable': 'off'
+  },
+  overrides: [
+    {
+      files: ['src/lib/controller-instance.ts'],
+      rules: {
+        '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off'
+      }
+    }
+  ]
 }

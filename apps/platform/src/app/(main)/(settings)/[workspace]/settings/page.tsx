@@ -205,7 +205,6 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex flex-grow flex-col gap-y-2 overflow-hidden">
-              <div className="mb-2 flex flex-row gap-x-2" />
               <h1 className="truncate text-2xl font-bold">
                 {selectedWorkspace?.name}
               </h1>

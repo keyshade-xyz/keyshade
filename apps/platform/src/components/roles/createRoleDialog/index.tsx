@@ -19,7 +19,8 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   createRoleOpenAtom,
   rolesOfWorkspaceAtom,
-  selectedWorkspaceAtom
+  selectedWorkspaceAtom,
+  workspaceRolesCountAtom
 } from '@/store'
 import {
   Select,
@@ -60,6 +61,7 @@ export default function CreateRoleDialog() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [isCreateRolesOpen, setIsCreateRolesOpen] = useAtom(createRoleOpenAtom)
   const setRoles = useSetAtom(rolesOfWorkspaceAtom)
+  const setWorkspaceRolesCount = useSetAtom(workspaceRolesCountAtom)
 
   const [selectedPermissions, setSelectedPermissions] = useState<
     Set<AuthorityEnum>
@@ -122,6 +124,7 @@ export default function CreateRoleDialog() {
       const { success, data } = await createRole()
 
       if (success && data) {
+        setWorkspaceRolesCount((prev) => prev + 1)
         toast.success('Role created successfully', {
           description: (
             <p className="text-xs text-green-300">
@@ -143,7 +146,8 @@ export default function CreateRoleDialog() {
     createRoleData.name,
     handleCleanup,
     setIsCreateRolesOpen,
-    setRoles
+    setRoles,
+    setWorkspaceRolesCount
   ])
 
   return (

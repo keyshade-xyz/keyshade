@@ -196,14 +196,15 @@ export class AuthController {
     req?: any
   ) {
     try {
-      const { ip, device, location } = await AuthService.parseLoginRequest(req)
+      const { ip, device, location, date, time } =
+        await AuthService.parseLoginRequest(req)
 
       const data = await this.authService.handleOAuthLogin(
         email,
         name,
         profilePictureUrl,
         oauthProvider,
-        { ip, device, location }
+        { ip, device, location, date, time }
       )
 
       const user = setCookie(response, data)
