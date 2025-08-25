@@ -60,8 +60,13 @@ export default function BillingDetail({
   const calculateCompoundedPrice = () => {
     const isAnnual = currentSubscription?.isAnnual
     const monthsPaid = isAnnual ? 12 : 1
-    return calculateTotalSeatPrice() * monthsPaid
+
+    const roundedTotal = Math.round(calculateTotalSeatPrice() * monthsPaid * 100) / 100
+
+    return roundedTotal
   }
+
+  const monthText = () => (currentSubscription?.isAnnual ? '12 months' : '1 month')
 
   const planPrice = (): `$${number}` => {
     const isAnnual = currentWorkspace?.subscription.isAnnual
@@ -213,7 +218,7 @@ export default function BillingDetail({
           />
           <BillingDetailRow
             label="Compounded price"
-            value={`$${calculateCompoundedPrice()}`}
+            value={`$${calculateCompoundedPrice()} (${monthText()})`}
           />
           <BillingDetailRow
             label="Next Billing Date"
