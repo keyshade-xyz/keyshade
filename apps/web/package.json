@@ -9,6 +9,8 @@
     "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs"
   },
   "dependencies": {
+    "@keyshade/api-client": "workspace:*",
+    "@keyshade/common": "workspace:*",
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@next/mdx": "15.2.3",
@@ -28,6 +30,8 @@
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.501.0",
     "next": "15.2.3",
+    "posthog-js": "^1.240.5",
+    "posthog-node": "^4.17.1",
     "radix-ui": "^1.4.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -36,9 +40,7 @@
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8",
-    "@keyshade/api-client": "workspace:*",
-    "@keyshade/common": "workspace:*"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "15.2.3",
