@@ -1,3 +1,9 @@
+## [2.34.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.1...v2.34.0-stage.2) (2025-08-26)
+
+### 🚀 Features
+
+* **web:** update dockerfil;e ([83ea99d](https://github.com/keyshade-xyz/keyshade/commit/83ea99ddf38e8e3de880246734d2cc7b30475332))
+
 ## [2.34.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.33.0...v2.34.0-stage.1) (2025-08-26)
 
 ### 🚀 Features
