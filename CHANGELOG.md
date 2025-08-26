@@ -1,3 +1,9 @@
+## [2.34.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.33.0...v2.34.0-stage.1) (2025-08-26)
+
+### 🚀 Features
+
+* **cli:** interactive CLI ([#1098](https://github.com/keyshade-xyz/keyshade/issues/1098)) ([2c4241f](https://github.com/keyshade-xyz/keyshade/commit/2c4241ff493dc198457b0363dca9d41b037d6ad0))
+
 ## [2.33.0](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0...v2.33.0) (2025-08-25)
 
 ### 🚀 Features
