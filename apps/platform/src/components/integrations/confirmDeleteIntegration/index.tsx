@@ -1,8 +1,12 @@
 import React, { useCallback, useState } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { deleteIntegrationOpenAtom, selectedIntegrationAtom } from '@/store'
+import {
+  deleteIntegrationOpenAtom,
+  selectedIntegrationAtom,
+  workspaceIntegrationCountAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,6 +26,7 @@ export default function DeleteIntegrationDialog() {
     deleteIntegrationOpenAtom
   )
   const selectedIntegration = useAtomValue(selectedIntegrationAtom)
+  const setWorkspaceIntegrationCount = useSetAtom(workspaceIntegrationCountAtom)
   const router = useRouter()
   const [confirmed, setConfirmed] = useState(false)
 
@@ -38,6 +43,7 @@ export default function DeleteIntegrationDialog() {
     try {
       const { success } = await deleteIntegration(selectedIntegration.slug)
       if (success) {
+        setWorkspaceIntegrationCount((prev) => prev - 1)
         toast.success('Integration deleted successfully')
         router.push('/integrations?tab=all')
       }
@@ -52,7 +58,8 @@ export default function DeleteIntegrationDialog() {
     deleteIntegration,
     selectedIntegration,
     confirmed,
-    router
+    router,
+    setWorkspaceIntegrationCount
   ])
 
   const handleClose = useCallback(() => {

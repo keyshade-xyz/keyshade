@@ -12,6 +12,7 @@ import OTPEmailTemplate from '../emails/otp-email-template'
 import { constructErrorBody } from '@/common/util'
 import WelcomeEmail from '../emails/welcome-email'
 import { LoginNotificationEmail } from '../emails/login-notification-email'
+import ShareSecretEmailTemplate from '../emails/share-secrete-email'
 import { OnboardingReminder1Email } from '../emails/onboarding-reminder-email-1'
 import { OnboardingReminder2Email } from '../emails/onboarding-reminder-email-2'
 import { OnboardingReminder3Email } from '../emails/onboarding-reminder-email-3'
@@ -35,12 +36,25 @@ export class MailService implements IMailService {
       }
     })
   }
+
+  async shareSecret(
+    email: string,
+    data: { expiresAt: Date; isPasswordProtected: boolean; url: string }
+  ): Promise<void> {
+    const subject = 'A secret has been shared with you over Keyshade!'
+    const body = await render(
+      ShareSecretEmailTemplate({
+        data
+      })
+    )
+    await this.sendEmail(email, subject, body)
+  }
+
   async invitedToWorkspace(
     email: string,
     workspaceName: string,
     actionUrl: string,
     invitedBy: string,
-    invitedOn: string,
     forRegisteredUser: boolean,
     inviteeName?: string
   ): Promise<void> {
@@ -103,14 +117,19 @@ export class MailService implements IMailService {
     data: {
       ip: string
       device: string
-      location?: string
+      location: string
+      date: string
+      time: string
     }
   ) {
     const html = await render(
       LoginNotificationEmail({
         ip: data.ip,
         device: data.device,
-        location: data.location
+        location: data.location,
+        userEmail: email,
+        date: data.date,
+        time: data.time
       })
     )
 

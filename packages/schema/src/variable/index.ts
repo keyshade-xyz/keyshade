@@ -10,7 +10,10 @@ export const VariableRevisionSchema = z.object({
   environment: z.object({
     id: EnvironmentSchema.shape.id,
     name: EnvironmentSchema.shape.name,
-    slug: EnvironmentSchema.shape.slug
+    slug: EnvironmentSchema.shape.slug,
+    // THESE TWO VALUES ARE ONLY AVAILABLE IN GetRevisionsOfVariableResponseSchema
+    maxAllowedRevisions: z.number(),
+    totalRevisions: z.number()
   }),
   createdBy: z.object({
     id: UserSchema.shape.id,

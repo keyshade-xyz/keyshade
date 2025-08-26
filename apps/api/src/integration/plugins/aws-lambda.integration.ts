@@ -145,6 +145,71 @@ export class AWSLambdaIntegration extends BaseIntegration {
     }
   }
 
+  public async validateConfiguration(
+    metadata: AWSLambdaIntegrationMetadata
+  ): Promise<void> {
+    const { lambdaFunctionName, region, accessKeyId, secretAccessKey } =
+      metadata
+
+    let client: LambdaClient
+    try {
+      client = new LambdaClient({
+        region,
+        credentials: { accessKeyId, secretAccessKey }
+      })
+    } catch (err: any) {
+      this.logger.error(`Error constructing Lambda client: ${err}`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid AWS region or credentials format',
+          err.message
+        )
+      )
+    }
+
+    try {
+      await client.send(
+        new GetFunctionConfigurationCommand({
+          FunctionName: lambdaFunctionName
+        })
+      )
+      this.logger.log(
+        `AWS Lambda function "${lambdaFunctionName}" validated successfully in region ${region}`
+      )
+    } catch (err) {
+      this.logger.error(
+        constructErrorBody(
+          'Error validating AWS Lambda configuration',
+          err.message
+        )
+      )
+      switch (err.name) {
+        case 'ResourceNotFoundException':
+          throw new BadRequestException(
+            constructErrorBody(
+              'Lambda function not found',
+              `Lambda function "${lambdaFunctionName}" not found in region ${region}`
+            )
+          )
+        case 'InvalidSignatureException':
+        case 'UnrecognizedClientException':
+          throw new BadRequestException(
+            constructErrorBody(
+              'Invalid AWS region or credentials',
+              `AWS credentials invalid or not permitted to call Lambda in ${region}`
+            )
+          )
+        default:
+          throw new BadRequestException(
+            constructErrorBody(
+              'Error validating AWS Lambda configuration',
+              `Error validating AWS Lambda configuration: ${err.message}`
+            )
+          )
+      }
+    }
+  }
+
   /**
    * We have 3 cases in here:
    * 1. The configuration has no records that were added to it
@@ -466,12 +531,6 @@ export class AWSLambdaIntegration extends BaseIntegration {
       Object.entries(response.Environment?.Variables || {})
     )
 
-    console.log('existingEnvironmentalValues', existingEnvironmentalValues)
-    console.log(
-      'response.Environment?.Variables',
-      response.Environment?.Variables
-    )
-
     this.logger.log(
       `Fetched ${existingEnvironmentalValues.size} environment variables from Lambda function`
     )
@@ -537,70 +596,5 @@ export class AWSLambdaIntegration extends BaseIntegration {
     }
 
     return this.lambda
-  }
-
-  public async validateConfiguration(
-    metadata: AWSLambdaIntegrationMetadata
-  ): Promise<void> {
-    const { lambdaFunctionName, region, accessKeyId, secretAccessKey } =
-      metadata
-
-    let client: LambdaClient
-    try {
-      client = new LambdaClient({
-        region,
-        credentials: { accessKeyId, secretAccessKey }
-      })
-    } catch (err: any) {
-      this.logger.error(`Error constructing Lambda client: ${err}`)
-      throw new BadRequestException(
-        constructErrorBody(
-          'Invalid AWS region or credentials format',
-          err.message
-        )
-      )
-    }
-
-    try {
-      await client.send(
-        new GetFunctionConfigurationCommand({
-          FunctionName: lambdaFunctionName
-        })
-      )
-      this.logger.log(
-        `AWS Lambda function "${lambdaFunctionName}" validated successfully in region ${region}`
-      )
-    } catch (err) {
-      this.logger.error(
-        constructErrorBody(
-          'Error validating AWS Lambda configuration',
-          err.message
-        )
-      )
-      switch (err.name) {
-        case 'ResourceNotFoundException':
-          throw new BadRequestException(
-            constructErrorBody(
-              'Lambda function not found',
-              `Lambda function "${lambdaFunctionName}" not found in region ${region}`
-            )
-          )
-        case 'InvalidSignatureException':
-        case 'UnrecognizedClientException':
-          throw new BadRequestException(
-            constructErrorBody(
-              'Invalid AWS region or credentials',
-              `AWS credentials invalid or not permitted to call Lambda in ${region}`
-            )
-          )
-        default:
-          throw new BadRequestException(
-            constructErrorBody(
-              'Error validating AWS Lambda configuration',
-              `Error validating AWS Lambda configuration: ${err.message}`
-            )
-          )
-      }
-    }
   }
 }

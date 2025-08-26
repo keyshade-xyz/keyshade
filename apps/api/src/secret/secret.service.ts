@@ -23,7 +23,7 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { Configuration, ChangeNotificationEvent } from '@/socket/socket.types'
+import { ChangeNotificationEvent, Configuration } from '@/socket/socket.types'
 import { paginate, PaginatedResponse } from '@/common/paginate'
 import {
   addHoursToDate,
@@ -35,7 +35,7 @@ import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { generateSecretValue } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { HydratedSecret, RawSecret, SecretRevision } from './secret.types'
+import { HydratedSecret, RawSecret, RawSecretRevision } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
@@ -48,6 +48,8 @@ import {
 } from '@/event/event.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
+import { checkForDisabledWorkspace } from '@/common/workspace'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class SecretService {
@@ -65,7 +67,8 @@ export class SecretService {
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    private readonly projectCacheService: ProjectCacheService
   ) {
     this.redis = redisClient.publisher
   }
@@ -97,6 +100,12 @@ export class SecretService {
         authorities: [Authority.CREATE_SECRET]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create a secret ${dto.name} in a disabled workspace`
+    )
 
     // Check if more secrets can be created in the project
     await this.tierLimitService.checkSecretLimitReached(project)
@@ -211,6 +220,11 @@ export class SecretService {
       this.prisma
     )
 
+    await this.projectCacheService.addSecretToProjectCache(
+      projectSlug,
+      secretData
+    )
+
     delete hydratedSecret.project
     return hydratedSecret
   }
@@ -317,7 +331,22 @@ export class SecretService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      await checkForDisabledWorkspace(
+        secret.project.workspaceId,
+        this.prisma,
+        `User ${user.id} attempted to update a disabled workspace`
+      )
+
       for (const entry of dto.entries) {
+        const environmentId = environmentSlugToIdMap.get(entry.environmentSlug)
+
+        // Check for secret revision tier limit
+        await this.tierLimitService.checkConfigurationVersionLimitReached(
+          secret,
+          environmentId,
+          'secret'
+        )
+
         // Fetch the latest version of the secret for the environment
         this.logger.log(
           `Fetching the latest version of secret ${secretSlug} for environment ${entry.environmentSlug}`
@@ -325,7 +354,7 @@ export class SecretService {
         const latestVersion = await this.prisma.secretVersion.findFirst({
           where: {
             secretId: secret.id,
-            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
+            environmentId
           },
           select: {
             version: true
@@ -346,7 +375,7 @@ export class SecretService {
               value: await encrypt(secret.project.publicKey, entry.value),
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
+              environmentId,
               secretId: secret.id
             }
           })
@@ -787,7 +816,7 @@ export class SecretService {
     // Get the environments
     const environments = await this.prisma.environment.findMany({
       where: {
-        DisabledEnvironmentOfSecret: {
+        disabledEnvironmentOfSecret: {
           some: {
             secretId
           }
@@ -834,6 +863,11 @@ export class SecretService {
     })
     this.logger.log(`Deleted secret ${secretSlug}`)
 
+    await this.projectCacheService.removeSecretFromProjectCache(
+      secret.project.slug,
+      secret.id
+    )
+
     await createEvent(
       {
         triggeredBy: user,
@@ -868,7 +902,7 @@ export class SecretService {
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
-  ): Promise<PaginatedResponse<SecretRevision>> {
+  ): Promise<PaginatedResponse<RawSecretRevision>> {
     this.logger.log(
       `User ${user.id} attempted to get revisions of secret ${secretSlug} in environment ${environmentSlug}`
     )
@@ -1080,7 +1114,7 @@ export class SecretService {
           }
         },
         // Ignore disabled secrets
-        DisabledEnvironmentOfSecret: {
+        disabledEnvironmentOfSecret: {
           none: {
             environmentId
           }
@@ -1157,6 +1191,45 @@ export class SecretService {
     await Promise.all(secrets.map((secret) => this.rotateSecret(secret)))
 
     this.logger.log('Secrets rotation complete')
+  }
+
+  /**
+   * Checks if a secret with a given name already exists in the project
+   * @throws {ConflictException} if the secret already exists
+   * @param secretName the name of the secret to check
+   * @param project the project to check the secret in
+   */
+  async secretExists(
+    secretName: Secret['name'] | null | undefined,
+    projectId: Project['id']
+  ) {
+    if (!secretName) return
+
+    this.logger.log(
+      `Checking if secret ${secretName} exists in project ${projectId}`
+    )
+
+    if (
+      (await this.prisma.secret.findFirst({
+        where: {
+          name: secretName,
+          projectId
+        }
+      })) !== null
+    ) {
+      this.logger.error(
+        `Secret ${secretName} already exists in project ${projectId}`
+      )
+      throw new ConflictException(
+        constructErrorBody(
+          'Secret already exists',
+          'A secret with this name already exists in this project. Please choose a different name.'
+        )
+      )
+    }
+    this.logger.log(
+      `Secret ${secretName} does not exist in project ${projectId}`
+    )
   }
 
   private async rotateSecret(secret: RawSecret): Promise<void> {
@@ -1264,40 +1337,5 @@ export class SecretService {
     )
 
     this.logger.log(`Secret ${secret.id} rotated`)
-  }
-
-  /**
-   * Checks if a secret with a given name already exists in the project
-   * @throws {ConflictException} if the secret already exists
-   * @param secretName the name of the secret to check
-   * @param project the project to check the secret in
-   */
-  async secretExists(
-    secretName: Secret['name'] | null | undefined,
-    projectId: Project['id']
-  ) {
-    if (!secretName) return
-
-    this.logger.log(
-      `Checking if secret ${secretName} exists in project ${projectId}`
-    )
-
-    if (
-      (await this.prisma.secret.findFirst({
-        where: {
-          name: secretName,
-          projectId
-        }
-      })) !== null
-    ) {
-      const errorMessage = `Secret ${secretName} already exists in project ${projectId}`
-      this.logger.error(errorMessage)
-      throw new ConflictException(
-        constructErrorBody('Secret already exists', errorMessage)
-      )
-    }
-    this.logger.log(
-      `Secret ${secretName} does not exist in project ${projectId}`
-    )
   }
 }

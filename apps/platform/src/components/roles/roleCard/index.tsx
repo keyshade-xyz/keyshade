@@ -25,13 +25,14 @@ interface RoleListItemProps {
 }
 
 function AuthorityTile({ authority }: { authority: AuthorityEnum }) {
-  let [first, second] = authority.split('_')
-  first = first.charAt(0) + first.slice(1).toLowerCase()
-  second = second.charAt(0) + second.slice(1).toLowerCase()
+  const formattedAuthority = authority
+    .split('_')
+    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .join(' ')
 
   return (
-    <div className="h-fit w-full rounded-md border border-cyan-200 bg-cyan-950 px-2 py-1 text-center text-sm text-cyan-200">
-      {first} {second}
+    <div className="h-fit w-fit rounded-md border border-cyan-200 bg-cyan-950 px-3 py-2 text-center text-sm text-cyan-200">
+      {formattedAuthority}
     </div>
   )
 }
@@ -100,7 +101,7 @@ export default function RoleCard({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <NoteIconSVG className="w-7" />
+                <NoteIconSVG className="w-6" />
               </TooltipTrigger>
               <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
                 <p>{role.description}</p>
@@ -110,47 +111,54 @@ export default function RoleCard({
         ) : null}
       </TableCell>
       <TableCell className="h-full">
-        <div className="mt-1 flex h-full flex-wrap items-start">
-          {role.members.map((member) => (
-            <TooltipProvider key={member.email}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <AvatarComponent
-                    className="ml-[-0.3rem]"
-                    name={member.name || ''}
-                    profilePictureUrl={member.profilePictureUrl}
-                  />
-                </TooltipTrigger>
-                <TooltipContent
-                  className="flex w-fit items-center justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
-                  sideOffset={8}
-                >
-                  <AvatarComponent
-                    className="h-10 w-10"
-                    name={member.name || ''}
-                    profilePictureUrl={member.profilePictureUrl}
-                  />
-                  <div className="ml-2 mr-5 flex flex-col">
-                    {member.name ? (
-                      <div className="font-semibold">{member.name}</div>
-                    ) : null}
-                    <div className="text-sm">{member.email}</div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <div className="text-sm text-white/60">Joined</div>
-                    <div className="text-sm text-white/60">
-                      {dayjs(String(member.memberSince)).format('MMM D, YYYY')}
+        <div className="mt-4 flex h-full flex-wrap items-start">
+          {role.members.map((member) => {
+            const isInvited = !member.invitationAccepted
+            return (
+              <TooltipProvider key={member.email}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <AvatarComponent
+                      className={` ${isInvited && 'opacity-50'}`}
+                      name={member.name || ''}
+                      profilePictureUrl={member.profilePictureUrl}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className="flex w-fit items-center justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                    sideOffset={8}
+                  >
+                    <AvatarComponent
+                      className={`h-10 w-10 ${isInvited ? 'opacity-50' : ''}`}
+                      name={member.name || ''}
+                      profilePictureUrl={member.profilePictureUrl}
+                    />
+                    <div className="ml-2 mr-5 flex flex-col">
+                      {member.name ? (
+                        <div className="font-semibold">{member.name}</div>
+                      ) : null}
+                      <div className="text-sm">{member.email}</div>
                     </div>
-                  </div>
-                  <TooltipArrow className="fill-zinc-700" />
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ))}
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm text-white/60">
+                        {isInvited ? 'Invited' : 'Joined'}
+                      </div>
+                      <div className="text-sm text-white/60">
+                        {dayjs(String(member.memberSince)).format(
+                          'MMM D, YYYY'
+                        )}
+                      </div>
+                    </div>
+                    <TooltipArrow className="fill-zinc-700" />
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )
+          })}
         </div>
       </TableCell>
       <TableCell className="h-full">
-        <div className="grid h-full grid-cols-2 gap-2">
+        <div className="mt-1 flex h-full flex-wrap items-start gap-2">
           {hasAuthorities ? (
             <>
               {role.authorities
@@ -162,7 +170,7 @@ export default function RoleCard({
                 <Button
                   aria-controls="authorities-list"
                   aria-expanded={showAllAuthorities}
-                  className="h-auto justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
+                  className="h-auto w-fit justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
                   onClick={() => setShowAllAuthorities(!showAllAuthorities)}
                 >
                   {showAllAuthorities ? 'Show less' : 'Show more'}
@@ -196,23 +204,23 @@ export default function RoleCard({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="flex justify-end gap-0.5 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
+      <TableCell className="flex justify-end gap-1.5 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 className="
-                hover:bg-white/5 hover:text-white "
+                p-3 hover:bg-white/5 hover:text-white"
                 onClick={() =>
                   copyToClipboard(
-                    role.slug,
+                    String(role.slug),
                     'The slug got copied to your clipboard.',
                     'Failed to copy slug'
                   )
                 }
                 variant="ghost"
               >
-                <Copy size={20} />
+                <Copy size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent
@@ -225,25 +233,24 @@ export default function RoleCard({
           </Tooltip>
         </TooltipProvider>
         <Button
-          className="
-                hover:bg-white/5 hover:text-white "
+          className="p-3 hover:bg-white/5 hover:text-white"
           disabled={!isAuthorisedToEditRole}
           onClick={handleEditRole}
           variant="ghost"
         >
-          <Pen size={20} />
+          <Pen size={16} />
         </Button>
 
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="hover:bg-white/5 hover:text-white"
+                className="p-3 hover:bg-white/5 hover:text-white"
                 disabled={isAdminRole || !isAuthorisedToDeleteRole}
                 onClick={handleDeleteRole}
                 variant="ghost"
               >
-                <TrashWhiteSVG />
+                <TrashWhiteSVG className="h-4 w-4" viewBox="0 0 22 22" />
               </Button>
             </TooltipTrigger>
             {isAdminRole ? (

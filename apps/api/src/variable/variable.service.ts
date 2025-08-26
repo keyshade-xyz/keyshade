@@ -22,7 +22,7 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { Configuration, ChangeNotificationEvent } from '@/socket/socket.types'
+import { ChangeNotificationEvent, Configuration } from '@/socket/socket.types'
 import { paginate, PaginatedResponse } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { createEvent } from '@/common/event'
@@ -32,7 +32,7 @@ import {
   mapEntriesToEventMetadata
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
-import { HydratedVariable, VariableRevision } from './variable.types'
+import { HydratedVariable, RawVariableRevision } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import {
@@ -43,6 +43,8 @@ import {
 import { SecretService } from '@/secret/secret.service'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
+import { checkForDisabledWorkspace } from '@/common/workspace'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class VariableService {
@@ -60,7 +62,8 @@ export class VariableService {
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    private readonly projectCacheService: ProjectCacheService
   ) {
     this.redis = redisClient.publisher
   }
@@ -92,6 +95,12 @@ export class VariableService {
         authorities: [Authority.CREATE_VARIABLE]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create variable ${dto.name} in disabled workspace ${project.workspaceId}`
+    )
 
     // Check if more variables are allowed in the project
     await this.tierLimitService.checkVariableLimitReached(project)
@@ -184,6 +193,11 @@ export class VariableService {
       }
     }
 
+    await this.projectCacheService.addVariableToProjectCache(
+      projectSlug,
+      variable
+    )
+
     await createEvent(
       {
         triggeredBy: user,
@@ -203,6 +217,7 @@ export class VariableService {
       this.prisma
     )
 
+    delete hydratedVariable.project
     return hydratedVariable
   }
 
@@ -308,7 +323,22 @@ export class VariableService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      await checkForDisabledWorkspace(
+        variable.project.workspaceId,
+        this.prisma,
+        `User ${user.id} attempted to update variable ${variableSlug} in disabled workspace ${variable.project.workspaceId}`
+      )
+
       for (const entry of dto.entries) {
+        const environmentId = environmentSlugToIdMap.get(entry.environmentSlug)
+
+        // Check for secret revision tier limit
+        await this.tierLimitService.checkConfigurationVersionLimitReached(
+          variable,
+          environmentId,
+          'variable'
+        )
+
         // Fetch the latest version of the variable for the environment
         this.logger.log(
           `Fetching latest version of variable ${variableSlug} for environment ${entry.environmentSlug}`
@@ -316,7 +346,7 @@ export class VariableService {
         const latestVersion = await this.prisma.variableVersion.findFirst({
           where: {
             variableId: variable.id,
-            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
+            environmentId
           },
           select: {
             version: true
@@ -337,7 +367,7 @@ export class VariableService {
               value: entry.value,
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
+              environmentId,
               variableId: variable.id
             }
           })
@@ -783,7 +813,7 @@ export class VariableService {
     // Get the environments
     const environments = await this.prisma.environment.findMany({
       where: {
-        DisabledEnvironmentOfVariable: {
+        disabledEnvironmentOfVariable: {
           some: {
             variableId
           }
@@ -837,6 +867,11 @@ export class VariableService {
       }
     })
     this.logger.log(`Deleted variable ${variable.slug}`)
+
+    await this.projectCacheService.removeVariableFromProjectCache(
+      variable.project.slug,
+      variable.id
+    )
 
     await createEvent(
       {
@@ -972,7 +1007,7 @@ export class VariableService {
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
-  ): Promise<PaginatedResponse<VariableRevision>> {
+  ): Promise<PaginatedResponse<RawVariableRevision>> {
     this.logger.log(
       `User ${user.id} attempted to get revisions of variable ${variableSlug} in environment ${environmentSlug}`
     )
@@ -1088,7 +1123,7 @@ export class VariableService {
           }
         },
         // Ignore disabled variables
-        DisabledEnvironmentOfVariable: {
+        disabledEnvironmentOfVariable: {
           none: {
             environmentId
           }
@@ -1159,10 +1194,14 @@ export class VariableService {
         }
       })) !== null
     ) {
-      const errorMessage = `Variable ${variableName} already exists in project ${projectId}`
-      this.logger.error(errorMessage)
+      this.logger.error(
+        `Variable ${variableName} already exists in project ${projectId}`
+      )
       throw new ConflictException(
-        constructErrorBody('Variable already exists', errorMessage)
+        constructErrorBody(
+          'Variable already exists',
+          'A variable with this name already exists in this project. Please choose a different name.'
+        )
       )
     }
 
