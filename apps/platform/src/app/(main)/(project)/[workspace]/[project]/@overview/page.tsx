@@ -47,7 +47,7 @@ function OverviewPage(): React.JSX.Element {
     }
   }, [regeneratedKeys, setIsViewAndDownloadProjectKeysDialogOpen])
 
-  if (loading || !selectedProject) {
+  if (loading) {
     return (
       <div className="space-y-4">
         <OverviewLoader />
@@ -57,24 +57,29 @@ function OverviewPage(): React.JSX.Element {
     )
   }
 
+  if (!selectedProject) {
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <span className="text-white/60">No project selected.</span>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-full w-full gap-4 pt-2">
       <PageTitle title={`${selectedProject.name} | Overview`} />
-      <div className="flex h-fit w-[55%] flex-col gap-4">
+      <div className="flex h-full w-[55%] flex-col gap-4 overflow-y-auto">
         {/* Basic project details eg:name , des... */}
         <ProjectDetails project={selectedProject} />
-
         {/* Import .env feature */}
         <ImportEnvButton projectSlug={selectedProject.slug} />
-
         {/* update project access level */}
         <ConfigAccessLevel
           accessLevel={selectedProject.accessLevel}
           projectSlug={selectedProject.slug}
         />
       </div>
-
-      <div className="flex h-fit w-[45%] flex-col gap-4">
+      <div className="flex h-full w-[45%] flex-col gap-4 overflow-y-auto">
         <div className="flex h-fit w-full flex-col gap-3 rounded-2xl bg-white/5 p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.06),0px_1px_3px_rgba(16,24,40,0.1)]">
           <div className="flex items-center gap-x-2 border-b border-white/20 pb-5">
             <LockSVG />
@@ -88,7 +93,6 @@ function OverviewPage(): React.JSX.Element {
                 onOpenSetupDialog={() => setLocalKeyDialogOpen(true)}
                 privateKey={projectPrivateKey}
               />
-
               {/* Regenerate private key */}
               <RegenerateKeySetup
                 onOpenRegenerateDialog={() => setRegenerateKeyDialogOpen(true)}
@@ -96,7 +100,6 @@ function OverviewPage(): React.JSX.Element {
                 privateKey={projectPrivateKey}
                 projectSlug={selectedProject.slug}
               />
-
               {/* store private key in keyshade db */}
               <ServerKeySetup
                 onDelete={() => setDeleteKeyDialogOpen(true)}
@@ -107,7 +110,6 @@ function OverviewPage(): React.JSX.Element {
             </TooltipProvider>
           </div>
         </div>
-
         {/* Link to docs */}
         <KeyshadeDocs />
       </div>
@@ -117,14 +119,12 @@ function OverviewPage(): React.JSX.Element {
         isOpen={localKeyDialogOpen}
         onClose={() => setLocalKeyDialogOpen(false)}
       />
-
       {/* Server key setup dialog */}
       <ServerKeySetupDialog
         currentProjectSlug={selectedProject.slug}
         isOpen={serverKeyDialogOpen}
         onClose={() => setServerKeyDialogOpen(false)}
       />
-
       {/* Regenerate key dialog */}
       <RegenerateKeyDialog
         currentProjectSlug={selectedProject.slug}
@@ -132,7 +132,6 @@ function OverviewPage(): React.JSX.Element {
         onClose={() => setRegenerateKeyDialogOpen(false)}
         onRegenerated={(keys) => setRegeneratedKeys(keys)}
       />
-
       {/* Delete secret alert dialog */}
       <ConfirmDeleteKeyDialog
         currentProject={selectedProject.slug}
