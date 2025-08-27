@@ -19,7 +19,8 @@ const zodEnv = z.object({
   NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE: sampleRateSchema(
     'NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE'
   ),
-  NEXT_PUBLIC_SENTRY_ENVIRONMENT: z.string()
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT: z.string(),
+  NEXT_PUBLIC_POSTHOG_KEY: z.string()
 })
 
 declare global {
