@@ -1,3 +1,21 @@
+## [2.34.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.2...v2.34.0-stage.3) (2025-08-26)
+
+### 🚀 Features
+
+* **web:** add posthog ([#1134](https://github.com/keyshade-xyz/keyshade/issues/1134)) ([7efe6b1](https://github.com/keyshade-xyz/keyshade/commit/7efe6b1d0114a82ad286112904d40d0434e736dc))
+
+## [2.34.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.1...v2.34.0-stage.2) (2025-08-26)
+
+### 🚀 Features
+
+* **web:** update dockerfil;e ([83ea99d](https://github.com/keyshade-xyz/keyshade/commit/83ea99ddf38e8e3de880246734d2cc7b30475332))
+
+## [2.34.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.33.0...v2.34.0-stage.1) (2025-08-26)
+
+### 🚀 Features
+
+* **cli:** interactive CLI ([#1098](https://github.com/keyshade-xyz/keyshade/issues/1098)) ([2c4241f](https://github.com/keyshade-xyz/keyshade/commit/2c4241ff493dc198457b0363dca9d41b037d6ad0))
+
 ## [2.33.0](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0...v2.33.0) (2025-08-25)
 
 ### 🚀 Features

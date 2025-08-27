@@ -1,6 +1,6 @@
 {
   "name": "@keyshade/cli",
-  "version": "3.2.4",
+  "version": "3.3.0-stage.1",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",

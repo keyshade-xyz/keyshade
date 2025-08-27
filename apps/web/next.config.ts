@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
   webpack(config, { isServer }) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- posthog auto gen
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack']
@@ -17,12 +18,29 @@ const nextConfig: NextConfig = {
     const __dirname = dirname(__filename)
 
     if (!isServer) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- posthog auto generate
       config.resolve.alias['@public'] = path.join(__dirname, 'public')
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- posthog auto generate
     return config
   },
   reactStrictMode: true,
+  // eslint-disable-next-line @typescript-eslint/require-await -- posthog auto generates this
+  async rewrites() {
+    return [
+      {
+        source: '/ingest/static/:path*',
+        destination: 'https://eu-assets.i.posthog.com/static/:path*'
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://eu.i.posthog.com/:path*'
+      }
+    ]
+  },
+  // This is required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true
 }
 
 const withMDX = createMDX({
@@ -66,4 +84,4 @@ const sentryBuildOptions: SentryBuildOptions = {
   automaticVercelMonitors: true
 }
 
-export default withSentryConfig(withMDX(nextConfig as any), sentryBuildOptions)
+export default withSentryConfig(withMDX(nextConfig), sentryBuildOptions)
