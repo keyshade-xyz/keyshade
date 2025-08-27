@@ -96,7 +96,7 @@ export const selectedWorkspaceAtom = atom<
 export const selectedProjectAtom = atom<
   GetAllProjectsResponse['items'][number] | null
 >(null)
-export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse[]>([])
+export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse['items']>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
 export const selectedMemberAtom = atom<
