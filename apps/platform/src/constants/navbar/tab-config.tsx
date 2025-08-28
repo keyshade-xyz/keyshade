@@ -8,7 +8,7 @@ import {
 export const TAB_CONFIGS = {
   settings: [
     { id: 'profile', label: 'Profile' },
-    { id: 'billing', label: 'Billing' },
+    // { id: 'billing', label: 'Billing' },
     { id: 'invites', label: 'Invites' }
   ],
   project: [

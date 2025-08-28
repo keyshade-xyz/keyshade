@@ -6,7 +6,7 @@ interface InfiniteScrollListResponse<T> {
   success: boolean
   data: {
     items: T[]
-    metadata?: { totalCount: number }
+    metadata?: { totalCount?: number }
   }
   error?: { message: string }
 }
