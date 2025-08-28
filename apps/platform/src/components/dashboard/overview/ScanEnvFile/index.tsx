@@ -219,7 +219,7 @@ function ScanEnvModal({
   return (
     <>
       <Dialog onOpenChange={onClose} open={isOpen}>
-        <DialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F]">
+        <DialogContent className="max-w-3xl rounded-lg border border-white/25 bg-[#1E1E1F]">
           <DialogHeader className="border-b border-white/20 pb-4">
             <DialogTitle className="text-xl font-semibold">
               Reorganize Selection
@@ -229,10 +229,10 @@ function ScanEnvModal({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-1 border-b border-white/20">
-            <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto  py-2">
+          <div className="flex flex-col gap-1 overflow-x-auto border-b border-white/20">
+            <div className="flex max-h-[40vh] flex-row gap-4  py-2">
               <div
-                className={`flex flex-col gap-2 rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
+                className={`flex flex-1 flex-col gap-2 overflow-y-auto rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
                   over === 'secret'
                     ? 'border-blue-500 bg-blue-500 bg-opacity-10'
                     : 'border-white/20 hover:border-white/40'
@@ -254,7 +254,7 @@ function ScanEnvModal({
                 <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
               </div>
               <div
-                className={`flex flex-col gap-2 rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
+                className={`flex flex-1 flex-col gap-2 overflow-y-auto rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
                   over === 'variable'
                     ? 'border-blue-500 bg-blue-500 bg-opacity-10'
                     : 'border-white/20 hover:border-white/40'
