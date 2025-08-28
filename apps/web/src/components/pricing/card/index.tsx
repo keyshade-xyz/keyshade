@@ -9,6 +9,7 @@ import {
   StarsRightSVG
 } from '@public/pricing'
 import type { PriceCardPropsType } from '@/types'
+import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function PriceCard({
   title,
@@ -39,6 +40,21 @@ function PriceCard({
       return 'Contact Us'
     }
     return 'Buy Now'
+  }
+
+  const handleGetStartedClick = () => {
+    if (price === 0) {
+      window.open('https://app.keyshade.xyz', '_blank')
+    } else if (price < 0) {
+      window.open(
+        'mailto:contact@keyshade.xyz?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan for my organization.',
+        '_blank'
+      )
+    } else {
+      isUserLoggedIn()
+        ? window.open('https://app.keyshade.xyz/billing', '_blank')
+        : window.open('https://app.keyshade.xyz/auth', '_blank')
+    }
   }
 
   return (
@@ -104,6 +120,7 @@ function PriceCard({
 
         <button
           className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
+          onClick={handleGetStartedClick}
           type="button"
         >
           {returnButtonLabel()}
