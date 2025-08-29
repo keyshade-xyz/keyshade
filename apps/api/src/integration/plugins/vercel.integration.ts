@@ -669,7 +669,36 @@ export class VercelIntegration extends BaseIntegration {
     let duration = 0
 
     try {
-      this.logger.log(`Fetching latest READY deployment for ${projectId}...`)
+      this.logger.log(`Checking for active deployments for ${projectId}...`)
+      const { deployments: activeDeployments } =
+        await this.vercel.deployments.getDeployments({
+          projectId,
+          state: 'BUILDING', // Check for in-progress states
+          target: 'production',
+          limit: 10 // Check multiple to be safe
+        })
+
+      if (activeDeployments?.length > 0) {
+        this.logger.log(
+          `Found ${activeDeployments.length} active deployment(s), cancelling...`
+        )
+        for (const activeDeployment of activeDeployments) {
+          try {
+            await this.vercel.deployments.cancelDeployment({
+              id: activeDeployment.uid
+            })
+            this.logger.log(`Cancelled deployment: ${activeDeployment.uid}`)
+          } catch (cancelErr) {
+            this.logger.warn(
+              `Failed to cancel deployment ${activeDeployment.uid}:`,
+              cancelErr
+            )
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
+
+      this.logger.log(`Fetching latest READY deployments for ${projectId}...`)
 
       const { deployments } = await this.vercel.deployments.getDeployments({
         projectId,
