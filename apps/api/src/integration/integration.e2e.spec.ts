@@ -35,9 +35,6 @@ import {
   LambdaClient
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
-import { BaseIntegration } from './plugins/base.integration'
-import IntegrationFactory from './plugins/integration.factory'
-import { HydratedIntegration } from './integration.types'
 import nock = require('nock')
 
 const originalFetch = global.fetch
@@ -78,7 +75,6 @@ global.fetch = jest
 
     throw new Error(`Unmocked fetch call to: ${url}`)
   })
-
 
 jest.mock('@vercel/sdk', () => {
   const getEnvMock = jest.fn()
@@ -573,6 +569,61 @@ describe('Integration Controller Tests', () => {
       expect(integrationRuns).toHaveLength(1)
 
       expect(integrationRuns[0].title).toBe('Initializing Discord integration')
+      expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
+    })
+  })
+
+  describe('Slack Integration Initialization Tests', () => {
+    const DUMMY_TOKEN = 'xoxb-valid-but-test'
+    const DUMMY_SIGNING_SECRET = 'fake-signing-secret'
+    const DUMMY_CHANNEL = 'C1234567890'
+
+    const validDtoSlack: CreateIntegration = {
+      name: 'Validation Test',
+      type: IntegrationType.SLACK,
+      metadata: {
+        botToken: DUMMY_TOKEN,
+        signingSecret: DUMMY_SIGNING_SECRET,
+        channelId: DUMMY_CHANNEL
+      } satisfies SlackIntegrationMetadata,
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    it('should send initialization message when Slack integration is created', async () => {
+      nock('https://slack.com').post('/api/auth.test').reply(200, {
+        ok: true
+      })
+
+      nock('https://slack.com')
+        .post('/api/chat.postEphemeral')
+        .reply(200, { ok: true })
+
+      nock('https://slack.com').post('/api/chat.postMessage').reply(200, {
+        ok: true
+      })
+
+      postMsgMock.mockResolvedValueOnce({
+        ok: true,
+        message: { text: 'Posting message to Slack' }
+      })
+
+      const result = await app.inject({
+        method: 'POST',
+        url: `/integration/${workspace1.slug}`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDtoSlack
+      })
+
+      expect(result.statusCode).toEqual(201)
+
+      const integrationRuns = await prisma.integrationRun.findMany({
+        where: {
+          integrationId: result.json().id,
+          title: 'Posting message to Slack'
+        }
+      })
+
+      expect(integrationRuns).toHaveLength(1)
       expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
   })
@@ -1238,62 +1289,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(result.statusCode).toEqual(404)
-    })
-  })
-
-  describe('Slack Integration Init Tests', () => {
-    let integration: HydratedIntegration
-    let createSlackIntegration: () => Promise<BaseIntegration>
-    const DUMMY_TOKEN = 'xoxb-valid-but-test'
-    const DUMMY_SIGNING_SECRET = 'fake-signing-secret'
-    const DUMMY_CHANNEL = 'C1234567890'
-
-    beforeEach(async () => {
-      integration = await integrationService.createIntegration(
-        user1,
-        {
-          name: 'Slack Init Test',
-          type: IntegrationType.SLACK,
-          metadata: {
-            botToken: DUMMY_TOKEN,
-            signingSecret: DUMMY_SIGNING_SECRET,
-            channelId: DUMMY_CHANNEL
-          } satisfies SlackIntegrationMetadata,
-          notifyOn: [EventType.WORKSPACE_UPDATED],
-          privateKey: 'test-private-key'
-        },
-        workspace1.slug
-      )
-
-      createSlackIntegration = async () => {
-        return await IntegrationFactory.createIntegration(integration, prisma)
-      }
-
-      jest.clearAllMocks()
-    })
-
-    it('should send a message when the init function is called', async () => {
-      postMsgMock.mockResolvedValueOnce({
-        ok: true,
-        message: { text: 'Integration initialized' }
-      })
-
-      const slack = await createSlackIntegration()
-
-      slack.init('dummy-key', 'event-id')
-
-      expect(postMsgMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          channel: DUMMY_CHANNEL,
-          text: 'Integration initialized'
-        })
-      )
-
-      const run = await prisma.integrationRun.findFirst({
-        where: { integrationId: integration.id },
-        orderBy: { triggeredAt: 'desc' }
-      })
-      expect(run?.status).toBe(IntegrationRunStatus.SUCCESS)
     })
   })
 })
