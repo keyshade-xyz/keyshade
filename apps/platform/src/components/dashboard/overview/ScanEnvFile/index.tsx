@@ -192,11 +192,11 @@ function ScanEnvModal({
   useEffect(() => {
     const initialSelection: Record<string, 'secret' | 'variable'> = {}
 
-    Object.keys(secretsAndVariables.secrets).forEach((key) => {
+    Object.keys(secretsAndVariables.secrets as object).forEach((key) => {
       initialSelection[key] = 'secret'
     })
 
-    Object.keys(secretsAndVariables.variables).forEach((key) => {
+    Object.keys(secretsAndVariables.variables as object).forEach((key) => {
       initialSelection[key] = 'variable'
     })
 
