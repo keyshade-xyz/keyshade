@@ -220,6 +220,11 @@ export class AuthorizationService {
     user: AuthenticatedUser,
     workspace: Workspace
   ) {
+    if (!user.ipAddress) {
+      // Only happens if it's not being set internally
+      return
+    }
+
     this.logger.log(
       `Checking if user ${user.id}'s IP address has access to workspace ${workspace.id}`
     )

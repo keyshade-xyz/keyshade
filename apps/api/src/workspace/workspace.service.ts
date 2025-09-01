@@ -35,6 +35,7 @@ import { HydratedWorkspace } from './workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
+import { Cron, CronExpression } from '@nestjs/schedule'
 
 @Injectable()
 export class WorkspaceService implements OnModuleInit {
@@ -85,6 +86,77 @@ export class WorkspaceService implements OnModuleInit {
       }
       await this.prisma.$transaction(createSubscriptionOps)
       this.logger.log('Finished creating subscriptions for workspaces')
+    }
+  }
+
+  /**
+   * There are cases where the user account gets created, but due to some errors,
+   * the default workspace is not created. This method creates a default workspace
+   * for the user account.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  public async createDefaultWorkspaces() {
+    try {
+      this.logger.log('Scanning for users without a default workspace...')
+
+      const workspaces = await this.prisma.workspace.findMany({
+        where: {
+          isDefault: true
+        },
+        distinct: ['ownerId']
+      })
+
+      const ownerIds: User['id'][] = workspaces.map(
+        (workspace) => workspace.ownerId
+      )
+
+      this.logger.log(
+        `Found ${workspaces.length} default workspaces for ${ownerIds.length} users`
+      )
+
+      const usersWithoutDefaultWorkspace = await this.prisma.user.findMany({
+        where: {
+          id: {
+            notIn: ownerIds
+          },
+          name: {
+            not: 'Admin'
+          }
+        }
+      })
+
+      this.logger.log(
+        `Found ${usersWithoutDefaultWorkspace.length} users without a default workspace`
+      )
+
+      for (const user of usersWithoutDefaultWorkspace) {
+        this.logger.log(
+          `Creating a default workspace for user ${user.id} (${user.email})`
+        )
+        const workspace = await createWorkspace(
+          user as AuthenticatedUser,
+          {
+            name: 'My Workspace'
+          },
+          this.prisma,
+          this.slugGenerator,
+          this.hydrationService,
+          this.workspaceCacheService,
+          true
+        )
+        this.logger.log(
+          `Created workspace ${workspace.slug} for user ${user.id}`
+        )
+      }
+
+      this.logger.log(
+        `Finished creating default workspaces ${usersWithoutDefaultWorkspace.length} users`
+      )
+    } catch (error) {
+      this.logger.error(
+        `Error creating default workspaces: ${error.message}`,
+        error.stack
+      )
     }
   }
 

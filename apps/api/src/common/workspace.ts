@@ -125,6 +125,7 @@ export const createWorkspace = async (
   )
 
   const workspace = result[0]
+  await workspaceCacheService.setRawWorkspace(workspace)
 
   await createEvent(
     {
@@ -142,7 +143,6 @@ export const createWorkspace = async (
     prisma
   )
 
-  await workspaceCacheService.setRawWorkspace(workspace)
   return await hydrationService.hydrateWorkspace({
     user,
     workspace
