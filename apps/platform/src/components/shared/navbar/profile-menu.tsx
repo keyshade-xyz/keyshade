@@ -73,14 +73,8 @@ export default function ProfileMenu() {
             <Link href="/settings?tab=profile">
               <DropdownMenuItem>Profile</DropdownMenuItem>
             </Link>
-            <Link href="/settings?tab=billing">
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-            </Link>
             <Link href="/settings?tab=invites">
               <DropdownMenuItem>View Invites</DropdownMenuItem>
-            </Link>
-            <Link href="/teams">
-              <DropdownMenuItem>Team</DropdownMenuItem>
             </Link>
 
             <DropdownMenuSeparator />
