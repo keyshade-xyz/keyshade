@@ -22,6 +22,8 @@ import { constructErrorBody, decryptMetadata } from '@/common/util'
 import { PrismaService } from '@/prisma/prisma.service'
 import { Project } from '@keyshade/schema'
 
+// TODO: Add a abstract destroy(eventId: Event['id']) function to base.integration.ts
+
 /**
  * The integration abstract class that every integration must extend.
  */
