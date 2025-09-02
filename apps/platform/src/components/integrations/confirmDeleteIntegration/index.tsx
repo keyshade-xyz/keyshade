@@ -28,7 +28,8 @@ export default function DeleteIntegrationDialog() {
   const selectedIntegration = useAtomValue(selectedIntegrationAtom)
   const setWorkspaceIntegrationCount = useSetAtom(workspaceIntegrationCountAtom)
   const router = useRouter()
-  const [confirmed, setConfirmed] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmCleanup, setConfirmCleanup] = useState(false)
 
   const deleteIntegration = useHttp((integrationSlug: string) => {
     return ControllerInstance.getInstance().integrationController.deleteIntegration(
@@ -39,7 +40,7 @@ export default function DeleteIntegrationDialog() {
   })
 
   const handleDeleteIntegration = useCallback(async () => {
-    if (!selectedIntegration || !confirmed) return
+    if (!selectedIntegration || !confirmDelete) return
     try {
       const { success } = await deleteIntegration(selectedIntegration.slug)
       if (success) {
@@ -51,20 +52,20 @@ export default function DeleteIntegrationDialog() {
       toast.error('Error deleting integration')
     } finally {
       setIsDeleteIntegrationOpen(false)
-      setConfirmed(false)
+      setConfirmDelete(false)
     }
   }, [
     setIsDeleteIntegrationOpen,
     deleteIntegration,
     selectedIntegration,
-    confirmed,
+    confirmDelete,
     router,
     setWorkspaceIntegrationCount
   ])
 
   const handleClose = useCallback(() => {
     setIsDeleteIntegrationOpen(false)
-    setConfirmed(false)
+    setConfirmDelete(false)
   }, [setIsDeleteIntegrationOpen])
 
   return (
@@ -85,27 +86,45 @@ export default function DeleteIntegrationDialog() {
           </DialogDescription>
           <div className="flex gap-2 border-y-[0.5px] border-white/20 py-3">
             <Checkbox
-              checked={confirmed}
+              checked={confirmDelete}
               className="mt-1 h-5 w-5 rounded border-[0.2px] border-white/40 bg-[#242528] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
               id="confirm-delete-integration"
-              onCheckedChange={(checked) => setConfirmed(Boolean(checked))}
+              onCheckedChange={(checked) => setConfirmDelete(Boolean(checked))}
             />
 
             <Label
               className="ml-2 flex w-3/4 flex-col"
               htmlFor="confirm-delete-integration"
             >
-              <p className="text-lg">Delete Integration</p>
+              <p className="text-lg">Delete &quot;{selectedIntegration?.slug}&quot;?</p>
               <p className="text-sm leading-5 text-white/50">
-                This will remove the private key and any related resources on
-                the 3rd party platform.
+                This will completely remove all the integration runs, events, and data for this integration
+                from your workspace.
+              </p>
+            </Label>
+          </div>
+          <div className="flex gap-2 border-b-[0.5px] border-white/20 py-3">
+            <Checkbox
+              checked={confirmCleanup}
+              className="mt-1 h-5 w-5 rounded border-[0.2px] border-white/40 bg-[#242528] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
+              id="confirm-cleanup"
+              onCheckedChange={(checked) => setConfirmCleanup(Boolean(checked))}
+            />
+
+            <Label
+              className="ml-2 flex w-3/4 flex-col"
+              htmlFor="confirm-cleanup"
+            >
+              <p className="text-lg">Cleanup?</p>
+              <p className="text-sm leading-5 text-white/50">
+                Clean up all integration data.
               </p>
             </Label>
           </div>
         </DialogHeader>
         <DialogFooter>
           <Button
-            disabled={!confirmed}
+            disabled={!confirmDelete}
             onClick={handleDeleteIntegration}
             variant="destructive"
           >
