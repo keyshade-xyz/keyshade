@@ -22,8 +22,6 @@ import { constructErrorBody, decryptMetadata } from '@/common/util'
 import { PrismaService } from '@/prisma/prisma.service'
 import { Project } from '@keyshade/schema'
 
-// TODO: Add a abstract destroy(eventId: Event['id']) function to base.integration.ts
-
 /**
  * The integration abstract class that every integration must extend.
  */
@@ -73,6 +71,11 @@ export abstract class BaseIntegration {
    * Use this function to test the condfiguration of the integration.
    */
   abstract validateConfiguration(metadata: IntegrationMetadata): Promise<void>
+
+  /**
+   * Use this function to clean up all integration data that was created.
+   */
+  abstract destroy(eventId: Event['id']): Promise<void>
 
   // WARNING: DO NOT OVERRIDE
   protected async registerIntegrationRun({

@@ -1,4 +1,5 @@
 import {
+  Event,
   EventType,
   IntegrationRunStatus,
   IntegrationType
@@ -53,6 +54,12 @@ export class DiscordIntegration extends BaseIntegration {
 
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['webhookUrl'])
+  }
+
+  public destroy(eventId: Event['id']): Promise<void> {
+    // TODO: Delete webhook URL
+    console.log(eventId)
+    return
   }
 
   public init(): Promise<void> {
