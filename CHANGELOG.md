@@ -1,3 +1,13 @@
+## [2.34.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.7...v2.34.0-stage.8) (2025-09-02)
+
+### 🚀 Features
+
+* **api:** optimized vercel redeployments ([#1135](https://github.com/keyshade-xyz/keyshade/issues/1135)) ([6fc8200](https://github.com/keyshade-xyz/keyshade/commit/6fc820094ac606c9df75800f4770d2466bea6a10))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** catch unhandled errors in integration emission events ([2bb8aee](https://github.com/keyshade-xyz/keyshade/commit/2bb8aee438bd819cd60b0f81464bd8f8b19dd95f))
+
 ## [2.34.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.6...v2.34.0-stage.7) (2025-09-02)
 
 ### 🐛 Bug Fixes
