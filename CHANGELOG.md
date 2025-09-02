@@ -1,3 +1,9 @@
+## [2.34.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.6...v2.34.0-stage.7) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **cli:** keyshde init command no longer overwrites private-keys.json file ([2114bda](https://github.com/keyshade-xyz/keyshade/commit/2114bda7f1015aaeee2029d365e0535bf2cefc87))
+
 ## [2.34.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.5...v2.34.0-stage.6) (2025-09-02)
 
 ### 🚀 Features
