@@ -113,7 +113,10 @@ const devSchema = z.object({
 
   POLAR_BASE_URL: z.string().url().optional(),
   POLAR_API_KEY: z.string().optional(),
-  POLAR_WEBHOOK_SECRET: z.string().optional()
+  POLAR_WEBHOOK_SECRET: z.string().optional(),
+
+  AZURE_STORAGE_CONNECTION_STRING: z.string().url().optional(),
+  AZURE_STORAGE_CONTAINER_NAME: z.string().optional()
 })
 
 const prodSchema = z.object({
@@ -192,7 +195,10 @@ const prodSchema = z.object({
 
   POLAR_BASE_URL: z.string().url().optional(),
   POLAR_API_KEY: z.string().optional(),
-  POLAR_WEBHOOK_SECRET: z.string().optional()
+  POLAR_WEBHOOK_SECRET: z.string().optional(),
+
+  AZURE_STORAGE_CONNECTION_STRING: z.string().url(),
+  AZURE_STORAGE_CONTAINER_NAME: z.string().optional()
 })
 
 export type EnvSchemaType = z.infer<typeof prodSchema>
