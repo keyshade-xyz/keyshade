@@ -1,5 +1,5 @@
 import { RawEnvironment } from '@/environment/environment.types'
-import { Logger } from '@nestjs/common'
+import { InternalServerErrorException, Logger } from '@nestjs/common'
 import {
   Authority,
   PrismaClient,
@@ -28,6 +28,8 @@ export const getCollectiveWorkspaceAuthorities = async (
   workspaceCacheService: WorkspaceCacheService,
   collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
 ): Promise<Set<Authority>> => {
+  const logger = new Logger('getCollectiveWorkspaceAuthorities')
+
   const cachedWorkspaceCollectiveAuthorities =
     await collectiveAuthoritiesCacheService.getCollectiveWorkspaceAuthorities(
       workspaceId,
@@ -35,6 +37,9 @@ export const getCollectiveWorkspaceAuthorities = async (
     )
 
   if (cachedWorkspaceCollectiveAuthorities.size > 0) {
+    logger.log(
+      `Workspace authorities for ${workspaceId} found in cache, returning ${cachedWorkspaceCollectiveAuthorities.size} authorities`
+    )
     return cachedWorkspaceCollectiveAuthorities
   }
 
@@ -241,19 +246,20 @@ const checkUserHasAdminRoleAssociation = async (
   prisma: PrismaClient,
   workspaceCacheService: WorkspaceCacheService
 ): Promise<boolean> => {
+  const logger = new Logger('checkUserHasAdminRoleAssociation')
+
   const cachedWorkspaceAdminUserId =
     await workspaceCacheService.getWorkspaceAdmin(workspaceId)
 
   if (cachedWorkspaceAdminUserId === userId) {
     return true
   }
-
-  const logger = new Logger('checkUserHasAdminRoleAssociation')
   logger.log(
     `Checking if user ${userId} is associated to the admin role of workspace ${workspaceId}`
   )
 
   // Fetch the admin role for the workspace
+  logger.log(`Fetching admin role for workspace ${workspaceId}`)
   const adminRole = await prisma.workspaceRole.findFirst({
     where: {
       workspaceId: workspaceId,
@@ -272,20 +278,30 @@ const checkUserHasAdminRoleAssociation = async (
     }
   })
 
-  if (!adminRole.workspaceMembers) {
-    logger.log(
-      `Admin role for workspace ${workspaceId} not found or no associations found`
+  if (!adminRole) {
+    logger.log(`Admin role for workspace ${workspaceId} not found`)
+    throw new InternalServerErrorException(
+      `Admin role for workspace ${workspaceId} not found`
     )
-    return false
   }
 
-  // Check if the user has associations to this role
-  for (const roleAssociation of adminRole.workspaceMembers) {
-    if (roleAssociation.workspaceMember.userId === userId) {
-      logger.log(`User ${userId} is associated to the admin role`)
-      await workspaceCacheService.setWorkspaceAdmin(workspaceId, userId)
-      return true
-    }
+  logger.log(`Admin role for workspace ${workspaceId} found`)
+
+  // Admin role can be only associated to one user
+  const workspaceMemberAssociation = adminRole.workspaceMembers[0]
+  const workspaceMember = workspaceMemberAssociation.workspaceMember
+  await workspaceCacheService.setWorkspaceAdmin(
+    workspaceId,
+    workspaceMember.userId
+  )
+  logger.log(
+    `Workspace admin for workspace ${workspaceId} set to ${workspaceMember.userId} in cache`
+  )
+
+  // Check if the user is associated to the admin role
+  if (workspaceMember.userId === userId) {
+    logger.log(`User ${userId} is associated to the admin role`)
+    return true
   }
 
   logger.log(`User ${userId} is not associated to the admin role`)
