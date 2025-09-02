@@ -4,7 +4,7 @@ import {
   eventTypeEnum,
   integrationRunStatusEnum,
   integrationTypeEnum
-} from '@/enums'
+} from '@/enums/index'
 import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
