@@ -1,3 +1,9 @@
+## [2.34.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.4...v2.34.0-stage.5) (2025-09-01)
+
+### 🚀 Features
+
+* **api:** imporved logging and admin role check in collective-authority.ts ([68e1bfd](https://github.com/keyshade-xyz/keyshade/commit/68e1bfd38e92141931d5336c9150a00b0f29a07a))
+
 ## [2.34.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.3...v2.34.0-stage.4) (2025-08-27)
 
 ### 🐛 Bug Fixes
