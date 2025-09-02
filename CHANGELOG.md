@@ -1,3 +1,9 @@
+## [2.34.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.5...v2.34.0-stage.6) (2025-09-02)
+
+### 🚀 Features
+
+* **api:** add file upload service ([#1137](https://github.com/keyshade-xyz/keyshade/issues/1137)) ([a50f6b8](https://github.com/keyshade-xyz/keyshade/commit/a50f6b8aecd7a46db2ec559fa6d044ea3717a2c4))
+
 ## [2.34.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.4...v2.34.0-stage.5) (2025-09-01)
 
 ### 🚀 Features
