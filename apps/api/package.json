@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.840.0",
+    "@azure/storage-blob": "^12.28.0",
     "@logtail/node": "^0.5.4",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.0",
