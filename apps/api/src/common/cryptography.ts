@@ -100,6 +100,64 @@ export const sDecrypt = (encryptedBase64: string, secret?: string): string => {
 }
 
 /**
+ * Encrypts the content of a File object using a password.
+ * Reads the file as text, encrypts the content into a base64 string,
+ * and returns a new File object with the encrypted content.
+ *
+ * @param file - The original File object to encrypt.
+ * @param secret - The password to use for encryption. If not provided, the default server secret is used.
+ * @returns A Promise that resolves to a new File object containing the encrypted data.
+ *          The new file will have a 'text/plain' MIME type.
+ */
+export const encryptFile = async (
+  file: File,
+  secret?: string
+): Promise<File> => {
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+  const base64Content = buffer.toString('base64')
+
+  const dataToEncrypt = {
+    type: file.type,
+    content: base64Content
+  }
+
+  const encryptedData = sEncrypt(JSON.stringify(dataToEncrypt), secret)
+
+  return new File([encryptedData], file.name, {
+    type: 'text/plain', // The encrypted file is always text
+    lastModified: file.lastModified
+  })
+}
+
+/**
+ * Decrypts the content of a File object that was previously encrypted with `encryptFile`.
+ * Reads the encrypted base64 string from the file, decrypts it using the password,
+ * and returns a new File object with the original, decrypted content.
+ *
+ * @param encryptedFile - The File object containing the encrypted base64 data.
+ * @param secret - The password that was used for encryption.
+ * @returns A Promise that resolves to a new File object with the decrypted content.
+ *          The file's original name and last modified date are preserved.
+ */
+export const decryptFile = async (
+  encryptedFile: File,
+  secret?: string
+): Promise<File> => {
+  const encryptedContent = await encryptedFile.text()
+  const decryptedJson = sDecrypt(encryptedContent, secret)
+
+  const { type, content: base64Content } = JSON.parse(decryptedJson)
+
+  const buffer = Buffer.from(base64Content, 'base64')
+
+  return new File([buffer], encryptedFile.name, {
+    type: type, // Restore the original MIME type
+    lastModified: encryptedFile.lastModified
+  })
+}
+
+/**
  * Interface for the encrypted data structure
  */
 export interface EncryptedData {

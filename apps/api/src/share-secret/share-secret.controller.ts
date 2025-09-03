@@ -4,14 +4,20 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
-  Query
+  Query,
+  UploadedFiles,
+  UseInterceptors
 } from '@nestjs/common'
 import { ShareSecretService } from './share-secret.service'
 import { Public } from '@/decorators/public.decorator'
-import { CreateShare } from './dto/create.share/create.share'
+import { FilesInterceptor } from '@nestjs/platform-express'
+import { CreateShare } from '@/share-secret/dto/create.share/create.share'
+import { convertBufferToArrayBuffer } from '@/common/util'
 
 @Controller('share-secret')
 export class ShareSecretController {
@@ -19,9 +25,27 @@ export class ShareSecretController {
 
   @Post()
   @Public()
+  @UseInterceptors(FilesInterceptor('files', 10))
   @HttpCode(HttpStatus.CREATED)
-  async createShare(@Body() dto: CreateShare) {
-    return await this.shareSecretService.createShare(dto)
+  async createShare(
+    @Body() dto: CreateShare,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 })]
+      })
+    )
+    files?: Express.Multer.File[]
+  ) {
+    const convertedFiles: File[] = files.map(
+      (file) =>
+        new File([convertBufferToArrayBuffer(file.buffer)], file.originalname, {
+          type: file.mimetype
+        })
+    )
+    return await this.shareSecretService.createShare({
+      ...dto,
+      medias: convertedFiles
+    })
   }
 
   @Put(':hash/add-email')
