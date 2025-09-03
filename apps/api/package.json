@@ -67,6 +67,9 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
+    "@fastify/multipart": "^9.0.3",
+    "@types/form-data": "^2.5.2",
+    "form-data": "^4.0.4",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",

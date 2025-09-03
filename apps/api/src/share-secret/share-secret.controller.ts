@@ -31,12 +31,13 @@ export class ShareSecretController {
     @Body() dto: CreateShare,
     @UploadedFiles(
       new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 })]
+        validators: [new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 })],
+        fileIsRequired: false
       })
     )
-    files?: Express.Multer.File[]
+    files?: any[] // Originally Express.Multer.File[], but that's not available in the test environment
   ) {
-    const convertedFiles: File[] = files.map(
+    const convertedFiles: File[] = (files ?? []).map(
       (file) =>
         new File([convertBufferToArrayBuffer(file.buffer)], file.originalname, {
           type: file.mimetype
