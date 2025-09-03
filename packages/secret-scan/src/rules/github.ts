@@ -3,8 +3,8 @@ import type { TestCase } from '@/types'
 
 export default function github(): RegExp[] {
   return [
-    /(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36}/,
-    /github_pat_[0-9a-zA-Z_]{82}/
+    /^(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36}$/,
+    /^github_pat_[0-9a-zA-Z_]{82}$/
   ]
 }
 

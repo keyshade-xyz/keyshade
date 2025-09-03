@@ -66,7 +66,8 @@ import {
   sendinblue,
   shippo,
   shopify,
-  sidekiq
+  sidekiq,
+  cloudflare
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -203,7 +204,8 @@ const denylist: SecretConfig = {
 
   shopify: shopify(),
 
-  sidekiq: sidekiq()
+  sidekiq: sidekiq(),
+  cloudflare: cloudflare()
 }
 
 export default denylist
