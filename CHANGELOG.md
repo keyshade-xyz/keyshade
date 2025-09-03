@@ -1,3 +1,9 @@
+## [2.34.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.8...v2.34.0-stage.9) (2025-09-03)
+
+### 🚀 Features
+
+* **web:** add book a demo ([#1139](https://github.com/keyshade-xyz/keyshade/issues/1139)) ([193b08d](https://github.com/keyshade-xyz/keyshade/commit/193b08d0228a154b0584e1873b52663b5b04db1d))
+
 ## [2.34.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.7...v2.34.0-stage.8) (2025-09-02)
 
 ### 🚀 Features
