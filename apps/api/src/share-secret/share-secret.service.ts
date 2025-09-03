@@ -4,7 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  OnModuleInit
+  OnModuleDestroy
 } from '@nestjs/common'
 import { CreateShare } from './dto/create.share/create.share'
 import { ShareResponse } from './share-secret.types'
@@ -27,9 +27,10 @@ import {
 import { Job, Queue, Worker } from 'bullmq'
 
 @Injectable()
-export class ShareSecretService implements OnModuleInit {
+export class ShareSecretService implements OnModuleDestroy {
   private readonly logger = new Logger(ShareSecretService.name)
   private readonly bullMqQueue: Queue
+  private readonly bullMqWorker: Worker
   private readonly queueName = 'scheduled-media-deletion-jobs'
 
   constructor(
@@ -43,10 +44,8 @@ export class ShareSecretService implements OnModuleInit {
         url: process.env.REDIS_URL
       }
     })
-  }
 
-  async onModuleInit() {
-    const worker = new Worker(
+    this.bullMqWorker = new Worker(
       this.queueName,
       async (job: Job<{ key: string }>) => {
         const key = job.data.key
@@ -61,10 +60,25 @@ export class ShareSecretService implements OnModuleInit {
       }
     )
 
-    worker.on('completed', (job: Job) => {
+    this.bullMqWorker.on('completed', (job: Job) => {
       const key = job.data.key
       this.logger.log(`Files with keys ${key} deleted`)
     })
+
+    this.bullMqWorker.on('error', (error) => {
+      this.logger.error('Worker encountered an error:', error)
+    })
+
+    this.bullMqWorker.on('failed', (job, error) => {
+      this.logger.error(`Job ${job.name} failed:`, error)
+    })
+  }
+
+  async onModuleDestroy() {
+    this.logger.log('Shutting down bullmq queue and worker...')
+    await this.bullMqQueue.close()
+    await this.bullMqWorker.close()
+    this.logger.log('Bullmq queue and worker shut down')
   }
 
   public async createShare(
