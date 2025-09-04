@@ -115,7 +115,7 @@ const devSchema = z.object({
   POLAR_API_KEY: z.string().optional(),
   POLAR_WEBHOOK_SECRET: z.string().optional(),
 
-  AZURE_STORAGE_CONNECTION_STRING: z.string().url().optional(),
+  AZURE_STORAGE_CONNECTION_STRING: z.string().optional(),
   AZURE_STORAGE_CONTAINER_NAME: z.string().optional()
 })
 
@@ -197,7 +197,7 @@ const prodSchema = z.object({
   POLAR_API_KEY: z.string().optional(),
   POLAR_WEBHOOK_SECRET: z.string().optional(),
 
-  AZURE_STORAGE_CONNECTION_STRING: z.string().url(),
+  AZURE_STORAGE_CONNECTION_STRING: z.string(),
   AZURE_STORAGE_CONTAINER_NAME: z.string().optional()
 })
 

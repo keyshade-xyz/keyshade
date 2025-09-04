@@ -21,17 +21,6 @@ services:
     networks:
       - keyshade-test
 
-  minio:
-    image: docker.io/bitnami/minio:2022
-    environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: supersecret
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    volumes:
-      - './data/minio:/data'
-
 networks:
   keyshade-test:
     driver: bridge

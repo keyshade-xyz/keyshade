@@ -15,7 +15,8 @@ import { ValidationPipe } from '@nestjs/common'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { PrismaService } from '@/prisma/prisma.service'
 import { PrismaModule } from '@/prisma/prisma.module'
-import { ShareResponse } from './share-secret.types'
+import { ShareResponse } from '@/share-secret/share-secret.types'
+import { MulterModule } from '@nestjs/platform-express'
 
 describe('Share Secret Tests', () => {
   let app: NestFastifyApplication
@@ -24,7 +25,14 @@ describe('Share Secret Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, ShareSecretModule, PrismaModule]
+      imports: [
+        MulterModule.register({
+          dest: './upload'
+        }),
+        AppModule,
+        ShareSecretModule,
+        PrismaModule
+      ]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -66,7 +74,8 @@ describe('Share Secret Tests', () => {
         method: 'POST',
         url: '/share-secret',
         payload: {
-          secret: 'secret'
+          secret: 'secret',
+          isText: true
         }
       })
 
@@ -82,13 +91,15 @@ describe('Share Secret Tests', () => {
       expect(share.secret).not.toBe('secret')
       expect(share.isPasswordProtected).toBe(false)
     })
+
     it('should be able to create a share with password', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/share-secret',
         payload: {
           secret: 'secret',
-          password: 'password'
+          password: 'password',
+          isText: true
         }
       })
 
@@ -104,13 +115,15 @@ describe('Share Secret Tests', () => {
       expect(share.secret).not.toBe('secret')
       expect(share.isPasswordProtected).toBe(true)
     })
+
     it('should be able to create the same share with same details twice', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/share-secret',
         payload: {
           secret: 'secret',
-          password: 'password'
+          password: 'password',
+          isText: true
         }
       })
 
@@ -121,7 +134,8 @@ describe('Share Secret Tests', () => {
         url: '/share-secret',
         payload: {
           secret: 'secret',
-          password: 'password'
+          password: 'password',
+          isText: true
         }
       })
 
@@ -131,11 +145,12 @@ describe('Share Secret Tests', () => {
   })
 
   describe('Add Email To Share Tests', () => {
-    let share: Omit<ShareResponse, 'secret'>
+    let share: Omit<ShareResponse, 'secret' | 'mediaKeys' | 'note' | 'isText'>
 
     beforeEach(async () => {
       share = await shareSecretService.createShare({
         secret: 'secret',
+        isText: true,
         expiresAfterDays: 1,
         viewLimit: 1
       })
@@ -241,6 +256,7 @@ describe('Share Secret Tests', () => {
     it('should get decrypted value for share with no password', async () => {
       const share = await shareSecretService.createShare({
         secret: 'secret',
+        isText: true,
         expiresAfterDays: 1,
         viewLimit: 1
       })
@@ -255,6 +271,7 @@ describe('Share Secret Tests', () => {
     it('should get encrypted value for share with password', async () => {
       const share = await shareSecretService.createShare({
         secret: 'secret',
+        isText: true,
         password: 'password',
         expiresAfterDays: 1,
         viewLimit: 1
@@ -271,6 +288,7 @@ describe('Share Secret Tests', () => {
       const share = await shareSecretService.createShare({
         secret: 'secret',
         viewLimit: 2,
+        isText: true,
         expiresAfterDays: 1
       })
 
@@ -288,6 +306,7 @@ describe('Share Secret Tests', () => {
       const { hash } = await shareSecretService.createShare({
         secret: 'secret',
         viewLimit: 2,
+        isText: true,
         expiresAfterDays: 1
       })
 

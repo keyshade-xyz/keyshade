@@ -30,6 +30,7 @@ import { ShareSecretModule } from '@/share-secret/share-secret.module'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { FileUploadModule } from '@/file-upload/file-upload.module'
+import { MulterModule } from '@nestjs/platform-express'
 
 @Module({
   controllers: [AppController],
@@ -43,8 +44,10 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
         abortEarly: true
       }
     }),
-
     ScheduleModule.forRoot(),
+    MulterModule.register({
+      dest: './upload'
+    }),
     PassportModule,
     AuthModule,
     PrismaModule,

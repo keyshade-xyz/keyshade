@@ -235,34 +235,34 @@ model LoginSession {
 }
 
 model User {
-  id                         String        @id @default(cuid())
-  email                      String        @unique
+  id                         String             @id @default(cuid())
+  email                      String             @unique
   name                       String?
   profilePictureUrl          String?
-  isActive                   Boolean       @default(true)
-  isOnboardingFinished       Boolean       @default(false)
-  isAdmin                    Boolean       @default(false)
+  isActive                   Boolean            @default(true)
+  isOnboardingFinished       Boolean            @default(false)
+  isAdmin                    Boolean            @default(false)
   authProvider               AuthProvider?
-  joinedOn                   DateTime      @default(now())
-  timesRemindedForOnboarding Int           @default(0) 
-  referralCode               String        @unique
-  workspaceMembers  WorkspaceMember[]
-  workspaces        Workspace[]
-  apiKeys           ApiKey[]
-  otp               Otp?
-  notifications     Notification[]
-  secrets           Secret[] // Stores the secrets the user updated
-  variables         Variable[] // Stores the variables the user updated
-  projects          Project[] // Stores the projects the user updated
-  environments      Environment[] // Stores the environments the user updated
-  secretVersion     SecretVersion[]
-  variableVersion   VariableVersion[]
-  events            Event[]
-  integrations      Integration[] // Stores the integrations the user updated
-  emailPreference   EmailPreference?
-  loginSessions     LoginSession[]
-  onboardingAnswers OnboardingAnswers?
-  subscriptions     Subscription[]
+  joinedOn                   DateTime           @default(now())
+  timesRemindedForOnboarding Int                @default(0)
+  referralCode               String             @unique
+  workspaceMembers           WorkspaceMember[]
+  workspaces                 Workspace[]
+  apiKeys                    ApiKey[]
+  otp                        Otp?
+  notifications              Notification[]
+  secrets                    Secret[] // Stores the secrets the user updated
+  variables                  Variable[] // Stores the variables the user updated
+  projects                   Project[] // Stores the projects the user updated
+  environments               Environment[] // Stores the environments the user updated
+  secretVersion              SecretVersion[]
+  variableVersion            VariableVersion[]
+  events                     Event[]
+  integrations               Integration[] // Stores the integrations the user updated
+  emailPreference            EmailPreference?
+  loginSessions              LoginSession[]
+  onboardingAnswers          OnboardingAnswers?
+  subscriptions              Subscription[]
 
   referredById  String?
   referredBy    User?   @relation("UserReferrals", fields: [referredById], references: [id])
@@ -285,12 +285,12 @@ model OnboardingAnswers {
 }
 
 model Subscription {
-  id                   String                @id @default(cuid())
-  plan                 SubscriptionPlanType  @default(FREE)
-  status               SubscriptionStatus    @default(INCOMPLETE)
-  seatsBooked          Int                   @default(3)
-  isAnnual             Boolean               @default(false)
-  activatedOn          DateTime              @default(now())
+  id                   String               @id @default(cuid())
+  plan                 SubscriptionPlanType @default(FREE)
+  status               SubscriptionStatus   @default(INCOMPLETE)
+  seatsBooked          Int                  @default(3)
+  isAnnual             Boolean              @default(false)
+  activatedOn          DateTime             @default(now())
   renewsOn             DateTime?
   vendorSubscriptionId String?
   vendorCustomerId     String?
@@ -633,7 +633,10 @@ model EmailPreference {
 model Share {
   id                  String   @id @default(cuid())
   hash                String   @unique
-  secret              String
+  note                String?
+  isText              Boolean  @default(true)
+  secret              String?
+  mediaKeys           String[] @default([])
   expiresAt           DateTime
   isPasswordProtected Boolean
   viewLimit           Int

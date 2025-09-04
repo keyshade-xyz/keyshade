@@ -11,15 +11,9 @@ export interface FileUploadService {
    *
    * @param files An array of `File` objects to be uploaded.
    * @param path The base path or directory within the storage provider where the files should be stored.
-   * @param expiresAfter The number of seconds after which the uploaded files should expire.
-   *        Note: This may not be supported by all providers (e.g., local file system).
    * @returns A promise that resolves to an array of keys, where each key uniquely identifies an uploaded file.
    */
-  uploadFiles(
-    files: File[],
-    path: string,
-    expiresAfter: number
-  ): Promise<string[]>
+  uploadFiles(files: File[], path: string): Promise<string[]>
 
   /**
    * Retrieves an array of files from the storage provider based on their keys.
