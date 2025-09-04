@@ -1,9 +1,5 @@
-import type {
-  Environment,
-  GetAllVariablesOfProjectResponse
-} from '@keyshade/schema'
+import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
-import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG } from '@public/svg/shared'
@@ -27,7 +23,6 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { Switch } from '@/components/ui/switch'
 import {
   deleteEnvironmentValueOfVariableOpenAtom,
   deleteVariableOpenAtom,
@@ -43,7 +38,6 @@ import {
 } from '@/components/ui/accordion'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
-import ControllerInstance from '@/lib/controller-instance'
 
 interface VariableCardProps {
   variableData: GetAllVariablesOfProjectResponse['items'][number]
@@ -70,9 +64,9 @@ export default function VariableCard({
 
   const { versions } = variableData
 
-  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
-    new Set()
-  )
+  // const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+  //   new Set()
+  // )
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -103,58 +97,61 @@ export default function VariableCard({
     setSelectedVariable(variableData)
     setIsVariableRevisionsOpen(true)
   }
+  // Not needed right now and causes too many requests
 
-  useEffect(() => {
-    const fetchDisabled = async () => {
-      try {
-        const res =
-          await ControllerInstance.getInstance().variableController.getAllDisabledEnvironmentsOfVariable(
-            { variableSlug: variableData.slug }
-          )
+  // useEffect(() => {
+  //   const fetchDisabled = async () => {
+  //     try {
+  //       const res =
+  //         await ControllerInstance.getInstance().variableController.getAllDisabledEnvironmentsOfVariable(
+  //           { variableSlug: variableData.slug }
+  //         )
 
-        if (res.success && res.data) {
-          setDisabledEnvironments(new Set(res.data))
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console -- console.error is used for debugging
-        console.error('Failed to load disabled environments', error)
-      }
-    }
+  //       if (res.success && res.data) {
+  //         setDisabledEnvironments(new Set(res.data))
+  //       }
+  //     } catch (error) {
+  //       // eslint-disable-next-line no-console -- console.error is used for debugging
+  //       console.error('Failed to load disabled environments', error)
+  //     }
+  //   }
 
-    fetchDisabled()
-  }, [variableData.slug])
+  //   fetchDisabled()
+  // }, [variableData.slug])
 
-  const handleToggleDisableVariableClick = async (
-    environmentSlug: Environment['slug'],
-    environmentId: Environment['id'],
-    checked: boolean
-  ) => {
-    const controller = ControllerInstance.getInstance().variableController
+  // Not needed right now
 
-    if (checked) {
-      // Enable variable
-      await controller.enableVariable({
-        variableSlug: variableData.slug,
-        environmentSlug
-      })
-      setDisabledEnvironments((prev) => {
-        const next = new Set(prev)
-        next.delete(environmentId) // Update local state
-        return next
-      })
-    } else {
-      // Disable variable
-      await controller.disableVariable({
-        variableSlug: variableData.slug,
-        environmentSlug
-      })
-      setDisabledEnvironments((prev) => {
-        const next = new Set(prev)
-        next.add(environmentId) // Update local state
-        return next
-      })
-    }
-  }
+  // const handleToggleDisableVariableClick = async (
+  //   environmentSlug: Environment['slug'],
+  //   environmentId: Environment['id'],
+  //   checked: boolean
+  // ) => {
+  //   const controller = ControllerInstance.getInstance().variableController
+
+  //   if (checked) {
+  //     // Enable variable
+  //     await controller.enableVariable({
+  //       variableSlug: variableData.slug,
+  //       environmentSlug
+  //     })
+  //     setDisabledEnvironments((prev) => {
+  //       const next = new Set(prev)
+  //       next.delete(environmentId) // Update local state
+  //       return next
+  //     })
+  //   } else {
+  //     // Disable variable
+  //     await controller.disableVariable({
+  //       variableSlug: variableData.slug,
+  //       environmentSlug
+  //     })
+  //     setDisabledEnvironments((prev) => {
+  //       const next = new Set(prev)
+  //       next.add(environmentId) // Update local state
+  //       return next
+  //     })
+  //   }
+  // }
 
   return (
     <ContextMenu key={variableData.id}>
@@ -214,7 +211,7 @@ export default function VariableCard({
                   <TableHead className="h-full text-base font-normal text-white/50">
                     Value
                   </TableHead>
-                  <TableHead className="h-full text-base font-normal text-white/50">
+                  <TableHead className="h-full w-[10.25rem] text-base font-normal text-white/50">
                     Version
                   </TableHead>
                   <TableHead className="h-full w-[100px] rounded-tr-xl text-base font-normal text-white/50" />
@@ -222,9 +219,9 @@ export default function VariableCard({
               </TableHeader>
               <TableBody>
                 {versions.map((value) => {
-                  const isDisabled = disabledEnvironments.has(
-                    value.environment.id
-                  )
+                  // const isDisabled = disabledEnvironments.has(
+                  //   value.environment.id
+                  // )
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -236,12 +233,13 @@ export default function VariableCard({
                       <TableCell className="h-full text-base">
                         {value.value}
                       </TableCell>
-                      <TableCell className="h-full px-8 py-4 text-base">
+                      <TableCell className="h-full w-[10.25rem] px-8 py-4 text-base">
                         {value.version}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
-                          <Switch
+                          {/* Disable toggle not needed right now */}
+                          {/* <Switch
                             checked={!isDisabled}
                             onCheckedChange={(checked) => {
                               handleToggleDisableVariableClick(
@@ -250,7 +248,7 @@ export default function VariableCard({
                                 checked
                               )
                             }}
-                          />
+                          /> */}
                           <button
                             onClick={() =>
                               handleDeleteEnvironmentValueOfVariableClick(
