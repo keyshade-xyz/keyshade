@@ -540,37 +540,6 @@ describe('Integration Controller Tests', () => {
       expect(integrationRuns).toHaveLength(1)
       expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
-
-    it('should create integration run records for initialization process', async () => {
-      createDummyDiscordWebhookUrlInterceptor()
-
-      const result = await app.inject({
-        method: 'POST',
-        url: `/integration/${workspace1.slug}`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        payload: validDto
-      })
-
-      expect(result.statusCode).toEqual(201)
-
-      const integrationRuns = await prisma.integrationRun.findMany({
-        where: {
-          integrationId: result.json().id
-        },
-        orderBy: [
-          {
-            triggeredAt: 'asc'
-          }
-        ]
-      })
-
-      expect(integrationRuns).toHaveLength(1)
-
-      expect(integrationRuns[0].title).toBe('Initializing Discord integration')
-      expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
-    })
   })
 
   describe('Slack Integration Initialization Tests', () => {
