@@ -15,10 +15,10 @@ import {
   Environment,
   EventType,
   Integration,
+  IntegrationRunStatus,
   IntegrationType,
   Project,
-  Workspace,
-  IntegrationRunStatus
+  Workspace
 } from '@prisma/client'
 import { ProjectService } from '@/project/project.service'
 import { ProjectModule } from '@/project/project.module'
@@ -83,6 +83,15 @@ jest.mock('@vercel/sdk', () => {
       environment: { getV9ProjectsIdOrNameCustomEnvironments: getEnvMock }
     })),
     __getEnvMock: getEnvMock
+  }
+})
+
+const postMsgMock = jest.fn()
+jest.mock('@slack/bolt', () => {
+  return {
+    App: jest.fn().mockImplementation(() => ({
+      client: { chat: { postMessage: postMsgMock } }
+    }))
   }
 })
 
@@ -531,35 +540,59 @@ describe('Integration Controller Tests', () => {
       expect(integrationRuns).toHaveLength(1)
       expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
+  })
 
-    it('should create integration run records for initialization process', async () => {
-      createDummyDiscordWebhookUrlInterceptor()
+  describe('Slack Integration Initialization Tests', () => {
+    const DUMMY_TOKEN = 'xoxb-valid-but-test'
+    const DUMMY_SIGNING_SECRET = 'fake-signing-secret'
+    const DUMMY_CHANNEL = 'C1234567890'
+
+    const validDtoSlack: CreateIntegration = {
+      name: 'Validation Test',
+      type: IntegrationType.SLACK,
+      metadata: {
+        botToken: DUMMY_TOKEN,
+        signingSecret: DUMMY_SIGNING_SECRET,
+        channelId: DUMMY_CHANNEL
+      } satisfies SlackIntegrationMetadata,
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    it('should send initialization message when Slack integration is created', async () => {
+      nock('https://slack.com').post('/api/auth.test').reply(200, {
+        ok: true
+      })
+
+      nock('https://slack.com')
+        .post('/api/chat.postEphemeral')
+        .reply(200, { ok: true })
+
+      nock('https://slack.com').post('/api/chat.postMessage').reply(200, {
+        ok: true
+      })
+
+      postMsgMock.mockResolvedValueOnce({
+        ok: true,
+        message: { text: 'Posting message to Slack' }
+      })
 
       const result = await app.inject({
         method: 'POST',
         url: `/integration/${workspace1.slug}`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        payload: validDto
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDtoSlack
       })
 
       expect(result.statusCode).toEqual(201)
 
       const integrationRuns = await prisma.integrationRun.findMany({
         where: {
-          integrationId: result.json().id
-        },
-        orderBy: [
-          {
-            triggeredAt: 'asc'
-          }
-        ]
+          integrationId: result.json().id,
+          title: 'Posting message to Slack'
+        }
       })
 
       expect(integrationRuns).toHaveLength(1)
-
-      expect(integrationRuns[0].title).toBe('Initializing Discord integration')
       expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
   })
