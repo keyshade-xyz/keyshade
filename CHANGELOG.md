@@ -1,3 +1,9 @@
+## [2.34.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.9...v2.34.0-stage.10) (2025-09-07)
+
+### 🚀 Features
+
+* **api:** update init function of slack integration ([#1089](https://github.com/keyshade-xyz/keyshade/issues/1089)) ([79ed4e6](https://github.com/keyshade-xyz/keyshade/commit/79ed4e6e0a27e2345812ea28c8b5ae69b7c83124))
+
 ## [2.34.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.8...v2.34.0-stage.9) (2025-09-03)
 
 ### 🚀 Features
