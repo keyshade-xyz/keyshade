@@ -9,7 +9,9 @@ import { FILE_UPLOAD_SERVICE } from '@/file-upload/file-upload.service'
     {
       provide: FILE_UPLOAD_SERVICE,
       useClass:
-        process.env.NODE_ENV === 'prod'
+        (!process.env.AZURE_STORAGE_CONNECTION_STRING &&
+          !process.env.AZURE_STORAGE_CONTAINER_NAME) ||
+        process.env.NODE_ENV !== 'prod'
           ? AzureFileUploadService
           : LocalFileUploadService
     }

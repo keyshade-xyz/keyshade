@@ -91,17 +91,8 @@ export class LocalFileUploadService implements FileUploadService, OnModuleInit {
     return results.filter((file): file is File => file !== null)
   }
 
-  async uploadFiles(
-    files: File[],
-    subpath: string,
-    expiresAfter: number
-  ): Promise<string[]> {
+  async uploadFiles(files: File[], subpath: string): Promise<string[]> {
     this.logger.log(`Uploading ${files.length} files to local storage...`)
-    if (expiresAfter > 0) {
-      this.logger.warn(
-        `'expiresAfter' is not supported by LocalFileUploadService and will be ignored.`
-      )
-    }
 
     const uploadPromises = files.map(async (file) => {
       const key = path.join(subpath, file.name)

@@ -264,3 +264,12 @@ export const generateReferralCode = async (
 
   return referralCode
 }
+
+export const convertBufferToArrayBuffer = (
+  buffer: Buffer<ArrayBufferLike>
+): ArrayBuffer => {
+  return buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength
+  ) as ArrayBuffer
+}

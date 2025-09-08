@@ -29,7 +29,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { constructErrorBody } from '@/common/util'
 import { AuthenticatedUserContext } from '@/auth/auth.types'
 import { toSHA256 } from '@/common/cryptography'
-import SlugGenerator from '@/common/slug-generator.service' // The redis subscription channel for configuration updates
+
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
@@ -55,8 +55,7 @@ export default class ChangeNotifier
       publisher: RedisClientType
     },
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly authorizationService: AuthorizationService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber

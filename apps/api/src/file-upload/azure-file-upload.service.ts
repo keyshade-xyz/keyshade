@@ -1,17 +1,13 @@
 import { FileUploadService } from '@/file-upload/file-upload.service'
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger
 } from '@nestjs/common'
-import {
-  BlobSASPermissions,
-  BlobServiceClient,
-  ContainerClient
-} from '@azure/storage-blob'
-import { exit } from 'process'
-import { v4 as uuidv4 } from 'uuid'
-import { constructErrorBody } from '@/common/util'
+import { BlobSASPermissions, ContainerClient } from '@azure/storage-blob'
+import { constructErrorBody, convertBufferToArrayBuffer } from '@/common/util'
+import { AZURE_CONTAINER_CLIENT } from '@/provider/azure-container.provider'
 
 // Expiry time for generated SAS URLs, in seconds
 const SAS_URL_EXPIRY_SECONDS = 3600 // 1 hour
@@ -19,64 +15,31 @@ const SAS_URL_EXPIRY_SECONDS = 3600 // 1 hour
 @Injectable()
 export class AzureFileUploadService implements FileUploadService {
   private readonly logger = new Logger(AzureFileUploadService.name)
+  @Inject(AZURE_CONTAINER_CLIENT)
   private readonly containerClient: ContainerClient
 
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING
-    const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME
-
-    if (connectionString && containerName) {
-      this.logger.log(
-        'Azure storage connection string and container name found. Initializing...'
-      )
-      try {
-        const blobServiceClient =
-          BlobServiceClient.fromConnectionString(connectionString)
-
-        this.containerClient =
-          blobServiceClient.getContainerClient(containerName)
-
-        // Ensure the container exists
-        this.containerClient
-          .createIfNotExists()
-          .then(() => {
-            this.logger.log('Azure storage container created successfully')
-          })
-          .catch((error) => {
-            this.logger.error('Error creating Azure storage container:', error)
-            exit(1)
-          })
-
-        this.logger.log('Azure storage client initialized successfully')
-      } catch (error) {
-        this.logger.error('Error initializing Azure storage client: ', error)
-        exit(1)
-      }
-    } else {
-      this.logger.warn(
-        'Azure storage connection string and container name not found. File uploads will work locally.'
-      )
-    }
-  }
-
   async deleteFiles(keys: string[]): Promise<void> {
-    this.logger.log(`Deleting ${keys.length} files from Azure storage...`)
+    this.logger.log(`Deleting ${keys.length} prefixes from Azure storage...`)
 
-    const deletePromises = keys.map(async (key) => {
+    for (const prefix of keys) {
+      this.logger.log(`Deleting blobs with prefix: ${prefix}`)
       try {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(key)
-        await blockBlobClient.delete()
-        this.logger.log(`Successfully deleted file with key: ${key}`)
-      } catch (error) {
-        if (error.statusCode === 404) {
-          this.logger.warn(`File with key "${key}" not found, skipping delete.`)
-        } else {
-          this.logger.error(`Error deleting file with key "${key}":`, error)
+        for await (const blob of this.containerClient.listBlobsFlat({
+          prefix
+        })) {
+          this.logger.log(`Deleting blob: ${blob.name}`)
+          await this.containerClient
+            .getBlobClient(blob.name)
+            .delete({ deleteSnapshots: 'include' })
+          this.logger.log(`Successfully deleted blob: ${blob.name}`)
         }
+      } catch (error) {
+        this.logger.error(
+          `Error deleting blobs with prefix "${prefix}":`,
+          error
+        )
       }
-    })
-
-    await Promise.all(deletePromises)
+    }
   }
 
   async getFiles(keys: string[]): Promise<File[]> {
@@ -88,11 +51,7 @@ export class AzureFileUploadService implements FileUploadService {
         const buffer = await blobClient.downloadToBuffer()
         const properties = await blobClient.getProperties()
         const fileName = key.substring(key.lastIndexOf('/') + 1)
-
-        const arrayBuffer = buffer.buffer.slice(
-          buffer.byteOffset,
-          buffer.byteOffset + buffer.byteLength
-        ) as ArrayBuffer
+        const arrayBuffer = convertBufferToArrayBuffer(buffer)
 
         return new File([arrayBuffer], fileName, {
           type: properties.contentType,
@@ -157,28 +116,19 @@ export class AzureFileUploadService implements FileUploadService {
     return results.filter((url): url is string => url !== null)
   }
 
-  async uploadFiles(
-    files: File[],
-    path: string,
-    expiresAfter: number
-  ): Promise<string[]> {
+  async uploadFiles(files: File[], path: string): Promise<string[]> {
     this.logger.log(`Uploading ${files.length} files to Azure storage...`)
 
     const uploadPromises = files.map(async (file) => {
-      // Create a unique name to avoid collisions
-      const uniqueFileName = `${uuidv4()}-${file.name}`
-      const key = path ? `${path}/${uniqueFileName}` : uniqueFileName
+      const fileName = file.name
+      const key = path ? `${path}/${fileName}` : fileName
 
       const blockBlobClient = this.containerClient.getBlockBlobClient(key)
       const buffer = await file.arrayBuffer()
 
       await blockBlobClient.uploadData(Buffer.from(buffer), {
         blobHTTPHeaders: {
-          blobContentType: file.type,
-          // Set expiry on the blob if a value is provided
-          ...(expiresAfter > 0 && {
-            expiresOn: new Date(Date.now() + expiresAfter * 1000)
-          })
+          blobContentType: file.type
         }
       })
       this.logger.log(`Successfully uploaded file with key: ${key}`)

@@ -1,8 +1,30 @@
-import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min
+} from 'class-validator'
+import { Transform } from 'class-transformer'
 
 export class CreateShare {
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isText: boolean
+
   @IsString()
-  secret: string
+  @IsOptional()
+  secret?: string
+
+  @IsOptional()
+  @IsArray()
+  medias?: File[] = []
+
+  @IsOptional()
+  @IsString()
+  note?: string
 
   @IsString()
   @IsOptional()
