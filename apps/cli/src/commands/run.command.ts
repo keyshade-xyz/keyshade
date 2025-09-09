@@ -24,7 +24,7 @@ export default class RunCommand extends BaseCommand {
 
   private projectSlug: string
   private environmentSlug: string
-  private readonly command: string
+  private command: string
 
   private childProcess = null
 

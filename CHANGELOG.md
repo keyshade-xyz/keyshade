@@ -1,3 +1,43 @@
+## [2.34.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.10...v2.34.0-stage.11) (2025-09-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** project icon alignment issue on dashboard ([#1141](https://github.com/keyshade-xyz/keyshade/issues/1141)) ([9b15567](https://github.com/keyshade-xyz/keyshade/commit/9b1556770eedb04a8074c354fe918c08fb7d36fa))
+
+## [2.34.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.9...v2.34.0-stage.10) (2025-09-07)
+
+### 🚀 Features
+
+* **api:** update init function of slack integration ([#1089](https://github.com/keyshade-xyz/keyshade/issues/1089)) ([79ed4e6](https://github.com/keyshade-xyz/keyshade/commit/79ed4e6e0a27e2345812ea28c8b5ae69b7c83124))
+
+## [2.34.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.8...v2.34.0-stage.9) (2025-09-03)
+
+### 🚀 Features
+
+* **web:** add book a demo ([#1139](https://github.com/keyshade-xyz/keyshade/issues/1139)) ([193b08d](https://github.com/keyshade-xyz/keyshade/commit/193b08d0228a154b0584e1873b52663b5b04db1d))
+
+## [2.34.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.7...v2.34.0-stage.8) (2025-09-02)
+
+### 🚀 Features
+
+* **api:** optimized vercel redeployments ([#1135](https://github.com/keyshade-xyz/keyshade/issues/1135)) ([6fc8200](https://github.com/keyshade-xyz/keyshade/commit/6fc820094ac606c9df75800f4770d2466bea6a10))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** catch unhandled errors in integration emission events ([2bb8aee](https://github.com/keyshade-xyz/keyshade/commit/2bb8aee438bd819cd60b0f81464bd8f8b19dd95f))
+
+## [2.34.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.6...v2.34.0-stage.7) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **cli:** keyshde init command no longer overwrites private-keys.json file ([2114bda](https://github.com/keyshade-xyz/keyshade/commit/2114bda7f1015aaeee2029d365e0535bf2cefc87))
+
+## [2.34.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.5...v2.34.0-stage.6) (2025-09-02)
+
+### 🚀 Features
+
+* **api:** add file upload service ([#1137](https://github.com/keyshade-xyz/keyshade/issues/1137)) ([a50f6b8](https://github.com/keyshade-xyz/keyshade/commit/a50f6b8aecd7a46db2ec559fa6d044ea3717a2c4))
+
 ## [2.34.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.4...v2.34.0-stage.5) (2025-09-01)
 
 ### 🚀 Features

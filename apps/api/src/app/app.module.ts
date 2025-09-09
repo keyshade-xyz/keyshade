@@ -29,6 +29,7 @@ import { PaymentGatewayModule } from '@/payment-gateway/payment-gateway.module'
 import { ShareSecretModule } from '@/share-secret/share-secret.module'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
+import { FileUploadModule } from '@/file-upload/file-upload.module'
 
 @Module({
   controllers: [AppController],
@@ -64,7 +65,8 @@ import { RedisClientType } from 'redis'
     CacheModule,
     WorkspaceMembershipModule,
     PaymentGatewayModule,
-    ShareSecretModule
+    ShareSecretModule,
+    FileUploadModule
   ],
   providers: [
     {

@@ -273,3 +273,7 @@
 ### Minor Changes
 
 - Interactive mode for `keyshade run` command
+
+### Patches
+
+- `keyshade init` no longer overwrites existing private-keys.json file.
