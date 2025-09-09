@@ -1,3 +1,9 @@
+## [2.34.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.10...v2.34.0-stage.11) (2025-09-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** project icon alignment issue on dashboard ([#1141](https://github.com/keyshade-xyz/keyshade/issues/1141)) ([9b15567](https://github.com/keyshade-xyz/keyshade/commit/9b1556770eedb04a8074c354fe918c08fb7d36fa))
+
 ## [2.34.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.9...v2.34.0-stage.10) (2025-09-07)
 
 ### 🚀 Features
