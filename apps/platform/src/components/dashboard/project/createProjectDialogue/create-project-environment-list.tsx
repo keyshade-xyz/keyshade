@@ -10,6 +10,13 @@ interface CreateProjectNameProps {
   onDeleteEnvironment: (index: number) => void
   hasNoEnvironments: boolean
   environments: CreateProjectRequest['environments']
+  /**
+   * Called when the user pastes text into any input — parsed into environments
+   */
+  onPasteEnvironments?: (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    index: number
+  ) => void
 }
 
 export default function CreateProjectEnvironmentList({
@@ -17,7 +24,8 @@ export default function CreateProjectEnvironmentList({
   onChangeDescription,
   onDeleteEnvironment,
   hasNoEnvironments,
-  environments = []
+  environments = [],
+  onPasteEnvironments
 }: CreateProjectNameProps): React.JSX.Element {
   if (hasNoEnvironments) {
     return (
@@ -30,6 +38,7 @@ export default function CreateProjectEnvironmentList({
       </div>
     )
   }
+
   return (
     <>
       {environments.map((env, index) => (
@@ -39,14 +48,16 @@ export default function CreateProjectEnvironmentList({
               className="w-[20rem]"
               name="name"
               onChange={(e) => onChangeName(e.target.value, index)}
-              placeholder="Name"
+              onPaste={(e) => onPasteEnvironments?.(e, index)}
+              placeholder="Name (or paste envs here)"
               value={env.name}
             />
             <Input
               className="w-[20rem] resize-none"
               name="description"
               onChange={(e) => onChangeDescription(e.target.value, index)}
-              placeholder="Description"
+              onPaste={(e) => onPasteEnvironments?.(e, index)}
+              placeholder="Description (or paste envs here)"
               value={env.description}
             />
             <Button

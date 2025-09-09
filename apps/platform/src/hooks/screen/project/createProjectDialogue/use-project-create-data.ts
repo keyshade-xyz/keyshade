@@ -1,5 +1,7 @@
+
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { useCallback, useState } from 'react'
+import { parseEnvironmentsText } from '@/lib/utils'
 
 const DEFAULT_PROJECT_DATA: CreateProjectRequest = {
   name: '',
@@ -65,6 +67,15 @@ interface UseProjectCreateData {
    * Function to reset the project data to its default state.
    */
   resetProjectData: () => void
+  /**
+   * Handle paste of environments directly.
+   * Accepts the clipboard event and the index of the environment field.
+   * Responsible for parsing text and updating environments list.
+   */
+  handlePasteEnvironments: (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    index: number
+  ) => void
 }
 
 /**
@@ -152,6 +163,31 @@ export function useProjectCreateData(): UseProjectCreateData {
     setNewProjectData(DEFAULT_PROJECT_DATA)
   }, [])
 
+  const setEnvironments = useCallback((environments: CreateProjectRequest['environments']) => {
+    setNewProjectData((prev) => ({
+      ...prev,
+      environments: environments ?? []
+    }))
+  }, [])
+
+  const handlePasteEnvironments = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>) => {
+      const text = e.clipboardData.getData('text');
+      if (!text) return;
+
+      const parsed = parseEnvironmentsText(text);
+
+      // single or multiple envs → append to existing list
+      if (parsed.length >= 1) {
+        e.preventDefault();
+        setEnvironments([...(newProjectData.environments ?? []), ...parsed]);
+      }
+
+      // else: leaving for default paste behavior
+    },
+    [newProjectData.environments, setEnvironments]
+  )
+
   return {
     newProjectData,
     updateName,
@@ -161,6 +197,7 @@ export function useProjectCreateData(): UseProjectCreateData {
     updateEnvironment,
     deleteEnvironment,
     createNewEnvironment,
-    resetProjectData
+    resetProjectData,
+    handlePasteEnvironments
   }
 }

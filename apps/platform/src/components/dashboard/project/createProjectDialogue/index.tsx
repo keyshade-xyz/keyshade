@@ -57,7 +57,8 @@ export default function CreateProjectDialogue(): JSX.Element {
     updateDescription,
     updateAccessLevel,
     updateStorePrivateKey,
-    resetProjectData
+    resetProjectData,
+    handlePasteEnvironments
   } = useProjectCreateData()
 
   const { projects, isLoading, createNewProject } = useCreateNewProject(
@@ -167,6 +168,7 @@ export default function CreateProjectDialogue(): JSX.Element {
                         updateEnvironment(index, 'name', value)
                       }}
                       onDeleteEnvironment={deleteEnvironment}
+                      onPasteEnvironments={handlePasteEnvironments}
                     />
                   </div>
                   <Button

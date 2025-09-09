@@ -2,7 +2,8 @@ import type {
   Environment,
   SecretVersion,
   Variable,
-  VariableVersion
+  VariableVersion,
+  CreateProjectRequest
 } from '@keyshade/schema'
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
@@ -100,4 +101,82 @@ export function mergeExistingEnvironments(oldValues: T, newValues: T): T {
   }
 
   return mergedValues
+}
+
+/* ------------------------------
+   parseEnvironmentsText util
+   Strict parser: only accepts env-like key/value pairs
+   Supported formats per line:
+     - KEY=VALUE
+     - KEY: VALUE
+     - KEY VALUE
+     - standalone KEY (no value) -> description ""
+   Returns CreateProjectRequest['environments']
+   ------------------------------ */
+
+type Env = NonNullable<CreateProjectRequest['environments']>[number]
+type Envs = NonNullable<CreateProjectRequest['environments']>
+
+export function parseEnvironmentsText(text: string, max = 200): Envs {
+  if (!text) return []
+
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+
+  const results: Env[] = []
+  let autoIndex = 1
+
+  for (const line of lines) {
+    if (results.length >= max) break;
+
+    // KEY=VALUE (allow VALUE to contain '=')
+    if (line.includes('=')) {
+      const [k, ...rest] = line.split('=');
+      const name = k.trim();
+      const description = rest.join('=').trim();
+      if (name && /^[A-Za-z0-9_.-]+$/.test(name)) {
+        results.push({ name, description });
+      }
+      continue;
+    }
+
+    // KEY: VALUE (allow VALUE to contain ':')
+    if (line.includes(':')) {
+      const [k, ...rest] = line.split(':');
+      const name = k.trim();
+      const description = rest.join(':').trim();
+      if (name && /^[A-Za-z0-9_.-]+$/.test(name)) {
+        results.push({ name, description });
+      }
+      continue;
+    }
+
+    // KEY VALUE (first token is key)
+    const parts = line.split(/\s+/)
+    if (parts.length > 1) {
+      const name = parts[0].trim();
+      const description = parts.slice(1).join(' ').trim();
+      if (name && /^[A-Za-z0-9_.-]+$/.test(name)) {
+        results.push({ name, description });
+      }
+      continue;
+    }
+
+    // standalone key → no value (allow only safe key chars)
+    if (line && /^[A-Za-z0-9_.-]+$/.test(line)) {
+      results.push({ name: line, description: '' })
+    }
+  }
+
+  // ensure unique names by appending -2, -3 etc.
+  const seen = new Map<string, number>();
+  return results.map((env) => {
+    let name = env.name || `env-${autoIndex++}`;
+    const count = (seen.get(name) ?? 0) + 1;
+    seen.set(name, count);
+    if (count > 1) name = `${name}-${count}`
+    return { name, description: env.description ?? '' }
+  })
 }
