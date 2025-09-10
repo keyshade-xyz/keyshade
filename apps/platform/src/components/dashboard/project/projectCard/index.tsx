@@ -103,11 +103,13 @@ export default function ProjectCard({
           href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
           key={id}
         >
-          <div className="flex items-center gap-x-5">
-            <Avvvatars size={56} style="shape" value={id} />
-            <div>
-              <div className="font-semibold">{name}</div>
-              <span className="text-xs font-semibold text-white/60">
+          <div className="flex min-w-0 items-center gap-x-5">
+            <div className="flex-shrink-0">
+              <Avvvatars size={56} style="shape" value={id} />
+            </div>
+            <div className="flex min-w-0 flex-col overflow-hidden">
+              <div className="truncate font-semibold">{name}</div>
+              <span className="truncate text-xs font-semibold text-white/60">
                 {description}
               </span>
             </div>

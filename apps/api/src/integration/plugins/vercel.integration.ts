@@ -75,7 +75,7 @@ export class VercelIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
+      integrationId: (integration as any).id,
       title: 'Adding KS_PRIVATE_KEY to Vercel project'
     })
 
@@ -127,6 +127,7 @@ export class VercelIntegration extends BaseIntegration {
 
   public async emitEvent(data: IntegrationEventData): Promise<void> {
     let shouldTriggerRedeploy = false
+    let environmentTarget: string | undefined = undefined
 
     switch (data.eventType) {
       case EventType.SECRET_ADDED:
@@ -152,8 +153,12 @@ export class VercelIntegration extends BaseIntegration {
         )
     }
 
+    // Try to extract environment from event data if present
     if (shouldTriggerRedeploy) {
-      await this.triggerRedeploy(data.event.id)
+      // Prefer environment from data if available, fallback to 'production'
+      // You may want to adjust this extraction logic as needed
+      environmentTarget = (data as any).environmentTarget || 'production'
+      await this.triggerRedeploy(data.event.id, environmentTarget)
     }
   }
 
@@ -278,7 +283,7 @@ export class VercelIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
+      integrationId: (integration as any).id,
       title: `Adding environment variable ${data.name} to targets ${filteredValues
         .map(
           ([environmentName]) =>
@@ -415,7 +420,7 @@ export class VercelIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
+      integrationId: (integration as any).id,
       title: `Updating environment variable name from ${data.oldName} to ${data.newName}`
     })
 
@@ -525,7 +530,7 @@ export class VercelIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
+      integrationId: (integration as any).id,
       title: `Deleting environment variable ${data.name}`
     })
 
@@ -694,7 +699,11 @@ export class VercelIntegration extends BaseIntegration {
     }
   }
 
-  private async triggerRedeploy(eventId: Event['id']): Promise<void> {
+  private async triggerRedeploy(
+    eventId: Event['id'],
+    environmentTarget: string
+  ): Promise<void> {
+
     const integration = this.getIntegration<VercelIntegrationMetadata>()
     const projectId: string = integration.metadata.projectId
 
@@ -702,19 +711,53 @@ export class VercelIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
-      title: `Triggering Vercel redeploy for project ${projectId}`
+      integrationId: (integration as any).id,
+      title: `Triggering Vercel redeploy for project ${projectId} (target: ${environmentTarget})`
     })
 
     let duration = 0
 
     try {
-      this.logger.log(`Fetching latest READY deployment for ${projectId}...`)
+      this.logger.log(`Checking for active deployments for ${projectId}...`)
+      const { deployments: activeDeployments } =
+        await this.vercel.deployments.getDeployments({
+          projectId,
+          state: 'BUILDING', // Check for in-progress states
+          target: environmentTarget,
+          limit: 10 // Check multiple to be safe
+        })
+
+      if (activeDeployments?.length > 0) {
+        this.logger.log(
+          `Found ${activeDeployments.length} active deployment(s), cancelling...`
+        )
+        // Measure duration for cancelling all deployments
+        const { duration: cancelDuration } = await makeTimedRequest(
+          async () => {
+            for (const activeDeployment of activeDeployments) {
+              try {
+                await this.vercel.deployments.cancelDeployment({
+                  id: activeDeployment.uid
+                })
+                this.logger.log(`Cancelled deployment: ${activeDeployment.uid}`)
+              } catch (cancelErr) {
+                this.logger.warn(
+                  `Failed to cancel deployment ${activeDeployment.uid}:`,
+                  cancelErr
+                )
+              }
+            }
+          }
+        )
+        duration += cancelDuration
+      }
+
+      this.logger.log(`Fetching latest READY deployments for ${projectId}...`)
 
       const { deployments } = await this.vercel.deployments.getDeployments({
         projectId,
         state: 'READY',
-        target: 'production',
+        target: environmentTarget,
         limit: 1
       })
 
