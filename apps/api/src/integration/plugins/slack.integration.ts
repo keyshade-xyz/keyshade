@@ -37,6 +37,12 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
+  public destroy(eventId: any): Promise<void> {
+    // TODO: cleanup integration
+    console.log(eventId)
+    return
+  }
+
   public init(): Promise<void> {
     // TODO: implement this
     return Promise.resolve()
