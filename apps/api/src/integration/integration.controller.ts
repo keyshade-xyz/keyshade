@@ -134,11 +134,13 @@ export class IntegrationController {
   @RequiredApiKeyAuthorities(Authority.DELETE_INTEGRATION)
   async deleteIntegration(
     @CurrentUser() user: AuthenticatedUser,
-    @Param('integrationSlug') integrationSlug: string
+    @Param('integrationSlug') integrationSlug: string,
+    @Query('cleanUp') cleanUp?: boolean
   ) {
     return await this.integrationService.deleteIntegration(
       user,
-      integrationSlug
+      integrationSlug,
+      cleanUp ?? false
     )
   }
 }
