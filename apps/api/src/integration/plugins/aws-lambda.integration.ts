@@ -73,6 +73,12 @@ export class AWSLambdaIntegration extends BaseIntegration {
     return 'single'
   }
 
+  public destroy(eventId: Event['id']): Promise<void> {
+    // TODO: cleanup integration
+    console.log(eventId)
+    return
+  }
+
   public async init(
     privateKey: Project['privateKey'],
     eventId: Event['id']

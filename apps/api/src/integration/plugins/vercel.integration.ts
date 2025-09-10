@@ -61,6 +61,12 @@ export class VercelIntegration extends BaseIntegration {
     return 'atleast-one'
   }
 
+  public destroy(eventId: Event['id']): Promise<void> {
+    // TODO: Delete webhook URL
+    console.log(eventId)
+    return
+  }
+
   public async init(
     privateKey: Project['privateKey'],
     eventId: Event['id']

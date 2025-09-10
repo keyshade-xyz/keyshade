@@ -87,6 +87,12 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
+  public destroy(eventId: any): Promise<void> {
+    // TODO: cleanup integration
+    console.log(eventId)
+    return
+  }
+
   public getPermittedEvents(): Set<EventType> {
     return new Set([
       EventType.INTEGRATION_ADDED,
