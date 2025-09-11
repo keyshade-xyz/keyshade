@@ -58,7 +58,9 @@ export class DiscordIntegration extends BaseIntegration {
 
   public destroy(eventId: Event['id']): Promise<void> {
     // TODO: Delete webhook URL
-    console.log(eventId)
+    this.logger.log(
+      `CLEANING UP DISCORD INTEGRATION: ${this.integration} EVENTID: ${eventId}`
+    )
     return
   }
 

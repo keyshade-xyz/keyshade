@@ -84,7 +84,8 @@ export const UpdateIntegrationRequestSchema = z.object({
 export const UpdateIntegrationResponseSchema = IntegrationSchema
 
 export const DeleteIntegrationRequestSchema = z.object({
-  integrationSlug: IntegrationSchema.shape.slug
+  integrationSlug: IntegrationSchema.shape.slug,
+  cleanUp: z.boolean().optional()
 })
 
 export const DeleteIntegrationResponseSchema = z.void()

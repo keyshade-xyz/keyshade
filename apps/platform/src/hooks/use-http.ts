@@ -37,6 +37,7 @@ function handle500(error) {
 type FunctionArgs = (
   | string
   | number
+  | boolean
   | Record<string, string>
   | Record<string, number>
 )[]

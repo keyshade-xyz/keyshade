@@ -90,7 +90,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteIntegrationResponse>> {
     const response = await this.apiClient.delete(
-      `/api/integration/${request.integrationSlug}`,
+      `/api/integration/${request.integrationSlug}?cleanUp=${request.cleanUp}`,
       headers
     )
     return await parseResponse<DeleteIntegrationResponse>(response)

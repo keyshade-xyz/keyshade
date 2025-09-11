@@ -26,10 +26,11 @@ export default function DeleteIntegrationDialog() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [confirmCleanup, setConfirmCleanup] = useState(false)
 
-  const deleteIntegration = useHttp((integrationSlug: string) => {
+  const deleteIntegration = useHttp((integrationSlug: string, cleanUp: boolean) => {
     return ControllerInstance.getInstance().integrationController.deleteIntegration(
       {
-        integrationSlug
+        integrationSlug,
+        cleanUp
       }
     )
   })
@@ -37,7 +38,7 @@ export default function DeleteIntegrationDialog() {
   const handleDeleteIntegration = useCallback(async () => {
     if (!selectedIntegration || !confirmDelete) return
     try {
-      const { success } = await deleteIntegration(selectedIntegration.slug)
+      const { success } = await deleteIntegration(selectedIntegration.slug, confirmCleanup);
       if (success) {
         toast.success('Integration deleted successfully')
         router.push('/integrations?tab=all')
@@ -47,12 +48,14 @@ export default function DeleteIntegrationDialog() {
     } finally {
       setIsDeleteIntegrationOpen(false)
       setConfirmDelete(false)
+      setConfirmCleanup(false)
     }
   }, [
     setIsDeleteIntegrationOpen,
     deleteIntegration,
     selectedIntegration,
     confirmDelete,
+    confirmCleanup,
     router
   ])
 
