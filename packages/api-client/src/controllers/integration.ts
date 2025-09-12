@@ -92,7 +92,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetVercelEnvironmentsResponse>> {
     const response = await this.apiClient.put(
-      `/api/integration/${request.integrationSlug}/vercel/environments`,
+      `/api/integration/vercel/environments`,
       headers
     )
 
