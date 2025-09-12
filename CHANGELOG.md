@@ -1,3 +1,9 @@
+## [2.34.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.11...v2.34.0-stage.12) (2025-09-12)
+
+### 🐛 Bug Fixes
+
+* prisma cli and client mismatch ([3617538](https://github.com/keyshade-xyz/keyshade/commit/361753892a4e648ce5ab36340ed8784c73fe42a5))
+
 ## [2.34.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.10...v2.34.0-stage.11) (2025-09-09)
 
 ### 🐛 Bug Fixes
