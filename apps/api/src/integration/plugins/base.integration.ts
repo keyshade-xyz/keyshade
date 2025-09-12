@@ -129,8 +129,6 @@ export abstract class BaseIntegration {
   public getIntegration<
     T extends IntegrationMetadata
   >(): IntegrationWithEnvironmentsAndMetadata<T> {
-    console.log(this)
-
     if (!this.integration) {
       throw new InternalServerErrorException('Integration not set')
     }
