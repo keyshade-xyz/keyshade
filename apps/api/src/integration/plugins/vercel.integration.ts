@@ -650,9 +650,8 @@ export class VercelIntegration extends BaseIntegration {
 
     if (!this.vercel || token) {
       this.logger.log('Generating Vercel client...')
-      const integration = this.getIntegration<VercelIntegrationMetadata>()
 
-      const bearerToken = token ?? integration.metadata.token
+      const bearerToken = token
       this.vercel = new Vercel({
         bearerToken
       })
