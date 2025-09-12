@@ -23,9 +23,6 @@ importers:
       '@keyshade/secret-scan':
         specifier: workspace:*
         version: link:packages/secret-scan
-      '@prisma/client':
-        specifier: ^6.12.0
-        version: 6.13.0(prisma@6.13.0(typescript@5.9.2))(typescript@5.9.2)
       '@semantic-release/changelog':
         specifier: ^6.0.3
         version: 6.0.3(semantic-release@24.2.7(typescript@5.9.2))
@@ -144,9 +141,6 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.5.11
         version: 0.5.14(prettier@3.5.3)
-      prisma:
-        specifier: ^6.6.0
-        version: 6.13.0(typescript@5.9.2)
       ts-jest:
         specifier: ^29.1.0
         version: 29.4.1(@babel/core@7.26.10)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.10))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.9.2)))(typescript@5.9.2)
@@ -210,6 +204,9 @@ importers:
       '@polar-sh/sdk':
         specifier: ^0.34.12
         version: 0.34.13
+      '@prisma/client':
+        specifier: ^6.16.1
+        version: 6.16.1(prisma@6.16.1(typescript@5.7.2))(typescript@5.7.2)
       '@react-email/components':
         specifier: ^0.0.25
         version: 0.0.25(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -264,6 +261,9 @@ importers:
       passport-google-oauth20:
         specifier: ^2.0.0
         version: 2.0.0
+      prisma:
+        specifier: ^6.16.1
+        version: 6.16.1(typescript@5.7.2)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -291,16 +291,13 @@ importers:
         version: 8.4.1
       '@nestjs/cli':
         specifier: ^10.0.0
-        version: 10.4.9(@swc/cli@0.4.0(@swc/core@1.11.21)(chokidar@3.6.0))(@swc/core@1.11.21)(esbuild@0.24.2)
+        version: 10.4.9(@swc/cli@0.4.0(@swc/core@1.11.21)(chokidar@3.6.0))(@swc/core@1.11.21)
       '@nestjs/schematics':
         specifier: ^10.0.0
         version: 10.2.3(chokidar@3.6.0)(typescript@5.7.2)
       '@nestjs/testing':
         specifier: ^10.0.0
         version: 10.4.17(@nestjs/common@10.4.17(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.17(@nestjs/common@10.4.17(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@10.4.17)(@nestjs/websockets@10.4.17)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@10.4.17(@nestjs/common@10.4.17(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.17))
-      '@prisma/client':
-        specifier: ^6.6.0
-        version: 6.6.0(prisma@6.6.0(typescript@5.7.2))(typescript@5.7.2)
       '@types/cookie-parser':
         specifier: ^1.4.7
         version: 1.4.8(@types/express@4.17.21)
@@ -333,7 +330,7 @@ importers:
         version: 7.4.4
       file-loader:
         specifier: ^6.2.0
-        version: 6.2.0(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2))
+        version: 6.2.0(webpack@5.97.1(@swc/core@1.11.21))
       jest:
         specifier: ^29.5.0
         version: 29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2))
@@ -346,9 +343,6 @@ importers:
       prettier:
         specifier: ^3.0.0
         version: 3.5.3
-      prisma:
-        specifier: ^6.6.0
-        version: 6.6.0(typescript@5.7.2)
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -360,10 +354,10 @@ importers:
         version: 6.3.4
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.1(@babel/core@7.26.10)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.10))(esbuild@0.24.2)(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2)))(typescript@5.7.2)
+        version: 29.4.1(@babel/core@7.26.10)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.10))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2)))(typescript@5.7.2)
       ts-loader:
         specifier: ^9.4.3
-        version: 9.5.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2))
+        version: 9.5.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21))
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2)
@@ -3328,8 +3322,8 @@ packages:
       '@modelcontextprotocol/sdk':
         optional: true
 
-  '@prisma/client@6.13.0':
-    resolution: {integrity: sha512-8m2+I3dQovkV8CkDMluiwEV1TxV9EXdT6xaCz39O6jYw7mkf5gwfmi+cL4LJsEPwz5tG7sreBwkRpEMJedGYUQ==}
+  '@prisma/client@6.16.1':
+    resolution: {integrity: sha512-QaBCOY29lLAxEFFJgBPyW3WInCW52fJeQTmWx/h6YsP5u0bwuqP51aP0uhqFvhK9DaZPwvai/M4tSDYLVE9vRg==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -3340,53 +3334,23 @@ packages:
       typescript:
         optional: true
 
-  '@prisma/client@6.6.0':
-    resolution: {integrity: sha512-vfp73YT/BHsWWOAuthKQ/1lBgESSqYqAWZEYyTdGXyFAHpmewwWL2Iz6ErIzkj4aHbuc6/cGSsE6ZY+pBO04Cg==}
-    engines: {node: '>=18.18'}
-    peerDependencies:
-      prisma: '*'
-      typescript: '>=5.1.0'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
-      typescript:
-        optional: true
+  '@prisma/config@6.16.1':
+    resolution: {integrity: sha512-sz3uxRPNL62QrJ0EYiujCFkIGZ3hg+9hgC1Ae1HjoYuj0BxCqHua4JNijYvYCrh9LlofZDZcRBX3tHBfLvAngA==}
 
-  '@prisma/config@6.13.0':
-    resolution: {integrity: sha512-OYMM+pcrvj/NqNWCGESSxVG3O7kX6oWuGyvufTUNnDw740KIQvNyA4v0eILgkpuwsKIDU36beZCkUtIt0naTog==}
+  '@prisma/debug@6.16.1':
+    resolution: {integrity: sha512-RWv/VisW5vJE4cDRTuAHeVedtGoItXTnhuLHsSlJ9202QKz60uiXWywBlVcqXVq8bFeIZoCoWH+R1duZJPwqLw==}
 
-  '@prisma/config@6.6.0':
-    resolution: {integrity: sha512-d8FlXRHsx72RbN8nA2QCRORNv5AcUnPXgtPvwhXmYkQSMF/j9cKaJg+9VcUzBRXGy9QBckNzEQDEJZdEOZ+ubA==}
+  '@prisma/engines-version@6.16.0-7.1c57fdcd7e44b29b9313256c76699e91c3ac3c43':
+    resolution: {integrity: sha512-ThvlDaKIVrnrv97ujNFDYiQbeMQpLa0O86HFA2mNoip4mtFqM7U5GSz2ie1i2xByZtvPztJlNRgPsXGeM/kqAA==}
 
-  '@prisma/debug@6.13.0':
-    resolution: {integrity: sha512-um+9pfKJW0ihmM83id9FXGi5qEbVJ0Vxi1Gm0xpYsjwUBnw6s2LdPBbrsG9QXRX46K4CLWCTNvskXBup4i9hlw==}
+  '@prisma/engines@6.16.1':
+    resolution: {integrity: sha512-EOnEM5HlosPudBqbI+jipmaW/vQEaF0bKBo4gVkGabasINHR6RpC6h44fKZEqx4GD8CvH+einD2+b49DQrwrAg==}
 
-  '@prisma/debug@6.6.0':
-    resolution: {integrity: sha512-DL6n4IKlW5k2LEXzpN60SQ1kP/F6fqaCgU/McgaYsxSf43GZ8lwtmXLke9efS+L1uGmrhtBUP4npV/QKF8s2ZQ==}
+  '@prisma/fetch-engine@6.16.1':
+    resolution: {integrity: sha512-fl/PKQ8da5YTayw86WD3O9OmKJEM43gD3vANy2hS5S1CnfW2oPXk+Q03+gUWqcKK306QqhjjIHRFuTZ31WaosQ==}
 
-  '@prisma/engines-version@6.13.0-35.361e86d0ea4987e9f53a565309b3eed797a6bcbd':
-    resolution: {integrity: sha512-MpPyKSzBX7P/ZY9odp9TSegnS/yH3CSbchQE9f0yBg3l2QyN59I6vGXcoYcqKC9VTniS1s18AMmhyr1OWavjHg==}
-
-  '@prisma/engines-version@6.6.0-53.f676762280b54cd07c770017ed3711ddde35f37a':
-    resolution: {integrity: sha512-JzRaQ5Em1fuEcbR3nUsMNYaIYrOT1iMheenjCvzZblJcjv/3JIuxXN7RCNT5i6lRkLodW5ojCGhR7n5yvnNKrw==}
-
-  '@prisma/engines@6.13.0':
-    resolution: {integrity: sha512-D+1B79LFvtWA0KTt8ALekQ6A/glB9w10ETknH5Y9g1k2NYYQOQy93ffiuqLn3Pl6IPJG3EsK/YMROKEaq8KBrA==}
-
-  '@prisma/engines@6.6.0':
-    resolution: {integrity: sha512-nC0IV4NHh7500cozD1fBoTwTD1ydJERndreIjpZr/S3mno3P6tm8qnXmIND5SwUkibNeSJMpgl4gAnlqJ/gVlg==}
-
-  '@prisma/fetch-engine@6.13.0':
-    resolution: {integrity: sha512-grmmq+4FeFKmaaytA8Ozc2+Tf3BC8xn/DVJos6LL022mfRlMZYjT3hZM0/xG7+5fO95zFG9CkDUs0m1S2rXs5Q==}
-
-  '@prisma/fetch-engine@6.6.0':
-    resolution: {integrity: sha512-Ohfo8gKp05LFLZaBlPUApM0M7k43a0jmo86YY35u1/4t+vuQH9mRGU7jGwVzGFY3v+9edeb/cowb1oG4buM1yw==}
-
-  '@prisma/get-platform@6.13.0':
-    resolution: {integrity: sha512-Nii2pX50fY4QKKxQwm7/vvqT6Ku8yYJLZAFX4e2vzHwRdMqjugcOG5hOSLjxqoXb0cvOspV70TOhMzrw8kqAnw==}
-
-  '@prisma/get-platform@6.6.0':
-    resolution: {integrity: sha512-3qCwmnT4Jh5WCGUrkWcc6VZaw0JY7eWN175/pcb5Z6FiLZZ3ygY93UX0WuV41bG51a6JN/oBH0uywJ90Y+V5eA==}
+  '@prisma/get-platform@6.16.1':
+    resolution: {integrity: sha512-kUfg4vagBG7dnaGRcGd1c0ytQFcDj2SUABiuveIpL3bthFdTLI6PJeLEia6Q8Dgh+WhPdo0N2q0Fzjk63XTyaA==}
 
   '@prisma/instrumentation@6.11.1':
     resolution: {integrity: sha512-mrZOev24EDhnefmnZX7WVVT7v+r9LttPRqf54ONvj6re4XMF7wFTpK2tLJi4XHB7fFp/6xhYbgRel8YV7gQiyA==}
@@ -7519,6 +7483,10 @@ packages:
     resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==}
     engines: {node: '>= 4'}
 
+  empathic@2.0.0:
+    resolution: {integrity: sha512-i6UzDscO/XfAcNYD75CfICkmfLedpyPDdozrLMmQc5ORaQcdMoc21OnlEylMIqI7U8eniKrPMxxtj8k0vhmJhA==}
+    engines: {node: '>=14'}
+
   encodeurl@1.0.2:
     resolution: {integrity: sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==}
     engines: {node: '>= 0.8'}
@@ -7629,11 +7597,6 @@ packages:
 
   esbuild-plugin-env@1.1.1:
     resolution: {integrity: sha512-xM8peq9LLzvrQ/1czyj1HLhbJgtD0UzlKuNuTvPySdFGc77ysYsqo3oxDBOyQVSaa4YQU4wjrPpbeeDX1z0eHA==}
-
-  esbuild-register@3.6.0:
-    resolution: {integrity: sha512-H2/S7Pm8a9CL1uhp9OvjwrBh5Pvx0H8qVOxNu8Wed9Y7qv56MPtq+GGM8RJpq6glYJn9Wspr8uw7l55uyinNeg==}
-    peerDependencies:
-      esbuild: '>=0.12 <1'
 
   esbuild@0.24.2:
     resolution: {integrity: sha512-+9egpBW8I3CD5XPe0n6BfT5fxLzxrlDzqydF3aviG+9ni1lDC/OvMHcxqEFV0+LANZG5R1bFMWfUrjVsdwxJvA==}
@@ -10480,8 +10443,8 @@ packages:
   pkg-types@1.3.1:
     resolution: {integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==}
 
-  pkg-types@2.2.0:
-    resolution: {integrity: sha512-2SM/GZGAEkPp3KWORxQZns4M+WSeXbC2HEvmOIJe3Cmiv6ieAJvdVhDldtHqM5J1Y7MrR1XhkBT/rMlhh9FdqQ==}
+  pkg-types@2.3.0:
+    resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
 
   plimit-lit@1.6.1:
     resolution: {integrity: sha512-B7+VDyb8Tl6oMJT9oSO2CW8XC/T4UcJGrwOVoNGwOQsQYhlpfajmrMj5xeejqaASq3V/EqThyOeATEOMuSEXiA==}
@@ -10678,18 +10641,8 @@ packages:
     resolution: {integrity: sha512-4yf0QO/sllf/1zbZWYnvWw3NxCQwLXKzIj0G849LSufP15BXKM0rbD2Z3wVnkMfjdn/CB0Dpp444gYAACdsplg==}
     engines: {node: '>=18'}
 
-  prisma@6.13.0:
-    resolution: {integrity: sha512-dfzORf0AbcEyyzxuv2lEwG8g+WRGF/qDQTpHf/6JoHsyF5MyzCEZwClVaEmw3WXcobgadosOboKUgQU0kFs9kw==}
-    engines: {node: '>=18.18'}
-    hasBin: true
-    peerDependencies:
-      typescript: '>=5.1.0'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
-  prisma@6.6.0:
-    resolution: {integrity: sha512-SYCUykz+1cnl6Ugd8VUvtTQq5+j1Q7C0CtzKPjQ8JyA2ALh0EEJkMCS+KgdnvKW1lrxjtjCyJSHOOT236mENYg==}
+  prisma@6.16.1:
+    resolution: {integrity: sha512-MFkMU0eaDDKAT4R/By2IA9oQmwLTxokqv2wegAErr9Rf+oIe7W2sYpE/Uxq0H2DliIR7vnV63PkC1bEwUtl98w==}
     engines: {node: '>=18.18'}
     hasBin: true
     peerDependencies:
@@ -14870,8 +14823,8 @@ snapshots:
 
   '@jridgewell/source-map@0.3.6':
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.8
-      '@jridgewell/trace-mapping': 0.3.25
+      '@jridgewell/gen-mapping': 0.3.13
+      '@jridgewell/trace-mapping': 0.3.30
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
@@ -15087,7 +15040,7 @@ snapshots:
       '@tybys/wasm-util': 0.9.0
     optional: true
 
-  '@nestjs/cli@10.4.9(@swc/cli@0.4.0(@swc/core@1.11.21)(chokidar@3.6.0))(@swc/core@1.11.21)(esbuild@0.24.2)':
+  '@nestjs/cli@10.4.9(@swc/cli@0.4.0(@swc/core@1.11.21)(chokidar@3.6.0))(@swc/core@1.11.21)':
     dependencies:
       '@angular-devkit/core': 17.3.11(chokidar@3.6.0)
       '@angular-devkit/schematics': 17.3.11(chokidar@3.6.0)
@@ -15097,7 +15050,7 @@ snapshots:
       chokidar: 3.6.0
       cli-table3: 0.6.5
       commander: 4.1.1
-      fork-ts-checker-webpack-plugin: 9.0.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2))
+      fork-ts-checker-webpack-plugin: 9.0.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21))
       glob: 10.4.5
       inquirer: 8.2.6
       node-emoji: 1.11.0
@@ -15106,7 +15059,7 @@ snapshots:
       tsconfig-paths: 4.2.0
       tsconfig-paths-webpack-plugin: 4.2.0
       typescript: 5.7.2
-      webpack: 5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.11.21)
       webpack-node-externals: 3.0.0
     optionalDependencies:
       '@swc/cli': 0.4.0(@swc/core@1.11.21)(chokidar@3.6.0)
@@ -15739,73 +15692,40 @@ snapshots:
       standardwebhooks: 1.0.0
       zod: 3.25.76
 
-  '@prisma/client@6.13.0(prisma@6.13.0(typescript@5.9.2))(typescript@5.9.2)':
+  '@prisma/client@6.16.1(prisma@6.16.1(typescript@5.7.2))(typescript@5.7.2)':
     optionalDependencies:
-      prisma: 6.13.0(typescript@5.9.2)
-      typescript: 5.9.2
-
-  '@prisma/client@6.6.0(prisma@6.6.0(typescript@5.7.2))(typescript@5.7.2)':
-    optionalDependencies:
-      prisma: 6.6.0(typescript@5.7.2)
+      prisma: 6.16.1(typescript@5.7.2)
       typescript: 5.7.2
 
-  '@prisma/config@6.13.0':
+  '@prisma/config@6.16.1':
     dependencies:
       c12: 3.1.0
       deepmerge-ts: 7.1.5
       effect: 3.16.12
-      read-package-up: 11.0.0
+      empathic: 2.0.0
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/config@6.6.0':
+  '@prisma/debug@6.16.1': {}
+
+  '@prisma/engines-version@6.16.0-7.1c57fdcd7e44b29b9313256c76699e91c3ac3c43': {}
+
+  '@prisma/engines@6.16.1':
     dependencies:
-      esbuild: 0.24.2
-      esbuild-register: 3.6.0(esbuild@0.24.2)
-    transitivePeerDependencies:
-      - supports-color
+      '@prisma/debug': 6.16.1
+      '@prisma/engines-version': 6.16.0-7.1c57fdcd7e44b29b9313256c76699e91c3ac3c43
+      '@prisma/fetch-engine': 6.16.1
+      '@prisma/get-platform': 6.16.1
 
-  '@prisma/debug@6.13.0': {}
-
-  '@prisma/debug@6.6.0': {}
-
-  '@prisma/engines-version@6.13.0-35.361e86d0ea4987e9f53a565309b3eed797a6bcbd': {}
-
-  '@prisma/engines-version@6.6.0-53.f676762280b54cd07c770017ed3711ddde35f37a': {}
-
-  '@prisma/engines@6.13.0':
+  '@prisma/fetch-engine@6.16.1':
     dependencies:
-      '@prisma/debug': 6.13.0
-      '@prisma/engines-version': 6.13.0-35.361e86d0ea4987e9f53a565309b3eed797a6bcbd
-      '@prisma/fetch-engine': 6.13.0
-      '@prisma/get-platform': 6.13.0
+      '@prisma/debug': 6.16.1
+      '@prisma/engines-version': 6.16.0-7.1c57fdcd7e44b29b9313256c76699e91c3ac3c43
+      '@prisma/get-platform': 6.16.1
 
-  '@prisma/engines@6.6.0':
+  '@prisma/get-platform@6.16.1':
     dependencies:
-      '@prisma/debug': 6.6.0
-      '@prisma/engines-version': 6.6.0-53.f676762280b54cd07c770017ed3711ddde35f37a
-      '@prisma/fetch-engine': 6.6.0
-      '@prisma/get-platform': 6.6.0
-
-  '@prisma/fetch-engine@6.13.0':
-    dependencies:
-      '@prisma/debug': 6.13.0
-      '@prisma/engines-version': 6.13.0-35.361e86d0ea4987e9f53a565309b3eed797a6bcbd
-      '@prisma/get-platform': 6.13.0
-
-  '@prisma/fetch-engine@6.6.0':
-    dependencies:
-      '@prisma/debug': 6.6.0
-      '@prisma/engines-version': 6.6.0-53.f676762280b54cd07c770017ed3711ddde35f37a
-      '@prisma/get-platform': 6.6.0
-
-  '@prisma/get-platform@6.13.0':
-    dependencies:
-      '@prisma/debug': 6.13.0
-
-  '@prisma/get-platform@6.6.0':
-    dependencies:
-      '@prisma/debug': 6.6.0
+      '@prisma/debug': 6.16.1
 
   '@prisma/instrumentation@6.11.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -19900,7 +19820,7 @@ snapshots:
       ohash: 2.0.11
       pathe: 2.0.3
       perfect-debounce: 1.0.0
-      pkg-types: 2.2.0
+      pkg-types: 2.3.0
       rc9: 2.1.2
 
   cac@6.7.14: {}
@@ -20662,6 +20582,8 @@ snapshots:
 
   emojis-list@3.0.0: {}
 
+  empathic@2.0.0: {}
+
   encodeurl@1.0.2: {}
 
   encodeurl@2.0.0: {}
@@ -20920,13 +20842,6 @@ snapshots:
   esbuild-plugin-env@1.1.1:
     dependencies:
       dotenv: 16.5.0
-
-  esbuild-register@3.6.0(esbuild@0.24.2):
-    dependencies:
-      debug: 4.4.0(supports-color@5.5.0)
-      esbuild: 0.24.2
-    transitivePeerDependencies:
-      - supports-color
 
   esbuild@0.24.2:
     optionalDependencies:
@@ -21690,11 +21605,11 @@ snapshots:
     dependencies:
       flat-cache: 3.2.0
 
-  file-loader@6.2.0(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)):
+  file-loader@6.2.0(webpack@5.97.1(@swc/core@1.11.21)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.11.21)
 
   file-type@17.1.6:
     dependencies:
@@ -21800,7 +21715,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  fork-ts-checker-webpack-plugin@9.0.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)):
+  fork-ts-checker-webpack-plugin@9.0.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21)):
     dependencies:
       '@babel/code-frame': 7.26.2
       chalk: 4.1.2
@@ -21815,7 +21730,7 @@ snapshots:
       semver: 7.7.1
       tapable: 2.2.1
       typescript: 5.7.2
-      webpack: 5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.11.21)
 
   form-data@2.5.3:
     dependencies:
@@ -24097,7 +24012,7 @@ snapshots:
       citty: 0.1.6
       consola: 3.4.2
       pathe: 2.0.3
-      pkg-types: 2.2.0
+      pkg-types: 2.3.0
       tinyexec: 1.0.1
 
   oauth@0.10.2: {}
@@ -24477,7 +24392,7 @@ snapshots:
       mlly: 1.7.4
       pathe: 2.0.3
 
-  pkg-types@2.2.0:
+  pkg-types@2.3.0:
     dependencies:
       confbox: 0.2.2
       exsolve: 1.0.7
@@ -24600,24 +24515,14 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prisma@6.13.0(typescript@5.9.2):
+  prisma@6.16.1(typescript@5.7.2):
     dependencies:
-      '@prisma/config': 6.13.0
-      '@prisma/engines': 6.13.0
+      '@prisma/config': 6.16.1
+      '@prisma/engines': 6.16.1
     optionalDependencies:
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - magicast
-
-  prisma@6.6.0(typescript@5.7.2):
-    dependencies:
-      '@prisma/config': 6.6.0
-      '@prisma/engines': 6.6.0
-    optionalDependencies:
-      fsevents: 2.3.3
       typescript: 5.7.2
     transitivePeerDependencies:
-      - supports-color
+      - magicast
 
   prismjs@1.29.0: {}
 
@@ -25981,17 +25886,16 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  terser-webpack-plugin@5.3.14(@swc/core@1.11.21)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)):
+  terser-webpack-plugin@5.3.14(@swc/core@1.11.21)(webpack@5.97.1(@swc/core@1.11.21)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 4.3.0
       serialize-javascript: 6.0.2
       terser: 5.39.0
-      webpack: 5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.11.21)
     optionalDependencies:
       '@swc/core': 1.11.21
-      esbuild: 0.24.2
 
   terser-webpack-plugin@5.3.14(@swc/core@1.11.21)(webpack@5.99.5(@swc/core@1.11.21)):
     dependencies:
@@ -26117,7 +26021,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-jest@29.4.1(@babel/core@7.26.10)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.10))(esbuild@0.24.2)(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2)))(typescript@5.7.2):
+  ts-jest@29.4.1(@babel/core@7.26.10)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.10))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2)))(typescript@5.7.2):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
@@ -26135,7 +26039,6 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.26.10)
-      esbuild: 0.24.2
       jest-util: 29.7.0
 
   ts-jest@29.4.1(@babel/core@7.26.10)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.10))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.10)(ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.9.2)))(typescript@5.9.2):
@@ -26158,7 +26061,7 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.26.10)
       jest-util: 29.7.0
 
-  ts-loader@9.5.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)):
+  ts-loader@9.5.2(typescript@5.7.2)(webpack@5.97.1(@swc/core@1.11.21)):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.18.3
@@ -26166,7 +26069,7 @@ snapshots:
       semver: 7.7.1
       source-map: 0.7.4
       typescript: 5.7.2
-      webpack: 5.97.1(@swc/core@1.11.21)(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.11.21)
 
   ts-node@10.9.2(@swc/core@1.11.21)(@types/node@20.19.10)(typescript@5.7.2):
     dependencies:
@@ -26639,7 +26542,7 @@ snapshots:
 
   webpack-virtual-modules@0.6.2: {}
 
-  webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2):
+  webpack@5.97.1(@swc/core@1.11.21):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.7
@@ -26661,7 +26564,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.14(@swc/core@1.11.21)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.11.21)(esbuild@0.24.2))
+      terser-webpack-plugin: 5.3.14(@swc/core@1.11.21)(webpack@5.97.1(@swc/core@1.11.21))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:
