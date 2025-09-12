@@ -129,7 +129,7 @@ export abstract class BaseIntegration {
   public getIntegration<
     T extends IntegrationMetadata
   >(): IntegrationWithEnvironmentsAndMetadata<T> {
-    if (!this.integration) {
+    if (!this.integrationType) {
       throw new InternalServerErrorException('Integration not set')
     }
     // @ts-expect-error -- returns the correct value

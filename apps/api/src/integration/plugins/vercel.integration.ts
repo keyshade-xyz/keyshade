@@ -703,7 +703,6 @@ export class VercelIntegration extends BaseIntegration {
     eventId: Event['id'],
     environmentTarget: string
   ): Promise<void> {
-
     const integration = this.getIntegration<VercelIntegrationMetadata>()
     const projectId: string = integration.metadata.projectId
 

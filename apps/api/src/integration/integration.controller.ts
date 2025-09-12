@@ -143,7 +143,7 @@ export class IntegrationController {
     )
   }
 
-  @Put(':integrationSlug/vercel/environments')
+  @Put('vercel/environments')
   @RequiredApiKeyAuthorities(
     Authority.READ_PROJECT,
     Authority.READ_ENVIRONMENT,
