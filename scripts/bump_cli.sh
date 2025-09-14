@@ -47,9 +47,9 @@ mv apps/cli/package.tmp.json apps/cli/package.json
 URL="https://github.com/keyshade-xyz/keyshade/releases/download/v${REPO_VERSION}/keyshade-cli.exe"
 
 # Compute hash
-echo "Downloading from $URL"
+echo "Downloading Windows executable from $URL"
 HASH=$(curl -L "$URL" | shasum -a 256 | cut -d ' ' -f1)
-echo "Computed hash for exe build: $HASH"
+echo "Computed hash for Windows executable: $HASH"
 
 # Update Scoop manifest in place (only version, url, hash)
 jq \
@@ -60,6 +60,44 @@ jq \
   | .url = $url
   | .hash = $hash' \
   bucket/keyshade.json > bucket/keyshade.tmp.json && mv bucket/keyshade.tmp.json bucket/keyshade.json
+
+# Brew formula update
+BREW_FORMULA="Formula/keyshade.rb"
+INTEL_URL="https://github.com/keyshade-xyz/keyshade/releases/download/v${REPO_VERSION}/keyshade-cli-macos-x64"
+ARM_URL="https://github.com/keyshade-xyz/keyshade/releases/download/v${REPO_VERSION}/keyshade-cli-macos-arm64"
+
+echo "Downloading MacOS(x64) executable from $INTEL_URL"
+INTEL_HASH=$(curl -L "$INTEL_URL" | shasum -a 256 | cut -d ' ' -f1)
+echo "Computed hash for MacOS(x64) executable: $HASH"
+
+echo "Downloading MacOS(arm64) executable from $ARM_URL"
+ARM_HASH=$(curl -L "$ARM_URL" | shasum -a 256 | cut -d ' ' -f1)
+echo "Computed hash for MacOS(arm64) executable: $ARM_HASH"
+
+cat > "$BREW_FORMULA" <<EOF
+class Keyshade < Formula
+  desc "Keyshade CLI - Secure, real-time secret and configuration management"
+  homepage "https://keyshade.xyz"
+  version "$CLI_VERSION"
+  license "MIT"
+
+  on_macos do
+    on_intel do
+      url "$INTEL_URL"
+      sha256 "$INTEL_HASH"
+    end
+
+    on_arm do
+      url "$ARM_URL"
+      sha256 "$ARM_HASH"
+    end
+  end
+
+  def install
+    bin.install "keyshade-cli" => "keyshade"
+  end
+end
+EOF
 
 
 # Optionally commit changes
