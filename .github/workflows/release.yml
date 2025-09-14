@@ -657,7 +657,7 @@ jobs:
               "64bit": {
                 "url": "$URL",
                 "hash": "$HASH",
-                "bin": "keyshade-cli.exe"
+                "bin": "keyshade.exe"
               }
             }
           }
