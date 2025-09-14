@@ -654,7 +654,7 @@ jobs:
           git add bucket/keyshade.json
           git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}" || echo "No changes to commit"
           git pull --rebase origin main
-          git push origin main
+          git push origin ${{ github.ref_name }}
 
   #  update-brew:
 #    name: Update Homebrew Formula
