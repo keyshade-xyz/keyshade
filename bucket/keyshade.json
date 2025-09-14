@@ -5,7 +5,7 @@
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/keyshade-xyz/keyshade/releases/download/v3.3.0-stage.2/keyshade-cli.exe",
+      "url": "https://github.com/keyshade-xyz/keyshade/releases/download/v2.34.0-stage.13/keyshade-cli.exe",
       "hash": "6bf96b19c8a9076087d372fc3db553ceeffb7d421ad388ae421e3bf7a5d59547",
       "bin": "keyshade-cli.exe"
     }
