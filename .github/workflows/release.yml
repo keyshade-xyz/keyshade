@@ -533,6 +533,42 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+  build-cli-exe:
+    name: Build CLI Windows Executable
+    needs: [release, publish-cli]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install PNPM
+        run: npm i -g pnpm
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build CLI
+        run: pnpm build:cli
+
+      - name: Package CLI into .exe
+        run: |
+          # Example using pkg (install if not in deps)
+          pnpm add -g pkg
+          pkg apps/cli/dist/index.cjs --targets node22-win-x64 --output keyshade-cli.exe
+
+      - name: Upload .exe to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ needs.release.outputs.version }}
+          echo "Uploading CLI exe for version $VERSION"
+          gh release upload v$VERSION keyshade-cli.exe --clobber
+
+
   sentry-release-cli:
     name: Sentry CLI
     needs: [release, publish-cli]
