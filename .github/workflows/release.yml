@@ -645,22 +645,20 @@ jobs:
           RELEASE_VERSION=${{ needs.release.outputs.version }}
           HASH=${{ steps.sha.outputs.hash }}
           URL="https://github.com/${{ github.repository }}/releases/download/v${RELEASE_VERSION}/keyshade-cli.exe"
-
+          
           # Overwrite the JSON manifest directly
           cat > bucket/keyshade.json <<EOF
           {
             "version": "$CLI_VERSION",
             "description": "Keyshade CLI - Secure, real-time secret and configuration management",
             "homepage": "https://keyshade.xyz",
-            "license": "MIT",
-            "architecture": {
-              "64bit": {
-                "url": "$URL",
-                "hash": "$HASH",
-                "bin": {
-                    "keyshade": "keyshade-cli.exe"
-                }
-              }
+            "license": "MPL-2.0",
+            "url": "$URL",
+            "hash": "$HASH",
+            "bin": "keyshade.exe",
+            "pre_install": "Rename-Item \"\$dir\\keyshade-cli.exe\" -NewName \"keyshade.exe\" -Force",
+            "autoupdate": {
+              "url": "https://github.com/${{ github.repository }}/releases/download/v\$version/keyshade-cli.exe"
             }
           }
           EOF
@@ -668,7 +666,7 @@ jobs:
           # Commit changes to unprotected branch
           git checkout -b ci/scoop-update
           git add bucket/keyshade.json
-          git commit -m "chore(scoop): update to $VERSION" || echo "No changes to commit"
+          git commit -m "chore(scoop): update to $CLI_VERSION" || echo "No changes to commit"
           git push origin ci/scoop-update --force
 
       - name: Create PR for Scoop manifest update
