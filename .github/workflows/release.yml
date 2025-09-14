@@ -533,10 +533,28 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  build-cli-exe:
-    name: Build CLI Windows Executable
+  build-cli-executables:
+    name: Build CLI Executables
     needs: [release, publish-cli]
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: keyshade-cli-linux-x64
+          - os: ubuntu-latest
+            target: node18-linux-arm64
+            output: keyshade-cli-linux-arm64
+          - os: macos-latest
+            target: node18-macos-x64
+            output: keyshade-cli-macos-x64
+          - os: macos-latest
+            target: node18-macos-arm64
+            output: keyshade-cli-macos-arm64
+          - os: windows-latest
+            target: node18-win-x64
+            output: keyshade-cli.exe
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -554,18 +572,21 @@ jobs:
       - name: Build CLI
         run: pnpm build:cli
 
-      - name: Package CLI into .exe
+      - name: Package CLI into Executable
         run: |
           npm i -g pkg
-          pkg apps/cli/dist/index.cjs --targets  node18-win-x64 --output keyshade-cli.exe
+          pkg apps/cli/dist/index.cjs \
+            --targets ${{ matrix.target }} \
+            --output ${{ matrix.output }}
 
-      - name: Upload .exe to GitHub Release
+      - name: Upload Executable to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.release.outputs.version }}
         run: |
-          VERSION=${{ needs.release.outputs.version }}
-          echo "Uploading CLI exe for version $VERSION"
-          gh release upload v$VERSION keyshade-cli.exe --clobber
+          echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
+          gh release upload v$VERSION ${{ matrix.output }} --clobber
+
 
 
   sentry-release-cli:
