@@ -1,0 +1,13 @@
+{
+  "version": "0.0.0",
+  "description": "Keyshade CLI - Secure, real-time secret and configuration management",
+  "homepage": "https://keyshade.xyz",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/keyshade-xyz/keyshade/releases/download/v0.0.0/keyshade-cli.exe",
+      "hash": "",
+      "bin": "keyshade-cli.exe"
+    }
+  }
+}

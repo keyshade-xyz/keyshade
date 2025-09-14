@@ -610,6 +610,48 @@ jobs:
           echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
           gh release upload "v${VERSION}" "${{ matrix.output }}" --clobber
 
+  update-scoop:
+    name: Update Scoop Manifest
+    needs: [release, build-cli-executables]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Windows binary
+        run: |
+          VERSION=${{ needs.release.outputs.version }}
+          curl -L "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli.exe" -o keyshade-cli.exe
+
+      - name: Calculate SHA256
+        id: sha
+        run: |
+          HASH=$(sha256sum keyshade-cli.exe | cut -d ' ' -f1)
+          echo "hash=$HASH" >> $GITHUB_OUTPUT
+
+      - name: Update Scoop manifest
+        run: |
+          VERSION=${{ needs.release.outputs.version }}
+          URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli.exe"
+  
+          jq --arg version "$VERSION" \
+             --arg url "$URL" \
+             --arg hash "${{ steps.sha.outputs.hash }}" \
+             '.version=$version
+              | .architecture."64bit".url=$url
+              | .architecture."64bit".hash=$hash' \
+             scoop/keyshade.json > scoop/keyshade.json.tmp
+  
+          mv scoop/keyshade.json.tmp scoop/keyshade.json
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scoop/keyshade.json
+          git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}"
+          git push origin HEAD:main
+
   sentry-release-cli:
     name: Sentry CLI
     needs: [release, publish-cli]
