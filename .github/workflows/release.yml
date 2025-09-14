@@ -643,9 +643,9 @@ jobs:
              '.version=$version
               | .architecture."64bit".url=$url
               | .architecture."64bit".hash=$hash' \
-             scoop/keyshade.json > scoop/keyshade.json.tmp
+             bucket/keyshade.json > bucket/keyshade.json.tmp
   
-          mv scoop/keyshade.json.tmp scoop/keyshade.json
+          mv bucket/keyshade.json.tmp bucket/keyshade.json
 
       - name: Commit and push changes
         run: |
