@@ -641,14 +641,15 @@ jobs:
 
       - name: Update and commit Scoop manifest
         run: |
-          VERSION=${{ needs.publish-cli.outputs.current_version }}
+          CLI_VERSION=${{ needs.publish-cli.outputs.current_version }}
+          RELEASE_VERSION=${{ needs.release.outputs.version }}
           HASH=${{ steps.sha.outputs.hash }}
-          URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli.exe"
+          URL="https://github.com/${{ github.repository }}/releases/download/v${RELEASE_VERSION}/keyshade-cli.exe"
 
           # Overwrite the JSON manifest directly
           cat > bucket/keyshade.json <<EOF
           {
-            "version": "$VERSION",
+            "version": "$CLI_VERSION",
             "description": "Keyshade CLI - Secure, real-time secret and configuration management",
             "homepage": "https://keyshade.xyz",
             "license": "MIT",
