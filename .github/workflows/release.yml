@@ -646,7 +646,7 @@ jobs:
 
       - name: Create PR for Scoop manifest update
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_GH_TOKEN }}
         run: |
           gh pr create \
             --title "chore(scoop): update to ${{ needs.release.outputs.version }}" \
