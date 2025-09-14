@@ -543,7 +543,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: 20.x
 
       - name: Install PNPM
         run: npm i -g pnpm
@@ -557,7 +557,7 @@ jobs:
       - name: Package CLI into .exe
         run: |
           npm i -g pkg
-          pkg apps/cli/dist/index.cjs --targets node22-win-x64 --output keyshade-cli.exe
+          pkg apps/cli/dist/index.cjs --targets  node18-win-x6 --output keyshade-cli.exe
 
       - name: Upload .exe to GitHub Release
         env:
@@ -608,7 +608,7 @@ jobs:
             ${{ runner.os }}-cli-dist-
 
       - name: Build
-        run: pnpm build:api
+        run: pnpm build:cli
 
       - name: Install sentry-cli
         run: npm i -g @sentry/cli
