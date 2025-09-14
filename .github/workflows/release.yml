@@ -602,12 +602,13 @@ jobs:
             --output ${{ matrix.output }}
 
       - name: Upload Executable to GitHub Release
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
           echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
-          gh release upload v$VERSION ${{ matrix.output }} --clobber
+          gh release upload "v${VERSION}" "${{ matrix.output }}" --clobber
 
   sentry-release-cli:
     name: Sentry CLI
