@@ -463,6 +463,7 @@ jobs:
         id: check-versions
         run: |
           current_version=`jq -r '.version' apps/cli/package.json`
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
 
           if [ "${{ github.ref_name }}" == "main" ]; then
             published_version=`npm show @keyshade/cli version`
@@ -639,19 +640,22 @@ jobs:
 
       - name: Update and commit Scoop manifest
         run: |
-          VERSION=${{ needs.release.outputs.version }}
+          VERSION=${{ needs.publish-cli.outputs.current_version }}
           HASH=${{ steps.sha.outputs.hash }}
-      
-          # Use jq to update version and sha256
-          jq --arg version "$VERSION" --arg sha "$HASH" \
-          '.version = $version | .bin.hash = $sha' \
-          bucket/keyshade.json > bucket/keyshade.tmp.json
+          URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli.exe"
+          
+          # Update version, url, and sha256 in the manifest
+          jq --arg version "$VERSION" --arg sha "$HASH" --arg url "$URL" \
+             '.version = $version | .bin.url = $url | .bin.hash = $sha' \
+             bucket/keyshade.json > bucket/keyshade.tmp.json
           mv bucket/keyshade.tmp.json bucket/keyshade.json
           
+          # Commit changes to unprotected branch
           git checkout -b ci/scoop-update
           git add bucket/keyshade.json
-          git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}" || echo "No changes to commit"
+          git commit -m "chore(scoop): update to $VERSION" || echo "No changes to commit"
           git push origin ci/scoop-update --force
+
 
       - name: Create PR for Scoop manifest update
         env:
