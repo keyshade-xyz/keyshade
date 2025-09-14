@@ -451,6 +451,7 @@ jobs:
 
     outputs:
       skip_publish: ${{ steps.check-versions.outputs.skip_publish || 'false' }}
+      current_version: ${{ steps.check-versions.outputs.current_version }}
 
     permissions:
       contents: read
