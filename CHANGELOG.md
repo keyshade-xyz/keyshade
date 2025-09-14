@@ -1,3 +1,27 @@
+## [2.34.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.12...v2.34.0-stage.13) (2025-09-12)
+
+### 🚀 Features
+
+* **api:** add endpoint to fetch vercel environments ([#1108](https://github.com/keyshade-xyz/keyshade/issues/1108)) ([637b868](https://github.com/keyshade-xyz/keyshade/commit/637b868888b89cbc55de9d2d84fec245f43e8255))
+
+## [2.34.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.11...v2.34.0-stage.12) (2025-09-12)
+
+### 🐛 Bug Fixes
+
+* prisma cli and client mismatch ([3617538](https://github.com/keyshade-xyz/keyshade/commit/361753892a4e648ce5ab36340ed8784c73fe42a5))
+
+## [2.34.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.10...v2.34.0-stage.11) (2025-09-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** project icon alignment issue on dashboard ([#1141](https://github.com/keyshade-xyz/keyshade/issues/1141)) ([9b15567](https://github.com/keyshade-xyz/keyshade/commit/9b1556770eedb04a8074c354fe918c08fb7d36fa))
+
+## [2.34.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.9...v2.34.0-stage.10) (2025-09-07)
+
+### 🚀 Features
+
+* **api:** update init function of slack integration ([#1089](https://github.com/keyshade-xyz/keyshade/issues/1089)) ([79ed4e6](https://github.com/keyshade-xyz/keyshade/commit/79ed4e6e0a27e2345812ea28c8b5ae69b7c83124))
+
 ## [2.34.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.8...v2.34.0-stage.9) (2025-09-03)
 
 ### 🚀 Features
