@@ -621,6 +621,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Download Windows binary
         run: |
           VERSION=${{ needs.release.outputs.version }}
@@ -632,38 +637,23 @@ jobs:
           HASH=$(sha256sum keyshade-cli.exe | cut -d ' ' -f1)
           echo "hash=$HASH" >> $GITHUB_OUTPUT
 
-      - name: Update Scoop manifest
+      - name: Commit Scoop manifest to unprotected branch
         run: |
-          VERSION=${{ needs.release.outputs.version }}
-          URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli.exe"
-  
-          jq --arg version "$VERSION" \
-             --arg url "$URL" \
-             --arg hash "${{ steps.sha.outputs.hash }}" \
-             '.version=$version
-              | .architecture."64bit".url=$url
-              | .architecture."64bit".hash=$hash' \
-             bucket/keyshade.json > bucket/keyshade.json.tmp
-  
-          mv bucket/keyshade.json.tmp bucket/keyshade.json
-
-      - name: Commit and push Scoop manifest
-        env:
-          GH_TOKEN: ${{ secrets.PAT_GH_TOKEN }}  # PAT with repo write permissions
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Fetch full history and checkout develop
-          git fetch origin develop
-          git checkout develop
-          
-          # Add/commit updated manifest
+          git checkout -b ci/scoop-update
           git add bucket/keyshade.json
           git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}" || echo "No changes to commit"
-          
-          # Push directly to develop using PAT
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} develop
+          git push origin ci/scoop-update --force
+
+      - name: Create PR for Scoop manifest update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "chore(scoop): update to ${{ needs.release.outputs.version }}" \
+            --body "Automated scoop manifest update." \
+            --base develop \
+            --head ci/scoop-update \
+            --repo ${{ github.repository }}
 
 
 
