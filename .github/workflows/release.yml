@@ -643,19 +643,18 @@ jobs:
           VERSION=${{ needs.publish-cli.outputs.current_version }}
           HASH=${{ steps.sha.outputs.hash }}
           URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli.exe"
-          
-          # Update version, url, and sha256 in the manifest
-          jq --arg version "$VERSION" --arg sha "$HASH" --arg url "$URL" \
-             '.version = $version | .bin.url = $url | .bin.hash = $sha' \
+
+          # Update version, architecture URL, and hash
+          jq --arg version "$VERSION" --arg url "$URL" --arg sha "$HASH" \
+             '.version = $version | .architecture."64bit".url = $url | .architecture."64bit".hash = $sha' \
              bucket/keyshade.json > bucket/keyshade.tmp.json
           mv bucket/keyshade.tmp.json bucket/keyshade.json
-          
+
           # Commit changes to unprotected branch
           git checkout -b ci/scoop-update
           git add bucket/keyshade.json
           git commit -m "chore(scoop): update to $VERSION" || echo "No changes to commit"
           git push origin ci/scoop-update --force
-
 
       - name: Create PR for Scoop manifest update
         env:
