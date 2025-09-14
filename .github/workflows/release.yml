@@ -557,7 +557,7 @@ jobs:
       - name: Package CLI into .exe
         run: |
           npm i -g pkg
-          pkg apps/cli/dist/index.cjs --targets  node18-win-x6 --output keyshade-cli.exe
+          pkg apps/cli/dist/index.cjs --targets  node18-win-x64 --output keyshade-cli.exe
 
       - name: Upload .exe to GitHub Release
         env:
