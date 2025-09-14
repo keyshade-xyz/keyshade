@@ -666,7 +666,7 @@ jobs:
             --base develop \
             --head ci/scoop-update \
             --repo ${{ github.repository }} \
-            --assignee @me
+            --assignee @rajdip-b
 
 
   #  update-brew:
