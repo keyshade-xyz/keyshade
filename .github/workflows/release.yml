@@ -535,22 +535,43 @@ jobs:
 
   build-cli-executables:
     name: Build CLI Executables
-    needs: [release, publish-cli]
+    needs: [ release, publish-cli ]
     strategy:
       matrix:
         include:
+          # Ubuntu
           - os: ubuntu-latest
             target: node18-linux-x64
             output: keyshade-cli-linux-x64
           - os: ubuntu-latest
             target: node18-linux-arm64
             output: keyshade-cli-linux-arm64
+
+          # RHEL / CentOS
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: keyshade-cli-rhel-x64
+          - os: ubuntu-latest
+            target: node18-linux-arm64
+            output: keyshade-cli-rhel-arm64
+
+          # Amazon Linux
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: keyshade-cli-amazonlinux-x64
+          - os: ubuntu-latest
+            target: node18-linux-arm64
+            output: keyshade-cli-amazonlinux-arm64
+
+          # macOS
           - os: macos-latest
             target: node18-macos-x64
             output: keyshade-cli-macos-x64
           - os: macos-latest
             target: node18-macos-arm64
             output: keyshade-cli-macos-arm64
+
+          # Windows
           - os: windows-latest
             target: node18-win-x64
             output: keyshade-cli.exe
@@ -573,6 +594,7 @@ jobs:
         run: pnpm build:cli
 
       - name: Package CLI into Executable
+        shell: bash
         run: |
           npm i -g pkg
           pkg apps/cli/dist/index.cjs \
@@ -586,8 +608,6 @@ jobs:
         run: |
           echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
           gh release upload v$VERSION ${{ matrix.output }} --clobber
-
-
 
   sentry-release-cli:
     name: Sentry CLI
