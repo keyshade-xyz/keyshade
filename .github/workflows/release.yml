@@ -617,6 +617,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download Windows binary
         run: |
@@ -648,9 +650,75 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scoop/keyshade.json
-          git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}"
-          git push origin HEAD:main
+          git pull --rebase origin main
+          git add bucket/keyshade.json
+          git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}" || echo "No changes to commit"
+          git push origin main
+
+  #  update-brew:
+#    name: Update Homebrew Formula
+#    needs: [release, build-cli-executables]
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          ref: main
+#
+#      - name: Download macOS binaries
+#        run: |
+#          VERSION=${{ needs.release.outputs.version }}
+#          curl -L "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli-macos-x64" -o keyshade-cli-macos-x64
+#          curl -L "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/keyshade-cli-macos-arm64" -o keyshade-cli-macos-arm64
+#
+#      - name: Calculate SHA256
+#        id: sha
+#        run: |
+#          X64_HASH=$(sha256sum keyshade-cli-macos-x64 | cut -d ' ' -f1)
+#          ARM64_HASH=$(sha256sum keyshade-cli-macos-arm64 | cut -d ' ' -f1)
+#          echo "x64=$X64_HASH" >> $GITHUB_OUTPUT
+#          echo "arm64=$ARM64_HASH" >> $GITHUB_OUTPUT
+#
+#      - name: Update Homebrew formula
+#        run: |
+#          VERSION=${{ needs.release.outputs.version }}
+#          URL_BASE="https://github.com/${{ github.repository }}/releases/download/v${VERSION}"
+#
+#          cat > homebrew/Formula/keyshade.rb <<EOF
+#          class Keyshade < Formula
+#          desc "Keyshade CLI - Secure, real-time secret and configuration management"
+#          homepage "https://keyshade.xyz"
+#          version "$VERSION"
+#
+#          if Hardware::CPU.arm?
+#          url "$URL_BASE/keyshade-cli-macos-arm64"
+#          sha256 "${{ steps.sha.outputs.arm64 }}"
+#          else
+#          url "$URL_BASE/keyshade-cli-macos-x64"
+#          sha256 "${{ steps.sha.outputs.x64 }}"
+#          end
+#
+#          def install
+#          if Hardware::CPU.arm?
+#          bin.install "keyshade-cli-macos-arm64" => "keyshade"
+#          else
+#          bin.install "keyshade-cli-macos-x64" => "keyshade"
+#          end
+#          end
+#
+#          test do
+#          system "\#{bin}/keyshade", "--version"
+#          end
+#          end
+#          EOF
+#
+#      - name: Commit and push changes
+#        run: |
+#          git config user.name "github-actions[bot]"
+#          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+#          git add homebrew/Formula/keyshade.rb
+#          git commit -m "chore(brew): update formula to ${{ needs.release.outputs.version }}"
+#          git push origin HEAD:main
 
   sentry-release-cli:
     name: Sentry CLI
