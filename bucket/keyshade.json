@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "2.34.0-stage.13",
   "description": "Keyshade CLI - Secure, real-time secret and configuration management",
   "homepage": "https://keyshade.xyz",
   "license": "MIT",
@@ -9,5 +9,8 @@
       "hash": "",
       "bin": "keyshade-cli.exe"
     }
+  },
+  "bin": {
+    "hash": "6bf96b19c8a9076087d372fc3db553ceeffb7d421ad388ae421e3bf7a5d59547"
   }
 }
