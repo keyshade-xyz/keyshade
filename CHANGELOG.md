@@ -1,3 +1,15 @@
+## [2.34.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.12...v2.34.0-stage.13) (2025-09-12)
+
+### 🚀 Features
+
+* **api:** add endpoint to fetch vercel environments ([#1108](https://github.com/keyshade-xyz/keyshade/issues/1108)) ([637b868](https://github.com/keyshade-xyz/keyshade/commit/637b868888b89cbc55de9d2d84fec245f43e8255))
+
+## [2.34.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.11...v2.34.0-stage.12) (2025-09-12)
+
+### 🐛 Bug Fixes
+
+* prisma cli and client mismatch ([3617538](https://github.com/keyshade-xyz/keyshade/commit/361753892a4e648ce5ab36340ed8784c73fe42a5))
+
 ## [2.34.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.10...v2.34.0-stage.11) (2025-09-09)
 
 ### 🐛 Bug Fixes

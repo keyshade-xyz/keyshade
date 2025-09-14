@@ -451,6 +451,7 @@ jobs:
 
     outputs:
       skip_publish: ${{ steps.check-versions.outputs.skip_publish || 'false' }}
+      current_version: ${{ steps.check-versions.outputs.current_version }}
 
     permissions:
       contents: read
@@ -463,6 +464,7 @@ jobs:
         id: check-versions
         run: |
           current_version=`jq -r '.version' apps/cli/package.json`
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
 
           if [ "${{ github.ref_name }}" == "main" ]; then
             published_version=`npm show @keyshade/cli version`
@@ -533,6 +535,83 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+  build-cli-executables:
+    name: Build CLI Executables
+    needs: [ release, publish-cli ]
+    strategy:
+      matrix:
+        include:
+          # Ubuntu
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: keyshade-cli-linux-x64
+          - os: ubuntu-latest
+            target: node18-linux-arm64
+            output: keyshade-cli-linux-arm64
+
+          # RHEL / CentOS
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: keyshade-cli-rhel-x64
+          - os: ubuntu-latest
+            target: node18-linux-arm64
+            output: keyshade-cli-rhel-arm64
+
+          # Amazon Linux
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: keyshade-cli-amazonlinux-x64
+          - os: ubuntu-latest
+            target: node18-linux-arm64
+            output: keyshade-cli-amazonlinux-arm64
+
+          # macOS
+          - os: macos-latest
+            target: node18-macos-x64
+            output: keyshade-cli-macos-x64
+          - os: macos-latest
+            target: node18-macos-arm64
+            output: keyshade-cli-macos-arm64
+
+          # Windows
+          - os: windows-latest
+            target: node18-win-x64
+            output: keyshade-cli.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install PNPM
+        run: npm i -g pnpm
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build CLI
+        run: pnpm build:cli
+
+      - name: Package CLI into Executable
+        shell: bash
+        run: |
+          npm i -g pkg
+          pkg apps/cli/dist/index.cjs \
+            --targets ${{ matrix.target }} \
+            --output ${{ matrix.output }}
+
+      - name: Upload Executable to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
+          gh release upload "v${VERSION}" "${{ matrix.output }}" --clobber
+
   sentry-release-cli:
     name: Sentry CLI
     needs: [release, publish-cli]
@@ -573,7 +652,7 @@ jobs:
             ${{ runner.os }}-cli-dist-
 
       - name: Build
-        run: pnpm build:api
+        run: pnpm build:cli
 
       - name: Install sentry-cli
         run: npm i -g @sentry/cli
