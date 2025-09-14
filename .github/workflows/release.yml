@@ -652,17 +652,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b ci/scoop-update
-          git add scoop/keyshade.json
+          git add bucket/keyshade.json
           git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}" || echo "No changes to commit"
           git push origin ci/scoop-update --force
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          branch: ci/scoop-update
-          base: develop
-          title: "chore(scoop): update to ${{ needs.release.outputs.version }}"
-          body: "Automated scoop manifest update."
+      - name: Create Pull Request via GH CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "chore(scoop): update to ${{ needs.release.outputs.version }}" \
+            --body "Automated scoop manifest update." \
+            --base develop \
+            --head ci/scoop-update \
+            --repo ${{ github.repository }} \
+            --assignee @me
 
 
   #  update-brew:
