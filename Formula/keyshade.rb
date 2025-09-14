@@ -17,6 +17,10 @@ class Keyshade < Formula
   end
 
   def install
-    bin.install "keyshade-cli" => "keyshade"
+    if Hardware::CPU.intel?
+      bin.install "keyshade-cli-macos-x64" => "keyshade"
+    else
+      bin.install "keyshade-cli-macos-arm64" => "keyshade"
+    end
   end
 end
