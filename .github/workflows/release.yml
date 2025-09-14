@@ -637,8 +637,17 @@ jobs:
           HASH=$(sha256sum keyshade-cli.exe | cut -d ' ' -f1)
           echo "hash=$HASH" >> $GITHUB_OUTPUT
 
-      - name: Commit Scoop manifest to unprotected branch
+      - name: Update and commit Scoop manifest
         run: |
+          VERSION=${{ needs.release.outputs.version }}
+          HASH=${{ steps.sha.outputs.hash }}
+      
+          # Use jq to update version and sha256
+          jq --arg version "$VERSION" --arg sha "$HASH" \
+          '.version = $version | .bin.hash = $sha' \
+          bucket/keyshade.json > bucket/keyshade.tmp.json
+          mv bucket/keyshade.tmp.json bucket/keyshade.json
+          
           git checkout -b ci/scoop-update
           git add bucket/keyshade.json
           git commit -m "chore(scoop): update to ${{ needs.release.outputs.version }}" || echo "No changes to commit"
