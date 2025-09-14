@@ -83,30 +83,50 @@ mv bucket/keyshade.tmp.json bucket/keyshade.json
 ########################################
 # 4. Build macOS binaries for Homebrew
 ########################################
-for arch in x64 arm64; do
-  echo "📦 Building macOS $arch executable for Homebrew..."
-  MAC_OUT="$EXEC_DIR/keyshade-cli-macos-${arch}"
-  pkg apps/cli/dist/index.cjs \
-    --targets "node18-macos-${arch}" \
-    --output "$MAC_OUT"
+echo "📦 Building macOS x64 executable..."
+pkg apps/cli/dist/index.cjs --targets node18-macos-x64 --output executables/keyshade-cli-macos-x64
+HASH_X64=$(shasum -a 256 executables/keyshade-cli-macos-x64 | cut -d ' ' -f1)
+URL_X64="https://github.com/keyshade-xyz/keyshade/releases/download/v${REPO_VERSION}/keyshade-cli-macos-x64"
+echo "✅ x64 build complete. Hash: $HASH_X64"
 
-  MAC_HASH=$(shasum -a 256 "$MAC_OUT" | cut -d ' ' -f1)
-  MAC_URL="https://github.com/keyshade-xyz/keyshade/releases/download/v${REPO_VERSION}/keyshade-cli-macos-${arch}"
+echo "📦 Building macOS arm64 executable..."
+pkg apps/cli/dist/index.cjs --targets node18-macos-arm64 --output executables/keyshade-cli-macos-arm64
+HASH_ARM=$(shasum -a 256 executables/keyshade-cli-macos-arm64 | cut -d ' ' -f1)
+URL_ARM="https://github.com/keyshade-xyz/keyshade/releases/download/v${REPO_VERSION}/keyshade-cli-macos-arm64"
+echo "✅ arm64 build complete. Hash: $HASH_ARM"
 
-  echo "✅ macOS $arch hash: $MAC_HASH"
+echo "📄 Updating Homebrew formula..."
+cat > Formula/keyshade.rb <<EOF
+class Keyshade < Formula
+  desc "Keyshade CLI - Secure, real-time secret and configuration management"
+  homepage "https://keyshade.xyz"
+  version "${CLI_VERSION}"
+  license "MIT"
 
-  # Update formula
-  sed -i.bak \
-    "s|sha256 \".*\" # ${arch}|sha256 \"$MAC_HASH\" # ${arch}|" \
-    Formula/keyshade.rb
-done
+  on_macos do
+    on_intel do
+      url "${URL_X64}"
+      sha256 "${HASH_X64}"
+    end
+
+    on_arm do
+      url "${URL_ARM}"
+      sha256 "${HASH_ARM}"
+    end
+  end
+
+  def install
+    bin.install "keyshade-cli" => "keyshade"
+  end
+end
+EOF
+echo "✅ Homebrew formula updated with version $CLI_VERSION"
 
 ########################################
 # 5. Cleanup
 ########################################
 echo "🧹 Cleaning up executables..."
 rm -rf "$EXEC_DIR"
-rm Formula/keyshade.rb.bak
 
 ########################################
 # 6. Commit changes

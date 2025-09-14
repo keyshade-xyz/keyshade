@@ -4,7 +4,7 @@
   "homepage": "https://keyshade.xyz",
   "license": "MPL-2.0",
   "url": "https://github.com/keyshade-xyz/keyshade/releases/download/v2.34.0-stage.13/keyshade-cli.exe",
-  "hash": "8cbe22702f421930bad1a554834a0db7b26a51f6d13bfb40c7062c20be520226",
+  "hash": "3c7b92497bafdd6a2fec054051dec579bd819a408789d56394fcf2f76faa9936",
   "bin": "keyshade.exe",
   "pre_install": "Rename-Item \"$dir\\keyshade-cli.exe\" -NewName \"keyshade.exe\" -Force",
   "autoupdate": {
