@@ -87,10 +87,9 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
-  public destroy(eventId: any): Promise<void> {
-    // TODO: cleanup integration
-    console.log(eventId)
-    return
+  public async destroy(): Promise<void> {
+    this.app = null
+    return Promise.resolve()
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -145,6 +144,14 @@ export class SlackIntegration extends BaseIntegration {
     this.logger.log(`Emitting event to Slack: ${data.title}`)
 
     const integration = this.getIntegration<SlackIntegrationMetadata>()
+    //app for some reason doesn't exist in emitEvent so we need to create it -> current workaround.
+    if (!this.app) {
+      const metadata = integration.metadata
+      this.app = new App({
+        token: metadata.botToken,
+        signingSecret: metadata.signingSecret
+      })
+    }
 
     try {
       const { id: integrationRunId } = await this.registerIntegrationRun({
