@@ -145,11 +145,11 @@ URL_BASE="https://github.com/keyshade-xyz/keyshade/releases/download/v__REPO_VER
 URL="$URL_BASE/$BIN_NAME"
 DEST="/usr/local/bin/keyshade"
 
-echo "📥 Downloading Keyshade CLI (\$BIN_NAME) from \$URL..."
-curl -L "\$URL" -o "\$DEST"
-chmod +x "\$DEST"
+echo "📥 Downloading Keyshade CLI ($BIN_NAME) from $URL..."
+curl -L "$URL" -o "$DEST"
+chmod +x "$DEST"
 
-echo "✅ Keyshade CLI installed to \$DEST"
+echo "✅ Keyshade CLI installed to $DEST"
 EOF
 
 # Now replace placeholder with actual version
@@ -157,10 +157,6 @@ sed -i.bak "s/__REPO_VERSION__/${REPO_VERSION}/g" install.sh && rm install.sh.ba
 
 chmod +x install.sh
 echo "✅ install.sh generated at ./install.sh"
-
-echo "📤 Uploading install.sh to GitHub release v${REPO_VERSION}..."
-gh release upload "v${REPO_VERSION}" install.sh --clobber
-echo "✅ install.sh uploaded to release"
 ########################################
 # 4. Cleanup
 ########################################
