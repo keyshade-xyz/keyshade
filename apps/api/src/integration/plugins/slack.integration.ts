@@ -21,7 +21,8 @@ import {
 } from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private readonly app: App
+  //need to remove readonly type since we need to instantiate it later in the class
+  private app: App
 
   constructor(prisma: PrismaService) {
     super(IntegrationType.SLACK, prisma)
@@ -37,15 +38,51 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
-  public destroy(eventId: any): Promise<void> {
-    // TODO: cleanup integration
-    console.log(eventId)
-    return
+  public async destroy(): Promise<void> {
+    this.app = null
+    return Promise.resolve()
   }
 
-  public init(): Promise<void> {
-    // TODO: implement this
-    return Promise.resolve()
+  private initializeApp() {
+    if (!this.integration) {
+      throw new InternalServerErrorException('Integration not initialized')
+    }
+
+    try {
+      const integration = this.getIntegration<SlackIntegrationMetadata>()
+      const metadata = integration.metadata
+
+      if (!metadata) {
+        throw new InternalServerErrorException(
+          'Failed to get integration metadata'
+        )
+      }
+      if (!this.app) {
+        this.app = new App({
+          token: metadata.botToken,
+          signingSecret: metadata.signingSecret
+        })
+      }
+      return metadata
+    } catch (error) {
+      this.logger.error(`Failed to initialize Slack app: ${error}`)
+      throw new InternalServerErrorException(
+        'Failed to initialize Slack integration'
+      )
+    }
+  }
+
+  public async init(): Promise<void> {
+    try {
+      const metadata = this.initializeApp()
+      await this.validateConfiguration(metadata)
+      this.logger.log('Slack integration initialized successfully')
+    } catch (error) {
+      this.logger.error(`Failed to initialize Slack integration: ${error}`)
+      throw new InternalServerErrorException(
+        'Failed to initialize Slack integration'
+      )
+    }
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -90,6 +127,14 @@ export class SlackIntegration extends BaseIntegration {
     this.logger.log(`Emitting event to Slack: ${data.title}`)
 
     const integration = this.getIntegration<SlackIntegrationMetadata>()
+    //app for some reason doesn't exist in emitEvent so we need to create it -> current workaround.
+    if (!this.app) {
+      const metadata = integration.metadata
+      this.app = new App({
+        token: metadata.botToken,
+        signingSecret: metadata.signingSecret
+      })
+    }
 
     try {
       const { id: integrationRunId } = await this.registerIntegrationRun({
