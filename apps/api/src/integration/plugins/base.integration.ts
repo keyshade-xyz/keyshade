@@ -74,6 +74,11 @@ export abstract class BaseIntegration {
    */
   abstract validateConfiguration(metadata: IntegrationMetadata): Promise<void>
 
+  /**
+   * Use this function to clean up all integration data that was created.
+   */
+  abstract destroy(eventId: Event['id']): Promise<void>
+
   // WARNING: DO NOT OVERRIDE
   protected async registerIntegrationRun({
     eventId,
