@@ -1,3 +1,18 @@
+## [2.34.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.14...v2.34.0-stage.15) (2025-09-16)
+
+### 🐛 Bug Fixes
+
+* **api:** fixed bug in workspace role tests ([#1156](https://github.com/keyshade-xyz/keyshade/issues/1156)) ([9465994](https://github.com/keyshade-xyz/keyshade/commit/946599489107145284296828e6cc8c5541d120d3))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** update node env for CLI packaging ([471b212](https://github.com/keyshade-xyz/keyshade/commit/471b2126bb7b3f2f38747fc79f15742cecf58cb8))
+* **ci:** update node env for CLI packaging ([825d7b4](https://github.com/keyshade-xyz/keyshade/commit/825d7b4fa5879df27b2d06157bde3b487fdfc1bc))
+* **ci:** update node env for CLI packaging ([5f12976](https://github.com/keyshade-xyz/keyshade/commit/5f129769cb04f845be4af238efceb4109acb67cc))
+* **cli:** update package managers to use v3.3.0-stage.2 [skip ci] ([1c98b43](https://github.com/keyshade-xyz/keyshade/commit/1c98b435423dad64d701d2638d877a08ab8a80a7))
+* **cli:** update package managers to use v3.3.0-stage.2 [skip ci] ([0ee522d](https://github.com/keyshade-xyz/keyshade/commit/0ee522d7cee03f9b3ce1035af9e8ae48d1b06cb6))
+* updated helper scripts ([57ce482](https://github.com/keyshade-xyz/keyshade/commit/57ce482cac5f80bfc6d1126255d2176d591143eb))
+
 ## [2.34.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.13...v2.34.0-stage.14) (2025-09-14)
 
 ### 🚀 Features
