@@ -87,11 +87,6 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
-  public async destroy(): Promise<void> {
-    this.app = null
-    return Promise.resolve()
-  }
-
   public getPermittedEvents(): Set<EventType> {
     return new Set([
       EventType.INTEGRATION_ADDED,
@@ -126,6 +121,12 @@ export class SlackIntegration extends BaseIntegration {
     ])
   }
 
+  public destroy(eventId: Event['id']): Promise<void> {
+    // TODO: Delete webhook URL
+    console.log(eventId)
+    return
+  }
+
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['botToken', 'signingSecret', 'channelId'])
   }
@@ -144,6 +145,7 @@ export class SlackIntegration extends BaseIntegration {
     this.logger.log(`Emitting event to Slack: ${data.title}`)
 
     const integration = this.getIntegration<SlackIntegrationMetadata>()
+<<<<<<< HEAD
     //app for some reason doesn't exist in emitEvent so we need to create it -> current workaround.
     if (!this.app) {
       const metadata = integration.metadata
@@ -152,6 +154,8 @@ export class SlackIntegration extends BaseIntegration {
         signingSecret: metadata.signingSecret
       })
     }
+=======
+>>>>>>> da0b676c (pulled in new changes from develop)
 
     try {
       const { id: integrationRunId } = await this.registerIntegrationRun({
