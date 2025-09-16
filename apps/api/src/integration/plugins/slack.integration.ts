@@ -87,10 +87,6 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
-  public destroy(): Promise<void> {
-    return Promise.resolve()
-  }
-
   public getPermittedEvents(): Set<EventType> {
     return new Set([
       EventType.INTEGRATION_ADDED,
@@ -125,6 +121,12 @@ export class SlackIntegration extends BaseIntegration {
     ])
   }
 
+  public destroy(eventId: Event['id']): Promise<void> {
+    // TODO: Delete webhook URL
+    console.log(eventId)
+    return
+  }
+
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['botToken', 'signingSecret', 'channelId'])
   }
@@ -140,8 +142,88 @@ export class SlackIntegration extends BaseIntegration {
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
-    console.log(data)
-    return
+    this.logger.log(`Emitting event to Slack: ${data.title}`)
+
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
+
+    try {
+      const { id: integrationRunId } = await this.registerIntegrationRun({
+        eventId: data.event.id,
+        integrationId: integration.id,
+        title: 'Posting message to Slack'
+      })
+
+      const block = [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Update occurred on keyshade',
+            emoji: true
+          }
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${data.title ?? 'No title provided'}*\n${data.description ?? 'No description provided'}`
+          }
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: `*Event:*\n${data.title}`
+            },
+            {
+              type: 'mrkdwn',
+              text: `*Source:*\n${data.source}`
+            }
+          ]
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: '<https://keyshade.xyz|View in Keyshade>'
+            }
+          ]
+        }
+      ]
+
+      const { response, duration } = await makeTimedRequest(() =>
+        this.getSlackApp().client.chat.postMessage({
+          channel: integration.metadata.channelId,
+          blocks: block,
+          text: data.title
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        response.message.text
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to emit event to Slack: ${response.status} - ${response.statusText}`
+        )
+      } else {
+        this.logger.log(`Event emitted to Slack in ${duration}ms`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to emit event to Slack: ${error}`)
+      throw new InternalServerErrorException('Failed to emit event to Slack')
+    }
   }
 
   public async validateConfiguration(metadata: SlackIntegrationMetadata) {
