@@ -61,13 +61,9 @@ export default function DeleteIntegrationDialog() {
     deleteIntegration,
     selectedIntegration,
     confirmDelete,
-<<<<<<< HEAD
-    router,
-    setWorkspaceIntegrationCount
-=======
     confirmCleanup,
+    setWorkspaceIntegrationCount,
     router
->>>>>>> cc3c2870 (configured DeleteIntegrationDialog to send a cleanUp parameter to the delete integration endpoint)
   ])
 
   const handleClose = useCallback(() => {
