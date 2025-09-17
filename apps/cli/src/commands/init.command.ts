@@ -86,10 +86,8 @@ export default class InitCommand extends BaseCommand {
             }))
           })
         } else {
-          Logger.info('No workspaces found. Please create one first.')
-          workspace = await text({
-            message: 'Enter the workspace slug'
-          })
+          Logger.error('No workspaces found. Please create one first.')
+          process.exit(1)
         }
       } else {
         this.logError(error)
@@ -134,15 +132,19 @@ export default class InitCommand extends BaseCommand {
 
             if (projectSuccess && projectData.privateKey) {
               privateKey = projectData.privateKey
-            } else if (!projectSuccess) {
-              this.logError(projectError)
+            } else {
+              if (!projectSuccess) {
+                this.logError(projectError)
+              }
+              note('Project private key is not available in database')
+              privateKey = await text({
+                message: 'Enter the private key'
+              })
             }
           }
         } else {
-          Logger.info('No projects found in this workspace.')
-          project = await text({
-            message: 'Enter the project slug'
-          })
+          Logger.error('No projects found in this workspace.')
+          process.exit(1)
         }
       } else {
         this.logError(error)
@@ -150,13 +152,6 @@ export default class InitCommand extends BaseCommand {
           message: 'Enter the project slug'
         })
       }
-    }
-
-    if (!privateKey) {
-      note('Project private key is not stored in database')
-      privateKey = await text({
-        message: 'Enter the private key'
-      })
     }
 
     if (!environment) {
@@ -179,10 +174,8 @@ export default class InitCommand extends BaseCommand {
             }))
           })
         } else {
-          Logger.info('No environments found in this project.')
-          environment = await text({
-            message: 'Enter the environment slug'
-          })
+          Logger.error('No environments found in this project.')
+          process.exit(1)
         }
       } else {
         this.logError(error)
