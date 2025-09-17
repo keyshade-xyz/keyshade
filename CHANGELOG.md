@@ -1,3 +1,9 @@
+## [2.34.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.15...v2.34.0-stage.16) (2025-09-17)
+
+### 🚀 Features
+
+* **cli:** make init command dynamically fetch config ([#1155](https://github.com/keyshade-xyz/keyshade/issues/1155)) ([512ca59](https://github.com/keyshade-xyz/keyshade/commit/512ca5982e38e710a0d9f4343c1babaed64445b7))
+
 ## [2.34.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.14...v2.34.0-stage.15) (2025-09-16)
 
 ### 🐛 Bug Fixes
