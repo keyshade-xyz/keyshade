@@ -609,8 +609,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
-          echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
-          gh release upload "v${VERSION}" "${{ matrix.output }}" --clobber
+          echo "Checking if asset '${{ matrix.output }}' already exists for release v${VERSION}..."
+          
+          if gh release view "v${VERSION}" --json assets -q ".assets[].name" | grep -q "^${{ matrix.output }}$"; then
+            echo "Asset '${{ matrix.output }}' already exists, skipping upload."
+          else
+            echo "Uploading CLI executable (${{ matrix.output }}) for version $VERSION"
+            gh release upload "v${VERSION}" "${{ matrix.output }}"
+          fi
 
   sentry-release-cli:
     name: Sentry CLI
