@@ -6,6 +6,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
+  productionBrowserSourceMaps: true,
   webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/,
