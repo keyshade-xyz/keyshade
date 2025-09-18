@@ -1,3 +1,17 @@
+## [2.34.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.16...v2.34.0-stage.17) (2025-09-18)
+
+### 🚀 Features
+
+* trigger re-release ([b3d8715](https://github.com/keyshade-xyz/keyshade/commit/b3d87153e5e4171dea7a7a1cb78b5eef4d99c599))
+
+### 🔧 Miscellaneous Chores
+
+* add sourcemap generation ([0f8be57](https://github.com/keyshade-xyz/keyshade/commit/0f8be57ce83f9c5f65065c64375c0690d27ad844))
+* add sourcemap generation ([fcd60d2](https://github.com/keyshade-xyz/keyshade/commit/fcd60d2607f578cc4f65afcf2aef2a16e3070bc2))
+* add sourcemap generation ([44d6a7a](https://github.com/keyshade-xyz/keyshade/commit/44d6a7a399232da27358742e82ccced4b0b4bb0e))
+* check if asset is present in release before uploading ([46c314a](https://github.com/keyshade-xyz/keyshade/commit/46c314aa61e1303eccc6f1c2ac265d4ab16cfec7))
+* **ci:** building cli executables work run only on main branch ([c6730b9](https://github.com/keyshade-xyz/keyshade/commit/c6730b9609efe56412c43e551665a1ef319116fb))
+
 ## [2.34.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.15...v2.34.0-stage.16) (2025-09-17)
 
 ### 🚀 Features
