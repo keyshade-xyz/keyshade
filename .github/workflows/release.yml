@@ -538,6 +538,7 @@ jobs:
   build-cli-executables:
     name: Build CLI Executables
     needs: [ release, publish-cli ]
+    if: github.ref == 'refs/heads/main'
     strategy:
       matrix:
         include:
