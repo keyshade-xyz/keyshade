@@ -200,7 +200,7 @@ jobs:
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
           sentry-cli sourcemaps inject apps/api/dist
-          sentry-cli sourcemaps upload --release $VERSION -p $SENTRY_PROJECT apps/api/dist
+          sentry-cli sourcemaps upload --rewrite --url-prefix '~/dist' --release $VERSION -p $SENTRY_PROJECT apps/api/dist
 
   deploy-platform:
     needs: release
@@ -426,7 +426,7 @@ jobs:
             ${{ runner.os }}-web-next-
 
       - name: Build
-        run: pnpm build:api
+        run: pnpm build:web
 
       - name: Sentry Release
         env:

@@ -3,6 +3,10 @@
   "compilerOptions": {
     "jsx": "preserve",
     "target": "ESNext",
+    "sourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "declarationMap": true,
     "plugins": [
       {
         "name": "next"
