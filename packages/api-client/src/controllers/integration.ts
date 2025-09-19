@@ -12,7 +12,9 @@ import {
   UpdateIntegrationRequest,
   UpdateIntegrationResponse,
   ValidateIntegrationConfigurationRequest,
-  ValidateIntegrationConfigurationResponse
+  ValidateIntegrationConfigurationResponse,
+  GetVercelEnvironmentsRequest,
+  GetVercelEnvironmentsResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { ClientResponse } from '@keyshade/schema'
@@ -83,6 +85,18 @@ export default class IntegrationController {
     )
     const response = await this.apiClient.get(url, headers)
     return await parseResponse<GetAllIntegrationRunsResponse>(response)
+  }
+
+  async getVercelEnvironments(
+    request: GetVercelEnvironmentsRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetVercelEnvironmentsResponse>> {
+    const response = await this.apiClient.put(
+      `/api/integration/vercel/environments`,
+      headers
+    )
+
+    return await parseResponse<GetVercelEnvironmentsResponse>(response)
   }
 
   async deleteIntegration(
