@@ -1,3 +1,9 @@
+## [2.34.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.17...v2.34.0-stage.18) (2025-09-21)
+
+### 🚀 Features
+
+* update lockfile ([ec86db9](https://github.com/keyshade-xyz/keyshade/commit/ec86db98b6b142d8f0edf6b89a70328a250fc49b))
+
 ## [2.34.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.16...v2.34.0-stage.17) (2025-09-18)
 
 ### 🚀 Features
