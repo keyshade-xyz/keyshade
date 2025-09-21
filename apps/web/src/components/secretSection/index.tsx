@@ -51,7 +51,7 @@ const cardData = [
 
 function SecretSection(): React.JSX.Element {
   return (
-    <section className="mt-[10vw] flex min-h-[50vh] w-full flex-col items-center gap-y-[5rem] p-6 sm:mt-[1vh] md:gap-y-[9.69rem] landscape:mt-[30vh]">
+    <section className="mt-[4vw] flex min-h-[50vh] w-full flex-col items-center gap-y-[5rem] p-6 sm:mt-[1vh] md:mt-[2vh] md:gap-y-[9.69rem] landscape:mt-[2vh]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
         <h2
           className={`${GeistSans.className}  text-center text-4xl md:text-5xl`}

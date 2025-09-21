@@ -9,7 +9,7 @@ function Hero(): React.JSX.Element {
   return (
     <>
       <Toaster />
-      <div className="relative -top-8 flex h-screen w-full flex-col items-center justify-center  bg-[url(/hero/colour-bg.svg)]  bg-cover bg-no-repeat md:pt-[36rem]">
+      <div className="relative -top-8 flex min-h-screen w-full flex-col items-center justify-center  bg-[url(/hero/colour-bg.svg)]  bg-cover bg-no-repeat pb-4 md:pt-[36rem]">
         <section className="flex flex-col items-center gap-8 py-[6.88rem] ">
           <h1
             className={` text-brandBlue w-[25rem] text-center text-4xl md:w-auto md:text-7xl`}
