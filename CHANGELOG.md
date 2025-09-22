@@ -1,3 +1,9 @@
+## [2.34.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.18...v2.34.0-stage.19) (2025-09-22)
+
+### 🚀 Features
+
+* **platform:** update import environment button text and description ([#1167](https://github.com/keyshade-xyz/keyshade/issues/1167)) ([e82686e](https://github.com/keyshade-xyz/keyshade/commit/e82686e8256b44d1158b2f664430c3c04416d759))
+
 ## [2.34.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.17...v2.34.0-stage.18) (2025-09-21)
 
 ### 🚀 Features
