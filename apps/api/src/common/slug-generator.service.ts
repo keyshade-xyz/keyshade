@@ -119,7 +119,7 @@ export default class SlugGenerator {
       throw new InternalServerErrorException(
         constructErrorBody(
           'Too many iterations while generating slug',
-          `Failed to generate unique slug for ${name} in ${model.toString()} after 10 attempts.`
+          `Failed to generate unique slug for ${name} in ${model.toString()} after ${SlugGenerator.MAX_ITERATIONS} attempts.`
         )
       )
     }
@@ -132,7 +132,7 @@ export default class SlugGenerator {
     this.logger.log(`Generated base slug for ${name}: ${baseSlug}`)
 
     let max: number = 0
-    let newSlug: string
+    let newSlug: string | undefined
 
     // Check if the slug already exists in the cache
     const cachedSlugNumericPart = await this.fetchLatestCreatedSlug(
@@ -170,10 +170,12 @@ export default class SlugGenerator {
       }
     }
 
+    // Add randomization to reduce collision probability
     if (!newSlug) {
-      // Increment the max value by 1
       max += 1
-      newSlug = `${baseSlug}-${max}`
+      // Add a short random string to the slug for extra uniqueness
+      const randomSuffix = Math.random().toString(36).substring(2, 6)
+      newSlug = `${baseSlug}-${max}-${randomSuffix}`
       this.logger.log(`Generated new slug for ${name}: ${newSlug}`)
 
       // Check if the new slug already exists
@@ -187,9 +189,8 @@ export default class SlugGenerator {
       })
 
       if (slugExists) {
-        // If it exists, call the function recursively to generate a new slug
         this.logger.log(
-          `Slug ${newSlug} already exists in ${model.toString()}.`
+          `Slug ${newSlug} already exists in ${model.toString()}. Retrying with incremented iteration.`
         )
         return await this.generateUniqueSlug(name, model, iterationCount + 1)
       }
@@ -202,7 +203,7 @@ export default class SlugGenerator {
     // Store the new slug in the cache
     await this.cacheSlug(baseSlug, model, max)
 
-    return newSlug
+    return newSlug!
   }
 
   /**
