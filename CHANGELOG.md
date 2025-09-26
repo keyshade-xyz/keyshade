@@ -1,3 +1,9 @@
+## [2.34.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.19...v2.34.0-stage.20) (2025-09-26)
+
+### 🐛 Bug Fixes
+
+* **platform:** trigger count now displays correct number of triggers ([#1168](https://github.com/keyshade-xyz/keyshade/issues/1168)) ([e44c7d1](https://github.com/keyshade-xyz/keyshade/commit/e44c7d1876602800f04e64b57c1e9a70fea3da3f))
+
 ## [2.34.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.18...v2.34.0-stage.19) (2025-09-22)
 
 ### 🚀 Features
