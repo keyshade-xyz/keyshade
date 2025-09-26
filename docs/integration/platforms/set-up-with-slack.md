@@ -111,7 +111,7 @@ Before setting up the integration, you need a Keyshade project with your secrets
 
 ### Select Project and Environments (optional)
 
-- If you don’t select a project: Keyshade will listen for events from all projects in the workspace
+- If you don’t select a project: Keyshade will listen for events from the entire workspace
 - If you select a project but no environment(s): it will listen for all environments in that project
 - If you select a project and one or more environments: it will listen only to those environments of that project
 
