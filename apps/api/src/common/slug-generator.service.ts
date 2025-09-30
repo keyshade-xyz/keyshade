@@ -13,6 +13,20 @@ import { RedisClientType } from 'redis'
 
 @Injectable()
 export default class SlugGenerator {
+  /**
+   * Demo method to show example slug combinations for a given name.
+   * Prints several possible slugs to the console.
+   * Not used in production; for review/testing only.
+   */
+  static demoSlugCombinations(name: string) {
+    const baseSlug = slugify(name, { lower: true, strict: true })
+    const max = 0
+    for (let i = 0; i < 5; i++) {
+      const randomSuffix = Math.random().toString(36).substring(2, 6)
+      const slug = `${baseSlug}-${max + i}-${randomSuffix}`
+      console.log(slug)
+    }
+  }
   private readonly logger: Logger = new Logger(SlugGenerator.name)
   private static readonly MAX_ITERATIONS: number = 10
 
@@ -132,7 +146,7 @@ export default class SlugGenerator {
     this.logger.log(`Generated base slug for ${name}: ${baseSlug}`)
 
     let max: number = 0
-    let newSlug: string | undefined
+    let newSlug: string
 
     // Check if the slug already exists in the cache
     const cachedSlugNumericPart = await this.fetchLatestCreatedSlug(
@@ -173,7 +187,9 @@ export default class SlugGenerator {
 
     // Add randomization to reduce collision probability
     if (!newSlug) {
+      // Increment the max value by 1
       max += 1
+      newSlug = `${baseSlug}-${max}`
       // Add a short random string to the slug for extra uniqueness
       const randomSuffix = Math.random().toString(36).substring(2, 6)
       newSlug = `${baseSlug}-${max}-${randomSuffix}`
@@ -248,3 +264,15 @@ export default class SlugGenerator {
     }
   }
 }
+
+// Demo: Print example slug combinations for 'Example Name'
+// Output will look like (randomized):
+// example-name-0-4k2a
+// example-name-1-9bqz
+// example-name-2-7x1c
+// example-name-3-2j8d
+// example-name-4-0wqf
+// (Each run will have different random suffixes)
+//
+// To test, uncomment the line below and run this file directly with ts-node or node (after transpile):
+// SlugGenerator.demoSlugCombinations('Example Name');
