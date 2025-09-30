@@ -116,6 +116,14 @@ export interface HydratedIntegration extends Integration {
     name: string
     slug: string
   }[]
+  /** Integration triggers/events */
+  notifyOn: string[]
+  /** Integration slug */
+  slug: string
+  /** Workspace ID for the integration */
+  workspaceId: string
+  /** Total number of triggers for this integration */
+  totalTriggers: number
 }
 
 export interface RawIntegration

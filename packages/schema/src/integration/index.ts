@@ -45,7 +45,9 @@ export const IntegrationSchema = z.object({
   entitlements: z.object({
     canUpdate: z.boolean(),
     canDelete: z.boolean()
-  })
+  }),
+  /** Total number of triggers for this integration */
+  totalTriggers: z.number()
 })
 
 export const IntegrationRunSchema = z.object({

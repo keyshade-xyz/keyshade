@@ -1,7 +1,4 @@
-import {
-  HydratedIntegration,
-  RawIntegration
-} from '@/integration/integration.types'
+import { HydratedIntegration } from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Injectable, Logger } from '@nestjs/common'
@@ -51,7 +48,7 @@ type RootHydrationParams = {
 }
 
 type IntegrationHydrationParams = RootHydrationParams & {
-  integration: RawIntegration
+  integration: HydratedIntegration
 }
 
 type SecretHydrationParams = RootHydrationParams & {
@@ -145,7 +142,10 @@ export class HydrationService {
 
     return {
       ...integration,
-      entitlements
+      entitlements,
+      totalTriggers: Array.isArray(integration.notifyOn)
+        ? integration.notifyOn.length
+        : 0
     }
   }
 
