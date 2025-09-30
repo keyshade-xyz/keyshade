@@ -146,7 +146,8 @@ export default class SlugGenerator {
       max = cachedSlugNumericPart
     } else {
       // Get all slugs that match baseSlug-N
-      const existingSlugs = await (this.prisma[model] as any).findMany({
+      const prismaModel = this.prisma[model as string] as any
+      const existingSlugs = await prismaModel.findMany({
         where: {
           slug: {
             startsWith: baseSlug
@@ -182,7 +183,8 @@ export default class SlugGenerator {
       this.logger.log(
         `Checking if slug already exists in ${model.toString()}...`
       )
-      const slugExists = await (this.prisma[model] as any).findFirst({
+      const prismaModel = this.prisma[model as string] as any
+      const slugExists = await prismaModel.findFirst({
         where: {
           slug: newSlug
         }
