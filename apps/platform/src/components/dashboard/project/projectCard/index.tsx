@@ -109,7 +109,7 @@ export default function ProjectCard({
             </div>
             <div className="flex min-w-0 flex-col overflow-hidden">
               <div className="truncate font-semibold">{name}</div>
-              <span className="truncate text-xs font-semibold text-white/60">
+              <span className="line-clamp-2 break-words text-xs font-semibold text-white/60">
                 {description}
               </span>
             </div>
