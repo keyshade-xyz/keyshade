@@ -77,10 +77,8 @@ export default function OtpInputForm({
       if (success && data) {
         setUser(data)
 
-        // Add the account to the account manager
-        if (data.token) {
-          accountManager.addProfile(data, data.token)
-        }
+        // Add the account to the account manager (token managed by backend cookie)
+        accountManager.addProfile(data)
 
         if (data.isOnboardingFinished) {
           router.push('/')

@@ -45,10 +45,8 @@ export default function AuthPage(): React.JSX.Element {
       const data = JSON.parse(decodedJSONData) as User & { token?: string }
       setUser(data)
 
-      // Add the account to the account manager if token is present
-      if (data.token) {
-        accountManager.addProfile(data, data.token)
-      }
+      // Add the account to the account manager (token managed by backend cookie)
+      accountManager.addProfile(data)
 
       Cookies.set('isOnboardingFinished', `${data.isOnboardingFinished}`, {
         expires: 7

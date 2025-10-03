@@ -43,15 +43,13 @@ describe('AccountManager', () => {
         name: 'User One',
         profilePictureUrl: 'https://example.com/avatar.jpg'
       }
-      const token = 'jwt-token-123'
 
-      const profile = accountManager.addProfile(user, token)
+      const profile = accountManager.addProfile(user)
 
       expect(profile).toBeDefined()
       expect(profile.id).toBe(user.id)
       expect(profile.email).toBe(user.email)
       expect(profile.name).toBe(user.name)
-      expect(profile.token).toBe(token)
     })
 
     it('should throw error when user.id is missing', () => {
@@ -59,10 +57,9 @@ describe('AccountManager', () => {
         email: 'user1@example.com',
         name: 'User One'
       }
-      const token = 'jwt-token-123'
 
       expect(() => {
-        accountManager.addProfile(user, token)
+        accountManager.addProfile(user)
       }).toThrow('User ID and email are required to create a profile.')
     })
 
@@ -74,7 +71,7 @@ describe('AccountManager', () => {
       const token = 'jwt-token-123'
 
       expect(() => {
-        accountManager.addProfile(user, token)
+        accountManager.addProfile(user)
       }).toThrow('User ID and email are required to create a profile.')
     })
 
@@ -85,7 +82,7 @@ describe('AccountManager', () => {
       const token = 'jwt-token-123'
 
       expect(() => {
-        accountManager.addProfile(user, token)
+        accountManager.addProfile(user)
       }).toThrow('User ID and email are required to create a profile.')
     })
 
@@ -97,7 +94,7 @@ describe('AccountManager', () => {
       }
       const token = 'jwt-token-123'
 
-      accountManager.addProfile(user, token)
+      accountManager.addProfile(user)
       const activeProfile = accountManager.getActiveProfile()
 
       expect(activeProfile).toBeDefined()
@@ -116,8 +113,8 @@ describe('AccountManager', () => {
         name: 'User Two'
       }
 
-      accountManager.addProfile(user1, 'token-1')
-      accountManager.addProfile(user2, 'token-2')
+      accountManager.addProfile(user1)
+      accountManager.addProfile(user2)
 
       const profiles = accountManager.getAllProfiles()
       expect(profiles).toHaveLength(2)
@@ -137,7 +134,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const activeProfile = accountManager.getActiveProfile()
 
       expect(activeProfile).toBeDefined()
@@ -163,10 +160,10 @@ describe('AccountManager', () => {
         name: 'User Two'
       }
 
-      accountManager.addProfile(user1, 'token-1')
+      accountManager.addProfile(user1)
       // Wait a bit to ensure different timestamps
       setTimeout(() => {
-        accountManager.addProfile(user2, 'token-2')
+        accountManager.addProfile(user2)
       }, 10)
 
       const profiles = accountManager.getAllProfiles()
@@ -189,8 +186,8 @@ describe('AccountManager', () => {
         name: 'User Two'
       }
 
-      accountManager.addProfile(user1, 'token-1')
-      accountManager.addProfile(user2, 'token-2')
+      accountManager.addProfile(user1)
+      accountManager.addProfile(user2)
 
       const switched = accountManager.switchProfile('user-2')
       expect(switched).toBeDefined()
@@ -212,7 +209,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const profile1 = accountManager.getProfile('user-1')
       const lastUsed1 = profile1?.lastUsed
 
@@ -236,7 +233,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const removed = accountManager.removeProfile('user-1')
 
       expect(removed).toBe(true)
@@ -260,8 +257,8 @@ describe('AccountManager', () => {
         name: 'User Two'
       }
 
-      accountManager.addProfile(user1, 'token-1')
-      accountManager.addProfile(user2, 'token-2')
+      accountManager.addProfile(user1)
+      accountManager.addProfile(user2)
 
       // user-1 is active by default
       accountManager.removeProfile('user-1')
@@ -279,7 +276,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const profile = accountManager.getProfile('user-1')
 
       expect(profile).toBeDefined()
@@ -300,7 +297,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const updated = accountManager.updateProfile('user-1', {
         name: 'Updated Name',
         profilePictureUrl: 'https://example.com/new-avatar.jpg'
@@ -320,7 +317,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const updated = accountManager.updateProfile('user-1', {
         id: 'new-id'
       } as any)
@@ -344,7 +341,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       expect(accountManager.hasProfileByEmail('user1@example.com')).toBe(true)
     })
 
@@ -363,7 +360,7 @@ describe('AccountManager', () => {
         name: 'User One'
       }
 
-      accountManager.addProfile(user, 'token-1')
+      accountManager.addProfile(user)
       const profile = accountManager.getProfileByEmail('user1@example.com')
 
       expect(profile).toBeDefined()
@@ -389,8 +386,8 @@ describe('AccountManager', () => {
         name: 'User Two'
       }
 
-      accountManager.addProfile(user1, 'token-1')
-      accountManager.addProfile(user2, 'token-2')
+      accountManager.addProfile(user1)
+      accountManager.addProfile(user2)
 
       accountManager.clearAllProfiles()
 
@@ -416,10 +413,10 @@ describe('AccountManager', () => {
         name: 'User Two'
       }
 
-      accountManager.addProfile(user1, 'token-1')
+      accountManager.addProfile(user1)
       expect(accountManager.getProfileCount()).toBe(1)
 
-      accountManager.addProfile(user2, 'token-2')
+      accountManager.addProfile(user2)
       expect(accountManager.getProfileCount()).toBe(2)
     })
   })

@@ -1,6 +1,6 @@
 /**
  * Account Manager - Handles multiple account profiles in the browser
- * Stores encrypted account data in localStorage with secure token management
+ * Stores profile metadata in localStorage (tokens managed by backend cookies)
  */
 
 import type { User } from '@keyshade/schema'
@@ -11,7 +11,6 @@ export interface AccountProfile {
   email: string
   name: string | null
   profilePictureUrl: string | null
-  token: string
   isActive: boolean
   lastUsed: Date
   workspaceId?: string
@@ -91,8 +90,9 @@ export class AccountManager {
 
   /**
    * Add or update a profile
+   * Note: Token is managed by backend cookies, not stored in localStorage
    */
-  addProfile(user: Partial<User>, token: string): AccountProfile {
+  addProfile(user: Partial<User>): AccountProfile {
     // Validate required fields
     if (!user.id || !user.email) {
       throw new Error('User ID and email are required to create a profile.')
@@ -105,7 +105,6 @@ export class AccountManager {
       email: user.email,
       name: user.name || null,
       profilePictureUrl: user.profilePictureUrl || null,
-      token,
       isActive: true,
       lastUsed: new Date(),
       workspaceId: user.defaultWorkspace?.id
@@ -153,6 +152,8 @@ export class AccountManager {
 
   /**
    * Switch to a different profile
+   * Note: This updates local metadata only. Backend session is managed via cookies.
+   * For full switching with token rotation, backend API implementation is required.
    */
   switchProfile(id: string): AccountProfile | null {
     const storage = this.getStorage()
@@ -169,13 +170,9 @@ export class AccountManager {
     
     this.saveStorage(storage)
 
-    // Set the token in cookies
-    Cookies.set('token', profile.token, {
-      expires: 7, // 7 days
-      sameSite: 'lax',
-      secure: window.location.protocol === 'https:'
-    })
-
+    // Note: Token switching requires backend API endpoint
+    // Current implementation relies on existing backend cookie
+    
     return profile
   }
 
@@ -199,16 +196,9 @@ export class AccountManager {
       )
       storage.activeProfileId = remainingProfiles.length > 0 ? remainingProfiles[0].id : null
       
-      // Update cookies if switching to another profile
-      if (storage.activeProfileId) {
-        const newActiveProfile = storage.profiles[storage.activeProfileId]
-        Cookies.set('token', newActiveProfile.token, {
-          expires: 7,
-          sameSite: 'lax',
-          secure: window.location.protocol === 'https:'
-        })
-      } else {
-        // No profiles left, clear the token
+      // Note: Token management handled by backend cookies
+      // If no profiles left, user should be logged out by the app
+      if (!storage.activeProfileId) {
         Cookies.remove('token')
       }
     }
