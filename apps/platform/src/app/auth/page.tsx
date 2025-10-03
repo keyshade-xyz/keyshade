@@ -6,6 +6,7 @@ import type { User } from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
 import { useSetAtom } from 'jotai'
 import { userAtom } from '@/store'
+import { accountManager } from '@/lib/account-manager'
 import {
   AuthEmailForm,
   AuthErrorBanner,
@@ -41,8 +42,13 @@ export default function AuthPage(): React.JSX.Element {
 
     const decodedJSONData = decodeURIComponent(urlEncodedData)
     if (decodedJSONData) {
-      const data = JSON.parse(decodedJSONData) as User
+      const data = JSON.parse(decodedJSONData) as User & { token?: string }
       setUser(data)
+
+      // Add the account to the account manager if token is present
+      if (data.token) {
+        accountManager.addProfile(data, data.token)
+      }
 
       Cookies.set('isOnboardingFinished', `${data.isOnboardingFinished}`, {
         expires: 7

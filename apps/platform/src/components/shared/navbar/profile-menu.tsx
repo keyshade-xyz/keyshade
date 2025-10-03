@@ -6,6 +6,7 @@ import { useAtomValue } from 'jotai'
 import { DropdownSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import { accountManager } from '@/lib/account-manager'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +34,8 @@ export default function ProfileMenu() {
         document.cookie =
           'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
 
-        localStorage.clear()
+        // Clear all account data
+        accountManager.clearAllProfiles()
         posthog.reset()
         toast.success('Logged out successfully')
 
@@ -72,6 +74,9 @@ export default function ProfileMenu() {
             <DropdownMenuSeparator />
             <Link href="/settings?tab=profile">
               <DropdownMenuItem>Profile</DropdownMenuItem>
+            </Link>
+            <Link href="/settings?tab=accounts">
+              <DropdownMenuItem>Manage Accounts</DropdownMenuItem>
             </Link>
             <Link href="/settings?tab=invites">
               <DropdownMenuItem>View Invites</DropdownMenuItem>
