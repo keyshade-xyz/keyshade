@@ -1,3 +1,9 @@
+## [2.34.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.20...v2.34.0-stage.21) (2025-10-03)
+
+### 🐛 Bug Fixes
+
+* **platform:** description text overflow in project cards ([#1174](https://github.com/keyshade-xyz/keyshade/issues/1174)) ([ad823a7](https://github.com/keyshade-xyz/keyshade/commit/ad823a74b2e09ec470cc48ef363cbb756badc21a))
+
 ## [2.34.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.19...v2.34.0-stage.20) (2025-09-26)
 
 ### 🐛 Bug Fixes
