@@ -93,11 +93,16 @@ export class AccountManager {
    * Add or update a profile
    */
   addProfile(user: Partial<User>, token: string): AccountProfile {
+    // Validate required fields
+    if (!user.id || !user.email) {
+      throw new Error('User ID and email are required to create a profile.')
+    }
+
     const storage = this.getStorage()
     
     const profile: AccountProfile = {
-      id: user.id || '',
-      email: user.email || '',
+      id: user.id,
+      email: user.email,
       name: user.name || null,
       profilePictureUrl: user.profilePictureUrl || null,
       token,
@@ -188,8 +193,11 @@ export class AccountManager {
 
     // If this was the active profile, switch to another one
     if (storage.activeProfileId === id) {
-      const profiles = Object.keys(storage.profiles)
-      storage.activeProfileId = profiles.length > 0 ? profiles[0] : null
+      // Switch to the most recently used profile for predictable behavior
+      const remainingProfiles = Object.values(storage.profiles).sort(
+        (a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime()
+      )
+      storage.activeProfileId = remainingProfiles.length > 0 ? remainingProfiles[0].id : null
       
       // Update cookies if switching to another profile
       if (storage.activeProfileId) {

@@ -54,6 +54,41 @@ describe('AccountManager', () => {
       expect(profile.token).toBe(token)
     })
 
+    it('should throw error when user.id is missing', () => {
+      const user = {
+        email: 'user1@example.com',
+        name: 'User One'
+      }
+      const token = 'jwt-token-123'
+
+      expect(() => {
+        accountManager.addProfile(user, token)
+      }).toThrow('User ID and email are required to create a profile.')
+    })
+
+    it('should throw error when user.email is missing', () => {
+      const user = {
+        id: 'user-1',
+        name: 'User One'
+      }
+      const token = 'jwt-token-123'
+
+      expect(() => {
+        accountManager.addProfile(user, token)
+      }).toThrow('User ID and email are required to create a profile.')
+    })
+
+    it('should throw error when both id and email are missing', () => {
+      const user = {
+        name: 'User One'
+      }
+      const token = 'jwt-token-123'
+
+      expect(() => {
+        accountManager.addProfile(user, token)
+      }).toThrow('User ID and email are required to create a profile.')
+    })
+
     it('should set first profile as active', () => {
       const user = {
         id: 'user-1',
