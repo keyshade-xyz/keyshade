@@ -6,7 +6,11 @@
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"]
     },
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

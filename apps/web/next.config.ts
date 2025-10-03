@@ -7,6 +7,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
+  productionBrowserSourceMaps: true,
   webpack(config, { isServer }) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- posthog auto gen
     config.module.rules.push({

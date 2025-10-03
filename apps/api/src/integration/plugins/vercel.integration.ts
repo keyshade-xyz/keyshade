@@ -25,6 +25,7 @@ import {
 import { BadRequestException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
+import { GetVercelEnvironments } from '../dto/getVercelEnvironments/getVercelEnvironments'
 
 export class VercelIntegration extends BaseIntegration {
   private vercel: Vercel
@@ -644,19 +645,57 @@ export class VercelIntegration extends BaseIntegration {
     }
   }
 
-  private async getVercelClient(): Promise<Vercel> {
+  private async getVercelClient(token?: string): Promise<Vercel> {
     const { Vercel } = await import('@vercel/sdk')
 
-    if (!this.vercel) {
+    if (!this.vercel || token) {
       this.logger.log('Generating Vercel client...')
-      const integration = this.getIntegration<VercelIntegrationMetadata>()
+
+      const bearerToken = token
       this.vercel = new Vercel({
-        bearerToken: integration.metadata.token
+        bearerToken
       })
       this.logger.log('Generated Vercel client')
     }
 
     return this.vercel
+  }
+
+  public async getVercelEnvironments(
+    dto: GetVercelEnvironments
+  ): Promise<VercelIntegrationMetadata['environments']> {
+    const { token, projectId } = dto
+
+    this.logger.log(
+      `Fetching environments from Vercel for project: ${projectId}`
+    )
+
+    const environments: VercelIntegrationMetadata['environments'] = {
+      development: { vercelSystemEnvironment: 'development' },
+      preview: { vercelSystemEnvironment: 'preview' },
+      production: { vercelSystemEnvironment: 'production' }
+    }
+
+    this.vercel = await this.getVercelClient(token)
+
+    try {
+      const response =
+        await this.vercel.environment.getV9ProjectsIdOrNameCustomEnvironments({
+          idOrName: projectId
+        })
+
+      for (const env of response.environments ?? []) {
+        environments[env.slug] = {
+          vercelCustomEnvironmentId: env.id
+        }
+      }
+    } catch (err) {
+      this.logger.error(`Fetching custom vercel envs failed`, err)
+    }
+
+    return {
+      environments
+    }
   }
 
   private async triggerRedeploy(
