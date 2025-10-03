@@ -97,25 +97,6 @@ export type IntegrationWithEnvironmentsAndMetadata<
 
 export interface HydratedIntegration extends Integration {
   lastUpdatedBy: {
-    id: string
-    name: string
-    profilePictureUrl: string
-  }
-  entitlements: {
-    canUpdate: boolean
-    canDelete: boolean
-  }
-  workspace: Workspace
-  project: {
-    id: string
-    name: string
-    slug: string
-  } | null
-  environments: {
-    id: string
-    name: string
-    slug: string
-  }[]
   /** Integration triggers/events */
   notifyOn: string[]
   /** Integration slug */
@@ -124,9 +105,12 @@ export interface HydratedIntegration extends Integration {
   workspaceId: string
   /** Total number of triggers for this integration */
   totalTriggers: number
+
 }
 
 export interface RawIntegration
-  extends Omit<HydratedIntegration, 'entitlements'> {}
+  extends Omit<HydratedIntegration, 'entitlements'> {
+  id: string
+}
 
 export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'
