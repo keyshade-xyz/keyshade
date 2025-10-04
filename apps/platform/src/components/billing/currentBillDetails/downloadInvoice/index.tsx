@@ -139,13 +139,13 @@ export default function DownloadInvoice({
       case 'paid':
         return (
           <Badge color="green" icon="done" type="icon" variant="solid">
-            {formatText(status)}
+            {formatText(status as string)}
           </Badge>
         )
       case 'pending':
         return (
           <Badge color="yellow" icon="waiting" type="icon" variant="solid">
-            {formatText(status)}
+            {formatText(status as string)}
           </Badge>
         )
       case 'partially_refunded':
@@ -157,7 +157,7 @@ export default function DownloadInvoice({
             type="icon"
             variant="solid"
           >
-            {formatText(status)}
+            {formatText(status as string)}
           </Badge>
         )
 
