@@ -4,6 +4,7 @@ import React from 'react'
 import { toast } from 'sonner'
 import { useAtomValue } from 'jotai'
 import { DropdownSVG } from '@public/svg/shared'
+import AccountSwitcher from './account-switcher'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { accountManager } from '@/lib/account-manager'
@@ -15,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import AvatarComponent from '@/components/common/avatar'
+// import AvatarComponent from '@/components/common/avatar' // Removed unused import
 import { userAtom } from '@/store'
 
 export default function ProfileMenu() {
@@ -51,41 +52,30 @@ export default function ProfileMenu() {
   return (
     <>
       {user ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger className=" flex items-center gap-x-2 rounded-xl bg-[#2A2C2E] px-3 py-2">
-            {!user.name ? (
-              <>
-                <span className="h-6 w-6 animate-pulse rounded-full bg-white/20" />
-                <span className="h-5 w-20 animate-pulse rounded bg-white/20" />
-              </>
-            ) : (
-              <>
-                <AvatarComponent
-                  name={user.name}
-                  profilePictureUrl={user.profilePictureUrl || ''}
-                />
-                <span>{user.name}</span>
-              </>
-            )}
-            <DropdownSVG />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <Link href="/settings?tab=profile">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-            </Link>
-            <Link href="/settings?tab=accounts">
-              <DropdownMenuItem>Manage Accounts</DropdownMenuItem>
-            </Link>
-            <Link href="/settings?tab=invites">
-              <DropdownMenuItem>View Invites</DropdownMenuItem>
-            </Link>
+        <div className="flex items-center gap-2">
+          <AccountSwitcher />
+          <DropdownMenu>
+            <DropdownMenuTrigger className=" flex items-center gap-x-2 rounded-xl bg-[#2A2C2E] px-3 py-2">
+              <DropdownSVG />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <Link href="/settings?tab=profile">
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+              </Link>
+              <Link href="/settings?tab=accounts">
+                <DropdownMenuItem>Manage Accounts</DropdownMenuItem>
+              </Link>
+              <Link href="/settings?tab=invites">
+                <DropdownMenuItem>View Invites</DropdownMenuItem>
+              </Link>
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogOut}>Log out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogOut}>Log out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ) : null}
     </>
   )
