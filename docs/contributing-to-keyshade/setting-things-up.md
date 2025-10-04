@@ -101,7 +101,6 @@ This will start the following things in a dockerized environment and then expose
 
 1. PostgreSQL: This is the database that keyshade uses to store all the data.
 2. Redis: This is the cache store that keyshade uses to store the cache data.
-3. Minio: This is the object storage that keyshade uses to store the files.
 
 Please note that, in order for these steps to work, you will need to ensure that the following ports are free:
 

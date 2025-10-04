@@ -23,10 +23,11 @@ export interface AuthorizationParams {
 }
 
 export interface DeviceDetail {
-  encryptedIpAddress?: string
-  os?: string
-  platform?: string
-  city?: string
-  region?: string
-  country?: string
+  ipAddress: string
+  encryptedIpAddress: string
+  os: string
+  platform: string
+  city: string
+  region: string
+  country: string
 }

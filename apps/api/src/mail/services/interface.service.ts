@@ -37,7 +37,7 @@ export interface IMailService {
       device: string
       date: string
       time: string
-      location?: string
+      location: string
     }
   ): Promise<void>
 

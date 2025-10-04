@@ -186,14 +186,17 @@ model DeviceDetail {
   personalAccessTokens        PersonalAccessToken[]
   userSessions                UserSession[]
   ServiceAccountAccessHistory ServiceAccountAccessHistory[]
+
+  @@index([encryptedIpAddress, os, platform])
 }
 
 model PersonalAccessToken {
-  id         String   @id @default(cuid())
-  hash       String   @unique
-  createdOn  DateTime @default(now())
-  lastUsedOn DateTime
-  expiresOn  DateTime
+  id         String    @id @default(cuid())
+  hash       String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedOn DateTime  @default(now())
+  expiresOn  DateTime?
 
   deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   deviceDetailId String
@@ -205,7 +208,8 @@ model PersonalAccessToken {
 model CliToken {
   id         String   @id @default(cuid())
   hash       String   @unique
-  createdOn  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   lastUsedOn DateTime @default(now())
   expiresOn  DateTime
 
@@ -217,19 +221,38 @@ model CliToken {
 }
 
 model UserSession {
-  id           String   @id @default(cuid())
-  tokenHash    String   @unique
-  createdOn    DateTime @default(now())
-  lastActiveOn DateTime
-  expiresOn    DateTime
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lastUsedOn DateTime @default(now())
+  expiresOn  DateTime
 
   deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   deviceDetailId String
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
+}
 
-  @@index([tokenHash])
+model ServiceAccountAccessToken {
+  id         String    @id @default(cuid())
+  name       String
+  hash       String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedOn DateTime  @default(now())
+  expiresOn  DateTime?
+
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
+
+  serviceAccount   ServiceAccount @relation(fields: [serviceAccountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  serviceAccountId String
+
+  serviceAccountAccessHistory ServiceAccountAccessHistory[]
+
+  @@unique([name, serviceAccountId])
 }
 
 model Event {
@@ -278,21 +301,6 @@ model Notification {
   userId    String
 }
 
-model LoginSession {
-  id             String   @id @default(cuid())
-  userId         String
-  ipHash         String
-  browser        String
-  geolocation    String?
-  createdAt      DateTime @default(now())
-  lastLoggedOnAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, ipHash, browser])
-  @@index([userId])
-}
-
 model User {
   id                         String             @id @default(cuid())
   email                      String             @unique
@@ -318,7 +326,6 @@ model User {
   events                     Event[]
   integrations               Integration[] // Stores the integrations the user updated
   emailPreference            EmailPreference?
-  loginSessions              LoginSession[]
   onboardingAnswers          OnboardingAnswers?
   subscriptions              Subscription[]
 
@@ -680,24 +687,6 @@ model ServiceAccount {
   accessHistory    ServiceAccountAccessHistory[]
 
   @@unique([name, workspaceId])
-}
-
-model ServiceAccountAccessToken {
-  id        String    @id @default(cuid())
-  name      String
-  hash      String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  expiresAt DateTime?
-
-  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
-  lastUpdatedById String?
-
-  serviceAccount              ServiceAccount                @relation(fields: [serviceAccountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  serviceAccountId            String
-  ServiceAccountAccessHistory ServiceAccountAccessHistory[]
-
-  @@unique([name, serviceAccountId])
 }
 
 model ServiceAccountAccessHistory {

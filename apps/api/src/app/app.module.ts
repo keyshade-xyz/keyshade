@@ -11,10 +11,8 @@ import { AuthGuard } from '@/auth/guard/auth/auth.guard'
 import { UserModule } from '@/user/user.module'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
-import { ApiKeyModule } from '@/api-key/api-key.module'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
-import { ApiKeyGuard } from '@/auth/guard/api-key/api-key.guard'
 import { EventModule } from '@/event/event.module'
 import { VariableModule } from '@/variable/variable.module'
 import { SocketModule } from '@/socket/socket.module'
@@ -50,7 +48,6 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
     PrismaModule,
     CommonModule,
     MailModule,
-    ApiKeyModule,
     UserModule,
     ProjectModule,
     EnvironmentModule,
@@ -72,10 +69,6 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
     {
       provide: APP_GUARD,
       useClass: AuthGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard
     }
   ]
 })

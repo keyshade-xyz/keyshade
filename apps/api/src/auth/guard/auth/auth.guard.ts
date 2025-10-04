@@ -5,7 +5,6 @@ import {
   Injectable,
   UnauthorizedException
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { Reflector } from '@nestjs/core'
 import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -29,7 +28,6 @@ const X_KEYSHADE_TOKEN = 'x-keyshade-token'
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly reflector: Reflector,
     private readonly cache: UserCacheService,
@@ -71,6 +69,7 @@ export class AuthGuard implements CanActivate {
       nodeEnv = parsedEnv.data.NODE_ENV
     }
 
+    // We don't permit empty token for non-dev env
     if (nodeEnv !== 'e2e' && token === null) {
       throw new ForbiddenException('No authentication provided')
     }
@@ -140,8 +139,7 @@ export class AuthGuard implements CanActivate {
     // We attach the user to the request object.
     request['user'] = {
       ...user,
-      ipAddress,
-
+      ipAddress
     } as AuthenticatedUser
     return true
   }
@@ -154,7 +152,7 @@ export class AuthGuard implements CanActivate {
     token = headers[X_KEYSHADE_TOKEN]
     if (token != undefined) return token
 
-    // Check the cookies for presence of the token cookie
+    // Check the cookies for the presence of the token cookie
     const cookies = this.getCookies(request)
     token = cookies.token
     if (token != undefined) return token

@@ -13,13 +13,51 @@ import { RedisClientType } from 'redis'
 
 @Injectable()
 export default class SlugGenerator {
-  private readonly logger: Logger = new Logger(SlugGenerator.name)
   private static readonly MAX_ITERATIONS: number = 10
+  private readonly logger: Logger = new Logger(SlugGenerator.name)
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
   ) {}
+
+  /**
+   * Generates a unique slug for the given entity type.
+   * @param name The name of the entity to generate a slug for
+   * @param entityType The type of the entity to generate a slug for
+   * @returns The generated slug
+   */
+  async generateEntitySlug(
+    name: string | null | undefined,
+    entityType:
+      | 'WORKSPACE_ROLE'
+      | 'WORKSPACE'
+      | 'PROJECT'
+      | 'VARIABLE'
+      | 'SECRET'
+      | 'INTEGRATION'
+      | 'ENVIRONMENT'
+      | 'API_KEY'
+  ): Promise<string> {
+    if (!name) return undefined
+
+    switch (entityType) {
+      case 'WORKSPACE_ROLE':
+        return this.generateUniqueSlug(name, 'workspaceRole')
+      case 'WORKSPACE':
+        return this.generateUniqueSlug(name, 'workspace')
+      case 'PROJECT':
+        return this.generateUniqueSlug(name, 'project')
+      case 'VARIABLE':
+        return this.generateUniqueSlug(name, 'variable')
+      case 'SECRET':
+        return this.generateUniqueSlug(name, 'secret')
+      case 'INTEGRATION':
+        return this.generateUniqueSlug(name, 'integration')
+      case 'ENVIRONMENT':
+        return this.generateUniqueSlug(name, 'environment')
+    }
+  }
 
   /**
    * Constructs a cache key for storing or retrieving a slug.
@@ -203,45 +241,5 @@ export default class SlugGenerator {
     await this.cacheSlug(baseSlug, model, max)
 
     return newSlug
-  }
-
-  /**
-   * Generates a unique slug for the given entity type.
-   * @param name The name of the entity to generate a slug for
-   * @param entityType The type of the entity to generate a slug for
-   * @returns The generated slug
-   */
-  async generateEntitySlug(
-    name: string | null | undefined,
-    entityType:
-      | 'WORKSPACE_ROLE'
-      | 'WORKSPACE'
-      | 'PROJECT'
-      | 'VARIABLE'
-      | 'SECRET'
-      | 'INTEGRATION'
-      | 'ENVIRONMENT'
-      | 'API_KEY'
-  ): Promise<string> {
-    if (!name) return undefined
-
-    switch (entityType) {
-      case 'WORKSPACE_ROLE':
-        return this.generateUniqueSlug(name, 'workspaceRole')
-      case 'WORKSPACE':
-        return this.generateUniqueSlug(name, 'workspace')
-      case 'PROJECT':
-        return this.generateUniqueSlug(name, 'project')
-      case 'VARIABLE':
-        return this.generateUniqueSlug(name, 'variable')
-      case 'SECRET':
-        return this.generateUniqueSlug(name, 'secret')
-      case 'INTEGRATION':
-        return this.generateUniqueSlug(name, 'integration')
-      case 'ENVIRONMENT':
-        return this.generateUniqueSlug(name, 'environment')
-      case 'API_KEY':
-        return this.generateUniqueSlug(name, 'apiKey')
-    }
   }
 }

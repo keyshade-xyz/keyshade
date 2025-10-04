@@ -41,10 +41,10 @@ export class AuthController {
   @Public()
   @Post('send-otp/:email')
   async sendOtp(
-    @Param('email')
-    email: string
+    @Param('email') email: string,
+    @Query('mode') mode?: string
   ): Promise<void> {
-    await this.authService.sendOtp(email)
+    await this.authService.sendOtp(email, mode)
   }
 
   @Public()
@@ -64,9 +64,15 @@ export class AuthController {
     @Query('email') email: string,
     @Query('otp') otp: string,
     @Res({ passthrough: true }) response: Response,
-    @Req() req: Request
+    @Req() req: Request,
+    @Query('mode') mode?: string
   ) {
-    const sessionData = await this.authService.validateOtp(email, otp, req)
+    const sessionData = await this.authService.validateOtp(
+      email,
+      otp,
+      req,
+      mode
+    )
     return setCookie(response, sessionData)
   }
 
@@ -186,6 +192,12 @@ export class AuthController {
     )
   }
 
+  @Post('logout')
+  async logout(@Res() res: Response): Promise<void> {
+    await this.authService.logout(res)
+    res.status(HttpStatus.OK).send({ message: 'Logged out successfully' })
+  }
+
   /* istanbul ignore next */
   private async handleOAuthProcess(
     email: string,
@@ -196,15 +208,12 @@ export class AuthController {
     req?: any
   ) {
     try {
-      const { ip, device, location, date, time } =
-        await AuthService.parseLoginRequest(req)
-
       const data = await this.authService.handleOAuthLogin(
         email,
         name,
         profilePictureUrl,
         oauthProvider,
-        { ip, device, location, date, time }
+        req
       )
 
       const user = setCookie(response, data)
@@ -212,11 +221,5 @@ export class AuthController {
     } catch (error) {
       sendOAuthFailureRedirect(response, JSON.parse(error.message).body)
     }
-  }
-
-  @Post('logout')
-  async logout(@Res() res: Response): Promise<void> {
-    await this.authService.logout(res)
-    res.status(HttpStatus.OK).send({ message: 'Logged out successfully' })
   }
 }

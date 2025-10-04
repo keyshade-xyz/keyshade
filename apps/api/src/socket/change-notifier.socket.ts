@@ -27,9 +27,8 @@ import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { constructErrorBody } from '@/common/util'
-import { AuthenticatedUserContext } from '@/auth/auth.types'
-import { toSHA256 } from '@/common/cryptography'
-import SlugGenerator from '@/common/slug-generator.service' // The redis subscription channel for configuration updates
+import { ActorType, AuthenticatedUserContext } from '@/auth/auth.types'
+import { TokenService } from '@/common/token.service' // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
@@ -56,7 +55,7 @@ export default class ChangeNotifier
     },
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly tokenService: TokenService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -359,66 +358,41 @@ export default class ChangeNotifier
 
     // Extract API key from socket headers (similar to how AuthGuard does it)
     const headers = client.handshake.headers
-    const apiKeyValue = headers[X_KEYSHADE_TOKEN] as string
+    const tokenValue = headers[X_KEYSHADE_TOKEN] as string
 
-    if (!apiKeyValue) {
-      throw new ForbiddenException('No API key provided')
+    if (!tokenValue) {
+      throw new ForbiddenException('No token provided')
     }
 
-    // Validate API key
-    const apiKey = await this.prisma.apiKey.findUnique({
+    // Validate token
+    const userId = await this.tokenService.validateToken(tokenValue)
+
+    // Get the user from the database
+    const user = await this.prisma.user.findUnique({
       where: {
-        value: toSHA256(apiKeyValue)
-      },
-      include: {
-        user: true
+        id: userId
       }
     })
 
-    if (!apiKey) {
-      throw new ForbiddenException('Invalid API key')
-    }
-
-    // Check if user is active
-    if (!apiKey.user.isActive) {
+    // Check if the user is active
+    if (!user.isActive) {
       throw new UnauthorizedException('User account is not active')
     }
 
     // Get default workspace
     const defaultWorkspace = await this.prisma.workspace.findFirst({
       where: {
-        ownerId: apiKey.userId,
+        ownerId: user.id,
         isDefault: true
       }
     })
 
-    // Create authenticated user context
-    const userContext: AuthenticatedUserContext = {
-      ...apiKey.user,
+    // Create an authenticated user context
+    return {
+      ...user,
+      actorType: ActorType.USER,
       defaultWorkspace,
-      ipAddress: client.handshake.address,
-      isAuthViaApiKey: true,
-      apiKeyAuthorities: new Set(apiKey.authorities)
+      ipAddress: client.handshake.address
     }
-
-    // Check required authorities for this socket endpoint
-    const requiredAuthorities = [
-      Authority.READ_WORKSPACE,
-      Authority.READ_PROJECT,
-      Authority.READ_ENVIRONMENT
-    ]
-
-    // If user has ADMIN authority, bypass individual authority checks
-    if (!userContext.apiKeyAuthorities.has(Authority.ADMIN)) {
-      for (const requiredAuthority of requiredAuthorities) {
-        if (!userContext.apiKeyAuthorities.has(requiredAuthority)) {
-          throw new UnauthorizedException(
-            `API key is missing the required authority: ${requiredAuthority}`
-          )
-        }
-      }
-    }
-
-    return userContext
   }
 }
