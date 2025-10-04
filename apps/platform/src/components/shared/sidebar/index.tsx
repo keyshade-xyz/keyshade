@@ -10,8 +10,8 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import SidebarTab from './sidebarTab'
 import TierLimit from './tierLimit'
+import SidebarTab from './sidebarTab'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { VERSION_BADGE } from '@/constants/sidebar'

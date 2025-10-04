@@ -22,7 +22,7 @@ function ProjectDetails({ project }: Readonly<ProjectDetailsProps>) {
         </div>
         <CopyToClipboard text={project.slug} />
       </div>
-      {project.lastUpdatedBy ? (
+      {project.lastUpdatedBy.name ? (
         <div className="flex items-center gap-1 border-t border-white/20 p-4">
           <AvatarComponent
             className="mr-2 rounded-md"

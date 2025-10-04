@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
-import { InfiniteScrollList } from './infinite-scroll-list'
-import { WorkspaceListItem } from './workspace-list-item'
 import { Skeleton } from './skeleton'
+import { WorkspaceListItem } from './workspace-list-item'
+import { InfiniteScrollList } from './infinite-scroll-list'
 import {
   Popover,
   PopoverContent,

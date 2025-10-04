@@ -3,8 +3,8 @@ import secretDetector from '@keyshade/secret-scan'
 import { parse as parseDotenv } from 'dotenv'
 import type { Project } from '@keyshade/schema'
 import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
-import ImportConfiguration from '../ImportConfiguration'
 import ModifyFileScan from '../ModifyFileScan'
+import ImportConfiguration from '../ImportConfiguration'
 import {
   Select,
   SelectContent,
