@@ -3,8 +3,8 @@ import type { TestCase } from '@/types'
 
 export default function linear(): RegExp[] {
   return [
-    // Linear API Key regex (total 32 chars: "lin_api_" + 32)
-    /^lin_api_[a-z0-9]{32}$/
+    // Linear API Key regex (total 40 chars: "lin_api_" + 40)
+    /^lin_api_[a-z0-9]{40}$/
   ]
 }
 
