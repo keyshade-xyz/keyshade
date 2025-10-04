@@ -109,6 +109,22 @@ export const footerBanner: CSSProperties = {
   alignItems: 'center'
 }
 
+export const footerContainer: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'end',
+  alignItems: 'center',
+  width: 'fit-content'
+}
+
+export const footerInfoSection: CSSProperties = {
+  width: '85%',
+  margin: '0 auto',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '20px'
+}
+
 export const footerlogo: CSSProperties = {
   width: '75%',
   display: 'flex',

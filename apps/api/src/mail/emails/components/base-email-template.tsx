@@ -16,6 +16,8 @@ import {
   content,
   footer,
   footerBanner,
+  footerContainer,
+  footerInfoSection,
   footerlogo,
   footerSocial,
   footerSocialIcon,
@@ -37,6 +39,41 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
   heading,
   children
 }) => {
+  const socials = [
+    {
+      alt: 'youtube',
+      href: 'https://www.youtube.com/@keyshade_xyz',
+      src: 'https://keyshadeglobal.blob.core.windows.net/assets/yt.png'
+    },
+    {
+      alt: 'X',
+      href: 'https://x.com/keyshade_xyz',
+      src: 'https://keyshadeglobal.blob.core.windows.net/assets/xlogo.png'
+    },
+    {
+      alt: 'linkedin',
+      href: 'https://www.linkedin.com/company/keyshade-xyz',
+      src: 'https://keyshadeglobal.blob.core.windows.net/assets/linkedin.png'
+    },
+    {
+      alt: 'instagram',
+      href: 'https://www.instagram.com/keyshade_xyz/',
+      src: 'https://keyshadeglobal.blob.core.windows.net/assets/insta.png'
+    }
+  ]
+
+  const footerLegalLinks = {
+    privacyPolicy: {
+      href: 'https://www.keyshade.xyz/privacy',
+      text: 'Privacy Policy'
+    },
+    termsAndConditions: {
+      href: 'https://www.keyshade.xyz/terms_and_condition',
+      text: 'Terms and Conditions'
+    },
+    unsubscribe: { href: '#', text: 'Unsubscribe' }
+  }
+
   return (
     <Html>
       <Head />
@@ -62,67 +99,20 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
                 alt="keyshade"
               />
             </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'end',
-                alignItems: 'center',
-                width: 'fit-content'
-              }}
-            >
+            <div style={footerContainer}>
               <div style={footerSocial}>
-                <a href="https://www.youtube.com/@keyshade_xyz" target="_blank">
-                  <div style={footerSocialIcon}>
-                    <img
-                      src="https://keyshadeglobal.blob.core.windows.net/assets/yt.png"
-                      alt="youtube"
-                    />
-                  </div>
-                </a>
-                <a href="https://x.com/keyshade_xyz" target="_blank">
-                  <div style={footerSocialIcon}>
-                    <img
-                      src="https://keyshadeglobal.blob.core.windows.net/assets/xlogo.png"
-                      alt="X"
-                    />
-                  </div>
-                </a>
-                <a
-                  href="https://www.linkedin.com/company/keyshade-xyz"
-                  target="_blank"
-                >
-                  <div style={footerSocialIcon}>
-                    <img
-                      src="https://keyshadeglobal.blob.core.windows.net/assets/linkedin.png"
-                      alt="linkedin"
-                    />
-                  </div>
-                </a>
-                <a
-                  href="https://www.instagram.com/keyshade_xyz/"
-                  target="_blank"
-                >
-                  <div style={footerSocialIcon}>
-                    <img
-                      src="https://keyshadeglobal.blob.core.windows.net/assets/insta.png"
-                      alt="instagram"
-                    />
-                  </div>
-                </a>
+                {socials.map(({ alt, href, src }) => (
+                  <a href={href} target="_blank" key={alt}>
+                    <div style={footerSocialIcon}>
+                      <img src={src} alt={alt} />
+                    </div>
+                  </a>
+                ))}
               </div>
             </div>
           </div>
 
-          <div
-            style={{
-              width: '85%',
-              margin: '0 auto',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '20px'
-            }}
-          >
+          <div style={footerInfoSection}>
             <div
               style={{
                 width: '50%'
@@ -167,18 +157,18 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
               This is an automated message. Please do not reply to this email.
               <br />
               Read our{' '}
-              <Link href="https://www.keyshade.xyz/privacy" style={link}>
+              <Link href={footerLegalLinks.privacyPolicy.href} style={link}>
                 Privacy Policy
               </Link>{' '}
               and{' '}
               <Link
-                href="https://www.keyshade.xyz/terms_and_condition"
+                href={footerLegalLinks.termsAndConditions.href}
                 style={link}
               >
                 Terms and Conditions
               </Link>{' '}
               for more information on how we manage your data and services.{' '}
-              <Link href="#" style={link}>
+              <Link href={footerLegalLinks.unsubscribe.href} style={link}>
                 Unsubscribe
               </Link>
             </Text>

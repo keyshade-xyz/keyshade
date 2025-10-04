@@ -20,7 +20,7 @@ export const OTPEmailTemplate = ({ otp }: OTPEmailTemplateProps) => {
       </Text>
       <Section style={workspaceDetails}>
         <Text style={otpStyle}>
-          <strong>{otp}</strong>
+          <strong>{otp ?? '0000'}</strong>
         </Text>
       </Section>
       <Text style={text}>
