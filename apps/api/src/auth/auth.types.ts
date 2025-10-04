@@ -5,10 +5,14 @@ export interface UserAuthenticatedResponse extends UserWithWorkspace {
   token: string
 }
 
+export enum ActorType {
+  USER = 'USER',
+  SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
+}
+
 export type AuthenticatedUserContext = User & {
   ipAddress: string
-  isAuthViaApiKey?: boolean
-  apiKeyAuthorities?: Set<Authority>
+  actorType: ActorType
   defaultWorkspace: Workspace
 }
 
@@ -16,4 +20,13 @@ export interface AuthorizationParams {
   user: AuthenticatedUser
   authorities: Authority[]
   slug: string
+}
+
+export interface DeviceDetail {
+  encryptedIpAddress?: string
+  os?: string
+  platform?: string
+  city?: string
+  region?: string
+  country?: string
 }

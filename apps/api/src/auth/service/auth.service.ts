@@ -6,7 +6,6 @@ import {
   LoggerService,
   UnauthorizedException
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { UserAuthenticatedResponse } from '../auth.types'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
@@ -23,6 +22,7 @@ import { isIP } from 'class-validator'
 import { UAParser } from 'ua-parser-js'
 import { toSHA256 } from '@/common/cryptography'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { TokenService } from '@/common/token.service'
 
 @Injectable()
 export class AuthService {
@@ -31,7 +31,7 @@ export class AuthService {
   constructor(
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
+    private readonly tokenService: TokenService,
     private readonly cache: UserCacheService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
@@ -70,7 +70,7 @@ export class AuthService {
     const os = parser.getOS().name || 'Unknown'
     const device = `${browser} on ${os}`
 
-    let location = 'Unknown'
+    let location: string
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 3000)
@@ -265,7 +265,7 @@ export class AuthService {
     this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
 
-    const token = await this.generateToken(user.id)
+    const token = await this.tokenService.generateBearerToken(user.id)
 
     return {
       ...user,
@@ -307,7 +307,7 @@ export class AuthService {
       profilePictureUrl
     )
 
-    const token = await this.generateToken(user.id)
+    const token = await this.tokenService.generateBearerToken(user.id)
 
     this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
@@ -525,9 +525,5 @@ export class AuthService {
     }
 
     return user
-  }
-
-  private async generateToken(id: string) {
-    return await this.jwt.signAsync({ id })
   }
 }

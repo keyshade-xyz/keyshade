@@ -10,16 +10,16 @@ import { Reflector } from '@nestjs/core'
 import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '@/decorators/bypass-onboarding.decorator'
-import { AuthenticatedUserContext } from '../../auth.types'
 import { EnvSchema } from '@/common/env/env.schema'
 import { UserCacheService } from '@/cache/user-cache.service'
-import { toSHA256 } from '@/common/cryptography'
 import { getUserByEmailOrId } from '@/common/user'
 import { Request } from 'express'
 import { constructErrorBody } from '@/common/util'
 import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { TokenService } from '@/common/token.service'
+import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -35,7 +35,8 @@ export class AuthGuard implements CanActivate {
     private readonly cache: UserCacheService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
-    private readonly workspaceCacheService: WorkspaceCacheService
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly tokenService: TokenService
   ) {}
 
   /**
@@ -59,121 +60,59 @@ export class AuthGuard implements CanActivate {
       return true
     }
 
-    let userContext: AuthenticatedUserContext | null = null
     const request = context.switchToHttp().getRequest<Request>()
-    const authType = this.getAuthType(request)
+    const token = this.extractTokenFromRequest(request)
+
     const parsedEnv = EnvSchema.safeParse(process.env)
     let nodeEnv: string
-
     if (!parsedEnv.success) {
       nodeEnv = 'dev' // Default to a valid value or handle appropriately
     } else {
       nodeEnv = parsedEnv.data.NODE_ENV
     }
 
-    if (nodeEnv !== 'e2e' && authType === 'NONE') {
+    if (nodeEnv !== 'e2e' && token === null) {
       throw new ForbiddenException('No authentication provided')
     }
 
+    let user: UserWithWorkspace
+    const ipAddress = request.ip
+
     // In case the environment is e2e, we want to authenticate the user using the email,
     // else we want to authenticate the user using the JWT token.
-
-    if (authType !== 'API_KEY' && nodeEnv === 'e2e') {
+    if (nodeEnv === 'e2e') {
       const email = request.headers[X_E2E_USER_EMAIL] as string
       if (!email) {
         throw new ForbiddenException()
       }
-      const user = await getUserByEmailOrId(
+
+      user = await getUserByEmailOrId(
         email,
         this.prisma,
         this.slugGenerator,
         this.hydrationService,
         this.workspaceCacheService
       )
-
-      userContext = {
-        ...user,
-        ipAddress: request.ip
-      }
     } else {
-      if (authType === 'API_KEY') {
-        const apiKeyValue = this.extractApiKeyFromHeader(request)
-        if (!apiKeyValue) {
-          throw new ForbiddenException('No API key provided')
-        }
+      const userId = await this.tokenService.validateToken(token)
 
-        const apiKey = await this.prisma.apiKey.findUnique({
-          where: {
-            value: toSHA256(apiKeyValue)
-          },
-          include: {
-            user: true
-          }
-        })
-
-        if (!apiKey) {
-          throw new ForbiddenException('Invalid API key')
-        }
-
-        const defaultWorkspace = await this.prisma.workspace.findFirst({
-          where: {
-            ownerId: apiKey.userId,
-            isDefault: true
-          }
-        })
-
-        userContext = {
-          ...apiKey.user,
-          defaultWorkspace,
-          ipAddress: request.ip
-        }
-        userContext.isAuthViaApiKey = true
-        userContext.apiKeyAuthorities = new Set(apiKey.authorities)
-      } else if (authType === 'JWT') {
-        const token = this.extractTokenFromCookies(request)
-        if (!token) {
-          throw new ForbiddenException()
-        }
-        try {
-          const payload = await this.jwtService.verifyAsync(token, {
-            secret: process.env.JWT_SECRET
-          })
-
-          const cachedUser = await this.cache.getUser(payload['id'])
-          if (cachedUser) {
-            userContext = {
-              ...cachedUser,
-              ipAddress: request.ip
-            }
-          } else {
-            const user = await getUserByEmailOrId(
-              payload['id'],
-              this.prisma,
-              this.slugGenerator,
-              this.hydrationService,
-              this.workspaceCacheService
-            )
-
-            userContext = {
-              ...user,
-              ipAddress: request.ip
-            }
-          }
-        } catch {
-          throw new ForbiddenException()
-        }
+      const cachedUser = await this.cache.getUser(userId)
+      if (cachedUser) {
+        user = cachedUser
       } else {
-        throw new ForbiddenException('No authentication provided')
+        user = await getUserByEmailOrId(
+          userId,
+          this.prisma,
+          this.slugGenerator,
+          this.hydrationService,
+          this.workspaceCacheService
+        )
+        await this.cache.setUser(user)
       }
-    }
-
-    // If the user is not found, we throw a ForbiddenException.
-    if (!userContext) {
-      throw new ForbiddenException()
     }
 
     // If the user is not active, we throw UnauthorizedException.
-    if (!userContext.isActive) {
+    if (!user.isActive) {
       throw new UnauthorizedException(
         constructErrorBody(
           'User not active',
@@ -189,7 +128,7 @@ export class AuthGuard implements CanActivate {
       ]) ?? false
 
     // If the onboarding is not finished, we throw an UnauthorizedException.
-    if (!onboardingBypassed && !userContext.isOnboardingFinished) {
+    if (!onboardingBypassed && !user.isOnboardingFinished) {
       throw new UnauthorizedException(
         constructErrorBody(
           'Onboarding not finished',
@@ -199,34 +138,26 @@ export class AuthGuard implements CanActivate {
     }
 
     // We attach the user to the request object.
-    request['user'] = userContext
+    request['user'] = {
+      ...user,
+      ipAddress,
+
+    } as AuthenticatedUser
     return true
   }
 
-  private getAuthType(request: any): 'JWT' | 'API_KEY' | 'NONE' {
-    const headers = this.getHeaders(request)
-    const cookies = request.cookies
-    if (headers[X_KEYSHADE_TOKEN]) {
-      return 'API_KEY'
-    }
-    if (cookies && cookies['token']) {
-      return 'JWT'
-    }
-    return 'NONE'
-  }
+  private extractTokenFromRequest(request: any): string | undefined {
+    let token: string
 
-  private extractTokenFromCookies(request: any): string | undefined {
-    const headers = this.getCookies(request)
-    const [type, token] = headers.token?.split(' ') ?? []
-    return type === 'Bearer' ? token : undefined
-  }
-
-  private extractApiKeyFromHeader(request: any): string | undefined {
+    // Check the headers for presence of the X-Keyshade-Token header
     const headers = this.getHeaders(request)
-    if (Array.isArray(headers[X_KEYSHADE_TOKEN])) {
-      throw new ForbiddenException('Bad auth')
-    }
-    return headers[X_KEYSHADE_TOKEN]
+    token = headers[X_KEYSHADE_TOKEN]
+    if (token != undefined) return token
+
+    // Check the cookies for presence of the token cookie
+    const cookies = this.getCookies(request)
+    token = cookies.token
+    if (token != undefined) return token
   }
 
   private getHeaders(request: any): any {
