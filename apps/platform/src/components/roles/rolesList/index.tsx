@@ -15,7 +15,7 @@ import ErrorCard from '@/components/shared/error-card'
 
 function RoleListItemSkeleton(): React.JSX.Element {
   return (
-    <div className="grid grid-cols-4 items-center justify-between gap-x-10">
+    <div className="grid animate-pulse grid-cols-4 items-center justify-between gap-x-10">
       <div className="h-5 w-8/12 rounded-full bg-white/5" />
       <div className="h-5 w-6/12 rounded-full bg-white/5" />
       <div className="h-5 w-7/12 rounded-full bg-white/5" />

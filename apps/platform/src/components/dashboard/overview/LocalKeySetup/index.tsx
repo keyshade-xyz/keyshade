@@ -27,10 +27,10 @@ function LocalKeySetup({
 
   return (
     <div
-      className={`flex justify-between gap-2 rounded-lg bg-white/10 p-3 ${isPrivateKeyStored && 'flex-col gap-3'}`}
+      className={`flex justify-between gap-2 rounded-lg bg-white/5 p-3 ${isPrivateKeyStored && 'flex-col gap-3'}`}
     >
       <div>
-        <h1 className="text-lg font-medium text-white">
+        <h1 className="text-sm font-medium text-white">
           Do you wanna setup private key?{' '}
           <Tooltip>
             <TooltipTrigger>

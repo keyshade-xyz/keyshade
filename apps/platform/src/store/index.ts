@@ -4,17 +4,16 @@ import type {
   ApiKey,
   Environment,
   EventTypeEnum,
-  GetAllEnvironmentsOfProjectResponse,
-  GetAllProjectsResponse,
-  GetAllWorkspacesOfUserResponse,
-  GetMembersResponse,
   Integration,
   Secret,
   SecretVersion,
   User,
   Variable,
   VariableVersion,
-  WorkspaceRole
+  WorkspaceRole,
+  Workspace,
+  Project,
+  WorkspaceMember
 } from '@keyshade/schema'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
 
@@ -49,17 +48,14 @@ export const globalSearchDataAtom = atom<{
   projects: []
 })
 
-export const allWorkspacesAtom = atom<GetAllProjectsResponse['items']>([])
+export const allWorkspacesAtom = atom<Workspace[]>([])
 
-type PartialProject = Pick<
-  GetAllProjectsResponse['items'][number],
-  'slug' | 'storePrivateKey' | 'privateKey'
->
+type PartialProject = Pick<Project, 'slug' | 'storePrivateKey' | 'privateKey'>
 
 export const integrationFormAtom = atom<{
   name: string
   selectedEvents: Set<EventTypeEnum>
-  selectedProjectSlug: GetAllProjectsResponse['items'][number]['slug'] | null
+  selectedProjectSlug: Project['slug'] | null
   selectedProject: PartialProject | null
   selectedEnvironments: Environment['slug'][]
   metadata: Record<string, unknown>
@@ -89,19 +85,13 @@ export const resetIntegrationFormAtom = atom(null, (get, set) => {
   })
 })
 
-export const selectedWorkspaceAtom = atom<
-  GetAllWorkspacesOfUserResponse['items'][number] | null
->(null)
+export const selectedWorkspaceAtom = atom<Workspace | null>(null)
 
-export const selectedProjectAtom = atom<
-  GetAllProjectsResponse['items'][number] | null
->(null)
-export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse['items']>([])
+export const selectedProjectAtom = atom<Project | null>(null)
+export const projectsOfWorkspaceAtom = atom<Project[]>([])
 
-export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
-export const selectedMemberAtom = atom<
-  GetMembersResponse['items'][number] | null
->(null)
+export const membersOfWorkspaceAtom = atom<WorkspaceMember[]>([])
+export const selectedMemberAtom = atom<WorkspaceMember | null>(null)
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(
@@ -139,12 +129,8 @@ export const revisionsOfSecretAtom = atom<
   }[]
 >([])
 
-export const selectedEnvironmentAtom = atom<
-  GetAllEnvironmentsOfProjectResponse['items'][number] | null
->(null)
-export const environmentsOfProjectAtom = atom<
-  GetAllEnvironmentsOfProjectResponse['items']
->([])
+export const selectedEnvironmentAtom = atom<Environment | null>(null)
+export const environmentsOfProjectAtom = atom<Environment[]>([])
 
 export const selectedRoleAtom = atom<WorkspaceRole | null>(null)
 export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
@@ -156,7 +142,7 @@ export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
 export const localProjectPrivateKeyAtom = atom<
   {
     slug: Environment['slug']
-    key: GetAllProjectsResponse['items'][number]['privateKey']
+    key: Project['privateKey']
   }[]
 >([])
 export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(

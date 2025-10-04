@@ -129,11 +129,10 @@ function ConfigAccessLevel({
             </div>
           </div>
         </RadioGroup>
-
         <Button
           className="mt-0"
           onClick={handleUpdateAccessLevel}
-          variant="secondary"
+          variant="primary"
         >
           Save
         </Button>

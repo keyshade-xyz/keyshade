@@ -4,12 +4,14 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:text-white/[56%] disabled:border disabled:border-[#FAFAFA]/10 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:text-white/[56%] disabled:border disabled:border-[#FAFAFA]/10 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300',
   {
     variants: {
       variant: {
         default:
           'bg-[#26282C] border border-[#FAFAFA]/10 shadow-inherit shadow-black/50 text-white/[56%] hover:bg-[#17191B]/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90',
+        primary:
+          'bg-[#075563] border border-[#FAFAFA]/10 shadow-inherit shadow-black/50 text-slate-200 hover:bg-[#075563]/80 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90',
         destructive:
           'bg-red-500 text-zinc-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-zinc-50 dark:hover:bg-red-900/90',
         outline:

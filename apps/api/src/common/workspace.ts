@@ -64,7 +64,7 @@ export const createWorkspace = async (
               slug: workspaceAdminRoleSlug,
               authorities: [Authority.WORKSPACE_ADMIN],
               hasAdminAuthority: true,
-              colorCode: '#FF0000'
+              colorCode: '#FB2C36'
             }
           ]
         }

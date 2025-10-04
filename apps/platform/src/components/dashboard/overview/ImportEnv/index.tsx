@@ -39,7 +39,7 @@ function ImportEnvButton({ projectSlug }): React.JSX.Element {
           className="flex w-fit px-3 py-4 text-sm"
           onClick={handleOpenModal}
           type="button"
-          variant="secondary"
+          variant="primary"
         >
           Get started
         </Button>

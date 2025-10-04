@@ -4,8 +4,8 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
 import { Integrations } from '@keyshade/common'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import IntegrationIcon from '../integrationIcon'
 import SetupIntegration from '../integrationSetup'
+import IntegrationIcon from '../integrationIcon'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
