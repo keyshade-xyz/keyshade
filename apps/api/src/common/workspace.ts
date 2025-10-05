@@ -10,6 +10,7 @@ import { InclusionQuery } from './inclusion-query'
 import { HydrationService } from './hydration.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from './util'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 /**
  * Creates a new workspace and adds the user as the owner.
@@ -18,6 +19,7 @@ import { constructErrorBody } from './util'
  * @param prisma The Prisma client
  * @param slugGenerator
  * @param hydrationService
+ * @param workspaceCacheService
  * @param isDefault Whether the workspace should be the default workspace
  * @returns The created workspace
  */
@@ -27,6 +29,7 @@ export const createWorkspace = async (
   prisma: PrismaService,
   slugGenerator: SlugGenerator,
   hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService,
   isDefault?: boolean
 ): Promise<HydratedWorkspace> => {
   const logger = new Logger('createWorkspace')
@@ -122,6 +125,7 @@ export const createWorkspace = async (
   )
 
   const workspace = result[0]
+  await workspaceCacheService.setRawWorkspace(workspace)
 
   await createEvent(
     {

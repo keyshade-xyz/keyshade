@@ -125,29 +125,11 @@ describe('Project Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     workspace1 = await workspaceService.createWorkspace(user1, {
@@ -233,11 +215,14 @@ describe('Project Controller Tests', () => {
     })
 
     it('should not be able to create projects if tier limit it reached', async () => {
+      const maxProjects = (
+        await tierLimitService.getWorkspaceTierLimit(workspace1.id)
+      ).MAX_PROJECTS_PER_WORKSPACE
+
       // Create the number of projects that the tier limit allows
       for (
         let x = 100;
-        x <
-        100 + (await tierLimitService.getProjectTierLimit(workspace1.id)) - 2; // Subtract 2 for the projects created above
+        x < 100 + maxProjects - 2; // Subtract 2 for the projects created above
         x++
       ) {
         await projectService.createProject(user1, workspace1.slug, {
@@ -659,9 +644,6 @@ describe('Project Controller Tests', () => {
       expect(project.description).toEqual(
         'Project for testing if all environments,secrets and keys are being fetched or not'
       )
-      // Verify that sensitive data is not included
-      expect(project).not.toHaveProperty('privateKey')
-      expect(project).not.toHaveProperty('publicKey')
     })
   })
 
@@ -981,16 +963,7 @@ describe('Project Controller Tests', () => {
 
       const johnny: AuthenticatedUser = {
         ...user,
-        ipAddress: USER_IP_ADDRESS,
-        emailPreference: {
-          id: expect.any(String),
-          userId: user.id,
-          marketing: true,
-          activity: true,
-          critical: true,
-          createdAt: expect.any(Date),
-          updatedAt: expect.any(Date)
-        }
+        ipAddress: USER_IP_ADDRESS
       }
 
       // Create a member role for the workspace

@@ -137,29 +137,11 @@ describe('Secret Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     project1 = await projectService.createProject(user1, workspace1.slug, {
@@ -406,12 +388,13 @@ describe('Secret Controller Tests', () => {
 
     it('should not be able to create secrets if tier limit is reached', async () => {
       // Create secrets until tier limit is reached
+      const maxSecrets = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_SECRETS_PER_PROJECT
+
       for (
         let x = 100;
-        x <
-        100 +
-          (await tierLimitService.getSecretTierLimit(project1.workspaceId)) -
-          1; // Subtract 1 for the secrets created above
+        x < 100 + maxSecrets - 1; // Subtract 1 for the secrets created above
         x++
       ) {
         await secretService.createSecret(

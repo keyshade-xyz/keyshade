@@ -2,6 +2,7 @@ import './global.css'
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Toaster } from 'sonner'
+import { PostHogProvider } from '../components/post-hog-provider'
 
 const description =
   'Manage all your secrets securely with public key encryption and realtime based tools, that seamlessly fits into your codebase'
@@ -89,8 +90,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <Toaster richColors />
+        <PostHogProvider>
+          {children}
+          <Toaster richColors />
+        </PostHogProvider>
       </body>
       <GoogleAnalytics
         gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID}

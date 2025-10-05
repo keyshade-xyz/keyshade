@@ -32,6 +32,10 @@ export default function DownloadInvoice({
 }: DownloadInvoiceProps) {
   const [invoices, setInvoices] = useState<GetPaymentHistoryResponse['items']>()
   const [isLoading, setIsLoading] = useState(true)
+  const [downloadingInvoices, setDownloadingInvoices] = useState<Set<string>>(
+    new Set()
+  )
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false)
 
   const downloadAllInvoices = useHttp(() => {
     return ControllerInstance.getInstance().paymentController.downloadAllInvoices(
@@ -59,34 +63,49 @@ export default function DownloadInvoice({
   })
 
   const onDownloadAllInvoices = async () => {
-    const response = await downloadAllInvoices()
-    if (response.data?.length === 0) {
-      toast.error('No invoices found to download.')
-      return
-    }
-    response.data?.forEach((invoice) => {
-      const link = document.createElement('a')
-      link.href = invoice.url
-      link.style.display = 'none'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    })
+    setIsDownloadingAll(true)
+    try {
+      const response = await downloadAllInvoices()
+      if (response.data?.length === 0) {
+        toast.error('No invoices found to download.')
+        return
+      }
+      response.data?.forEach((invoice) => {
+        const link = document.createElement('a')
+        link.href = invoice.url
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      })
 
-    toast.success('Invoices downloaded successfully.')
+      toast.success('Invoices downloaded successfully.')
+    } finally {
+      setIsDownloadingAll(false)
+    }
   }
 
   const onDownloadInvoicesById = async (id: string) => {
-    const { error, success, data } = await donaloadInvoiceById(id)
-    if (error) {
-      toast.error(error.message)
-    }
-    if (success && data?.url) {
-      const link = document.createElement('a')
-      link.href = data.url
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+    setDownloadingInvoices((prev) => new Set(prev).add(id))
+    try {
+      const { error, success, data } = await donaloadInvoiceById(id)
+      if (error) {
+        toast.error(error.message)
+        return
+      }
+      if (success && data?.url) {
+        const link = document.createElement('a')
+        link.href = data.url
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } finally {
+      setDownloadingInvoices((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(id)
+        return newSet
+      })
     }
   }
 
@@ -157,8 +176,19 @@ export default function DownloadInvoice({
             section.
           </p>
         </div>
-        <Button onClick={onDownloadAllInvoices} variant="secondary">
-          Download all
+        <Button
+          disabled={isDownloadingAll}
+          onClick={onDownloadAllInvoices}
+          variant="secondary"
+        >
+          {isDownloadingAll ? (
+            <>
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Downloading...
+            </>
+          ) : (
+            'Download all'
+          )}
         </Button>
       </div>
       <div className="mt-12 overflow-hidden rounded-lg border border-[#27272A]">
@@ -179,7 +209,7 @@ export default function DownloadInvoice({
             </Visible>
             <Visible if={!isLoading && invoices?.length === 0}>
               <TableRow>
-                <TableCell className="text-center" colSpan={5}>
+                <TableCell className="text-center" colSpan={6}>
                   No invoices found.
                 </TableCell>
               </TableRow>
@@ -204,12 +234,18 @@ export default function DownloadInvoice({
                   </TableCell>
                   <TableCell className="flex h-full items-center justify-center">
                     <button
+                      className="flex items-center justify-center disabled:opacity-50"
+                      disabled={downloadingInvoices.has(invoice.orderId)}
                       onClick={() => {
                         void onDownloadInvoicesById(invoice.orderId)
                       }}
                       type="button"
                     >
-                      <DownloadSVG />
+                      {downloadingInvoices.has(invoice.orderId) ? (
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <DownloadSVG />
+                      )}
                     </button>
                   </TableCell>
                 </TableRow>

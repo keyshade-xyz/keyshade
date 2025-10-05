@@ -45,6 +45,15 @@ function Navbar(): React.JSX.Element {
             Blog
           </a>
         </li>
+        <li className="text-white/70">
+          <a
+            href="https://cal.com/keyshade/demo"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Book a Demo
+          </a>
+        </li>
       </ul>
       <div className="flex items-center gap-x-4">
         <a href="https://git.new/keyshade">

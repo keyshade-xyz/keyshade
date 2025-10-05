@@ -12,7 +12,6 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import {
   Authority,
   AuthProvider,
@@ -33,6 +32,8 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedWorkspaceMember } from './workspace-membership.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -41,11 +42,12 @@ export class WorkspaceMembershipService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly jwt: JwtService,
     private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthoritiesCacheService: CollectiveAuthoritiesCacheService
   ) {}
 
   /**
@@ -74,7 +76,8 @@ export class WorkspaceMembershipService {
       otherUserEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     if (otherUser.id === user.id) {
@@ -205,6 +208,11 @@ export class WorkspaceMembershipService {
       this.prisma
     )
 
+    await this.workspaceCacheService.setWorkspaceAdmin(
+      workspace.id,
+      otherUser.id
+    )
+
     this.log.debug(
       `Transferred ownership of workspace ${workspace.name} (${workspace.id}) to user ${otherUser.email} (${otherUser.id})`
     )
@@ -238,7 +246,7 @@ export class WorkspaceMembershipService {
       throw new BadRequestException(
         constructErrorBody(
           'This workspace has been disabled',
-          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+          'To use the workspace again, remove the premium resources, or upgrade to a paid plan'
         )
       )
     }
@@ -318,59 +326,45 @@ export class WorkspaceMembershipService {
         authorities: [Authority.REMOVE_USER]
       })
 
-    const userIds = await this.prisma.user
-      .findMany({
-        where: {
-          email: {
-            in: userEmails.map((email) => email.toLowerCase())
-          }
-        },
-        select: {
-          id: true
+    const usersToRemove = await this.prisma.user.findMany({
+      where: {
+        email: {
+          in: userEmails.map((email) => email.toLowerCase())
         }
-      })
-      .then((users) => users.map((u) => u.id))
+      },
+      select: {
+        id: true
+      }
+    })
 
+    const userIds = []
     // Remove users from the workspace if any
-    if (userIds && userIds.length > 0) {
-      if (userIds.find((id) => id === user.id)) {
+    for (const userToRemove of usersToRemove) {
+      const userId = userToRemove.id
+      if (userId === user.id) {
         throw new BadRequestException(
           constructErrorBody(
-            `You can not remove yourself from the workspace.`,
-            `You can only leave a workspace.`
+            'Cannot remove yourself from the workspace',
+            'You cannot remove yourself from the workspace'
           )
         )
       }
 
-      // Delete the membership
-      await this.prisma.workspaceMember.deleteMany({
-        where: {
-          workspaceId: workspace.id,
-          userId: {
-            in: userIds
-          }
-        }
-      })
-
-      if (user.emailPreference && !user.emailPreference.activity) {
-        this.log.log(
-          `User ${user.id} has opted out of receiving activity notifications`
-        )
-        return
-      }
-
-      // Send an email to the removed users
-      const removedOn = new Date()
-      const emailPromises = userEmails.map((userEmail) =>
-        this.mailService.removedFromWorkspace(
-          userEmail,
-          workspace.name,
-          removedOn
-        )
-      )
-
-      await Promise.all(emailPromises)
+      userIds.push(userId)
+      await this.deleteMembership(workspace, userId)
     }
+
+    // Send email to the removed users
+    const removedOn = new Date()
+    const emailPromises = userEmails.map((userEmail) =>
+      this.mailService.removedFromWorkspace(
+        userEmail,
+        workspace.name,
+        removedOn
+      )
+    )
+
+    await Promise.all(emailPromises)
 
     await createEvent(
       {
@@ -414,7 +408,8 @@ export class WorkspaceMembershipService {
       otherUserEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     const workspace =
@@ -526,6 +521,8 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `Updated role of user ${otherUser.id} in workspace ${workspace.name} (${workspace.id})`
     )
+
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
 
     return await this.hydrationService.hydrateWorkspaceMember({
       user,
@@ -662,7 +659,7 @@ export class WorkspaceMembershipService {
       throw new BadRequestException(
         constructErrorBody(
           'This workspace has been disabled',
-          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+          'To use the workspace again, remove the premium resources, or upgrade to a paid plan'
         )
       )
     }
@@ -718,7 +715,8 @@ export class WorkspaceMembershipService {
       inviteeEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     const workspace =
@@ -732,7 +730,7 @@ export class WorkspaceMembershipService {
     await this.checkInvitationPending(workspaceSlug, inviteeUser)
 
     // Delete the membership
-    await this.deleteMembership(workspace.id, inviteeUser.id)
+    await this.deleteMembership(workspace, inviteeUser.id)
 
     await createEvent(
       {
@@ -777,7 +775,7 @@ export class WorkspaceMembershipService {
     })
 
     // Delete the membership
-    await this.deleteMembership(workspace.id, user.id)
+    await this.deleteMembership(workspace, user.id)
 
     await createEvent(
       {
@@ -837,7 +835,7 @@ export class WorkspaceMembershipService {
       )
 
     // Delete the membership
-    await this.deleteMembership(workspace.id, user.id)
+    await this.deleteMembership(workspace, user.id)
 
     await createEvent(
       {
@@ -878,7 +876,8 @@ export class WorkspaceMembershipService {
         otherUserEmail,
         this.prisma,
         this.slugGenerator,
-        this.hydrationService
+        this.hydrationService,
+        this.workspaceCacheService
       )
     } catch (e) {
       return false
@@ -908,7 +907,8 @@ export class WorkspaceMembershipService {
       inviteeEmail,
       this.prisma,
       this.slugGenerator,
-      this.hydrationService
+      this.hydrationService,
+      this.workspaceCacheService
     )
 
     const workspace =
@@ -940,13 +940,6 @@ export class WorkspaceMembershipService {
           'You are trying to invite someone who has not been invited before'
         )
       )
-    }
-
-    if (user.emailPreference && !user.emailPreference.critical) {
-      this.log.log(
-        `User ${member.id} has opted out of receiving critical notifications`
-      )
-      return
     }
 
     // Resend the invitation
@@ -1034,14 +1027,14 @@ export class WorkspaceMembershipService {
       ) {
         this.log.warn(
           `User ${
-            memberUser.name || memberUser.email
+            memberUser!.name || memberUser!.email
           } (${userId}) is already a member of workspace ${workspace.name} (${
             workspace.slug
           }). Skipping.`
         )
         throw new ConflictException(
           constructErrorBody(
-            `User ${memberUser.name || memberUser.email} is already a member of this workspace`,
+            `User ${memberUser!.name || memberUser!.email} is already a member of this workspace`,
             'Please check the teams tab to confirm whether the user is a member of this workspace'
           )
         )
@@ -1088,7 +1081,8 @@ export class WorkspaceMembershipService {
           },
           this.prisma,
           this.slugGenerator,
-          this.hydrationService
+          this.hydrationService,
+          this.workspaceCacheService
         )
       }
 
@@ -1125,6 +1119,11 @@ export class WorkspaceMembershipService {
           user: currentUser,
           workspaceMember: rawWorkspaceMember
         })
+      )
+
+      await this.workspaceCacheService.addMemberToRawWorkspace(
+        workspace,
+        rawWorkspaceMember.id
       )
 
       this.log.debug(`Added user ${memberUser} to workspace ${workspace.name}.`)
@@ -1177,23 +1176,47 @@ export class WorkspaceMembershipService {
 
   /**
    * Deletes the membership of a user in a workspace.
-   * @param workspaceId The ID of the workspace to delete the membership from
+   * @param workspace
    * @param userId The ID of the user to delete the membership for
    * @returns A promise that resolves when the membership is deleted
    * @private
    */
   private async deleteMembership(
-    workspaceId: Workspace['id'],
+    workspace: Workspace,
     userId: User['id']
   ): Promise<void> {
-    await this.prisma.workspaceMember.delete({
+    const membership = await this.prisma.workspaceMember.findUnique({
       where: {
         workspaceId_userId: {
-          workspaceId,
+          workspaceId: workspace.id,
           userId
         }
       }
     })
+
+    if (!membership) {
+      this.log.error(`Workspace membership not found for user ${userId}`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Workspace membership not found',
+          'The user is not a member of the workspace'
+        )
+      )
+    }
+
+    await this.prisma.workspaceMember.delete({
+      where: {
+        id: membership.id
+      }
+    })
+
+    await this.workspaceCacheService.removeMemberFromRawWorkspace(
+      workspace,
+      membership.id
+    )
+    await this.collectiveAuthoritiesCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspace.id
+    )
   }
 
   /**

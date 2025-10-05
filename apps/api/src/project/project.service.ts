@@ -46,6 +46,8 @@ import { ExportService } from './export/export.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class ProjectService {
@@ -54,12 +56,14 @@ export class ProjectService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly secretService: SecretService,
     private readonly variableService: VariableService,
     private readonly exportService: ExportService,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly projectCacheService: ProjectCacheService
   ) {}
 
   /**
@@ -206,10 +210,17 @@ export class ProjectService {
       )
     }
 
-    const [newProject] = await this.prisma.$transaction([
+    const result = await this.prisma.$transaction([
       createNewProject,
       ...createEnvironmentOps
     ])
+
+    const newProject = result[0]
+    const newEnvironments: Environment[] = result.slice(1)
+    newProject.environments = newEnvironments.map((environment) => ({
+      id: environment.id,
+      slug: environment.slug
+    }))
 
     await createEvent(
       {
@@ -231,9 +242,16 @@ export class ProjectService {
 
     this.logger.debug(`Created project ${newProject.name} (${newProject.slug})`)
 
+    await this.projectCacheService.setRawProject(newProject)
+
     // It is important that we log before the private key is set
     // in order to not log the private key
     newProject.privateKey = privateKey
+
+    await this.workspaceCacheService.addProjectToRawWorkspace(
+      workspace,
+      newProject
+    )
 
     return await this.hydrationService.hydrateProject({
       project: newProject,
@@ -446,6 +464,8 @@ export class ProjectService {
 
     this.logger.debug(`Updated project ${updatedProject.slug}`)
 
+    await this.projectCacheService.setRawProject(updatedProject)
+
     updatedProject.privateKey = privateKey
     updatedProject.publicKey = publicKey
 
@@ -491,13 +511,13 @@ export class ProjectService {
       `User ${user.id} attempted to fork project ${projectSlug} in disabled workspace ${project.workspaceId}`
     )
 
-    let workspaceId = null
+    let workspace: Workspace
 
     if (forkMetadata.workspaceSlug) {
       this.logger.log(
         `Project to be forked inside workspace ${forkMetadata.workspaceSlug}. Checking for authority`
       )
-      const workspace =
+      workspace =
         await this.authorizationService.authorizeUserAccessToWorkspace({
           user,
           slug: forkMetadata.workspaceSlug,
@@ -515,23 +535,19 @@ export class ProjectService {
           )
         )
       }
-
-      workspaceId = workspace.id
     } else {
       this.logger.log(
         `Project to be forked in default workspace. Fetching default workspace`
       )
-      const defaultWorkspace = await this.prisma.workspaceMember.findFirst({
+      workspace = await this.prisma.workspace.findFirst({
         where: {
-          userId: user.id,
-          workspace: {
-            isDefault: true
-          }
+          ownerId: user.id,
+          isDefault: true
         }
       })
-      workspaceId = defaultWorkspace.workspaceId
     }
 
+    const workspaceId = workspace.id
     const newProjectName = forkMetadata.name || project.name
     this.logger.log(`Forking project ${projectSlug} as ${newProjectName}`)
 
@@ -634,6 +650,12 @@ export class ProjectService {
 
     this.logger.debug(`Forked project ${newProject} (${newProject.slug})`)
 
+    await this.workspaceCacheService.addProjectToRawWorkspace(
+      workspace,
+      newProject
+    )
+    await this.projectCacheService.setRawProject(newProject)
+
     return await this.hydrationService.hydrateProject({
       user,
       project: newProject,
@@ -673,15 +695,19 @@ export class ProjectService {
     this.isProjectForked(project)
 
     this.logger.log(`Unlinking project ${projectSlug} from its parent`)
-    await this.prisma.project.update({
+    const updatedProject = await this.prisma.project.update({
       where: {
         id: projectId
       },
       data: {
         isForked: false,
         forkedFromId: null
-      }
+      },
+      include: InclusionQuery.Project
     })
+
+    await this.projectCacheService.setRawProject(updatedProject)
+
     this.logger.debug(`Unlinked project ${projectSlug} from its parent`)
   }
 
@@ -827,6 +853,16 @@ export class ProjectService {
       this.prisma
     )
 
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: project.workspaceId
+      }
+    })
+    await this.workspaceCacheService.removeProjectFromRawWorkspace(
+      workspace,
+      project.id
+    )
+    await this.projectCacheService.removeProjectCache(project.slug)
     this.logger.debug(`Deleted project ${project.slug}`)
   }
 
@@ -950,7 +986,7 @@ export class ProjectService {
       })
 
     project.privateKey =
-      project.privateKey != null ? sDecrypt(project.privateKey) : null
+      project.privateKey !== null ? sDecrypt(project.privateKey) : null
 
     return project
   }
@@ -1024,47 +1060,36 @@ export class ProjectService {
       `Found ${projects.length} projects of workspace ${workspaceSlug}`
     )
 
-    const accessibleProjects = []
+    const hydratedProjects: HydratedProject[] = []
     for (const project of projects) {
-      let hasAuthority = null
       try {
-        hasAuthority =
+        const hydratedProject =
           await this.authorizationService.authorizeUserAccessToProject({
             user,
             slug: project.slug,
             authorities: [Authority.READ_PROJECT]
           })
+        hydratedProjects.push(hydratedProject)
       } catch (_ignored) {
         this.logger.log(
           `User ${user.id} does not have access to project ${project.slug}`
         )
       }
-
-      if (hasAuthority) {
-        accessibleProjects.push(project)
-      }
     }
 
-    const items = await Promise.all(
-      accessibleProjects.map(
-        async (project) =>
-          await this.hydrationService.hydrateProject({
-            project,
-            user,
-            authorizationService: this.authorizationService
-          })
-      )
+    const metadata = paginate(
+      hydratedProjects.length,
+      `/project/all/${workspaceSlug}`,
+      {
+        page,
+        limit,
+        sort,
+        order,
+        search
+      }
     )
 
-    const metadata = paginate(items.length, `/project/all/${workspaceSlug}`, {
-      page,
-      limit,
-      sort,
-      order,
-      search
-    })
-
-    return { items, metadata }
+    return { items: hydratedProjects, metadata }
   }
 
   /**
@@ -1073,9 +1098,8 @@ export class ProjectService {
    *
    * @param user The user who is requesting the project secrets
    * @param projectSlug The slug of the project to export secrets from
-   * @param environmentSlug The slug of the environment to export secrets from
+   * @param environmentSlugs
    * @param format The format to export the secrets in
-   * @param privateKey The private key to use for secret decryption
    * @returns The secrets exported in the desired format
    *
    * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
@@ -1478,7 +1502,7 @@ export class ProjectService {
   /**
    * Updates the key pair of a project.
    *
-   * @param project The project to update
+   * @param projectId
    * @param oldPrivateKey The old private key of the project
    * @param storePrivateKey Whether to store the new private key in the database
    *

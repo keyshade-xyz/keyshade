@@ -59,7 +59,7 @@ function Sidebar(): JSX.Element {
   ]
 
   return (
-    <aside className="m-8 w-[14rem]">
+    <aside className="ml-4 mr-8 w-[14rem]">
       <div className="grid gap-y-[1.88rem]">
         <div className="mt-5 flex items-center justify-between">
           <div className=" flex gap-2 text-xl">

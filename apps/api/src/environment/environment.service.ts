@@ -25,6 +25,7 @@ import { checkForDisabledWorkspace } from '@/common/workspace'
 import { HydratedEnvironment } from './environment.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
+import { ProjectCacheService } from '@/cache/project-cache.service'
 
 @Injectable()
 export class EnvironmentService {
@@ -35,7 +36,8 @@ export class EnvironmentService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly projectCacheService: ProjectCacheService
   ) {}
 
   /**
@@ -146,6 +148,11 @@ export class EnvironmentService {
         workspaceId: project.workspaceId
       },
       this.prisma
+    )
+
+    await this.projectCacheService.addEnvironmentToProjectCache(
+      environment.project.slug,
+      environment
     )
 
     const hydratedEnvironment = await this.hydrationService.hydrateEnvironment({
@@ -477,6 +484,11 @@ export class EnvironmentService {
       }
     })
     this.logger.log(`Environment ${environmentSlug} deleted`)
+
+    await this.projectCacheService.removeEnvironmentFromProjectCache(
+      environment.project.slug,
+      environment.id
+    )
 
     await createEvent(
       {

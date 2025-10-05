@@ -127,29 +127,11 @@ describe('Variable Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -351,13 +333,14 @@ describe('Variable Controller Tests', () => {
     })
 
     it('should not be able to create variables if tier limit is reached', async () => {
+      const maxVariables = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_VARIABLES_PER_PROJECT
+
       // Create variables until tier limit is reached
       for (
         let x = 100;
-        x <
-        100 +
-          (await tierLimitService.getVariableTierLimit(project1.workspaceId)) -
-          1; // Subtract 1 for the variables created above
+        x < 100 + maxVariables - 1; // Subtract 1 for the variables created above
         x++
       ) {
         await variableService.createVariable(

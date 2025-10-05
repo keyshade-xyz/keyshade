@@ -1,8 +1,8 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Logger,
-  ForbiddenException,
   UnauthorizedException
 } from '@nestjs/common'
 import {
@@ -26,7 +26,6 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from '@/common/util'
 import { AuthenticatedUserContext } from '@/auth/auth.types'
 import { toSHA256 } from '@/common/cryptography'
@@ -44,8 +43,8 @@ const ENV_TO_SOCKET_PREFIX = 'env_to_socket:'
 export default class ChangeNotifier
   implements OnGatewayDisconnect, OnGatewayConnection, OnGatewayInit
 {
-  private readonly logger = new Logger(ChangeNotifier.name)
   @WebSocketServer() server: Server
+  private readonly logger = new Logger(ChangeNotifier.name)
   private readonly redis: RedisClientType
   private readonly redisSubscriber: RedisClientType
 
@@ -125,10 +124,7 @@ export default class ChangeNotifier
 
     try {
       // First, we need to authenticate the user from the socket connection
-      const userContext = await this.extractAndValidateUser(client)
-
-      // Convert to AuthenticatedUser for authorization service
-      const user = await this.convertToAuthenticatedUser(userContext)
+      const user = await this.extractAndValidateUser(client)
 
       // Check if the user has access to the workspace
       this.logger.log('Checking user access to workspace')
@@ -265,6 +261,21 @@ export default class ChangeNotifier
     }
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async rehydrateCache() {
+    this.logger.log('Rehydrating ChangeNotifier cache')
+    const socketMaps = await this.prisma.changeNotificationSocketMap.findMany()
+    this.logger.log(`Found ${socketMaps.length} socket maps`)
+
+    for (const socketMap of socketMaps) {
+      await this.redis.sAdd(
+        `${ENV_TO_SOCKET_PREFIX}${socketMap.environmentId}`,
+        socketMap.socketId
+      )
+    }
+    this.logger.log('Rehydrated ChangeNotifier cache')
+  }
+
   private async addClientToEnvironment(client: Socket, environmentId: string) {
     this.logger.log('Adding client to environment')
 
@@ -335,21 +346,6 @@ export default class ChangeNotifier
         `Notified ${clientIds.length} clients for environment: ${environmentId}`
       )
     }
-  }
-
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  async rehydrateCache() {
-    this.logger.log('Rehydrating ChangeNotifier cache')
-    const socketMaps = await this.prisma.changeNotificationSocketMap.findMany()
-    this.logger.log(`Found ${socketMaps.length} socket maps`)
-
-    for (const socketMap of socketMaps) {
-      await this.redis.sAdd(
-        `${ENV_TO_SOCKET_PREFIX}${socketMap.environmentId}`,
-        socketMap.socketId
-      )
-    }
-    this.logger.log('Rehydrated ChangeNotifier cache')
   }
 
   /**
@@ -424,28 +420,5 @@ export default class ChangeNotifier
     }
 
     return userContext
-  }
-
-  /**
-   * Convert AuthenticatedUserContext to AuthenticatedUser for authorization service
-   */
-  private async convertToAuthenticatedUser(
-    userContext: AuthenticatedUserContext
-  ): Promise<AuthenticatedUser> {
-    // Get email preference
-    const emailPreference = await this.prisma.emailPreference.findUnique({
-      where: {
-        userId: userContext.id
-      }
-    })
-
-    if (!emailPreference) {
-      throw new ForbiddenException('User email preferences not found')
-    }
-
-    return {
-      ...userContext,
-      emailPreference
-    }
   }
 }

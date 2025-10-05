@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import secretDetector from '@keyshade/secret-scan'
 import { parse as parseDotenv } from 'dotenv'
 import type { Project } from '@keyshade/schema'
@@ -45,40 +45,126 @@ function ScanEnvModal({
   const [environments, setEnvironments] = useState<Environment[]>([])
   const [selectedEnvironment, setSelectedEnvironment] =
     useState<Environment | null>(null)
-  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false)
   const [isProceedModalOpen, setIsProceedModalOpen] = useState(false)
 
-  const parsedContent = parseDotenv(content)
-  const secretAndVariables = secretDetector.scanJsObject(parsedContent)
-
-  const secretsCount = Object.keys(secretAndVariables.secrets).length
-  const variablesCount = Object.keys(secretAndVariables.variables).length
-
-  const secretsList = Object.entries(secretAndVariables.secrets).map(
-    ([key]) => {
-      return (
-        <div
-          className="w-fit rounded-md bg-neutral-800 p-2 text-xs text-white"
-          key={key}
-        >
-          {key}
-        </div>
-      )
-    }
+  const parsedContent = useMemo(() => parseDotenv(content), [content])
+  const secretsAndVariables = useMemo(
+    () => secretDetector.scanJsObject(parsedContent),
+    [parsedContent]
   )
 
-  const variablesList = Object.entries(secretAndVariables.variables).map(
-    ([key]) => {
-      return (
-        <div
-          className="w-fit rounded-md bg-neutral-800 p-2 text-xs text-white"
-          key={key}
-        >
-          {key}
-        </div>
-      )
-    }
+  const [selectedItems, setSelectedItems] = useState<
+    Record<string, 'secret' | 'variable'>
+  >({})
+
+  const [proceedPayload, setProceedPayload] = useState<{
+    secrets: Record<string, string>
+    variables: Record<string, string>
+  }>({ secrets: {}, variables: {} })
+
+  const allItems = useMemo(
+    () => ({
+      ...secretsAndVariables.secrets,
+      ...secretsAndVariables.variables
+    }),
+    [secretsAndVariables.secrets, secretsAndVariables.variables]
   )
+
+  const [draggingKey, setDraggingKey] = useState<string | null>(null)
+  const [over, setOver] = useState<null | 'secret' | 'variable'>(null)
+
+  const handleDragStart = (e: React.DragEvent, key: string) => {
+    e.dataTransfer.setData('text/plain', key)
+    e.dataTransfer.effectAllowed = 'move'
+    setDraggingKey(key)
+  }
+
+  const handleDragEnd = () => setDraggingKey(null)
+
+  const handleDragOver =
+    (target: 'secret' | 'variable') => (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.dataTransfer.dropEffect = 'move'
+      setOver(target)
+    }
+
+  const handleDrop =
+    (target: 'secret' | 'variable') => (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const key = e.dataTransfer.getData('text/plain')
+      if (!key || !(key in allItems)) return
+      setSelectedItems((prev) =>
+        prev[key] === target ? prev : { ...prev, [key]: target }
+      )
+      setOver(null)
+      setDraggingKey(null)
+    }
+
+  const secretsList = useMemo(
+    () =>
+      Object.entries(selectedItems)
+        .filter(([, type]) => type === 'secret')
+        .map(([key]) => {
+          return (
+            <div
+              className={`w-fit cursor-grab select-none rounded-md bg-neutral-800 p-2 text-xs text-white
+                ${draggingKey === key ? 'opacity-60' : ''}`}
+              draggable
+              key={key}
+              onDragEnd={handleDragEnd}
+              onDragStart={(e) => handleDragStart(e, key)}
+            >
+              {key}
+            </div>
+          )
+        }),
+    [selectedItems, draggingKey]
+  )
+
+  const variablesList = useMemo(
+    () =>
+      Object.entries(selectedItems)
+        .filter(([, type]) => type === 'variable')
+        .map(([key]) => {
+          return (
+            <div
+              className={`w-fit cursor-grab select-none rounded-md bg-neutral-800 p-2 text-xs text-white
+                ${draggingKey === key ? 'opacity-60' : ''}`}
+              draggable
+              key={key}
+              onDragEnd={handleDragEnd}
+              onDragStart={(e) => handleDragStart(e, key)}
+            >
+              {key}
+            </div>
+          )
+        }),
+    [selectedItems, draggingKey]
+  )
+
+  const secretsCount = secretsList.length
+  const variablesCount = variablesList.length
+
+  const getTransformedSecretsAndVariables = () => {
+    const transformedSecrets: Record<string, string> = {}
+    const transformedVariables: Record<string, string> = {}
+
+    Object.entries(selectedItems).forEach(([key, type]) => {
+      const value = allItems[key]
+      if (type === 'secret') {
+        transformedSecrets[key] = value
+      } else {
+        transformedVariables[key] = value
+      }
+    })
+
+    return {
+      secrets: transformedSecrets,
+      variables: transformedVariables
+    }
+  }
 
   const getProjectEnvironment = useHttp((slug: string) =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
@@ -104,13 +190,26 @@ function ScanEnvModal({
     fetchEnvironments()
   }, [projectSlug, getProjectEnvironment])
 
-  const handleModify = () => {
-    setIsModifyModalOpen(true)
-    onClose()
-  }
+  useEffect(() => {
+    const initialSelection: Record<string, 'secret' | 'variable'> = {}
+
+    Object.keys(secretsAndVariables.secrets as object).forEach((key) => {
+      initialSelection[key] = 'secret'
+    })
+
+    Object.keys(secretsAndVariables.variables as object).forEach((key) => {
+      initialSelection[key] = 'variable'
+    })
+
+    setSelectedItems(initialSelection)
+  }, [secretsAndVariables])
+
   const handleProceed = () => {
-    setIsProceedModalOpen(true)
+    const entries = getTransformedSecretsAndVariables()
+    setProceedPayload(entries)
+
     onClose()
+    setIsProceedModalOpen(true)
   }
 
   const handleEnvironmentSelect = (value: string) => {
@@ -121,7 +220,7 @@ function ScanEnvModal({
   return (
     <>
       <Dialog onOpenChange={onClose} open={isOpen}>
-        <DialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F]">
+        <DialogContent className="max-w-3xl rounded-lg border border-white/25 bg-[#1E1E1F]">
           <DialogHeader className="border-b border-white/20 pb-4">
             <DialogTitle className="text-xl font-semibold">
               Reorganize Selection
@@ -131,16 +230,46 @@ function ScanEnvModal({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-1 border-b border-white/20">
-            <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto  py-2">
-              <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
+          <div className="flex flex-col gap-1 overflow-x-auto border-b border-white/20">
+            <div className="flex max-h-[40vh] flex-row gap-4  py-2">
+              <div
+                className={`flex flex-1 flex-col gap-2 overflow-y-auto rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
+                  over === 'secret'
+                    ? 'border-blue-500 bg-blue-500 bg-opacity-10'
+                    : 'border-white/20 hover:border-white/40'
+                }`}
+                onDragEnter={handleDragOver('secret')}
+                onDragLeave={(e) => {
+                  if (
+                    !(e.currentTarget as Node).contains(e.relatedTarget as Node)
+                  )
+                    setOver(null)
+                }}
+                onDragOver={handleDragOver('secret')}
+                onDrop={handleDrop('secret')}
+              >
                 <div className="flex items-center gap-2">
                   <SecretSVG height={21} width={21} />
                   <p>{secretsCount} secrets to import</p>
                 </div>
                 <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
               </div>
-              <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
+              <div
+                className={`flex flex-1 flex-col gap-2 overflow-y-auto rounded-md border-2 bg-[#393A3B] p-2 text-sm text-white transition-colors ${
+                  over === 'variable'
+                    ? 'border-blue-500 bg-blue-500 bg-opacity-10'
+                    : 'border-white/20 hover:border-white/40'
+                }`}
+                onDragEnter={handleDragOver('variable')}
+                onDragLeave={(e) => {
+                  if (
+                    !(e.currentTarget as Node).contains(e.relatedTarget as Node)
+                  )
+                    setOver(null)
+                }}
+                onDragOver={handleDragOver('variable')}
+                onDrop={handleDrop('variable')}
+              >
                 <div className="flex items-center gap-2">
                   <VariableSVG height={21} width={21} />
                   <p>{variablesCount} variables to import</p>
@@ -202,18 +331,9 @@ function ScanEnvModal({
 
           <div className="flex flex-col gap-4">
             <div className="text-sm text-white/60">
-              Would you like to proceed with this selection or modify it
-              manually?
+              Drag items to customize your selection, or proceed as is.
             </div>
-            <div className="flex items-center justify-between">
-              <Button
-                disabled={!selectedEnvironment}
-                onClick={handleModify}
-                variant="secondary"
-              >
-                Modify
-              </Button>
-
+            <div className="flex items-center justify-end">
               <Button
                 disabled={!selectedEnvironment}
                 onClick={handleProceed}
@@ -225,19 +345,13 @@ function ScanEnvModal({
           </div>
         </DialogContent>
       </Dialog>
-      <ModifyFileScan
-        environmentSlug={selectedEnvironment?.slug || ''}
-        isOpen={isModifyModalOpen}
-        onClose={() => setIsModifyModalOpen(false)}
-        projectSlug={projectSlug}
-        secretsAndVariables={secretAndVariables}
-      />
+
       <ImportConfiguration
         environmentSlug={selectedEnvironment?.slug || ''}
         isOpen={isProceedModalOpen}
         onClose={() => setIsProceedModalOpen(false)}
         projectSlug={projectSlug}
-        secretsAndVariables={secretAndVariables}
+        secretsAndVariables={proceedPayload}
       />
     </>
   )

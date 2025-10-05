@@ -118,7 +118,7 @@ export default function CreateProjectDialogue(): JSX.Element {
               Create your new project
             </DialogDescription>
           </div>
-          <div className="flex flex-col gap-y-8 overflow-auto">
+          <div className="flex flex-col gap-y-8 overflow-y-scroll px-2">
             <div className="flex h-[29.125rem] w-full flex-col gap-4 py-4">
               {/* NAME */}
               <CreateProjectName
@@ -181,7 +181,7 @@ export default function CreateProjectDialogue(): JSX.Element {
               </div>
             </div>
           </div>
-          <div className="flex h-[2.25rem] w-full justify-end">
+          <div className="flex h-[2rem] w-full justify-end">
             <Button
               className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
               disabled={isLoading}

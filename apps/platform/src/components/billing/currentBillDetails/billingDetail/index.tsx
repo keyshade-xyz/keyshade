@@ -39,7 +39,7 @@ export default function BillingDetail({
     return `${currentSubscription?.plan[0].toUpperCase()}${currentSubscription?.plan.slice(1).toLowerCase()}`
   }
 
-  const calculateTotalPrice = () => {
+  const calculateTotalSeatPrice = () => {
     const isAnnual = currentSubscription?.isAnnual
     const seats = currentSubscription?.seatsBooked || 1
 
@@ -48,7 +48,6 @@ export default function BillingDetail({
       console.warn(`Plan "${formatPlan()}" not found in PricingTiers`)
       return 0
     }
-
     const amount = Number(
       PricingTiers[formatPlan()][isAnnual ? 'annually' : 'monthly'].replace(
         '$',
@@ -56,6 +55,12 @@ export default function BillingDetail({
       )
     )
     return amount * seats
+  }
+
+  const calculateCompoundedPrice = () => {
+    const isAnnual = currentSubscription?.isAnnual
+    const monthsPaid = isAnnual ? 12 : 1
+    return calculateTotalSeatPrice() * monthsPaid
   }
 
   const planPrice = (): `$${number}` => {
@@ -172,22 +177,28 @@ export default function BillingDetail({
       </DetailContainer>
       <DetailContainer>
         <div className="gap-1">
-          <div className="flex items-center justify-between">
-            <h3 className="mb-1 flex items-center gap-2 text-xl font-bold">
-              {formatName(currentSubscription?.plan as string)} plan{' '}
-              {renderSubscriptionStatusBadge(
-                currentSubscription?.status,
-                currentSubscription?.renewsOn
-              )}
-            </h3>
-            <p>
-              <span className="text-xl font-bold">{planPrice()}</span> per user
-              / month
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="mb-1 flex items-center gap-2 text-xl font-bold">
+                {formatName(currentSubscription?.plan as string)} plan{' '}
+                {renderSubscriptionStatusBadge(
+                  currentSubscription?.status,
+                  currentSubscription?.renewsOn
+                )}
+              </h3>
+              <p className="text-sm text-neutral-300">
+                More detail about the pricing and plan details.
+              </p>
+            </div>
+
+            <p className="text-end text-xs text-neutral-300">
+              <span className="text-2xl font-bold text-white">
+                {planPrice()}
+              </span>{' '}
+              <br />
+              per user / month
             </p>
           </div>
-          <p className="text-sm text-neutral-300">
-            More detail about the pricing and plan details.
-          </p>
         </div>
 
         <Separator className="bg-white/20" />
@@ -197,8 +208,12 @@ export default function BillingDetail({
             value={`x${currentSubscription?.seatsBooked || 0}`}
           />
           <BillingDetailRow
-            label="Total Cost"
-            value={`$${calculateTotalPrice()}`}
+            label="Total price for seats"
+            value={`$${calculateTotalSeatPrice()}`}
+          />
+          <BillingDetailRow
+            label="Compounded price"
+            value={`$${calculateCompoundedPrice()}`}
           />
           <BillingDetailRow
             label="Next Billing Date"

@@ -1,7 +1,9 @@
 import {
+  Event,
   EventType,
   IntegrationRunStatus,
-  IntegrationType
+  IntegrationType,
+  Project
 } from '@prisma/client'
 import {
   SlackIntegrationMetadata,
@@ -10,36 +12,79 @@ import {
 import { App } from '@slack/bolt'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import {
-  constructErrorBody,
-  decryptMetadata,
-  makeTimedRequest
-} from '@/common/util'
+import { constructErrorBody, makeTimedRequest } from '@/common/util'
 import {
   BadRequestException,
   InternalServerErrorException
 } from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private readonly app: App
-
   constructor(prisma: PrismaService) {
     super(IntegrationType.SLACK, prisma)
-
-    if (!this.app && this.integration) {
-      const metadata = decryptMetadata<SlackIntegrationMetadata>(
-        this.integration.metadata
-      )
-      this.app = new App({
-        token: metadata.botToken,
-        signingSecret: metadata.signingSecret
-      })
-    }
   }
 
-  public init(): Promise<void> {
-    // TODO: implement this
-    return Promise.resolve()
+  public async init(
+    _privateKey: Project['privateKey'],
+    eventId: Event['id']
+  ): Promise<void> {
+    this.logger.log(`Initializing Slack Integration...`)
+
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId: eventId,
+      integrationId: integration.id,
+      title: 'Posting message to Slack'
+    })
+
+    try {
+      const block = [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: '🥁 Keyshade is now configured with this channel!',
+            emoji: true
+          }
+        }
+      ]
+
+      const { response, duration } = await makeTimedRequest(() =>
+        this.getSlackApp().client.chat.postMessage({
+          channel: integration.metadata.channelId,
+          blocks: block,
+          text: 'Integration initialized'
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        response.message.text
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to integrate Slack: ${response.status} - ${response.statusText}`
+        )
+      } else {
+        this.logger.log(`Slack integration initialized in ${duration}ms`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to integrate Slack: ${error}`)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        error.message || 'Unknown error occurred'
+      )
+
+      throw new InternalServerErrorException('Failed to integrate Slack')
+    }
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -78,6 +123,16 @@ export class SlackIntegration extends BaseIntegration {
 
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['botToken', 'signingSecret', 'channelId'])
+  }
+
+  private getSlackApp() {
+    this.logger.log('Generating Slack app...')
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
+
+    return new App({
+      token: integration.metadata.botToken,
+      signingSecret: integration.metadata.signingSecret
+    })
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
@@ -136,7 +191,7 @@ export class SlackIntegration extends BaseIntegration {
       ]
 
       const { response, duration } = await makeTimedRequest(() =>
-        this.app.client.chat.postMessage({
+        this.getSlackApp().client.chat.postMessage({
           channel: integration.metadata.channelId,
           blocks: block,
           text: data.title

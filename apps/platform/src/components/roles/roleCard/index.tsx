@@ -101,7 +101,7 @@ export default function RoleCard({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <NoteIconSVG className="w-7" />
+                <NoteIconSVG className="w-6" />
               </TooltipTrigger>
               <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
                 <p>{role.description}</p>
@@ -111,7 +111,7 @@ export default function RoleCard({
         ) : null}
       </TableCell>
       <TableCell className="h-full">
-        <div className="mt-1 flex h-full flex-wrap items-start">
+        <div className="mt-4 flex h-full flex-wrap items-start">
           {role.members.map((member) => {
             const isInvited = !member.invitationAccepted
             return (
@@ -119,7 +119,7 @@ export default function RoleCard({
                 <Tooltip>
                   <TooltipTrigger>
                     <AvatarComponent
-                      className={` ml-[-0.3rem] ${isInvited ? 'opacity-50' : ''}`}
+                      className={` ${isInvited && 'opacity-50'}`}
                       name={member.name || ''}
                       profilePictureUrl={member.profilePictureUrl}
                     />
@@ -170,7 +170,7 @@ export default function RoleCard({
                 <Button
                   aria-controls="authorities-list"
                   aria-expanded={showAllAuthorities}
-                  className="h-auto justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
+                  className="h-auto w-fit justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
                   onClick={() => setShowAllAuthorities(!showAllAuthorities)}
                 >
                   {showAllAuthorities ? 'Show less' : 'Show more'}
@@ -204,23 +204,23 @@ export default function RoleCard({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="flex justify-end gap-0.5 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
+      <TableCell className="flex justify-end gap-1.5 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 className="
-                hover:bg-white/5 hover:text-white "
+                p-3 hover:bg-white/5 hover:text-white"
                 onClick={() =>
                   copyToClipboard(
-                    role.slug,
+                    String(role.slug),
                     'The slug got copied to your clipboard.',
                     'Failed to copy slug'
                   )
                 }
                 variant="ghost"
               >
-                <Copy size={20} />
+                <Copy size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent
@@ -233,25 +233,24 @@ export default function RoleCard({
           </Tooltip>
         </TooltipProvider>
         <Button
-          className="
-                hover:bg-white/5 hover:text-white "
+          className="p-3 hover:bg-white/5 hover:text-white"
           disabled={!isAuthorisedToEditRole}
           onClick={handleEditRole}
           variant="ghost"
         >
-          <Pen size={20} />
+          <Pen size={16} />
         </Button>
 
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="hover:bg-white/5 hover:text-white"
+                className="p-3 hover:bg-white/5 hover:text-white"
                 disabled={isAdminRole || !isAuthorisedToDeleteRole}
                 onClick={handleDeleteRole}
                 variant="ghost"
               >
-                <TrashWhiteSVG />
+                <TrashWhiteSVG className="h-4 w-4" viewBox="0 0 22 22" />
               </Button>
             </TooltipTrigger>
             {isAdminRole ? (
