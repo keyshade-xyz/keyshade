@@ -3,16 +3,36 @@
 
 import type { TestCase } from '@/types'
 
-export default function cloudflare(): RegExp[] {
+function cloudflare(): RegExp[] {
   /*
    * It covers three keys
    * 1. CLOUDFLARE_GLOBAL_API_KEY
    * 2. CLOUDFLARE_API_KEY
    * 3. CLOUDFLARE_ORIGIN_CA
    * */
+  const cfApiKey = /(?<![A-Za-z0-9=_-])[A-Za-z0-9=_-]{40}(?![A-Za-z0-9=_-])/
+  // Attach a filter to prevent matching known provider prefixes
+  ;(cfApiKey as any).filter = (str: string) => {
+    // Disallow matches that start with known provider prefixes
+    const forbiddenPrefixes = [
+      'ghp_',
+      'gho_',
+      'ghu_',
+      'ghs_',
+      'ghr_',
+      'github_pat_',
+      'lin_api_',
+      'foo_'
+    ]
+    return !forbiddenPrefixes.some((prefix) => str.startsWith(prefix))
+  }
   return [
-    // Cloudflare key regex
-    /(?:[a-z0-9]{37}|[a-zA-Z0-9=_-]{40}|v1\.0-[a-f0-9]{24}-[a-f0-9]{146})/i
+    // Cloudflare Global API Key: 37 lowercase letters and digits
+    /(?<![a-z0-9])[a-z0-9]{37}(?![a-z0-9])/,
+    // Cloudflare API Key: 40 base64 chars (A-Za-z0-9=_-), with filter
+    cfApiKey,
+    // Cloudflare Origin CA: v1.0-<24 hex>-<146 hex>
+    /v1\.0-[a-f0-9]{24}-[a-f0-9]{146}/
   ]
 }
 
@@ -71,3 +91,4 @@ const testcase: TestCase[] = [
 ]
 
 cloudflare.testcases = testcase
+export default cloudflare
