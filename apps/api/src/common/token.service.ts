@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  UnauthorizedException
-} from '@nestjs/common'
+import { Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
 import { CliToken, User, UserSession } from '@prisma/client'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -105,7 +100,12 @@ export class TokenService {
           expiresOn: dayjs().add(30, 'days').toDate(),
           deviceDetail: {
             create: {
-              ...deviceDetail
+              encryptedIpAddress: deviceDetail.encryptedIpAddress,
+              os: deviceDetail.os,
+              platform: deviceDetail.platform,
+              city: deviceDetail.city,
+              region: deviceDetail.region,
+              country: deviceDetail.country
             }
           }
         }
@@ -120,8 +120,7 @@ export class TokenService {
       }
     } catch (error) {
       this.logger.error(
-        `Encountered an error while saving bearer token ${bearerTokenHash} for user ${userId}`,
-        error
+        `Encountered an error while saving bearer token ${bearerTokenHash} for user ${userId}: ${error.message}`
       )
       throw new InternalServerErrorException(
         constructErrorBody(
@@ -169,7 +168,12 @@ export class TokenService {
           expiresOn: dayjs().add(6, 'months').toDate(),
           deviceDetail: {
             create: {
-              ...deviceDetail
+              encryptedIpAddress: deviceDetail.encryptedIpAddress,
+              os: deviceDetail.os,
+              platform: deviceDetail.platform,
+              city: deviceDetail.city,
+              region: deviceDetail.region,
+              country: deviceDetail.country
             }
           }
         }
@@ -184,8 +188,7 @@ export class TokenService {
       }
     } catch (error) {
       this.logger.error(
-        `Encountered an error while saving CLI token ${secureRandomHash} for user ${userId}`,
-        error
+        `Encountered an error while saving CLI token ${secureRandomHash} for user ${userId}: ${error.message}`
       )
       throw new InternalServerErrorException(
         constructErrorBody(

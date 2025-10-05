@@ -63,7 +63,11 @@ export class AuthService {
     const otp = await generateOtp(email, user.id, this.prisma)
 
     // Send the OTP to the user
-    await this.mailService.sendOtp(email, otp.code)
+    if (mode === 'cli') {
+      await this.mailService.sendSignInCode(email, otp.code, user.name)
+    } else {
+      await this.mailService.sendOtp(email, otp.code)
+    }
 
     this.logger.log(`Login code sent to ${email}`)
   }
@@ -404,8 +408,7 @@ export class AuthService {
     }
 
     this.logger.log(
-      'Device detail extracted successfully: ' +
-        JSON.stringify(deviceDetail, null, 2)
+      `Device detail extracted successfully: ${JSON.stringify(deviceDetail, null, 2)}`
     )
     return deviceDetail
   }

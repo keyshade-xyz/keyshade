@@ -29,6 +29,14 @@ export class MockMailService implements IMailService {
     )
   }
 
+  async sendSignInCode(
+    email: string,
+    code: string,
+    name: string
+  ): Promise<void> {
+    this.log.log(`Sign-in code for ${email} is ${code} and name is ${name}`)
+  }
+
   async adminUserCreateEmail(email: string): Promise<void> {
     this.log.log(`Create pAdmin User Email: ${email}`)
   }

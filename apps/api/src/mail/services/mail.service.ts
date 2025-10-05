@@ -19,6 +19,7 @@ import { OnboardingReminder3Email } from '../emails/onboarding-reminder-email-3'
 import { OnboardingReminder4Email } from '../emails/onboarding-reminder-email-4'
 import { OnboardingReminder5Email } from '../emails/onboarding-reminder-email-5'
 import { OnboardingReminder6Email } from '../emails/onboarding-reminder-email-6'
+import SignInCodeEmailTemplate from '@/mail/emails/signin-code-email'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -84,6 +85,23 @@ export class MailService implements IMailService {
     )
     await this.sendEmail(email, subject, body)
   }
+
+  async sendSignInCode(
+    email: string,
+    code: string,
+    name: string
+  ): Promise<void> {
+    const subject = 'Your Sign-in Code for Keyshade CLI'
+
+    const body = await render(
+      SignInCodeEmailTemplate({
+        name,
+        code
+      })
+    )
+    await this.sendEmail(email, subject, body)
+  }
+
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
     const subject = 'Your Keyshade Email Change One Time Password (OTP)'
 
@@ -95,6 +113,7 @@ export class MailService implements IMailService {
 
     await this.sendEmail(email, subject, body)
   }
+
   async accountLoginEmail(
     email: string,
     username: string,
@@ -111,6 +130,7 @@ export class MailService implements IMailService {
 
     await this.sendEmail(email, subject, body)
   }
+
   async sendLoginNotification(
     email: string,
     data: {

@@ -79,9 +79,7 @@ export class UserService {
         )
       }
 
-      this.log.log(`Generating OTP for user ${user.id} to change email`)
       const otp = await generateOtp(user.email, user.id, this.prisma)
-      this.log.log(`Generated OTP for user ${user.id} to change email`)
 
       this.log.log(`Creating email change record for user ${user.id}`)
       await this.prisma.userEmailChange.upsert({

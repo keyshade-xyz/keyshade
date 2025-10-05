@@ -5,6 +5,8 @@ export interface IMailService {
 
   sendEmailChangedOtp(email: string, otp: string): Promise<void>
 
+  sendSignInCode(email: string, code: string, name: string): Promise<void>
+
   invitedToWorkspace(
     email: string,
     workspaceName: string,

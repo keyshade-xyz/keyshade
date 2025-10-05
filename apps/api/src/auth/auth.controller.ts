@@ -74,9 +74,7 @@ export class AuthController {
       mode
     )
     if (mode === 'cli') {
-      return response.status(HttpStatus.OK).json({
-        user: sessionData
-      })
+      return sessionData
     } else {
       return setCookie(response, sessionData)
     }
