@@ -160,25 +160,26 @@ export class AuthService {
     })
     this.logger.log(`OTP deleted for ${email}`)
 
+    let cliSessionId: string
+    let loginToken: string
+
     const deviceDetail = await this.extractDeviceDetailFromRequest(req)
-    const token = await (async (): Promise<string> => {
-      if (mode === 'cli') {
-        const { token } = await this.tokenService.generateCliAccessToken(
-          user.id,
-          deviceDetail
-        )
-        return token
-      } else {
-        const { token, userSession } =
-          await this.tokenService.generateBearerToken(user.id, deviceDetail)
-        await this.sendLoginNotification(user, deviceDetail, userSession)
-        return token
-      }
-    })()
+    if (mode === 'cli') {
+      const { token, cliSession } =
+        await this.tokenService.generateCliAccessToken(user.id, deviceDetail)
+      loginToken = token
+      cliSessionId = cliSession.id
+    } else {
+      const { token, userSession } =
+        await this.tokenService.generateBearerToken(user.id, deviceDetail)
+      await this.sendLoginNotification(user, deviceDetail, userSession)
+      loginToken = token
+    }
 
     return {
       ...user,
-      token
+      token: loginToken,
+      cliSessionId
     }
   }
 

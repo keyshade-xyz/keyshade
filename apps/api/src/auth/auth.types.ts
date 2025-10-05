@@ -3,6 +3,7 @@ import { Authority, User, Workspace } from '@prisma/client'
 
 export interface UserAuthenticatedResponse extends UserWithWorkspace {
   token: string
+  cliSessionId?: string
 }
 
 export enum ActorType {

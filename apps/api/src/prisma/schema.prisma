@@ -182,7 +182,7 @@ model DeviceDetail {
   region             String?
   country            String?
 
-  cliSessions                   CliSession[]
+  cliSessions                 CliSession[]
   personalAccessTokens        PersonalAccessToken[]
   userSessions                UserSession[]
   ServiceAccountAccessHistory ServiceAccountAccessHistory[]
@@ -192,12 +192,14 @@ model DeviceDetail {
 
 model PersonalAccessToken {
   id         String    @id @default(cuid())
+  name       String
   hash       String    @unique
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   lastUsedOn DateTime  @default(now())
   expiresOn  DateTime?
 
+  // Last used from
   deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   deviceDetailId String
 
@@ -207,7 +209,7 @@ model PersonalAccessToken {
 
 model CliSession {
   id         String   @id @default(cuid())
-  tokenHash       String   @unique
+  tokenHash  String   @unique
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   lastUsedOn DateTime @default(now())
@@ -333,7 +335,7 @@ model User {
   referredBy    User?   @relation("UserReferrals", fields: [referredById], references: [id])
   referredUsers User[]  @relation("UserReferrals")
 
-  cliSessions                  CliSession[]
+  cliSessions                CliSession[]
   personalAccessTokens       PersonalAccessToken[]
   userSessions               UserSession[]
   serviceAccounts            ServiceAccount[]
