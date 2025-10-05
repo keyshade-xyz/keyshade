@@ -15,6 +15,7 @@ import {
   Environment,
   EventType,
   Integration,
+  IntegrationRunStatus,
   IntegrationType,
   Project,
   Workspace
@@ -27,14 +28,53 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
-import nock = require('nock')
 import { CreateIntegration } from './dto/create.integration/create.integration'
 import { mockClient } from 'aws-sdk-client-mock'
 import {
-  LambdaClient,
-  GetFunctionConfigurationCommand
+  GetFunctionConfigurationCommand,
+  LambdaClient
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
+import nock = require('nock')
+
+const originalFetch = global.fetch
+// helper to create dynamic mock responses
+function createMockResponse(status: number, body: any): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: () =>
+      Promise.resolve(typeof body === 'string' ? body : JSON.stringify(body)),
+    json: () => Promise.resolve(body)
+  } as unknown as Response
+}
+
+global.fetch = jest
+  .fn()
+  .mockImplementation((url: string, options?: RequestInit) => {
+    // Mock webhook URLs dynamically
+    if (url.includes('dummy-webhook-url.com')) {
+      const mockStatus = (options?.headers as any)?.['x-mock-status']
+
+      if (mockStatus) {
+        const status = Number(mockStatus)
+        const body = { success: status >= 200 && status < 300 }
+        return Promise.resolve(createMockResponse(status, body))
+      }
+
+      // No `x-mock-status`: let nock (or real fetch) handle it
+      if (originalFetch) {
+        return originalFetch(url, options)
+      }
+    }
+
+    // Pass through everything else
+    if (originalFetch) {
+      return originalFetch(url, options)
+    }
+
+    throw new Error(`Unmocked fetch call to: ${url}`)
+  })
 
 jest.mock('@vercel/sdk', () => {
   const getEnvMock = jest.fn()
@@ -43,6 +83,15 @@ jest.mock('@vercel/sdk', () => {
       environment: { getV9ProjectsIdOrNameCustomEnvironments: getEnvMock }
     })),
     __getEnvMock: getEnvMock
+  }
+})
+
+const postMsgMock = jest.fn()
+jest.mock('@slack/bolt', () => {
+  return {
+    App: jest.fn().mockImplementation(() => ({
+      client: { chat: { postMessage: postMsgMock } }
+    }))
   }
 })
 
@@ -67,9 +116,50 @@ describe('Integration Controller Tests', () => {
 
   const createDummyDiscordWebhookUrlInterceptor = () => {
     const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-    return nock(origin)
+    nock(origin)
+      .persist()
       .get(pathname || '/')
       .reply(200)
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(200, { success: true })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(400, { error: 'Bad Request' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(401, { error: 'Unauthorized' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(403, { error: 'Forbidden' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(404, { error: 'Not Found' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(409, { error: 'Conflict' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(429, { error: 'Too Many Requests' })
+
+    nock(origin)
+      .persist()
+      .post(pathname || '/')
+      .reply(500, { error: 'Internal Server Error' })
   }
 
   const DUMMY_INTEGRATION_NAME = 'Integration 1'
@@ -137,58 +227,40 @@ describe('Integration Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
-    project1 = (await projectService.createProject(user1, workspace1.slug, {
+    project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Description 1'
-    })) as Project
+    })
 
-    project2 = (await projectService.createProject(user2, workspace2.slug, {
+    project2 = await projectService.createProject(user2, workspace2.slug, {
       name: 'Project 2',
       description: 'Description 2'
-    })) as Project
+    })
 
-    environment1 = (await environmentService.createEnvironment(
+    environment1 = await environmentService.createEnvironment(
       user1,
       {
         name: 'Environment 1',
         description: 'Description 1'
       },
       project1.slug
-    )) as Environment
+    )
 
-    environment2 = (await environmentService.createEnvironment(
+    environment2 = await environmentService.createEnvironment(
       user2,
       {
         name: 'Environment 2',
         description: 'Description 2'
       },
       project2.slug
-    )) as Environment
+    )
 
     createDiscordIntegration = async () => {
       return await integrationService.createIntegration(
@@ -336,6 +408,7 @@ describe('Integration Controller Tests', () => {
 
       expect(result.statusCode).toEqual(404)
     })
+
     it('should throw an error if environment slug is specified and not project slug', async () => {
       const result = await app.inject({
         method: 'POST',
@@ -432,6 +505,95 @@ describe('Integration Controller Tests', () => {
       })
       expect(integration).toBeDefined()
       expect(integration!.id).toEqual(result.json().id)
+    })
+  })
+
+  describe('Discord Integration Initialization Tests', () => {
+    const validDto: CreateIntegration = {
+      name: 'Discord Init Test',
+      type: IntegrationType.DISCORD,
+      metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    it('should send initialization message when Discord integration is created', async () => {
+      createDummyDiscordWebhookUrlInterceptor()
+
+      const result = await app.inject({
+        method: 'POST',
+        url: `/integration/${workspace1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: validDto
+      })
+
+      expect(result.statusCode).toEqual(201)
+
+      const integrationRuns = await prisma.integrationRun.findMany({
+        where: {
+          integrationId: result.json().id,
+          title: 'Initializing Discord integration'
+        }
+      })
+
+      expect(integrationRuns).toHaveLength(1)
+      expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
+    })
+  })
+
+  describe('Slack Integration Initialization Tests', () => {
+    const DUMMY_TOKEN = 'xoxb-valid-but-test'
+    const DUMMY_SIGNING_SECRET = 'fake-signing-secret'
+    const DUMMY_CHANNEL = 'C1234567890'
+
+    const validDtoSlack: CreateIntegration = {
+      name: 'Validation Test',
+      type: IntegrationType.SLACK,
+      metadata: {
+        botToken: DUMMY_TOKEN,
+        signingSecret: DUMMY_SIGNING_SECRET,
+        channelId: DUMMY_CHANNEL
+      } satisfies SlackIntegrationMetadata,
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    it('should send initialization message when Slack integration is created', async () => {
+      nock('https://slack.com').post('/api/auth.test').reply(200, {
+        ok: true
+      })
+
+      nock('https://slack.com')
+        .post('/api/chat.postEphemeral')
+        .reply(200, { ok: true })
+
+      nock('https://slack.com').post('/api/chat.postMessage').reply(200, {
+        ok: true
+      })
+
+      postMsgMock.mockResolvedValueOnce({
+        ok: true,
+        message: { text: 'Posting message to Slack' }
+      })
+
+      const result = await app.inject({
+        method: 'POST',
+        url: `/integration/${workspace1.slug}`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDtoSlack
+      })
+
+      expect(result.statusCode).toEqual(201)
+
+      const integrationRuns = await prisma.integrationRun.findMany({
+        where: {
+          integrationId: result.json().id,
+          title: 'Posting message to Slack'
+        }
+      })
+
+      expect(integrationRuns).toHaveLength(1)
+      expect(integrationRuns[0].status).toBe(IntegrationRunStatus.SUCCESS)
     })
   })
 
@@ -843,7 +1005,7 @@ describe('Integration Controller Tests', () => {
         const response = await app.inject({
           method: 'POST',
           url: `${endpoint}?isCreate=true`,
-          headers: { 'x-e2e-user-email': user1.email },
+          headers: { 'x-e2e-user-email': user1.email, 'x-mock-status': 404 },
           payload: validDto
         })
 

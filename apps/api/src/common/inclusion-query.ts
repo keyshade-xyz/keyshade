@@ -166,9 +166,24 @@ export const InclusionQuery = {
         profilePictureUrl: true
       }
     },
-    secrets: true,
-    variables: true,
-    environments: true
+    secrets: {
+      select: {
+        id: true,
+        slug: true
+      }
+    },
+    variables: {
+      select: {
+        id: true,
+        slug: true
+      }
+    },
+    environments: {
+      select: {
+        id: true,
+        slug: true
+      }
+    }
   },
   Workspace: {
     lastUpdatedBy: {
@@ -178,6 +193,7 @@ export const InclusionQuery = {
         profilePictureUrl: true
       }
     },
+    subscription: true,
     members: {
       select: {
         id: true
@@ -185,17 +201,20 @@ export const InclusionQuery = {
     },
     roles: {
       select: {
-        id: true
+        id: true,
+        slug: true
       }
     },
     projects: {
       select: {
-        id: true
+        id: true,
+        slug: true
       }
     },
     integrations: {
       select: {
-        id: true
+        id: true,
+        slug: true
       }
     }
   }

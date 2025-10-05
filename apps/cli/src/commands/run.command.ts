@@ -24,7 +24,7 @@ export default class RunCommand extends BaseCommand {
 
   private projectSlug: string
   private environmentSlug: string
-  private readonly command: string
+  private command: string
 
   private childProcess = null
 
@@ -307,18 +307,12 @@ export default class RunCommand extends BaseCommand {
   private spawnCommand() {
     this.childProcess = spawn(this.command, {
       // @ts-expect-error this just works
-      stdio: ['inherit', 'pipe', 'pipe'],
+      stdio: 'inherit',
       shell: true,
-      env: { ...process.env, ...this.processEnvironmentalVariables },
-      detached: true
-    })
-
-    this.childProcess.stdout.on('data', (data) => {
-      process.stdout.write(`[COMMAND] ${data}`)
-    })
-
-    this.childProcess.stderr.on('data', (data) => {
-      process.stderr.write(`[COMMAND] ${data}`)
+      env: {
+        ...process.env,
+        ...this.processEnvironmentalVariables
+      }
     })
 
     this.childProcess.on('exit', (code: number | null) => {

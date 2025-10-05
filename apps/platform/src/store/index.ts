@@ -96,7 +96,7 @@ export const selectedWorkspaceAtom = atom<
 export const selectedProjectAtom = atom<
   GetAllProjectsResponse['items'][number] | null
 >(null)
-export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse[]>([])
+export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse['items']>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
 export const selectedMemberAtom = atom<
@@ -165,6 +165,8 @@ export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(
 
 export const workspaceProjectCountAtom = atom<number>(0)
 export const workspaceMemberCountAtom = atom<number>(0)
+export const workspaceRolesCountAtom = atom<number>(0)
+export const workspaceIntegrationCountAtom = atom<number>(0)
 export const projectEnvironmentCountAtom = atom<number>(0)
 export const projectSecretCountAtom = atom<number>(0)
 export const projectVariableCountAtom = atom<number>(0)

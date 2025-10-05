@@ -12,10 +12,10 @@ import {
   EventTriggerer,
   EventType,
   Project,
+  ProjectAccessLevel,
   Variable,
   VariableVersion,
-  Workspace,
-  ProjectAccessLevel
+  Workspace
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
 import { AppModule } from '@/app/app.module'
@@ -127,29 +127,11 @@ describe('Variable Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -239,16 +221,16 @@ describe('Variable Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.variable.name).toBe('Variable 3')
-      expect(body.variable.slug).toBeDefined()
-      expect(body.variable.note).toBe('Variable 3 note')
-      expect(body.variable.projectId).toBe(project1.id)
-      expect(body.values.length).toBe(1)
-      expect(body.values[0].value).toBe('Variable 3 value')
+      expect(body.name).toBe('Variable 3')
+      expect(body.slug).toBeDefined()
+      expect(body.note).toBe('Variable 3 note')
+      expect(body.projectId).toBe(project1.id)
+      expect(body.versions.length).toBe(1)
+      expect(body.versions[0].value).toBe('Variable 3 value')
 
       const variable = await prisma.variable.findUnique({
         where: {
-          id: body.variable.id
+          id: body.id
         }
       })
 
@@ -323,7 +305,7 @@ describe('Variable Controller Tests', () => {
       expect(body.failed.length).toBe(1)
 
       expect(body.failed[0].name).toBe('Bulk Conflicting Variable')
-      expect(body.successful[0].variable.name).toBe('Bulk Unique Variable')
+      expect(body.successful[0].name).toBe('Bulk Unique Variable')
     })
 
     it('should reject bulk create if all variables are invalid', async () => {
@@ -351,10 +333,14 @@ describe('Variable Controller Tests', () => {
     })
 
     it('should not be able to create variables if tier limit is reached', async () => {
+      const maxVariables = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_VARIABLES_PER_PROJECT
+
       // Create variables until tier limit is reached
       for (
         let x = 100;
-        x < 100 + tierLimitService.getVariableTierLimit(project1.id) - 1; // Subtract 1 for the variables created above
+        x < 100 + maxVariables - 1; // Subtract 1 for the variables created above
         x++
       ) {
         await variableService.createVariable(
@@ -546,7 +532,7 @@ describe('Variable Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Secret already exists')
       expect(msg.body).toBe(
-        `Secret COLLIDE already exists in project ${project1.slug}`
+        `A secret with this name already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -638,10 +624,10 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().variable.name).toEqual('Updated Variable 1')
-      expect(response.json().variable.note).toEqual('Updated Variable 1 note')
+      expect(response.json().name).toEqual('Updated Variable 1')
+      expect(response.json().note).toEqual('Updated Variable 1 note')
       expect(response.json().slug).not.toBe(variable1.slug)
-      expect(response.json().updatedVersions.length).toEqual(0)
+      expect(response.json().versions.length).toEqual(1)
 
       const variableVersion = await prisma.variableVersion.findMany({
         where: {
@@ -675,7 +661,7 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toEqual(1)
+      expect(response.json().versions.length).toEqual(1)
 
       const variableVersion = await prisma.variableVersion.findMany({
         where: {
@@ -754,7 +740,7 @@ describe('Variable Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Secret already exists')
       expect(msg.body).toBe(
-        `Secret COLLIDE already exists in project ${project1.slug}`
+        'A secret with this name already exists in this project. Please choose a different name.'
       )
     })
   })
@@ -937,31 +923,19 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { variable, values } = response.json().items[0]
+      const variable = response.json().items[0]
+      const versions = variable.versions
       expect(variable).toBeDefined()
-      expect(variable.versions).toBeUndefined()
-      expect(values).toBeDefined()
-      expect(values.length).toBe(1)
-      expect(values[0].value).toBe('Variable 1 value')
-      expect(values[0].version).toBe(1)
-      expect(values[0].environment.id).toBe(environment1.id)
-      expect(values[0].environment.slug).toBe(environment1.slug)
-      expect(values[0].environment.name).toBe(environment1.name)
-      expect(variable).toStrictEqual({
-        id: variable1.id,
-        name: variable1.name,
-        slug: variable1.slug,
-        note: variable1.note,
-        projectId: project1.id,
-        lastUpdatedById: variable1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: variable1.createdAt.toISOString(),
-        updatedAt: variable1.updatedAt.toISOString()
-      })
+      expect(versions).toBeDefined()
+      expect(versions.length).toBe(1)
+      expect(versions[0].value).toBe('Variable 1 value')
+      expect(versions[0].version).toBe(1)
+      expect(versions[0].environment.id).toBe(environment1.id)
+      expect(versions[0].environment.slug).toBe(environment1.slug)
+      expect(versions[0].environment.name).toBe(environment1.name)
+      expect(variable.id).toBe(variable1.id)
+      expect(variable.name).toBe(variable1.name)
+      expect(variable.slug).toBe(variable1.slug)
 
       //check metadata
       const metadata = response.json().metadata
@@ -1001,32 +975,19 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { variable, values } = response.json().items[0]
+      const variable = response.json().items[0]
+      const versions = variable.versions
       expect(variable).toBeDefined()
-      expect(variable.versions).toBeUndefined()
-      expect(values).toBeDefined()
-      expect(values.length).toBe(1)
-      expect(values[0].value).toBe('Variable 1 new value')
-      expect(values[0].version).toBe(2)
-      expect(values[0].environment.id).toBe(environment1.id)
-      expect(values[0].environment.slug).toBe(environment1.slug)
-      expect(values[0].environment.name).toBe(environment1.name)
-
-      expect(variable).toStrictEqual({
-        id: variable1.id,
-        name: variable1.name,
-        slug: variable1.slug,
-        note: variable1.note,
-        projectId: project1.id,
-        lastUpdatedById: variable1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: variable1.createdAt.toISOString(),
-        updatedAt: expect.any(String)
-      })
+      expect(versions).toBeDefined()
+      expect(versions.length).toBe(1)
+      expect(versions[0].value).toBe('Variable 1 new value')
+      expect(versions[0].version).toBe(2)
+      expect(versions[0].environment.id).toBe(environment1.id)
+      expect(versions[0].environment.slug).toBe(environment1.slug)
+      expect(versions[0].environment.name).toBe(environment1.name)
+      expect(variable.id).toBe(variable1.id)
+      expect(variable.name).toBe(variable1.name)
+      expect(variable.slug).toBe(variable1.slug)
 
       //check metadata
       const metadata = response.json().metadata

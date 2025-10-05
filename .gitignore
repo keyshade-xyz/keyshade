@@ -34,6 +34,8 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+executables/
+install.sh
 
 # System Files
 .DS_Store
@@ -58,5 +60,3 @@ Thumbs.db
 
 # ESLint
 .eslintcache
-
-keyshade.json

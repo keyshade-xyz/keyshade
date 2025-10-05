@@ -148,29 +148,11 @@ describe('Workspace Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     workspace1 = await workspaceService.createWorkspace(user1, {
@@ -238,7 +220,6 @@ describe('Workspace Controller Tests', () => {
       expect(body.slug).toBeDefined()
       expect(body.icon).toBe('🤓')
       expect(body.ownerId).toBe(user1.id)
-      expect(body.isFreeTier).toBe(true)
       expect(body.isDefault).toBe(false)
     })
 
@@ -277,7 +258,6 @@ describe('Workspace Controller Tests', () => {
       expect(workspace2.name).toBe('Workspace 1')
       expect(workspace2.icon).toBe('🤓')
       expect(workspace2.ownerId).toBe(user2.id)
-      expect(workspace2.isFreeTier).toBe(true)
       expect(workspace2.isDefault).toBe(false)
     })
 
@@ -447,7 +427,7 @@ describe('Workspace Controller Tests', () => {
 
   describe('Get All Workspace Of User Tests', () => {
     it('should be able to fetch all the workspaces the user is a member of', async () => {
-      // Create the invitation, but don't accept it.
+      // Create the invitation but don't accept it.
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
 
       const response = await app.inject({
