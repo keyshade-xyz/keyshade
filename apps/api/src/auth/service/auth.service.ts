@@ -20,7 +20,7 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
 import { isEmail, isIP } from 'class-validator'
 import { UAParser } from 'ua-parser-js'
-import { toSHA256 } from '@/common/cryptography'
+import { sEncrypt } from '@/common/cryptography'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { TokenService } from '@/common/token.service'
 import dayjs from 'dayjs'
@@ -396,7 +396,7 @@ export class AuthService {
     }
 
     const ipAddress = this.normalizeIp(rawIp)
-    const encryptedIpAddress = toSHA256(ipAddress)
+    const encryptedIpAddress = sEncrypt(ipAddress)
     const deviceDetail = {
       ipAddress,
       encryptedIpAddress,
