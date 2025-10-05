@@ -1,18 +1,18 @@
 import { InternalServerErrorException, Logger } from '@nestjs/common'
 import {
   Environment,
+  Event,
   EventSeverity,
+  EventSource,
   EventTriggerer,
   EventType,
-  EventSource,
+  Integration,
   Project,
   Secret,
   User,
-  Workspace,
-  WorkspaceRole,
   Variable,
-  Integration,
-  Event
+  Workspace,
+  WorkspaceRole
 } from '@prisma/client'
 import IntegrationFactory from '@/integration/plugins/integration.factory'
 import { EventService } from '@/event/event.service'
@@ -172,16 +172,25 @@ export const createEvent = async (
         prisma
       )
 
-      integrationInstance.emitEvent({
-        entity: data.entity,
-        source: data.source,
-        eventType: data.type,
-        title: data.title,
-        description: data.description,
-        event
-      })
-
-      logger.log(`Event emitted for integration with id ${integration.id}`)
+      integrationInstance
+        .emitEvent({
+          entity: data.entity,
+          source: data.source,
+          eventType: data.type,
+          title: data.title,
+          description: data.description,
+          event
+        })
+        .then(() => {
+          logger.log(
+            `Event emitted for integration with id ${integration.id} and type ${integration.type}`
+          )
+        })
+        .catch((error) => {
+          logger.error(
+            `Error emitting event for integration with id ${integration.id} and type ${integration.type}: ${error}`
+          )
+        })
     }
   }
   return event

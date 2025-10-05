@@ -1,7 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import type {
   CreateProjectRequest,
-  ProjectWithTierLimitAndCount
+  GetAllProjectsResponse
 } from '@keyshade/schema'
 import type { Dispatch, SetStateAction } from 'react'
 import { useCallback, useState } from 'react'
@@ -28,7 +28,7 @@ interface UseCreateNewProjectResponse {
   /**
    * List of projects in the current workspace.
    */
-  projects: ProjectWithTierLimitAndCount[]
+  projects: GetAllProjectsResponse['items']
 }
 
 export function useCreateNewProject(

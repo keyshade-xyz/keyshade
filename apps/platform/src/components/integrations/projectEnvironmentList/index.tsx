@@ -27,7 +27,7 @@ function ProjectEnvironmentList({
           <div>
             <p className="text-sm text-white/60">Project and Environment</p>
             <p className="text-lg font-medium text-white">
-              Watching events for all environments from all projects
+              Listening for events from the entire workspace (no specific project or environment selected)
             </p>
           </div>
         ) : (

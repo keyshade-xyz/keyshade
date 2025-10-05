@@ -49,15 +49,9 @@ export default function Index(): React.JSX.Element {
     })
   }, [getSelf, setUser])
 
-  if (!isAuthorizedToViewProject) {
-    return (
-      <div>You do not have permission to view projects in this workspace.</div>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-4">
-      <PageTitle title={`${selectedWorkspace.name} | Dashboard`} />
+      <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
       <div className="flex items-center justify-between">
         <Visible if={!isProjectsEmpty}>
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
@@ -66,15 +60,19 @@ export default function Index(): React.JSX.Element {
       </div>
 
       <ProjectLoader loading={loading}>
-        <ProjectEmpty isEmpty={isProjectsEmpty}>
-          <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-            className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
-            fetchFunction={fetchProjects}
-            itemComponent={ProjectItemComponent}
-            itemKey={(item) => item.id}
-            itemsPerPage={15}
-          />
-        </ProjectEmpty>
+        {isAuthorizedToViewProject ? (
+          <ProjectEmpty isEmpty={isProjectsEmpty}>
+            <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
+              className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
+              fetchFunction={fetchProjects}
+              itemComponent={ProjectItemComponent}
+              itemKey={(item) => item.id}
+              itemsPerPage={15}
+            />
+          </ProjectEmpty>
+        ) : (
+          <div>you don&apos;t have permission to view these projects</div>
+        )}
       </ProjectLoader>
 
       <Visible if={Boolean(isDeleteProjectOpen && selectedProject)}>

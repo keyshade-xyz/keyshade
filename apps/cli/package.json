@@ -1,6 +1,6 @@
 {
   "name": "@keyshade/cli",
-  "version": "3.2.4",
+  "version": "3.3.0-stage.3",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
@@ -40,7 +40,6 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@clack/core": "^0.3.4",
-    "@clack/prompts": "^0.7.0",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
     "chalk": "^4.1.2",

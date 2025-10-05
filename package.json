@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.33.0",
+  "version": "2.34.0-stage.21",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -164,7 +164,6 @@
     "lint-staged": "^15.4.3",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "prisma": "^6.6.0",
     "ts-jest": "^29.1.0",
     "tsconfig": "workspace:*",
     "tsconfig-paths": "^4.2.0",
@@ -172,11 +171,11 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.11",
+    "@clack/prompts": "^0.11.0",
     "@keyshade/api-client": "workspace:*",
     "@keyshade/common": "workspace:*",
     "@keyshade/schema": "workspace:*",
     "@keyshade/secret-scan": "workspace:*",
-    "@prisma/client": "^6.12.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/git": "^10.0.1",

@@ -240,6 +240,7 @@
 ## 3.2.2-stage.2
 
 ### Minor Changes
+
 - Fixed error handling in run command and socket notifier that displayed [object Object]; errors are now properly formatted for clearer CLI output
 
 # 3.2.2
@@ -267,3 +268,19 @@
 
 - Added request and response validation to `keyshade environment` subcommands
 - Removed email preference parsing in `keyshade init` command
+
+# 3.3.0-stage.1
+
+### Minor Changes
+
+- Interactive mode for `keyshade run` command
+
+### Patches
+
+- `keyshade init` no longer overwrites existing private-keys.json file.
+
+# 3.3.0-stage.3
+
+### Minor Changes
+
+- Interactive ode for `keyshade init` command

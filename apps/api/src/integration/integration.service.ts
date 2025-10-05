@@ -34,6 +34,8 @@ import { BaseIntegration } from './plugins/base.integration'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydratedIntegration } from './integration.types'
+import { VercelIntegration } from './plugins/vercel.integration'
+import { GetVercelEnvironments } from './dto/getVercelEnvironments/getVercelEnvironments'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { TierLimitService } from '@/common/tier-limit.service'
 
@@ -46,6 +48,7 @@ export class IntegrationService {
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
+    private readonly vercelIntegration: VercelIntegration,
     private readonly workspaceCacheService: WorkspaceCacheService,
     private readonly tierLimitService: TierLimitService
   ) {}
@@ -446,6 +449,25 @@ export class IntegrationService {
     // @ts-expect-error -- We expect the metadata to be in JSON format
     integration.metadata = decryptMetadata(integration.metadata)
     return integration
+  }
+
+  /**
+   * Retrieves all the Vercel environments for given integration. The user needs to have `READ_INTEGRATION`
+   * authority over the integration.
+   *
+   * @param user The user retrieving the integration
+   * @body DTO containing token and project id
+   * @returns The Vercel environmants for given integration
+   */
+  async getVercelEnvironments(
+    user: AuthenticatedUser,
+    dto: GetVercelEnvironments
+  ) {
+    this.logger.log(
+      `User ${user.id} fetching Vercel environments for integration ${dto.projectId}`
+    )
+
+    return this.vercelIntegration.getVercelEnvironments(dto)
   }
 
   /* istanbul ignore next */

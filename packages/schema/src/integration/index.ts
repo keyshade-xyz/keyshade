@@ -4,7 +4,7 @@ import {
   eventTypeEnum,
   integrationRunStatusEnum,
   integrationTypeEnum
-} from '@/enums'
+} from '@/enums/index'
 import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
@@ -129,3 +129,17 @@ export const ValidateIntegrationConfigurationRequestSchema =
 export const ValidateIntegrationConfigurationResponseSchema = z.object({
   success: z.literal(true)
 })
+
+export const GetVercelEnvironmentsRequestSchema = z.object({
+  token: z.string(),
+  projectId: z.string()
+})
+
+export const GetVercelEnvironmentsResponseSchema = z.record(
+  z.object({
+    vercelSystemEnvironment: z
+      .enum(['production', 'preview', 'development'])
+      .optional(),
+    vercelCustomEnvironmentId: z.string().optional()
+  })
+)

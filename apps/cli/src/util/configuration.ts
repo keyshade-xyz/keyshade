@@ -4,7 +4,7 @@ import type {
   ProjectRootConfig
 } from '@/types/index.types'
 import { existsSync } from 'fs'
-import { readFile, writeFile, mkdir } from 'fs/promises'
+import { mkdir, readFile, writeFile } from 'fs/promises'
 import { Logger } from './logger'
 
 export const getOsType = (): 'unix' | 'windows' => {
@@ -74,7 +74,9 @@ export const writePrivateKeyConfig = async (
 ): Promise<void> => {
   const path = getPrivateKeyConfigurationFilePath()
   await ensureDirectoryExists(path)
-  await writeFile(path, JSON.stringify(config, null, 2), 'utf8')
+  const existingConfig = await fetchPrivateKeyConfig()
+  const updatedConfig = { ...existingConfig, ...config }
+  await writeFile(path, JSON.stringify(updatedConfig, null, 2), 'utf8')
 }
 
 export const writeProjectRootConfig = async (
