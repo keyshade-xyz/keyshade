@@ -182,7 +182,7 @@ model DeviceDetail {
   region             String?
   country            String?
 
-  cliTokens                   CliToken[]
+  cliSessions                   CliSession[]
   personalAccessTokens        PersonalAccessToken[]
   userSessions                UserSession[]
   ServiceAccountAccessHistory ServiceAccountAccessHistory[]
@@ -205,9 +205,9 @@ model PersonalAccessToken {
   userId String
 }
 
-model CliToken {
+model CliSession {
   id         String   @id @default(cuid())
-  hash       String   @unique
+  tokenHash       String   @unique
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   lastUsedOn DateTime @default(now())
@@ -333,7 +333,7 @@ model User {
   referredBy    User?   @relation("UserReferrals", fields: [referredById], references: [id])
   referredUsers User[]  @relation("UserReferrals")
 
-  cliTokens                  CliToken[]
+  cliSessions                  CliSession[]
   personalAccessTokens       PersonalAccessToken[]
   userSessions               UserSession[]
   serviceAccounts            ServiceAccount[]

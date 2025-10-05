@@ -28,6 +28,7 @@ import { ShareSecretModule } from '@/share-secret/share-secret.module'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { FileUploadModule } from '@/file-upload/file-upload.module'
+import { SessionModule } from '@/session/session.module'
 
 @Module({
   controllers: [AppController],
@@ -41,7 +42,6 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
         abortEarly: true
       }
     }),
-
     ScheduleModule.forRoot(),
     PassportModule,
     AuthModule,
@@ -63,7 +63,8 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
     WorkspaceMembershipModule,
     PaymentGatewayModule,
     ShareSecretModule,
-    FileUploadModule
+    FileUploadModule,
+    SessionModule
   ],
   providers: [
     {

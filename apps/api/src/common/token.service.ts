@@ -1,5 +1,10 @@
-import { Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
-import { CliToken, User, UserSession } from '@prisma/client'
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException
+} from '@nestjs/common'
+import { CliSession, User, UserSession } from '@prisma/client'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '@/prisma/prisma.service'
 import { toSHA256 } from '@/common/cryptography'
@@ -21,9 +26,8 @@ export class TokenService {
   private readonly logger = new Logger(TokenService.name)
 
   constructor(
-    private readonly jwt: JwtService,
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService
   ) {}
 
   /**
@@ -36,7 +40,7 @@ export class TokenService {
     try {
       // Delete expired CLI tokens
       this.logger.log(`Cleaning up expired CLI tokens...`)
-      const cliTokensDeleted = await this.prisma.cliToken.deleteMany({
+      const cliTokensDeleted = await this.prisma.cliSession.deleteMany({
         where: {
           expiresOn: {
             lt: new Date()
@@ -78,7 +82,7 @@ export class TokenService {
   }> {
     // Generate the token
     this.logger.log(`Generating bearer token for user ${userId}`)
-    const bearerToken = await this.jwt.signAsync({ id: userId })
+    const bearerToken = await this.jwtService.signAsync({ id: userId })
     const bearerTokenHash = toSHA256(bearerToken)
     this.logger.log(
       `Bearer token hash ${bearerTokenHash} generated for ${userId}`
@@ -143,7 +147,7 @@ export class TokenService {
     deviceDetail: DeviceDetail
   ): Promise<{
     token: string
-    cliToken: CliToken
+    cliSession: CliSession
   }> {
     // Generate the token
     this.logger.verbose(
@@ -157,9 +161,9 @@ export class TokenService {
     // Save to the database
     try {
       this.logger.log(`Saving CLI token ${secureRandomHash} for user ${userId}`)
-      const cliToken = await this.prisma.cliToken.create({
+      const cliSession = await this.prisma.cliSession.create({
         data: {
-          hash: secureRandomHash,
+          tokenHash: secureRandomHash,
           user: {
             connect: {
               id: userId
@@ -179,12 +183,12 @@ export class TokenService {
         }
       })
       this.logger.log(
-        `Saved CLI token ${secureRandomHash} for user ${userId}: ${cliToken.id}`
+        `Saved CLI token ${secureRandomHash} for user ${userId}: ${cliSession.id}`
       )
 
       return {
         token,
-        cliToken
+        cliSession
       }
     } catch (error) {
       this.logger.error(
@@ -289,16 +293,16 @@ export class TokenService {
     })
 
     // Validate the token payload against the user session
-    const payload = await this.jwtService.verifyAsync(token, {
-      secret: process.env.JWT_SECRET
-    })
-    if (!payload) {
+    try {
+      const payload = await this.jwtService.verifyAsync(actualToken, {
+        secret: process.env.JWT_SECRET
+      })
+      return payload.id
+    } catch (error) {
       throw new UnauthorizedException(
-        'Error validating JWT token: Invalid payload'
+        `Error validating JWT token: ${error.message}`
       )
     }
-
-    return payload.id
   }
 
   /**
@@ -313,9 +317,9 @@ export class TokenService {
     const actualToken = this.extractActualToken(token)
 
     // Fetch the CLI token from the database
-    const cliToken = await this.prisma.cliToken.findUnique({
+    const cliToken = await this.prisma.cliSession.findUnique({
       where: {
-        hash: toSHA256(actualToken)
+        tokenHash: toSHA256(actualToken)
       }
     })
 
@@ -334,7 +338,7 @@ export class TokenService {
     }
 
     // Update the last used date of the session
-    await this.prisma.cliToken.update({
+    await this.prisma.cliSession.update({
       where: {
         id: cliToken.id
       },
