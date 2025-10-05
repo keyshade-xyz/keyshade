@@ -4,7 +4,7 @@ import {
   Logger
 } from '@nestjs/common'
 import { IMailService } from './interface.service'
-import { Transporter, createTransport } from 'nodemailer'
+import { createTransport, Transporter } from 'nodemailer'
 import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
 import { render } from '@react-email/render'
 import WorkspaceInvitationEmail from '../emails/workspace-invitation'
@@ -82,7 +82,6 @@ export class MailService implements IMailService {
         otp
       })
     )
-
     await this.sendEmail(email, subject, body)
   }
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {

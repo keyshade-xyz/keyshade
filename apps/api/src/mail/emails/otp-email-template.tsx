@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Text, Section } from '@react-email/components'
+import { Section, Text } from '@react-email/components'
 import { otpStyle, text, workspaceDetails } from './styles/common-styles'
-import BaseEmailTemplate from './components/base-email-template'
+import BaseEmailTemplate from '@/mail/emails/components/base-email-template'
 
 interface OTPEmailTemplateProps {
   otp: string

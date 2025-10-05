@@ -47,7 +47,10 @@ export class AuthService {
    */
   async sendOtp(email: string, mode?: string): Promise<void> {
     this.logger.log(`Attempting to send login code to ${email}`)
+
     this.validateEmail(email)
+
+    // Create the user if it doesn't exist
     const user = await this.createUserIfNotExists(
       email,
       AuthProvider.EMAIL_OTP,
@@ -55,8 +58,13 @@ export class AuthService {
       null,
       mode
     )
+
+    // Generate the OTP
     const otp = await generateOtp(email, user.id, this.prisma)
+
+    // Send the OTP to the user
     await this.mailService.sendOtp(email, otp.code)
+
     this.logger.log(`Login code sent to ${email}`)
   }
 

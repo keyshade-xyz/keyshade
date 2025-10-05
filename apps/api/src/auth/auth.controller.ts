@@ -73,7 +73,13 @@ export class AuthController {
       req,
       mode
     )
-    return setCookie(response, sessionData)
+    if (mode === 'cli') {
+      return response.status(HttpStatus.OK).json({
+        user: sessionData
+      })
+    } else {
+      return setCookie(response, sessionData)
+    }
   }
 
   /* istanbul ignore next */
