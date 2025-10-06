@@ -1,3 +1,13 @@
+## [2.34.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.21...v2.34.0-stage.22) (2025-10-06)
+
+### 🐛 Bug Fixes
+
+* **platform:** updated the logic for leaving workspace deletion & enhanced tooltip messages ([#1133](https://github.com/keyshade-xyz/keyshade/issues/1133)) ([f1baeba](https://github.com/keyshade-xyz/keyshade/commit/f1baeba91dd28d7ef0b5250402bf9faff47b9963))
+
+### 🔨 Code Refactoring
+
+* **[secure]-scan:** enable support for generic [secure] key regex ([#1113](https://github.com/keyshade-xyz/keyshade/issues/1113)) ([ae0a923](https://github.com/keyshade-xyz/keyshade/commit/ae0a923205db34bcb08e7a06ea9b1f3051d8826a))
+
 ## [2.34.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.20...v2.34.0-stage.21) (2025-10-03)
 
 ### 🐛 Bug Fixes
