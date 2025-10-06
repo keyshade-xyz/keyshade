@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Logger,
@@ -33,6 +34,8 @@ export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
 const ENV_TO_SOCKET_PREFIX = 'env_to_socket:'
+const SOCKET_TO_USER_PREFIX = 'socket_to_user:'
+const LIVE_USERS_KEY = 'live_cli_users'
 
 @WebSocketGateway({
   namespace: 'change-notifier',
@@ -125,6 +128,18 @@ export default class ChangeNotifier
       // First, we need to authenticate the user from the socket connection
       const user = await this.extractAndValidateUser(client)
 
+      // Check if the user is already registered for live changes
+      const isRegistered = await this.redis.sIsMember(LIVE_USERS_KEY, user.id)
+      if (isRegistered) {
+        this.logger.log(
+          `User ${user.id} is already registered for live changes`
+        )
+        throw new ConflictException(
+          'You are already connected to keyshade',
+          'One of your CLI sessions is already connected to keyshade. Please disconnect it before connecting another CLI session.'
+        )
+      }
+
       // Check if the user has access to the workspace
       this.logger.log('Checking user access to workspace')
       const workspace =
@@ -139,7 +154,7 @@ export default class ChangeNotifier
         })
 
       if (workspace.isDisabled) {
-        this.logger.log(`Workspace ${workspace.slug} is disabled`)
+        this.logger.warn(`Workspace ${workspace.slug} is disabled`)
         throw new BadRequestException(
           constructErrorBody(
             'This workspace has been disabled',
@@ -168,7 +183,7 @@ export default class ChangeNotifier
         })
 
       // Add the client to the environment
-      await this.addClientToEnvironment(client, environment.id)
+      await this.addClientToEnvironment(client, environment.id, user.id)
 
       // Send ACK to client
       this.logger.log('Sending ACK to client')
@@ -275,7 +290,11 @@ export default class ChangeNotifier
     this.logger.log('Rehydrated ChangeNotifier cache')
   }
 
-  private async addClientToEnvironment(client: Socket, environmentId: string) {
+  private async addClientToEnvironment(
+    client: Socket,
+    environmentId: string,
+    userId: string
+  ) {
     this.logger.log('Adding client to environment')
 
     await this.prisma.changeNotificationSocketMap.create({
@@ -285,6 +304,8 @@ export default class ChangeNotifier
       }
     })
     await this.redis.sAdd(`${ENV_TO_SOCKET_PREFIX}${environmentId}`, client.id)
+    await this.redis.set(`${SOCKET_TO_USER_PREFIX}${client.id}`, userId)
+    await this.redis.sAdd(LIVE_USERS_KEY, userId)
 
     this.logger.log(
       `Client registered: ${client.id} for environment: ${environmentId}`
@@ -315,6 +336,14 @@ export default class ChangeNotifier
         environmentId
       }
     })
+
+    const userId = await this.redis.get(`${SOCKET_TO_USER_PREFIX}${client.id}`)
+
+    // Remove socketId -> userId mapping
+    await this.redis.del(`${SOCKET_TO_USER_PREFIX}${client.id}`)
+
+    // Remove userId from live users set
+    await this.redis.sRem(LIVE_USERS_KEY, userId)
 
     this.logger.log(
       `Client deregistered: ${client.id} from environment: ${environmentId}`
