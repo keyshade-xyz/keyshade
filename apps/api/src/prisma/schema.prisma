@@ -183,7 +183,6 @@ model DeviceDetail {
   country            String?
 
   cliSessions                 CliSession[]
-  personalAccessTokens        PersonalAccessToken[]
   userSessions                UserSession[]
   ServiceAccountAccessHistory ServiceAccountAccessHistory[]
 
@@ -199,12 +198,10 @@ model PersonalAccessToken {
   lastUsedOn DateTime  @default(now())
   expiresOn  DateTime?
 
-  // Last used from
-  deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  deviceDetailId String
-
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
+
+  @@unique([name, userId])
 }
 
 model CliSession {

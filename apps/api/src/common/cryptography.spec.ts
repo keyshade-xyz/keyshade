@@ -1,17 +1,10 @@
-import {
-  createKeyPair,
-  decrypt,
-  encrypt,
-  generateApiKey,
-  toSHA256
-} from './cryptography'
+import { createKeyPair, decrypt, encrypt, toSHA256 } from './cryptography'
 
 describe('Cryptography Tests', () => {
   it('should be defined', () => {
     expect(createKeyPair).toBeDefined()
     expect(decrypt).toBeDefined()
     expect(encrypt).toBeDefined()
-    expect(generateApiKey).toBeDefined()
     expect(toSHA256).toBeDefined()
   })
 
@@ -41,12 +34,6 @@ describe('Cryptography Tests', () => {
       expect(e).toBeDefined()
       expect(e.message).toEqual('Decryption failed: Bad MAC')
     }
-  })
-
-  it('should generate an API key', () => {
-    const apiKey = generateApiKey()
-    expect(apiKey).toBeDefined()
-    expect(apiKey).toBeDefined()
   })
 
   it('should generate a SHA256 hash', () => {

@@ -4,15 +4,20 @@ import {
   Logger,
   UnauthorizedException
 } from '@nestjs/common'
-import { CliSession, User, UserSession } from '@prisma/client'
+import {
+  CliSession,
+  PersonalAccessToken,
+  User,
+  UserSession
+} from '@prisma/client'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '@/prisma/prisma.service'
-import { toSHA256 } from '@/common/cryptography'
+import { generateRandomBytes, toSHA256 } from '@/common/cryptography'
 import { DeviceDetail } from '@/auth/auth.types'
-import * as crypto from 'crypto'
 import dayjs from 'dayjs'
 import { constructErrorBody } from '@/common/util'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { CreatePatDto } from '@/user/dto/create.pat/create.pat'
 
 export enum TokenType {
   BEARER = 'Bearer',
@@ -153,17 +158,16 @@ export class TokenService {
     this.logger.verbose(
       `Generating CLI token for user ${userId} with device: ${deviceDetail}`
     )
-    const secureRandom = crypto.randomBytes(32).toString('hex')
-    const secureRandomHash = toSHA256(secureRandom)
-    const token = `ks.cli.${secureRandomHash}`
-    this.logger.log(`Generated token ${secureRandomHash} for user ${userId}`)
+    const { plaintext, hash } = generateRandomBytes(32)
+    const token = `ks.cli.${plaintext}`
+    this.logger.log(`Generated token ${hash} for user ${userId}`)
 
     // Save to the database
     try {
-      this.logger.log(`Saving CLI token ${secureRandomHash} for user ${userId}`)
+      this.logger.log(`Saving CLI token ${hash} for user ${userId}`)
       const cliSession = await this.prisma.cliSession.create({
         data: {
-          tokenHash: secureRandomHash,
+          tokenHash: hash,
           user: {
             connect: {
               id: userId
@@ -183,7 +187,7 @@ export class TokenService {
         }
       })
       this.logger.log(
-        `Saved CLI token ${secureRandomHash} for user ${userId}: ${cliSession.id}`
+        `Saved CLI token ${hash} for user ${userId}: ${cliSession.id}`
       )
 
       return {
@@ -192,7 +196,7 @@ export class TokenService {
       }
     } catch (error) {
       this.logger.error(
-        `Encountered an error while saving CLI token ${secureRandomHash} for user ${userId}: ${error.message}`
+        `Encountered an error while saving CLI token ${hash} for user ${userId}: ${error.message}`
       )
       throw new InternalServerErrorException(
         constructErrorBody(
@@ -203,8 +207,54 @@ export class TokenService {
     }
   }
 
-  public generateUserAccessToken(): Promise<string> {
-    throw new InternalServerErrorException('Not implemented')
+  public async generatePersonalAccessToken(
+    userId: User['id'],
+    dto: CreatePatDto
+  ): Promise<{
+    token: string
+    personalAccessToken: PersonalAccessToken
+  }> {
+    this.logger.log(`Generating personal access token for user ${userId}`)
+    const { plaintext, hash } = generateRandomBytes(32)
+    const token = `ks.pat.${plaintext}`
+    this.logger.log(`Generated token ${hash} for user ${userId}`)
+
+    // Save to the database
+    try {
+      this.logger.log(`Saving PAT ${hash} for user ${userId}`)
+      const personalAccessToken = await this.prisma.personalAccessToken.create({
+        data: {
+          name: dto.name,
+          hash: hash,
+          user: {
+            connect: {
+              id: userId
+            }
+          },
+          expiresOn: dto.expiresAfterDays
+            ? dayjs().add(dto.expiresAfterDays, 'days').toDate()
+            : undefined
+        }
+      })
+      this.logger.log(
+        `Saved PAT ${hash} for user ${userId}: ${personalAccessToken.id}`
+      )
+
+      return {
+        token,
+        personalAccessToken
+      }
+    } catch (error) {
+      this.logger.error(
+        `Encountered an error while saving PAT ${hash} for user ${userId}: ${error.message}`
+      )
+      throw new InternalServerErrorException(
+        constructErrorBody(
+          'Uh-oh! Something went wrong on our end.',
+          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.xyz'
+        )
+      )
+    }
   }
 
   public generateServiceAccountAccessToken(): Promise<string> {
@@ -246,7 +296,7 @@ export class TokenService {
         userId = await this.validateCliAccessToken(token)
         break
       case TokenType.PERSONAL_ACCESS_TOKEN:
-        userId = await this.validateUserAccessToken(token)
+        userId = await this.validatePersonalAccessToken(token)
         break
       case TokenType.SERVICE_ACCOUNT_ACCESS_TOKEN:
         userId = await this.validateServiceAccountAccessToken(token)
@@ -351,8 +401,44 @@ export class TokenService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private async validateUserAccessToken(token: string): Promise<User['id']> {
-    throw new UnauthorizedException('Error: Not implemented')
+  private async validatePersonalAccessToken(
+    token: string
+  ): Promise<User['id']> {
+    // Fetch the actual token
+    const actualToken = this.extractActualToken(token)
+
+    // Fetch the PAT from the database
+    const pat = await this.prisma.personalAccessToken.findUnique({
+      where: {
+        hash: toSHA256(actualToken)
+      }
+    })
+
+    // Check if the token exists
+    if (!pat) {
+      throw new UnauthorizedException(
+        'Error validating PAT token: Token not found'
+      )
+    }
+
+    // Check if the token is valid
+    if (pat.expiresOn.getDate() < Date.now()) {
+      throw new UnauthorizedException(
+        'Error validating PAT token: Token expired'
+      )
+    }
+
+    // Update the last used date of the session
+    await this.prisma.personalAccessToken.update({
+      where: {
+        id: pat.id
+      },
+      data: {
+        lastUsedOn: new Date()
+      }
+    })
+
+    return pat.userId
   }
 
   private async validateServiceAccountAccessToken(
