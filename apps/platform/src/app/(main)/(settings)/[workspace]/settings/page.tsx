@@ -72,7 +72,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     name: selectedWorkspace?.name || '',
     icon: selectedWorkspace?.icon || '🔥'
   })
-  const isDisableLeave =
+  const isLeaveDisabled =
     memberCount === 1 ||
     selectedWorkspace?.isDefault ||
     user?.id === selectedWorkspace?.ownerId
@@ -81,7 +81,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   const isAuthorizedToDelete = selectedWorkspace?.entitlements.canDelete
 
   const isDeleteWorkspaceDisabled =
-    isLoading || selectedWorkspace?.isDefault || !isAuthorizedToDelete
+    isLoading || isLeaveDisabled || !isAuthorizedToDelete
 
   function handleEmojiSelect(emojiData: string) {
     setWorkspaceData({
@@ -329,7 +329,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </Button>
               </TooltipTrigger>
 
-              {isDisableLeave ? (
+              {isLeaveDisabled ? (
                 <TooltipContent
                   className="max-w-[350px] border-white/20 bg-white/10 text-white backdrop-blur-xl"
                   sideOffset={7}
@@ -338,11 +338,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                     <p>This is your default workspace. You can not leave it.</p>
                   ) : user?.id === selectedWorkspace?.ownerId ? (
                     <p>
-                      You are the owner of this workspace. You can not leave
-                      workspace without transferring ownership.
+                      You are currently the admin of the workspace. Transfer the ownership to someone else if you would like to leave this workspace
                     </p>
                   ) : memberCount === 1 ? (
-                    <p>You are the only member of this workspace.</p>
+                    <p>You are the only member of this workspace. You might want to delete the workspace</p>
                   ) : null}
                 </TooltipContent>
               ) : null}
