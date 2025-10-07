@@ -30,7 +30,6 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { Switch } from '@/components/ui/switch'
 import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
@@ -41,7 +40,6 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
-import ControllerInstance from '@/lib/controller-instance'
 
 interface SecretCardProps {
   secretData: Secret
@@ -67,9 +65,9 @@ export default function SecretCard({
     selectedSecretEnvironmentAtom
   )
   const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
-  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
-    new Set()
-  )
+  // const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+  //   new Set()
+  // )
   const [decryptedValues, setDecryptedValues] = useState<
     Record<Environment['id'], string>
   >({})
@@ -104,25 +102,27 @@ export default function SecretCard({
     [privateKey, versions]
   )
 
-  useEffect(() => {
-    const fetchDisabled = async () => {
-      try {
-        const res =
-          await ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret(
-            { secretSlug: secretData.slug }
-          )
+  // Not needed right now and causes too many requests
 
-        if (res.success && res.data) {
-          setDisabledEnvironments(new Set(res.data))
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console -- console.error is used for debugging
-        console.error('Failed to load disabled environments', error)
-      }
-    }
+  // useEffect(() => {
+  //   const fetchDisabled = async () => {
+  //     try {
+  //       const res =
+  //         await ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret(
+  //           { secretSlug: secretData.slug }
+  //         )
 
-    fetchDisabled()
-  }, [secretData.slug])
+  //       if (res.success && res.data) {
+  //         setDisabledEnvironments(new Set(res.data))
+  //       }
+  //     } catch (error) {
+  //       // eslint-disable-next-line no-console -- console.error is used for debugging
+  //       console.error('Failed to load disabled environments', error)
+  //     }
+  //   }
+
+  //   fetchDisabled()
+  // }, [secretData.slug])
 
   useEffect(() => {
     handleDecryptValues(secretData.versions[0]?.environment.slug)
@@ -137,37 +137,38 @@ export default function SecretCard({
     )
   }
 
-  const handleToggleDisableSecretClick = async (
-    environmentSlug: Environment['slug'],
-    environmentId: Environment['id'],
-    checked: boolean
-  ) => {
-    const controller = ControllerInstance.getInstance().secretController
+  // Not needed right now
+  // const handleToggleDisableSecretClick = async (
+  //   environmentSlug: Environment['slug'],
+  //   environmentId: Environment['id'],
+  //   checked: boolean
+  // ) => {
+  //   const controller = ControllerInstance.getInstance().secretController
 
-    if (checked) {
-      // Enable secret
-      await controller.enableSecret({
-        secretSlug: secretData.slug,
-        environmentSlug
-      })
-      setDisabledEnvironments((prev) => {
-        const next = new Set(prev)
-        next.delete(environmentId) // Update local state
-        return next
-      })
-    } else {
-      // Disable secret
-      await controller.disableSecret({
-        secretSlug: secretData.slug,
-        environmentSlug
-      })
-      setDisabledEnvironments((prev) => {
-        const next = new Set(prev)
-        next.add(environmentId) // Update local state
-        return next
-      })
-    }
-  }
+  //   if (checked) {
+  //     // Enable secret
+  //     await controller.enableSecret({
+  //       secretSlug: secretData.slug,
+  //       environmentSlug
+  //     })
+  //     setDisabledEnvironments((prev) => {
+  //       const next = new Set(prev)
+  //       next.delete(environmentId) // Update local state
+  //       return next
+  //     })
+  //   } else {
+  //     // Disable secret
+  //     await controller.disableSecret({
+  //       secretSlug: secretData.slug,
+  //       environmentSlug
+  //     })
+  //     setDisabledEnvironments((prev) => {
+  //       const next = new Set(prev)
+  //       next.add(environmentId) // Update local state
+  //       return next
+  //     })
+  //   }
+  // }
 
   const handleRevealEnvironmentValueOfSecretClick = (
     environment: Environment['slug']
@@ -263,7 +264,7 @@ export default function SecretCard({
                   <TableHead className="h-full text-base font-normal text-white/50">
                     Value
                   </TableHead>
-                  <TableHead className="h-full text-base font-normal text-white/50">
+                  <TableHead className="h-full w-[10.25rem] text-base font-normal text-white/50">
                     Version
                   </TableHead>
                   <TableHead className="h-full w-[100px] rounded-tr-xl text-base font-normal text-white/50" />
@@ -274,9 +275,9 @@ export default function SecretCard({
                   const isRevealed =
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
-                  const isDisabled = disabledEnvironments.has(
-                    value.environment.id
-                  )
+                  // const isDisabled = disabledEnvironments.has(
+                  //   value.environment.id
+                  // )
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -290,12 +291,13 @@ export default function SecretCard({
                           ? decryptedValues[value.environment.id]
                           : value.value.replace(/./g, '*').substring(0, 20)}
                       </TableCell>
-                      <TableCell className="h-full px-8 py-4 text-base">
+                      <TableCell className="h-full w-[10.25rem] px-8 py-4 text-base">
                         {value.version}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
-                          <Switch
+                          {/* Disable toggle not needed right now */}
+                          {/* <Switch
                             checked={!isDisabled}
                             onCheckedChange={(checked) => {
                               handleToggleDisableSecretClick(
@@ -304,7 +306,7 @@ export default function SecretCard({
                                 checked
                               )
                             }}
-                          />
+                          /> */}
                           {privateKey ? (
                             <button
                               className="duration-300 hover:scale-105"
