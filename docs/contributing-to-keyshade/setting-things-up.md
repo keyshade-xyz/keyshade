@@ -97,7 +97,7 @@ We cluster every dependency that keyshade will need into our `docker compose` fi
 docker compose up -d
 ```
 
-This will start the following things in a dockerized environment and then expose the services yo your host maching:
+This will start the following things in a dockerized environment and then expose the services to your host machine:
 
 1. PostgreSQL: This is the database that keyshade uses to store all the data.
 2. Redis: This is the cache store that keyshade uses to store the cache data.
