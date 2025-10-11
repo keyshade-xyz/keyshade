@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import type { GetMembersResponse } from '@keyshade/schema'
 import TransferOwnershipDialog from '@/components/members/transferOwnershipDialog'
@@ -19,7 +19,7 @@ import {
   selectedMemberAtom,
   selectedWorkspaceAtom,
   transferOwnershipOpenAtom,
-  membersRefreshAtom
+  membersRefreshKeyAtom
 } from '@/store'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
@@ -33,14 +33,8 @@ export default function JoinedMembersTable(): React.JSX.Element {
     transferOwnershipOpenAtom
   )
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
-  const membersRefresh = useAtomValue(membersRefreshAtom)
-  const [resetKey, setResetKey] = useState(0)
+  const membersRefreshKey = useAtomValue(membersRefreshKeyAtom)
   const [isEditMemberOpen, setIsEditMemberOpen] = useAtom(editMemberOpenAtom)
-
-  // If membersRefresh changes, increment ResetKey
-  useEffect(() => {
-    setResetKey(prev => prev + 1)
-  }, [membersRefresh])
 
   const fetchMembers = useCallback(
     async ({ page, limit }: { page: number; limit: number }) => {
@@ -138,7 +132,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
               itemComponent={renderMemberRow}
               itemKey={(member) => member.id}
               itemsPerPage={10}
-              key={resetKey} // For remounting of list
+              refreshKey={membersRefreshKey} // For remounting of list
             />
           </TableBody>
         </Table>

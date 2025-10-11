@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import {
   membersOfWorkspaceAtom,
-  membersRefreshAtom,
+  membersRefreshKeyAtom,
   removeMemberOpenAtom,
   selectedMemberAtom,
   selectedWorkspaceAtom,
@@ -30,7 +30,7 @@ export default function RemoveMemberDialog() {
   const [isRemoveMemberOpen, setIsRemoveMemberOpen] =
     useAtom(removeMemberOpenAtom)
   const setMembers = useSetAtom(membersOfWorkspaceAtom)
-  const setMembersRefresh = useSetAtom(membersRefreshAtom)
+  const setMembersRefresh = useSetAtom(membersRefreshKeyAtom)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const removeMember = useHttp(() =>
@@ -52,7 +52,7 @@ export default function RemoveMemberDialog() {
       try {
         if (success) {
           setMemberCount((prevCount) => prevCount - 1)
-          setMembersRefresh(prev => prev + 1)
+          setMembersRefresh(prevKey => prevKey + 1)
           toast.success('Member removed successfully', {
             description: (
               <p className="text-xs text-emerald-300">
