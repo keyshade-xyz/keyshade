@@ -2,9 +2,9 @@
 description: Glimpse into the bigger picture
 ---
 
-# 🏗️ Architecture of keyshade
+# 🏗️ Architecture of Keyshade
 
-The following few diagrams try to explain the architecture of keyshade.
+The following few diagrams try to explain the architecture of Keyshade.
 
 ### Control Flow
 

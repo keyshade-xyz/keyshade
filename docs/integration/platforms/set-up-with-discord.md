@@ -19,7 +19,7 @@ Here's what this guide covers:
 - [Test the Integration](#test-the-integration)
 - [Best Practices and Troubleshooting](#best-practices-and-troubleshooting)
 
-> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/)
+> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/introduction)
 
 ---
 
