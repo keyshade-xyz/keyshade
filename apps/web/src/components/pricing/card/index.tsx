@@ -9,6 +9,7 @@ import {
   StarsRightSVG
 } from '@public/pricing'
 import type { PriceCardPropsType } from '@/types'
+import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function PriceCard({
   title,
@@ -39,6 +40,13 @@ function PriceCard({
       return 'Contact Us'
     }
     return 'Buy Now'
+  }
+  const handleButtonClick = () => {
+    if (isUserLoggedIn()) {
+      window.location.href = 'https://app.keyshade.xyz/dashboard/billing'
+    } else {
+      window.location.href = 'https://app.keyshade.xyz/auth'
+    }
   }
 
   return (
@@ -105,6 +113,7 @@ function PriceCard({
         <button
           className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
           type="button"
+          onClick={handleButtonClick}
         >
           {returnButtonLabel()}
         </button>
