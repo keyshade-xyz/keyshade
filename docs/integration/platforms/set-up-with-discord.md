@@ -19,7 +19,7 @@ Here's what this guide covers:
 - [Test the Integration](#test-the-integration)
 - [Best Practices and Troubleshooting](#best-practices-and-troubleshooting)
 
-> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/introduction)
+> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/introduction.md)
 
 ---
 
@@ -127,4 +127,7 @@ Finally, click **“Create Integration”**.
 
 _Your Keyshade project is now integrated with Discord for real-time alerts. Whether you're updating secrets or managing config variables, your team stays instantly informed._
 
-> Want to explore more integrations? Head over to the [Integrations Hub](/docs/integrations)
+> Want to explore more integrations? Check out our other integration guides:
+> - [Frameworks](/docs/integration/frameworks/README.md) - Next.js, Node.js
+> - [Languages](/docs/integration/languages/README.md) - Go, Rust, Python  
+> - [Platforms](/docs/integration/platforms/README.md) - AWS Lambda, Vercel, Slack, Discord
