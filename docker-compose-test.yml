@@ -1,18 +1,5 @@
 # The containers that compose the project
 services:
-  db:
-    image: postgres:13
-    restart: always
-    container_name: integration-tests-prisma
-    ports:
-      - '5432:5432'
-    environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: tests
-    networks:
-      - keyshade-test
-
   redis:
     image: redis:6
     container_name: integration-tests-redis
@@ -20,6 +7,7 @@ services:
       - '6379:6379'
     networks:
       - keyshade-test
+    command: ["redis-server", "--save", ""]
 
   minio:
     image: docker.io/bitnami/minio:2022
@@ -31,6 +19,8 @@ services:
       - '9001:9001'
     volumes:
       - './data/minio:/data'
+    networks:
+      - keyshade-test
 
 networks:
   keyshade-test:
