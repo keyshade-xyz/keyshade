@@ -13,6 +13,7 @@ import VariableCommand from './commands/variable.command'
 import { version } from '../package.json'
 import ConfigCommand from './commands/config.command'
 import IntegrationCommand from './commands/integration.command'
+import LoginCommand from './commands/login.command'
 
 const program = new Command()
 
@@ -32,7 +33,8 @@ const COMMANDS: BaseCommand[] = [
   new ScanCommand(),
   new VariableCommand(),
   new ConfigCommand(),
-  new IntegrationCommand()
+  new IntegrationCommand(),
+  new LoginCommand()
 ]
 
 COMMANDS.forEach((command) => {
