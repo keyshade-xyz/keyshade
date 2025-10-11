@@ -58,10 +58,6 @@ function Sidebar(): JSX.Element {
     }
   ]
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    e.stopPropagation()
-  }
-
   return (
     <aside className="ml-4 h-screen w-[18rem] min-w-[16rem] flex-shrink-0">
       <div className="flex h-full flex-col gap-2">
@@ -82,8 +78,7 @@ function Sidebar(): JSX.Element {
 
         {/* Scrollable Menu Items */}
         <div
-          className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent min-h-0 flex-1 overflow-y-auto"
-          onScroll={handleScroll}
+          className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent min-h-0 flex-1 overflow-y-auto overscroll-contain"
         >
           {sidebarTabData.map((tabData) => {
             return (
