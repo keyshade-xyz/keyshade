@@ -20,7 +20,7 @@ We tend to use docker for doing the heavy lifting on our behalf. Currently, we u
 
 ## Setting up `pnpm`
 
-keyshade works with any version of **node (>=18)** and takes the liberty that you have it installed. The project uses `pnpm` as the package manager. To install `pnpm`, run the following command:
+Keyshade works with any version of **node (>=18)** and takes the liberty that you have it installed. The project uses `pnpm` as the package manager. To install `pnpm`, run the following command:
 
 ```bash
 npm install -g pnpm
@@ -91,17 +91,17 @@ npm install -g @nestjs/cli
 
 ## Setting up the development environment
 
-We cluster every dependency that keyshade will need into our `docker compose` file. So, in order to start developing, you will first need to fire up these dependencies using one single command:
+We cluster every dependency that Keyshade will need into our `docker compose` file. So, in order to start developing, you will first need to fire up these dependencies using one single command:
 
 ```bash
 docker compose up -d
 ```
 
-This will start the following things in a dockerized environment and then expose the services yo your host maching:
+This will start the following things in a dockerized environment and then expose the services to your host machine:
 
-1. PostgreSQL: This is the database that keyshade uses to store all the data.
-2. Redis: This is the cache store that keyshade uses to store the cache data.
-3. Minio: This is the object storage that keyshade uses to store the files.
+1. PostgreSQL: This is the database that Keyshade uses to store all the data.
+2. Redis: This is the cache store that Keyshade uses to store the cache data.
+3. Minio: This is the object storage that Keyshade uses to store the files.
 
 Please note that, in order for these steps to work, you will need to ensure that the following ports are free:
 
