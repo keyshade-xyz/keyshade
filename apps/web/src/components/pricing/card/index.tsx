@@ -42,7 +42,9 @@ function PriceCard({
     return 'Buy Now'
   }
   const handleButtonClick = () => {
-    if (isUserLoggedIn()) {
+    if (price < 0) {
+      window.location.href = 'mailto:support@keyshade.xyz?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan. Please provide more details about pricing, features, and next steps.'
+    } else if (isUserLoggedIn()) {
       window.location.href = 'https://app.keyshade.xyz/dashboard/billing'
     } else {
       window.location.href = 'https://app.keyshade.xyz/auth'
