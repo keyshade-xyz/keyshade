@@ -1,6 +1,6 @@
 # Table of contents
 
-- [❔ What is keyshade?](README.md)
+- [❔ What is Keyshade?](README.md)
 
 ## Getting Started
 
@@ -8,7 +8,7 @@
 - [Adding your first secret and variable](getting-started/adding-your-first-secret-and-variable.md)
 - [Installing the CLI](getting-started/installing-the-cli.md)
 - [Setting up your profile](getting-started/setting-up-your-profile.md)
-- [Add keyshade to your project](getting-started/add-keyshade-to-your-project.md)
+- [Add Keyshade to your project](getting-started/add-keyshade-to-your-project.md)
 - [Running your app](getting-started/running-your-app.md)
 
 ## CLI
@@ -58,5 +58,5 @@
 
 ## Internals
 
-- [Architecture of keyshade](internals/architecture-of-keyshade.md)
+- [Architecture of Keyshade](internals/architecture-of-keyshade.md)
 - [How the CLI works](internals/how-the-cli-works.md)

@@ -38,7 +38,7 @@ Now, let's create our profile.
 
 ## Test your profile
 
-Now, you are set to making API calls to the keyshade API. You can run this command to check if your profile is set up correctly:
+Now, you are set to making API calls to the Keyshade API. You can run this command to check if your profile is set up correctly:
 
 ```bash
 keyshade workspace list

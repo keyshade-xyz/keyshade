@@ -11,5 +11,5 @@ Here's the list of contents, feel free to skip to any section you like.
 - [Adding your first secret and variable](adding-your-first-secret-and-variable.md)
 - [Installing the CLI](installing-the-cli.md)
 - [Setting up your profile](setting-up-your-profile.md)
-- [Add keyshade to your project](add-keyshade-to-your-project.md)
+- [Add Keyshade to your project](add-keyshade-to-your-project.md)
 - [Running your app](running-your-app.md)
