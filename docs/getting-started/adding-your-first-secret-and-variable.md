@@ -2,13 +2,14 @@
 description: Get to know about our platform
 ---
 
-# Adding your first secret and variable
+# Adding your first secret, variable and environment
 
-Our app is the place where you manage all of your secrets and variables. This can also be done using the CLI, but we want to keep it as simple as possible for now. Here's a list of things that we will be doing in this tutorial:
+Our app is the place where you manage all of your secrets, variables and environments. This can also be done using the CLI, but we want to keep it as simple as possible for now. Here's a list of things that we will be doing in this tutorial:
 
 - Creating a new project
 - Creating a secret in your project
 - Creating a variable in your project
+- Creating an environment in your project
 
 So, let's get started!
 
@@ -39,7 +40,7 @@ Your project should now show up in your dashboard:
 Now, let's create our first secret.
 
 - Select the newly created **My App** project.
-- Head over to the **Secrets** tab.
+- Head over to the **Secret** tab.
 - Enter the name of the secret. We will use `NEXT_PUBLIC_API_KEY`. You can also add a note if you want to.
 - Specify a value for the `dev` environment we created. We would use `ks_1234`.
 - Hit on **Add Secret**.
@@ -52,7 +53,7 @@ If created successfully, your secret should look like this:
 
 Lastly, let's create our first variable.
 
-- Head over to the **Variables** tab.
+- Head over to the **Variable** tab.
 - Enter the name of the variable. We will use `NEXT_PUBLIC_PORT`. You can also add a note if you want to.
 - Specify a value for the `dev` environment we created. We would use `3000`.
 - Hit on **Add Variable**.
@@ -60,6 +61,21 @@ Lastly, let's create our first variable.
 If created successfully, your variable should look like this:
 
 ![Success](../../blob/variable.png)
+
+## Creating an environment
+
+Now, let's create our first environment.
+
+- Select your project from the dashboard.
+- Head over to the **Environment** tab.
+- Click on **Add Environment**.
+- Enter the name of the environment. We will use `staging`.
+- Optionally, you can add a description for the environment.
+- Hit on **Create Environment**.
+
+If created successfully, your environment should look like this:
+
+![Success](../../blob/environment.png)
 
 ## That's it!
 
