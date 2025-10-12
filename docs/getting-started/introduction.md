@@ -8,7 +8,7 @@ This walkthrough is a mini-blog about how to get started with Keyshade. We would
 
 Here's the list of contents, feel free to skip to any section you like.
 
-- [Adding your first secret and variable](adding-your-first-secret-and-variable.md)
+- [Adding your first secret, variable and environment](adding-your-first-secret-and-variable.md)
 - [Installing the CLI](installing-the-cli.md)
 - [Setting up your profile](setting-up-your-profile.md)
 - [Add Keyshade to your project](add-keyshade-to-your-project.md)

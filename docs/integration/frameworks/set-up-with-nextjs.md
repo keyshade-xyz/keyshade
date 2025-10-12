@@ -18,7 +18,7 @@ Here’s what this guide covers:
 - [Install the Keyshade CLI](/docs/getting-started/installing-the-cli.md)  
 - [Set up a profile](/docs/getting-started/setting-up-your-profile.md)   using your API key  
 - Create a project and environment in the Keyshade dashboard  
-- [Add secrets and runtime variables](/docs/getting-started/adding-your-first-secret-and-variable.md)   
+- [Add secrets, runtime variables and environments](/docs/getting-started/adding-your-first-secret-and-variable.md)   
 - Link your local project with `keyshade init`  
 - Run your app with `keyshade run`  
 - Use `process.env` to access values in both frontend and backend code
@@ -85,7 +85,7 @@ When adding frontend-exposed values, prefix them with `NEXT_PUBLIC_`.
 
 See [Next.js docs](https://nextjs.org/docs/app/guides/environment-variables#bundling-environment-variables-for-the-browser) for details. 
 
-> Need help with projects and secrets? See [Managing Secrets & Variables](/docs/getting-started/adding-your-first-secret-and-variable.md)
+> Need help with projects and secrets? See [Managing Secrets, Variables and Environments](/docs/getting-started/adding-your-first-secret-and-variable.md)
 
 ## Initialize Keyshade in Your Project
 

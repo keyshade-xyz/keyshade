@@ -10,7 +10,7 @@ function KeyshadeDocs() {
       </div>
       <div className="grid grid-cols-2 gap-2 py-4">
         <Link
-          href="https://docs.keyshade.xyz/getting-started/adding-your-first-secret-and-variable"
+          href="https://docs.keyshade.xyz/getting-started/adding-your-first-secret-and-variable#creating-a-secret"
           target="_blank"
         >
           <div className="flex cursor-pointer items-center justify-between gap-2 rounded-lg bg-white/10 p-2 text-white/70 duration-300 hover:scale-[1.02] hover:text-white">
@@ -20,7 +20,7 @@ function KeyshadeDocs() {
         </Link>
 
         <Link
-          href="https://docs.keyshade.xyz/getting-started/adding-your-first-secret-and-variable"
+          href="https://docs.keyshade.xyz/getting-started/adding-your-first-secret-and-variable#creating-a-variable"
           target="_blank"
         >
           <div className="flex cursor-pointer items-center justify-between rounded-lg bg-white/10 p-2 text-white/70 duration-300 hover:scale-[1.02] hover:text-white">
@@ -30,7 +30,7 @@ function KeyshadeDocs() {
         </Link>
 
         <Link
-          href="https://docs.keyshade.xyz/getting-started/adding-your-first-secret-and-variable"
+          href="https://docs.keyshade.xyz/getting-started/adding-your-first-secret-and-variable#creating-an-environment"
           target="_blank"
         >
           <div className="flex cursor-pointer items-center justify-between rounded-lg bg-white/10 p-2 text-white/70 duration-300 hover:scale-[1.02] hover:text-white">

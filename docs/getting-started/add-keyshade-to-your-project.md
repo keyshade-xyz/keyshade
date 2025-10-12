@@ -40,7 +40,7 @@ As you can see, we are using 2 environment variables:
 - `NEXT_PUBLIC_API_KEY`
 - `NEXT_PUBLIC_PORT`
 
-We have not added these in any `.env` file. If you recall, we added these to our project in the [Adding your first secret and variable](/docs/getting-started/adding-your-first-secret-and-variable) section.
+We have not added these in any `.env` file. If you recall, we added these to our project in the [Adding your first secret, variable and environment](/docs/getting-started/adding-your-first-secret-and-variable) section.
 
 ## Initializing keyshade in your project
 

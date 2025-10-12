@@ -17,7 +17,7 @@ Here's what this guide covers:
 -   [Create or use an existing AWS Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/getting-started.html)
 -   [Set up IAM roles and policies for Keyshade access](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_create-console.html)
 -   [Configure AWS access credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
--   [Create a Keyshade project and add secrets/variables](/docs/getting-started/adding-your-first-secret-and-variable.md)
+-   [Create a Keyshade project and add secrets/variables/environments](/docs/getting-started/adding-your-first-secret-and-variable.md)
 -   [Configure the AWS Lambda integration in Keyshade](#configure-keyshade-integration)
 -   [Test the integration with automatic secret synchronization](#test-secret-synchronization)
 

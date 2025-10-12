@@ -18,7 +18,7 @@ Here's what this guide covers:
 - [Install the Keyshade CLI](/docs/getting-started/installing-the-cli.md)  
 - [Set up a profile](/docs/getting-started/setting-up-your-profile.md) using your API key  
 - Create a project and environment in the Keyshade dashboard
-- [Add secrets and runtime variables](/docs/getting-started/adding-your-first-secret-and-variable.md)   
+- [Add secrets, runtime variables and environments](/docs/getting-started/adding-your-first-secret-and-variable.md)   
 - Link your local project with `keyshade init`  
 - Run your app with `keyshade run`  
 - Use `os.Getenv` to access values in your Go code
@@ -92,7 +92,7 @@ To get started:
 >
 >* **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
 
-> Need help with projects and secrets? See [Managing Secrets & Variables](/docs/getting-started/adding-your-first-secret-and-variable.md)
+> Need help with projects and secrets? See [Managing Secrets, Variables and Environments](/docs/getting-started/adding-your-first-secret-and-variable.md)
 
 ## Initialize Keyshade in Your Project
 
