@@ -36,7 +36,7 @@ export default class AuthController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<ValidateOTPResponse>> {
     const response = await this.apiClient.post(
-      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}`,
+      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}${request.mode ? `&mode=${request.mode}` : ''}`,
       request,
       headers
     )
@@ -48,7 +48,7 @@ export default class AuthController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<SendOTPResponse>> {
     const response = await this.apiClient.post(
-      `/api/auth/send-otp/${encodeURIComponent(request.email)}`,
+      `/api/auth/send-otp/${encodeURIComponent(request.email)}${request.mode ? `?mode=${request.mode}` : ''}`,
       request,
       headers
     )

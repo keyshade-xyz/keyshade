@@ -10,7 +10,8 @@ export const ResendOTPResponseSchema = z.void()
 
 export const ValidateOTPRequestSchema = z.object({
   email: z.string().email(),
-  otp: z.string().length(6)
+  otp: z.string().length(6),
+  mode: z.enum(['cli']).optional()
 })
 
 export const ValidateOTPResponseSchema = UserSchema.extend({
@@ -20,7 +21,8 @@ export const ValidateOTPResponseSchema = UserSchema.extend({
 })
 
 export const SendOTPRequestSchema = z.object({
-  email: z.string().email()
+  email: z.string().email(),
+  mode: z.enum(['cli']).optional()
 })
 
 export const SendOTPResponseSchema = z.void()
