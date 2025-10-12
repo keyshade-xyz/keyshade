@@ -50,6 +50,7 @@ import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { ProjectCacheService } from '@/cache/project-cache.service'
+import { MetricsService } from '@/common/metrics.service'
 
 @Injectable()
 export class SecretService {
@@ -68,7 +69,8 @@ export class SecretService {
     readonly redisClient: {
       publisher: RedisClientType
     },
-    private readonly projectCacheService: ProjectCacheService
+    private readonly projectCacheService: ProjectCacheService,
+    private readonly metricsService: MetricsService
   ) {
     this.redis = redisClient.publisher
   }
@@ -1058,6 +1060,7 @@ export class SecretService {
       search
     })
 
+    await this.metricsService.incrementSecretPull()
     return { items: hydratedSecrets, metadata }
   }
 
@@ -1160,6 +1163,7 @@ export class SecretService {
       })
     }
 
+    await this.metricsService.incrementSecretPull()
     return response
   }
 

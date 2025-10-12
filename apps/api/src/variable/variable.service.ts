@@ -45,6 +45,7 @@ import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { ProjectCacheService } from '@/cache/project-cache.service'
+import { MetricsService } from '@/common/metrics.service'
 
 @Injectable()
 export class VariableService {
@@ -63,7 +64,8 @@ export class VariableService {
     readonly redisClient: {
       publisher: RedisClientType
     },
-    private readonly projectCacheService: ProjectCacheService
+    private readonly projectCacheService: ProjectCacheService,
+    private readonly metricsService: MetricsService
   ) {
     this.redis = redisClient.publisher
   }
@@ -965,6 +967,9 @@ export class VariableService {
       `Hydrated ${hydratedVariables.length} variables of project ${projectSlug}`
     )
 
+    // Track variable pull metrics
+    await this.metricsService.incrementVariablePull()
+
     // Calculate pagination metadata
     const totalCount = await this.prisma.variable.count({
       where: {
@@ -1160,6 +1165,9 @@ export class VariableService {
     this.logger.log(
       `Fetched ${variables.length} variables for project ${projectSlug} and environment ${environmentSlug}`
     )
+
+    // Track variable pull metrics
+    await this.metricsService.incrementVariablePull()
 
     return variables.map((variable) => ({
       name: variable.name,

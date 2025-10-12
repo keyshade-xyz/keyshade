@@ -30,6 +30,7 @@ import { constructErrorBody } from '@/common/util'
 import { AuthenticatedUserContext } from '@/auth/auth.types'
 import { toSHA256 } from '@/common/cryptography'
 import SlugGenerator from '@/common/slug-generator.service' // The redis subscription channel for configuration updates
+import { MetricsService } from '@/common/metrics.service'
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
@@ -56,7 +57,8 @@ export default class ChangeNotifier
     },
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly metricsService: MetricsService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -170,6 +172,9 @@ export default class ChangeNotifier
 
       // Add the client to the environment
       await this.addClientToEnvironment(client, environment.id)
+
+      // Track run command execution metrics
+      await this.metricsService.incrementRunCommandExecution()
 
       // Send ACK to client
       this.logger.log('Sending ACK to client')
