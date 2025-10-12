@@ -207,7 +207,7 @@ export default function TierLimit() {
   return shouldHideTiers ? (
     <Tiers hideTiers />
   ) : (
-    <div className="absolute bottom-12 w-[16rem] rounded-lg border border-white/10 bg-white/5 p-4">
+    <div className="w-full rounded-lg border border-white/10 bg-white/5 p-4">
       <div className="mb-5 flex items-center gap-3">
         <Button className="h-6 cursor-default bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
           {formatPlan() === undefined ? (

@@ -30,11 +30,11 @@
 
 ---
 
-keyshade is designed to simplify the integration of your secrets and variables into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) empowered by [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
+Keyshade is designed to simplify the integration of your secrets and variables into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) empowered by [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
 
 With keyshade, managing your configurations becomes a breeze while ensuring their security.
 
-## Why keyshade?
+## Why Keyshade?
 
 Any application that you host on a cloud provider would need access to configurations. These configurations help you to access other APIs or perform internal actions. You would generally be managing this from the dashboard of your project in the cloud provider. However, this comes with a few caveats:
 
@@ -48,7 +48,7 @@ Any application that you host on a cloud provider would need access to configura
 
 - **Collaboration**: Collaboration is hard. You'll need to share your secrets with your team members, which means that you'll have to share your cloud provider's credentials with them. Worse, you will be sending them over insecure channels such as email, or your communication platform.
 
-This is where keyshade comes in. We intend to solve these shortcomings by providing you with a simple, secure, and easy-to-use solution for managing your secrets.
+This is where Keyshade comes in. We intend to solve these shortcomings by providing you with a simple, secure, and easy-to-use solution for managing your secrets.
 
 ## Features
 
