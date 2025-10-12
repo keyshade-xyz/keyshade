@@ -11,7 +11,7 @@ function Navbar(): React.JSX.Element {
 
   return (
     <>
-      <nav className="flex flex-col gap-y-2 border-b border-[#DDDDDD]/[24%]">
+      <nav className="flex flex-col gap-y-2 border-b border-white/10">
         <div className="flex justify-between p-4">
           <CommandSearch setIsOpen={setIsOpen} />
           <ProfileMenu />

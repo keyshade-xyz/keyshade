@@ -5,10 +5,10 @@ import { toast } from 'sonner'
 import { posthog } from 'posthog-js'
 import { z } from 'zod'
 import { LoadingSVG } from '@public/svg/shared'
-import ReferralDetailsForm from './onboarding slides/referral-details-form'
-import ProfileDetailsForm from './onboarding slides/profile-details-form'
-import TeamOverviewForm from './onboarding slides/team-overview-form'
 import RoleIndustryForm from './onboarding slides/role-industry-form'
+import TeamOverviewForm from './onboarding slides/team-overview-form'
+import ProfileDetailsForm from './onboarding slides/profile-details-form'
+import ReferralDetailsForm from './onboarding slides/referral-details-form'
 import { userAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 import ControllerInstance from '@/lib/controller-instance'
@@ -153,7 +153,9 @@ export default function OnboardingStepper() {
             <Button
               className="border-white/60 text-sm text-white/60"
               disabled={isLoading}
-              onClick={handleSubmit}
+              onClick={() => {
+                handleSubmit()
+              }}
               variant="outline"
             >
               Skip

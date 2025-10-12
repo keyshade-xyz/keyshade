@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/tooltip'
 import AvatarComponent from '@/components/common/avatar'
 import { Button } from '@/components/ui/button'
+import RoleBadge from '@/components/common/role-badge'
 
 function MemberRow({
   member,
@@ -74,10 +75,14 @@ function MemberRow({
       <TableCell className="w-[30%] text-left">
         {dayjs(member.user.joinedOn).format('MMM D, YYYY')}
       </TableCell>
-      <TableCell className="w-[40%] text-left">
-        <div className="flex w-[8rem] items-center justify-center rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-purple-200">
-          {member.roles[0].role.name}
-        </div>
+      <TableCell className="w-[40%] space-x-2 text-left">
+        {member.roles.map((role) => {
+          return (
+            <RoleBadge color={role.role.colorCode ?? '#7C3AED'} key={role.id}>
+              {role.role.name}
+            </RoleBadge>
+          )
+        })}
       </TableCell>
       <TableCell className="text-left opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <div className="flex justify-start gap-0.5">

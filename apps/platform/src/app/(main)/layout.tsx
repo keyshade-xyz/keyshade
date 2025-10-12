@@ -10,7 +10,7 @@ export default function AppLayout({
   return (
     <main className="flex ">
       <Sidebar />
-      <div className="m-4 h-dvh overflow-clip rounded-[1.125rem] bg-[#161819] md:h-[96vh] md:w-[90vw] 2xl:h-[96.5vh]">
+      <div className="m-4 h-dvh overflow-clip rounded-[1.125rem] border border-white/5 bg-[#0B0F14] md:h-[96vh] md:w-[90vw] 2xl:h-[96.5vh]">
         <div className="flex h-full flex-col">
           <Navbar />
           <div className="flex-1 overflow-auto p-4">{children}</div>

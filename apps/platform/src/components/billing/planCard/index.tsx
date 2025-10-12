@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import { useAtomValue } from 'jotai'
 import type { AllowedPlans } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import Visible from '@/components/common/visible'
 import { Slider } from '@/components/ui/slider'
 import {
@@ -48,13 +48,14 @@ export default function PlanCard({
   const isAnually = selectedPlan === 'annually'
 
   const planName = (): AllowedPlans | null => {
-    if (tierName === 'Hacker') {
-      return 'HACKER'
+    switch (tierName) {
+      case 'Hacker':
+        return 'HACKER'
+      case 'Team':
+        return 'TEAM'
+      default:
+        return null
     }
-    if (tierName === 'Team') {
-      return 'TEAM'
-    }
-    return null
   }
 
   const calculateTotalPrice = () => {

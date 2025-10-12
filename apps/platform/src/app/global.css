@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-[#0b0d0f] text-white;
+  @apply bg-[#000203] text-slate-200;
 }
 
 /* For WebKit Browsers such as Chrome, Safari */
@@ -52,7 +52,8 @@ body {
 }
 
 @keyframes highlight {
-  0%, 100% {
+  0%,
+  100% {
     border: transparent;
   }
   50% {

@@ -3,11 +3,11 @@ import { useAtom, useAtomValue } from 'jotai'
 import { Plus } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
-import CreateProjectName from './create-project-name'
-import CreateProjectDescription from './create-project-description'
-import CreateProjectAccessLevel from './create-project-access-level'
-import CreateProjectStorePrivateKey from './create-project-store-private-key'
 import CreateProjectEnvironmentList from './create-project-environment-list'
+import CreateProjectStorePrivateKey from './create-project-store-private-key'
+import CreateProjectAccessLevel from './create-project-access-level'
+import CreateProjectDescription from './create-project-description'
+import CreateProjectName from './create-project-name'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -103,8 +103,9 @@ export default function CreateProjectDialogue(): JSX.Element {
             <Button
               disabled={!isAuthorizedToCreateProjects}
               onClick={toggleDialog}
+              variant="primary"
             >
-              <AddSVG /> Create a new Project
+              <AddSVG /> Create Project
             </Button>
           )}
         </DialogTrigger>

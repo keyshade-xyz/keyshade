@@ -23,9 +23,10 @@ export default function EmptySecretListContent(): React.JSX.Element {
       </div>
 
       <Button
-        className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+        className="h-[2.25rem]"
         disabled={!isAuthorizedToCreateSecrets}
         onClick={() => setIsCreateSecretOpen(true)}
+        variant="primary"
       >
         Create secret
       </Button>

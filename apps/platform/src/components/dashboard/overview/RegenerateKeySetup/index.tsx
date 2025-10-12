@@ -71,9 +71,9 @@ function RegenerateKeySetup({
   }, [projectKeys, onRegenerated])
 
   return (
-    <div className="flex justify-between gap-1.5 rounded-lg bg-white/10 p-3">
+    <div className="flex justify-between gap-1.5 rounded-lg bg-white/5 p-3">
       <div>
-        <h1 className="text-lg font-medium text-white">
+        <h1 className="text-sm font-medium text-white">
           Do you wanna regenerate private key?{' '}
           <Tooltip>
             <TooltipTrigger>

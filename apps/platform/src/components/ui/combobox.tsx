@@ -2,7 +2,7 @@
 import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
+import type { Workspace } from '@keyshade/schema'
 import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
 import { InfiniteScrollList } from './infinite-scroll-list'
 import { WorkspaceListItem } from './workspace-list-item'
@@ -89,7 +89,7 @@ export function Combobox(): React.JSX.Element {
   )
 
   const renderWorkspaceListItem = useCallback(
-    (workspace: WorkspaceWithTierLimitAndProjectCount) => (
+    (workspace: Workspace) => (
       <WorkspaceListItem onClose={() => setOpen(false)} workspace={workspace} />
     ),
     [setOpen]
@@ -135,7 +135,7 @@ export function Combobox(): React.JSX.Element {
     getWorkspacesOfUser,
     setGlobalSearchData,
     setAllWorkspaces,
-    allWorkspaces,
+    allWorkspaces.length,
     workspaceFromStorage
   ])
 
@@ -160,9 +160,8 @@ export function Combobox(): React.JSX.Element {
                 )}
               </div>
               <span className="text-xs text-white/55">
-                {selectedWorkspace?.projects}{' '}
-                {selectedWorkspace?.projects === 1 ||
-                selectedWorkspace?.projects === 0
+                {selectedWorkspace?.totalProjects}{' '}
+                {selectedWorkspace?.totalProjects === 0
                   ? 'project'
                   : 'projects'}
               </span>
@@ -179,7 +178,7 @@ export function Combobox(): React.JSX.Element {
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
               <div className="max-h-[10rem] overflow-auto">
-                <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
+                <InfiniteScrollList<Workspace>
                   fetchFunction={fetchWorkspaces}
                   itemComponent={renderWorkspaceListItem}
                   itemKey={(workspace) => workspace.id}

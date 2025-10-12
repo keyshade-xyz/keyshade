@@ -55,10 +55,10 @@ function ServerKeySetup({
 
   return (
     <div
-      className={`flex justify-between gap-2 rounded-lg bg-white/10 p-3 ${isPrivateKeyStoredDB && 'flex-col gap-3'}`}
+      className={`flex justify-between gap-2 rounded-lg bg-white/5 p-3 ${isPrivateKeyStoredDB && 'flex-col gap-3'}`}
     >
       <div>
-        <h1 className="text-lg font-medium text-white">
+        <h1 className="text-sm font-medium text-white">
           Share project private key with us?{' '}
           <Tooltip>
             <TooltipTrigger>

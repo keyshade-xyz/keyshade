@@ -6,13 +6,19 @@ import CreateRoleDialog from '@/components/roles/createRoleDialog'
 import RoleList from '@/components/roles/rolesList'
 import ConfirmDeleteRole from '@/components/roles/confirmDeleteRole'
 import EditRoleSheet from '@/components/roles/editRoleSheet'
-import { editRoleOpenAtom, selectedRoleAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  editRoleOpenAtom,
+  selectedRoleAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import { PageTitle } from '@/components/common/page-title'
 
 function RolesPage(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const selectedRole = useAtomValue(selectedRoleAtom)
   const isEditRolesOpen = useAtomValue(editRoleOpenAtom)
+
+  const shouldShowEditRoleSheet = isEditRolesOpen && selectedRole
 
   return (
     <div className="flex flex-col gap-y-10">
@@ -25,7 +31,7 @@ function RolesPage(): React.JSX.Element {
       <ConfirmDeleteRole />
 
       {/* Edit role sheet */}
-      {isEditRolesOpen && selectedRole ? <EditRoleSheet /> : null}
+      {shouldShowEditRoleSheet ? <EditRoleSheet /> : null}
     </div>
   )
 }

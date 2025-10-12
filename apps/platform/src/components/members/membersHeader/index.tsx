@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
+import type { WorkspaceMember } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -22,11 +23,9 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import RoleBadge from '@/components/common/role-badge'
 
-interface SelectedRoles {
-  name: string
-  roleSlug: string
-}
+type SelectedRoles = WorkspaceMember['roles'][number]['role']
 
 export default function MembersHeader(): React.JSX.Element {
   const [email, setEmail] = useState<string>('')
@@ -44,9 +43,9 @@ export default function MembersHeader(): React.JSX.Element {
 
   const toggleRole = (role: SelectedRoles): void => {
     setSelectedRoles((prev) => {
-      const isSelected = prev.some((r) => r.roleSlug === role.roleSlug)
+      const isSelected = prev.some((r) => r.slug === role.slug)
       if (isSelected) {
-        return prev.filter((r) => r.roleSlug !== role.roleSlug)
+        return prev.filter((r) => r.slug !== role.slug)
       }
       return [...prev, role]
     })
@@ -58,7 +57,7 @@ export default function MembersHeader(): React.JSX.Element {
       members: [
         {
           email,
-          roleSlugs: selectedRoles.map((role) => role.roleSlug)
+          roleSlugs: selectedRoles.map((role) => role.slug)
         }
       ]
     })
@@ -72,7 +71,7 @@ export default function MembersHeader(): React.JSX.Element {
   }, [])
 
   const handleInviteMembers = useCallback(async () => {
-    if (email.trim() === '') {
+    if (email.length === 0) {
       toast.error('Email is required')
       return
     }
@@ -133,10 +132,11 @@ export default function MembersHeader(): React.JSX.Element {
                     type="email"
                     value={email}
                   />
+                  {/* <InputTags setTags={setEmail} tags={email} /> */}
                   <Button
-                    className="w-1/4 border border-white/10 bg-[#262626] px-4 py-2 text-white/55"
                     disabled={isLoading}
                     onClick={handleInviteMembers}
+                    variant="default"
                   >
                     Invite Member
                   </Button>
@@ -159,12 +159,12 @@ export default function MembersHeader(): React.JSX.Element {
                     ) : (
                       <>
                         {selectedRoles.slice(0, 2).map((role) => (
-                          <span
-                            className="rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-xs text-purple-200"
-                            key={role.roleSlug}
+                          <RoleBadge
+                            color={role.colorCode ?? '#7C3AED'}
+                            key={role.id}
                           >
                             {role.name}
-                          </span>
+                          </RoleBadge>
                         ))}
                         {selectedRoles.length > 2 && (
                           <span className="p-2 text-xs text-[#A5F3FC]">
@@ -189,13 +189,17 @@ export default function MembersHeader(): React.JSX.Element {
                       >
                         <Checkbox
                           checked={selectedRoles.some(
-                            (r) => r.roleSlug === role.slug
+                            (r) => r.slug === role.slug
                           )}
                           className="mr-2 rounded-sm border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
                           onCheckedChange={() =>
                             toggleRole({
+                              id: role.id,
+                              colorCode: role.colorCode,
                               name: role.name,
-                              roleSlug: role.slug
+                              slug: role.slug,
+                              description: role.description,
+                              authorities: role.authorities
                             })
                           }
                         />
