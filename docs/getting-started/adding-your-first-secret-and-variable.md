@@ -23,7 +23,7 @@ Now, we can start creating our project.
 - Click on **Create Project**
 - Enter your project name
 - Optionally, you can store the private key in the project **(not recommended in production projects)**
-- Edit or add environments if your want to
+- Edit or add environments if you want to
 - Finally, click on **Create Project**
 
 If the creation was successful, you should be greeted with a dialog like this:
@@ -44,7 +44,7 @@ Now, let's create our first secret.
 - Specify a value for the `dev` environment we created. We would use `ks_1234`.
 - Hit on **Add Secret**.
 
-If created successfully, you secret should look like this:
+If created successfully, your secret should look like this:
 
 ![Success](../../blob/secret.png)
 
@@ -57,10 +57,10 @@ Lastly, let's create our first variable.
 - Specify a value for the `dev` environment we created. We would use `3000`.
 - Hit on **Add Variable**.
 
-If created successfully, you variable should look like this:
+If created successfully, your variable should look like this:
 
 ![Success](../../blob/variable.png)
 
 ## That's it!
 
-We are now in a pretty good shape. We have added our first secret and variable. Now, lets get the CLI installed and set up locally.
+We are now in a pretty good shape. We have added our first secret and variable. Now, let's get the CLI installed and set up locally.
