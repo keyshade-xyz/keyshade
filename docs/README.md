@@ -2,7 +2,7 @@
 description: Simple and secure secret management tool for modern developers
 ---
 
-# 👋 Welcome to keyshade
+# 👋 Welcome to Keyshade
 
 ## What is Keyshade ?
 Keyshade is a secret and environment variable manager designed for developers and teams. It helps you avoid hardcoded secrets, eliminate manual `.env` sharing, and keep environment configs in sync—across local setups, CI/CD pipelines, and production. Whether you're solo or working with a team, Keyshade fits into your workflow with minimal setup and maximum security.

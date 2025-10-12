@@ -1,5 +1,5 @@
 ---
-description: Compiles a list of article to help running the services locally
+description: Compiles a list of articles to help running the services locally
 ---
 
 # Running things locally

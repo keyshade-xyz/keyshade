@@ -4,7 +4,7 @@ description: Get up and running with our CLI tool in no time.
 
 # Introduction
 
-Our CLI is one of the major component of keyshade. The CLI is the entrypoint for your application to tap into the live updates from our platform. Whatever changes you make to your secrets or variables in your project, are reflected automatically in your application. Besides that, it also helps you to interact with the keyshade API.
+Our CLI is one of the major component of Keyshade. The CLI is the entrypoint for your application to tap into the live updates from our platform. Whatever changes you make to your secrets or variables in your project, are reflected automatically in your application. Besides that, it also helps you to interact with the Keyshade API.
 
 ## Commands
 

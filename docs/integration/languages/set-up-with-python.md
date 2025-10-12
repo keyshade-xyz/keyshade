@@ -88,7 +88,7 @@ To get started:
 
 ## Initialize Keyshade in Your Project
 
-In order to use the configurations you just created on the dashboard, you would need to initialize keyshade in your project. This generates the necessary configurations for the CLI to tap into your keyshade project.
+In order to use the configurations you just created on the dashboard, you would need to initialize Keyshade in your project. This generates the necessary configurations for the CLI to tap into your Keyshade project.
 
 From your project root:
 
