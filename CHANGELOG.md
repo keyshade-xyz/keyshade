@@ -1,3 +1,18 @@
+## [2.34.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.22...v2.34.0-stage.23) (2025-10-12)
+
+### 🚀 Features
+
+* **web:** add onClick functionality to pricing page buttons ([#1195](https://github.com/keyshade-xyz/keyshade/issues/1195)) ([3d54fb5](https://github.com/keyshade-xyz/keyshade/commit/3d54fb54b86fe83d7364cefccfff3c476f037576))
+
+### 📚 Documentation
+
+* fix minor typos and standardize Keyshade capitalization ([#1194](https://github.com/keyshade-xyz/keyshade/issues/1194)) ([822db37](https://github.com/keyshade-xyz/keyshade/commit/822db378971c37e0ab8d532c232737573e758edf))
+* fix typos in setting-things-up.md ([#1192](https://github.com/keyshade-xyz/keyshade/issues/1192)) ([88ce2c9](https://github.com/keyshade-xyz/keyshade/commit/88ce2c9755ab9d6c89b5e8acb877fbdfcb7c1f7c))
+
+### 🔨 Code Refactoring
+
+* **platform:** enhance layout and sidebar components for improved responsiveness and usability ([#1193](https://github.com/keyshade-xyz/keyshade/issues/1193)) ([3f7fb18](https://github.com/keyshade-xyz/keyshade/commit/3f7fb18f4c3ed167e5aeb0ba80da908d7721b6e3))
+
 ## [2.34.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.21...v2.34.0-stage.22) (2025-10-06)
 
 ### 🐛 Bug Fixes
