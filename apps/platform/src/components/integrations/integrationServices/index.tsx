@@ -3,8 +3,8 @@ import React, { useCallback, useMemo } from 'react'
 import { Integrations } from '@keyshade/common'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import type { Integration } from '@keyshade/schema'
-import IntegrationIcon from '../integrationIcon'
 import CreateIntegration from '../createIntegration'
+import IntegrationIcon from '../integrationIcon'
 import { Button } from '@/components/ui/button'
 import {
   createIntegrationOpenAtom,

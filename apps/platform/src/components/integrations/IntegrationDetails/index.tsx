@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
-import { EditTwoSVG, TrashWhiteSVG } from '@public/svg/shared'
 import type { Integration } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
+import { EditTwoSVG, TrashWhiteSVG } from '@public/svg/shared'
 import IntegrationIcon from '../integrationIcon'
 import { formatDate, formatText } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
