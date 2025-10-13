@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { fn } from 'storybook/test'
 import { Button } from './button-example'
 
