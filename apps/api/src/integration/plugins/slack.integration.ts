@@ -121,6 +121,12 @@ export class SlackIntegration extends BaseIntegration {
     ])
   }
 
+  public destroy(eventId: Event['id']): Promise<void> {
+    // TODO: Delete webhook URL
+    console.log(eventId)
+    return
+  }
+
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['botToken', 'signingSecret', 'channelId'])
   }

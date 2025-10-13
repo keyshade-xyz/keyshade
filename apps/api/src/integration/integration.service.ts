@@ -552,11 +552,13 @@ export class IntegrationService {
    *
    * @param user The user deleting the integration
    * @param integrationSlug The slug of the integration to delete
+   * @param cleanUp Boolean to determine if we want to clean up third-party integeration data
    * @returns Nothing
    */
   async deleteIntegration(
     user: AuthenticatedUser,
-    integrationSlug: Integration['slug']
+    integrationSlug: Integration['slug'],
+    cleanUp: boolean
   ) {
     this.logger.log(
       `User ${user.id} attempted to delete integration ${integrationSlug}`
@@ -587,6 +589,14 @@ export class IntegrationService {
       workspace,
       integration.id
     )
+
+    if (cleanUp) {
+      const integrationObject = IntegrationFactory.createIntegration(
+        integration,
+        this.prisma
+      )
+      integrationObject.destroy(integrationId)
+    }
 
     await createEvent(
       {
