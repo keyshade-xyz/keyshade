@@ -23,8 +23,6 @@ import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
 
-// FIXME: Error at line:47 & line:55  process.env.NODE_ENV === 'dev'
-
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -59,7 +57,9 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>()
-    const token = this.extractTokenFromRequest(request)
+
+    let user: UserWithWorkspace
+    const ipAddress = request.ip
 
     const parsedEnv = EnvSchema.safeParse(process.env)
     let nodeEnv: string
@@ -68,14 +68,6 @@ export class AuthGuard implements CanActivate {
     } else {
       nodeEnv = parsedEnv.data.NODE_ENV
     }
-
-    // We don't permit empty token for non-dev env
-    if (nodeEnv !== 'e2e' && token === null) {
-      throw new ForbiddenException('No authentication provided')
-    }
-
-    let user: UserWithWorkspace
-    const ipAddress = request.ip
 
     // In case the environment is e2e, we want to authenticate the user using the email,
     // else we want to authenticate the user using the JWT token.
@@ -93,6 +85,12 @@ export class AuthGuard implements CanActivate {
         this.workspaceCacheService
       )
     } else {
+      const token = this.extractTokenFromRequest(request)
+
+      if (nodeEnv !== 'e2e' && (token === null || token === undefined)) {
+        throw new ForbiddenException('No authentication provided')
+      }
+
       const userId = await this.tokenService.validateToken(token)
 
       const cachedUser = await this.cache.getUser(userId)

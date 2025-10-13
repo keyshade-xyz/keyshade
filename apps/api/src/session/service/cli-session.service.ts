@@ -17,7 +17,7 @@ export class CliSessionService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  public async getAllSessionsOfUser(
+  public async getAllCliSessions(
     user: AuthenticatedUser
   ): Promise<CliSessionResponse[]> {
     this.logger.log(`User ${user.id} attempted to fetch all CLI sessions`)
@@ -46,7 +46,7 @@ export class CliSessionService {
           id: cliSession.deviceDetail.id,
           ipAddress: sDecrypt(cliSession.deviceDetail.encryptedIpAddress),
           os: cliSession.deviceDetail.os,
-          platform: cliSession.deviceDetail.platform,
+          agent: cliSession.deviceDetail.agent,
           city: cliSession.deviceDetail.city,
           country: cliSession.deviceDetail.country,
           region: cliSession.deviceDetail.region
@@ -58,7 +58,7 @@ export class CliSessionService {
     return cliSessionResponses
   }
 
-  public async revokeSession(
+  public async revokeCliSession(
     user: AuthenticatedUser,
     sessionId: CliSession['id']
   ): Promise<void> {

@@ -3,7 +3,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Logger,
   Param,
   Post,
   Query,
@@ -29,8 +28,6 @@ import { ThrottlerGuard } from '@nestjs/throttler'
 
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name)
-
   constructor(
     private authService: AuthService,
     private githubOAuthStrategyFactory: GithubOAuthStrategyFactory,
@@ -41,10 +38,11 @@ export class AuthController {
   @Public()
   @Post('send-otp/:email')
   async sendOtp(
+    @Req() req: Request,
     @Param('email') email: string,
     @Query('mode') mode?: string
   ): Promise<void> {
-    await this.authService.sendOtp(email, mode)
+    await this.authService.sendOtp(req, email, mode)
   }
 
   @Public()
@@ -91,7 +89,7 @@ export class AuthController {
       )
     }
 
-    res.status(302).redirect('/api/auth/github/callback')
+    res.status(302).redirect(`/api/auth/github/callback`)
   }
 
   /* istanbul ignore next */

@@ -283,4 +283,12 @@
 
 ### Minor Changes
 
-- Interactive ode for `keyshade init` command
+- Interactive code for `keyshade init` command
+
+# 3.4.0-stage.1
+
+- `keyshade login` command added to support interactive login
+- `keyshade profile create, delete, use` commands deleted
+- `keyshade profile list` command updated
+- `keyshade profile switch` allows users to switch between profiles
+- `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend

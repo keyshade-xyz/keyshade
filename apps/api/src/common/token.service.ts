@@ -5,10 +5,10 @@ import {
   UnauthorizedException
 } from '@nestjs/common'
 import {
+  BrowserSession,
   CliSession,
   PersonalAccessToken,
-  User,
-  UserSession
+  User
 } from '@prisma/client'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -38,7 +38,7 @@ export class TokenService {
   /**
    * Cron job to delete expired tokens.
    *
-   * This job runs every day at midnight. It deletes expired CLI tokens and user sessions from the database.
+   * This job runs every day at midnight. It deletes expired CLI tokens and browser sessions from the database.
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   public async deleteExpiredTokens(): Promise<void> {
@@ -54,16 +54,19 @@ export class TokenService {
       })
       this.logger.log(`Deleted ${cliTokensDeleted.count} expired CLI tokens.`)
 
-      // Delete expired user sessions
-      this.logger.log(`Cleaning up expired user sessions...`)
-      const userSessionsDeleted = await this.prisma.userSession.deleteMany({
-        where: {
-          expiresOn: {
-            lt: new Date()
+      // Delete expired browser sessions
+      this.logger.log(`Cleaning up expired browser sessions...`)
+      const browserSessionsDeleted =
+        await this.prisma.browserSession.deleteMany({
+          where: {
+            expiresOn: {
+              lt: new Date()
+            }
           }
-        }
-      })
-      this.logger.log(`Deleted ${userSessionsDeleted.count} user sessions.`)
+        })
+      this.logger.log(
+        `Deleted ${browserSessionsDeleted.count} browser sessions.`
+      )
     } catch (error) {
       this.logger.error(
         `Encountered an error while deleting expired tokens: ${error.message}`
@@ -83,7 +86,7 @@ export class TokenService {
     deviceDetail: DeviceDetail
   ): Promise<{
     token: string
-    userSession: UserSession
+    browserSession: BrowserSession
   }> {
     // Generate the token
     this.logger.log(`Generating bearer token for user ${userId}`)
@@ -98,7 +101,7 @@ export class TokenService {
       this.logger.log(
         `Saving bearer token ${bearerTokenHash} for user ${userId} in session...`
       )
-      const userSession = await this.prisma.userSession.create({
+      const browserSession = await this.prisma.browserSession.create({
         data: {
           tokenHash: bearerTokenHash,
           user: {
@@ -111,7 +114,7 @@ export class TokenService {
             create: {
               encryptedIpAddress: deviceDetail.encryptedIpAddress,
               os: deviceDetail.os,
-              platform: deviceDetail.platform,
+              agent: deviceDetail.agent,
               city: deviceDetail.city,
               region: deviceDetail.region,
               country: deviceDetail.country
@@ -120,12 +123,12 @@ export class TokenService {
         }
       })
       this.logger.log(
-        `Saved bearer token ${bearerTokenHash} for user ${userId}: ${userSession.id}`
+        `Saved bearer token ${bearerTokenHash} for user ${userId}: ${browserSession.id}`
       )
 
       return {
         token: bearerToken,
-        userSession
+        browserSession
       }
     } catch (error) {
       this.logger.error(
@@ -178,7 +181,7 @@ export class TokenService {
             create: {
               encryptedIpAddress: deviceDetail.encryptedIpAddress,
               os: deviceDetail.os,
-              platform: deviceDetail.platform,
+              agent: deviceDetail.agent,
               city: deviceDetail.city,
               region: deviceDetail.region,
               country: deviceDetail.country
@@ -320,29 +323,29 @@ export class TokenService {
     // Extract the actual token from the Bearer token
     const actualToken = this.extractActualToken(token)
 
-    // Validate the token against the user session store
-    const userSession = await this.prisma.userSession.findUnique({
+    // Validate the token against the browser session store
+    const browserSession = await this.prisma.browserSession.findUnique({
       where: {
         tokenHash: toSHA256(actualToken)
       }
     })
-    if (!userSession) {
+    if (!browserSession) {
       throw new UnauthorizedException(
-        'Error validating JWT token: No user session found against the token'
+        'Error validating JWT token: No browser session found against the token'
       )
     }
 
     // Update the last used date of the session
-    await this.prisma.userSession.update({
+    await this.prisma.browserSession.update({
       where: {
-        id: userSession.id
+        id: browserSession.id
       },
       data: {
         lastUsedOn: new Date()
       }
     })
 
-    // Validate the token payload against the user session
+    // Validate the token payload against the browser session
     try {
       const payload = await this.jwtService.verifyAsync(actualToken, {
         secret: process.env.JWT_SECRET
@@ -381,9 +384,9 @@ export class TokenService {
     }
 
     // Check if the token is valid
-    if (cliToken.expiresOn.getDate() < Date.now()) {
+    if (this.hasExpired(cliToken.expiresOn)) {
       throw new UnauthorizedException(
-        'Error validating JWT token: Token expired'
+        'Error validating CLI token: Token expired'
       )
     }
 
@@ -422,7 +425,7 @@ export class TokenService {
     }
 
     // Check if the token is valid
-    if (pat.expiresOn.getDate() < Date.now()) {
+    if (this.hasExpired(pat.expiresOn)) {
       throw new UnauthorizedException(
         'Error validating PAT token: Token expired'
       )
@@ -463,5 +466,9 @@ export class TokenService {
       }
       return parts[2]
     }
+  }
+
+  private hasExpired(date: Date): boolean {
+    return date < new Date()
   }
 }

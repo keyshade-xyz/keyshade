@@ -8,7 +8,7 @@ export interface CliSessionResponse {
   deviceDetail: Omit<DeviceDetail, 'encryptedIpAddress'>
 }
 
-export interface UserSessionResponse {
+export interface BrowserSessionResponse {
   id: string
   createdAt: Date
   updatedAt: Date

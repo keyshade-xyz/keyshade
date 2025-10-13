@@ -3,26 +3,23 @@ import {
   type CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from './base.command'
-import {
-  intro,
-  text,
-  outro,
-  spinner,
-  note,
-  confirm,
-  stream
-} from '@clack/prompts'
+import { confirm, intro, note, outro, spinner, text } from '@clack/prompts'
 import z from 'zod'
 import chalk from 'chalk'
 import ControllerInstance from '@/util/controller-instance'
-import { handleSIGINT } from '@/util/handle-sigint'
 import { type ValidateOTPResponse } from '@keyshade/schema'
-
-// interface verifyVerificationCodeResult {
-//   success: boolean
-//   data: ValidateOTPResponse
-//   errorMessage?: string
-// }
+import {
+  fetchProfileConfig,
+  writeDefaultProfileConfig,
+  writeProfileConfig
+} from '@/util/configuration'
+import {
+  clearSpinnerLines,
+  handleSIGINT,
+  showError,
+  showSuccess
+} from '@/util/prompt'
+import * as os from 'node:os'
 
 interface VerificationResult {
   success: boolean
@@ -45,28 +42,23 @@ export default class LoginCommand extends BaseCommand {
     return 'Login to Keyshade account'
   }
 
-  canMakeHttpRequests(): boolean {
-    return true
-  }
-
   getOptions(): CommandOption[] {
     return [
       {
         short: '-e',
-        long: '--email <email>',
+        long: '--email <string>',
         description:
           'Your email address to receive the sign-in verification code'
       },
       {
         short: '-u',
-        long: '--base-url <url>',
+        long: '--base-url <string>',
         description: 'Custom Keyshade deployment URL'
       }
     ]
   }
 
   async action({ options }: CommandActionData): Promise<void> {
-    // Clean Code
     intro(chalk.bgBlue(' Authenticate to Keyshade '))
 
     try {
@@ -83,7 +75,7 @@ export default class LoginCommand extends BaseCommand {
   private async gatherLoginInputs(
     options: CommandActionData['options']
   ): Promise<LoginState> {
-    const baseUrl = await this.getBaseUrl(options.baseUrl)
+    const baseUrl = await this.getBaseUrl(options.baseUrl || this.baseUrl)
     const email = await this.getEmail(options.email)
     return { email, baseUrl }
   }
@@ -164,18 +156,16 @@ export default class LoginCommand extends BaseCommand {
     try {
       const result = await this.sendVerificationCode(email, baseUrl)
       loading.stop()
-      this.clearSpinnerLines()
+      clearSpinnerLines()
 
       if (result.success) {
-        await this.showSuccess(
-          'Verification code sent! Please check your email. 📨'
-        )
+        await showSuccess('Verification code sent! Please check your email. 📨')
       }
 
       return result
     } catch (error) {
       loading.stop()
-      this.clearSpinnerLines()
+      clearSpinnerLines()
       throw error
     }
   }
@@ -191,12 +181,12 @@ export default class LoginCommand extends BaseCommand {
     try {
       const result = await this.verifyVerificationCode(code, email, baseUrl)
       loading.stop()
-      this.clearSpinnerLines()
+      clearSpinnerLines()
 
       return result
     } catch (error) {
       loading.stop()
-      this.clearSpinnerLines()
+      clearSpinnerLines()
       throw error
     }
   }
@@ -217,18 +207,18 @@ export default class LoginCommand extends BaseCommand {
     baseUrl: string | null
   ): Promise<void> {
     if (result.success && result.data) {
-      await this.showSuccess('Login successful! 🎉')
+      await showSuccess('Login successful! 🎉')
       await this.saveProfile(result.data, baseUrl)
       outro(
         `You are now logged in to Keyshade as ${chalk.bold(result.data.name)}`
       )
     } else {
-      await this.showError(result.errorMessage || 'Verification failed')
+      await showError(result.errorMessage || 'Verification failed')
     }
   }
 
   private async handleLoginError(error?: string): Promise<void> {
-    await this.showError(error || 'An unexpected error occurred during login')
+    await showError(error || 'An unexpected error occurred during login')
     note(
       `If you don't have an account, please sign up at ${chalk.blue.underline('https://app.keyshade.xyz/auth')}`
     )
@@ -266,30 +256,6 @@ export default class LoginCommand extends BaseCommand {
     }
   }
 
-  // UI helpers
-  private clearSpinnerLines(): void {
-    process.stdout.write('\x1b[1A\x1b[2K')
-    process.stdout.write('\x1b[1A\x1b[2K')
-  }
-
-  private async showSuccess(message: string): Promise<void> {
-    await stream.success(
-      // eslint-disable-next-line prettier/prettier, generator-star-spacing
-      (function* () {
-        yield chalk.green(message)
-      })()
-    )
-  }
-
-  private async showError(message: string): Promise<void> {
-    await stream.error(
-      // eslint-disable-next-line prettier/prettier, generator-star-spacing
-      (function* () {
-        yield chalk.red(message)
-      })()
-    )
-  }
-
   // API methods
   private async sendVerificationCode(
     email: string,
@@ -308,7 +274,9 @@ export default class LoginCommand extends BaseCommand {
     const { success, error } =
       await ControllerInstance.getInstance().authController.sendOTP({
         email,
-        mode: 'cli'
+        mode: 'cli',
+        os: this.getOSInfo(),
+        agent: this.getCliVersion()
       })
 
     const errorMessage = JSON.parse(error?.message || '{}')?.body
@@ -325,10 +293,12 @@ export default class LoginCommand extends BaseCommand {
       /\/$/,
       ''
     )
-    // since before login we won't have the base url, we initialize it here
-    // defaulting to the main Keyshade deployment
-    // this can be overridden by the user using --base-url option
-    // or by setting a default profile with a custom base url
+    /*
+    Since before login we won't have the base url, we initialize it here
+    defaulting to the main Keyshade deployment this can be overridden by
+    the user using --base-url option or by setting a default profile with
+    a custom base url
+    */
     ControllerInstance.initialize(cleanBaseUrl)
 
     const { data, success, error } =
@@ -350,6 +320,31 @@ export default class LoginCommand extends BaseCommand {
     data: ValidateOTPResponse,
     baseUrl: string | null
   ): Promise<void> {
-    // TODO: Implementation for saving profile @rajdip
+    const existingProfiles = await fetchProfileConfig()
+
+    existingProfiles[data.id] = {
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email
+      },
+      token: data.token,
+      sessionId: data.cliSessionId,
+      baseUrl: baseUrl ?? 'https://api.keyshade.xyz',
+      metricsEnabled: false
+    }
+
+    await writeProfileConfig(existingProfiles)
+    await writeDefaultProfileConfig({
+      userId: data.id
+    })
+  }
+
+  private getOSInfo(): string {
+    return `${os.type()} ${os.release()} (${os.arch()})`
+  }
+
+  private getCliVersion(): string {
+    return `CLI ${process.env.CLI_VERSION}`
   }
 }

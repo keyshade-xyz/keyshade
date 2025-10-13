@@ -27,7 +27,7 @@ export interface DeviceDetail {
   ipAddress: string
   encryptedIpAddress: string
   os: string
-  platform: string
+  agent: string
   city: string
   region: string
   country: string

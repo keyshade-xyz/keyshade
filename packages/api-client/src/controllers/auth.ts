@@ -1,16 +1,16 @@
 import {
-  ResendOTPResponse,
+  ClientResponse,
+  LogOutRequest,
+  LogOutResponse,
   ResendOTPRequest,
-  ValidateOTPResponse,
-  ValidateOTPRequest,
+  ResendOTPResponse,
   SendOTPRequest,
   SendOTPResponse,
-  LogOutRequest,
-  LogOutResponse
+  ValidateOTPRequest,
+  ValidateOTPResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@keyshade/schema'
 
 export default class AuthController {
   private apiClient: APIClient
@@ -36,7 +36,7 @@ export default class AuthController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<ValidateOTPResponse>> {
     const response = await this.apiClient.post(
-      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}${request.mode ? `&mode=${request.mode}` : ''}`,
+      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}&mode=${request.mode}&os=${request.os}&agent=${request.agent}`,
       request,
       headers
     )
@@ -48,7 +48,7 @@ export default class AuthController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<SendOTPResponse>> {
     const response = await this.apiClient.post(
-      `/api/auth/send-otp/${encodeURIComponent(request.email)}${request.mode ? `?mode=${request.mode}` : ''}`,
+      `/api/auth/send-otp/${encodeURIComponent(request.email)}?mode=${request.mode}&os=${request.os}&agent=${request.agent}`,
       request,
       headers
     )

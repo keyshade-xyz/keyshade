@@ -177,16 +177,16 @@ model DeviceDetail {
   id                 String  @id @default(cuid())
   encryptedIpAddress String?
   os                 String?
-  platform           String?
+  agent              String?
   city               String?
   region             String?
   country            String?
 
   cliSessions                 CliSession[]
-  userSessions                UserSession[]
+  browserSessions             BrowserSession[]
   ServiceAccountAccessHistory ServiceAccountAccessHistory[]
 
-  @@index([encryptedIpAddress, os, platform])
+  @@index([encryptedIpAddress, os, agent])
 }
 
 model PersonalAccessToken {
@@ -219,7 +219,7 @@ model CliSession {
   userId String
 }
 
-model UserSession {
+model BrowserSession {
   id         String   @id @default(cuid())
   tokenHash  String   @unique
   createdAt  DateTime @default(now())
@@ -334,7 +334,7 @@ model User {
 
   cliSessions                CliSession[]
   personalAccessTokens       PersonalAccessToken[]
-  userSessions               UserSession[]
+  browserSessions            BrowserSession[]
   serviceAccounts            ServiceAccount[]
   serviceAccountAccessTokens ServiceAccountAccessToken[]
 

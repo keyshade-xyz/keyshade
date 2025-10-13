@@ -1,5 +1,7 @@
 import {
   AppController,
+  AuthController,
+  CliSessionController,
   EnvironmentController,
   EventController,
   IntegrationController,
@@ -7,13 +9,21 @@ import {
   SecretController,
   VariableController,
   WorkspaceController,
-  WorkspaceRoleController,
   WorkspaceMembershipController,
-  AuthController
+  WorkspaceRoleController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
   private static instance: ControllerInstance | null
+
+  private _cliSessionController: CliSessionController | null = null
+
+  get cliSessionController(): CliSessionController {
+    if (!this._cliSessionController) {
+      throw new Error('ControllerInstance not initialized')
+    }
+    return this._cliSessionController
+  }
 
   private _appController: AppController | null = null
 
@@ -131,6 +141,7 @@ export default class ControllerInstance {
     instance._workspaceMembershipController = new WorkspaceMembershipController(
       baseUrl
     )
+    instance._cliSessionController = new CliSessionController(baseUrl)
 
     ControllerInstance.instance = instance
   }

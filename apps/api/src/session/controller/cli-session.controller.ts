@@ -9,15 +9,15 @@ export class CliSessionController {
   constructor(private readonly cliSessionService: CliSessionService) {}
 
   @Get('all')
-  public async getAllSessionsOfUser(@CurrentUser() user: AuthenticatedUser) {
-    return await this.cliSessionService.getAllSessionsOfUser(user)
+  public async getAllCliSessions(@CurrentUser() user: AuthenticatedUser) {
+    return await this.cliSessionService.getAllCliSessions(user)
   }
 
   @Delete('revoke/:sessionId')
-  public async revokeSession(
+  public async revokeCliSession(
     @CurrentUser() user: AuthenticatedUser,
     @Param('sessionId') sessionId: CliSession['id']
   ) {
-    return await this.cliSessionService.revokeSession(user, sessionId)
+    return await this.cliSessionService.revokeCliSession(user, sessionId)
   }
 }

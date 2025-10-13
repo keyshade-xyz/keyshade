@@ -89,14 +89,18 @@ export class MailService implements IMailService {
   async sendSignInCode(
     email: string,
     code: string,
-    name: string
+    name: string,
+    device: string,
+    location: string
   ): Promise<void> {
     const subject = 'Your Sign-in Code for Keyshade CLI'
 
     const body = await render(
       SignInCodeEmailTemplate({
         name,
-        code
+        code,
+        device,
+        location
       })
     )
     await this.sendEmail(email, subject, body)

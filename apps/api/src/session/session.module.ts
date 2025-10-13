@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common'
-import { UserSessionController } from '@/session/controller/user-session.controller'
 import { CliSessionController } from '@/session/controller/cli-session.controller'
-import { UserSessionService } from '@/session/service/user-session.service'
 import { CliSessionService } from '@/session/service/cli-session.service'
+import { BrowserSessionController } from '@/session/controller/browser-session.controller'
+import { BrowserSessionService } from '@/session/service/browser-session.service'
 
 @Module({
-  controllers: [UserSessionController, CliSessionController],
-  providers: [UserSessionService, CliSessionService]
+  controllers: [BrowserSessionController, CliSessionController],
+  providers: [BrowserSessionService, CliSessionService]
 })
 export class SessionModule {}

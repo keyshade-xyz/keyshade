@@ -10,7 +10,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { DeviceDetail, UserAuthenticatedResponse } from '../auth.types'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
-import { AuthProvider, UserSession } from '@prisma/client'
+import { AuthProvider, BrowserSession } from '@prisma/client'
 import { UserCacheService } from '@/cache/user-cache.service'
 import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
@@ -19,11 +19,11 @@ import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
 import { HydrationService } from '@/common/hydration.service'
 import { isEmail, isIP } from 'class-validator'
-import { UAParser } from 'ua-parser-js'
 import { sEncrypt } from '@/common/cryptography'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { TokenService } from '@/common/token.service'
 import dayjs from 'dayjs'
+import { UAParser } from 'ua-parser-js'
 
 @Injectable()
 export class AuthService {
@@ -42,10 +42,11 @@ export class AuthService {
   /**
    * Sends a login code to the given email address
    * @throws {BadRequestException} If the email address is invalid
+   * @param req The HTTP request object
    * @param email The email address to send the login code to
    * @param mode The mode of login
    */
-  async sendOtp(email: string, mode?: string): Promise<void> {
+  async sendOtp(req: Request, email: string, mode?: string): Promise<void> {
     this.logger.log(`Attempting to send login code to ${email}`)
 
     this.validateEmail(email)
@@ -62,9 +63,19 @@ export class AuthService {
     // Generate the OTP
     const otp = await generateOtp(email, user.id, this.prisma)
 
+    const deviceDetail = await this.extractDeviceDetailFromRequest(req)
+    const device = `${deviceDetail.agent} (${deviceDetail.os})`
+    const location = `${deviceDetail.city}, ${deviceDetail.region}, ${deviceDetail.country} [${deviceDetail.ipAddress}]`
+
     // Send the OTP to the user
     if (mode === 'cli') {
-      await this.mailService.sendSignInCode(email, otp.code, user.name)
+      await this.mailService.sendSignInCode(
+        email,
+        otp.code,
+        user.name,
+        device,
+        location
+      )
     } else {
       await this.mailService.sendOtp(email, otp.code)
     }
@@ -114,6 +125,9 @@ export class AuthService {
     mode?: string
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(`Validating login code for ${email}`)
+
+    this.validateEmail(email)
+    this.validateOtpCode(otp)
 
     const user = await getUserByEmailOrId(
       email,
@@ -170,9 +184,9 @@ export class AuthService {
       loginToken = token
       cliSessionId = cliSession.id
     } else {
-      const { token, userSession } =
+      const { token, browserSession } =
         await this.tokenService.generateBearerToken(user.id, deviceDetail)
-      await this.sendLoginNotification(user, deviceDetail, userSession)
+      await this.sendLoginNotification(user, deviceDetail, browserSession)
       loginToken = token
     }
 
@@ -215,11 +229,9 @@ export class AuthService {
     await this.cache.setUser(user)
 
     const deviceDetail = await this.extractDeviceDetailFromRequest(req)
-    const { token, userSession } = await this.tokenService.generateBearerToken(
-      user.id,
-      deviceDetail
-    )
-    await this.sendLoginNotification(user, deviceDetail, userSession)
+    const { token, browserSession } =
+      await this.tokenService.generateBearerToken(user.id, deviceDetail)
+    await this.sendLoginNotification(user, deviceDetail, browserSession)
 
     return {
       ...user,
@@ -264,30 +276,23 @@ export class AuthService {
   private async sendLoginNotification(
     user: UserWithWorkspace,
     deviceDetail: DeviceDetail,
-    currentUserSession: UserSession
+    currentBrowserSession: BrowserSession
   ) {
-    const {
-      ipAddress,
-      encryptedIpAddress,
-      os,
-      platform,
-      city,
-      country,
-      region
-    } = deviceDetail
+    const { ipAddress, encryptedIpAddress, os, agent, city, country, region } =
+      deviceDetail
     const { email, id: userId } = user
     try {
       // Find all the existing sessions of the user where the device detail matches
-      const existingSessions = await this.prisma.userSession.findMany({
+      const existingSessions = await this.prisma.browserSession.findMany({
         where: {
           userId,
           deviceDetail: {
             encryptedIpAddress,
             os,
-            platform
+            agent
           },
           NOT: {
-            id: currentUserSession.id
+            id: currentBrowserSession.id
           }
         }
       })
@@ -307,7 +312,7 @@ export class AuthService {
         // Send out the email
         await this.mailService.sendLoginNotification(user.email, {
           ip: ipAddress,
-          device: `${platform} on ${os}`,
+          device: `${agent} on ${os}`,
           location: `${city}, ${region}, ${country}`,
           date,
           time
@@ -355,8 +360,13 @@ export class AuthService {
     const userAgent = req.headers['user-agent'] || 'Unknown'
     const parser = new UAParser(userAgent)
 
-    const platform = parser.getBrowser().name || 'Unknown' // Can be a browser, or CLI, or SDKs
-    const os = parser.getOS().name || 'Unknown'
+    const params = new URLSearchParams(req.url)
+    const agent =
+      (params.get('agent') as string)?.trim() ||
+      parser.getBrowser().name ||
+      'Unknown'
+    const os =
+      (params.get('os') as string)?.trim() || parser.getOS().name || 'Unknown'
 
     let city: string
     let region: string
@@ -402,7 +412,7 @@ export class AuthService {
       ipAddress,
       encryptedIpAddress,
       os,
-      platform,
+      agent,
       city,
       region,
       country
@@ -456,7 +466,7 @@ export class AuthService {
         throw new NotFoundException(
           constructErrorBody(
             'Account not found',
-            'We were not able to find an account with this email address. Please sign up first.'
+            `We were not able to find an account with this email address. Please sign up at ${process.env.PLATFORM_FRONTEND_URL}`
           )
         )
       }
@@ -519,6 +529,15 @@ export class AuthService {
           'Invalid email address',
           'Please enter a valid email address'
         )
+      )
+    }
+  }
+
+  private validateOtpCode(otp: string) {
+    if (!/^\d{6}$/.test(otp)) {
+      this.logger.error(`Invalid OTP: ${otp}`)
+      throw new BadRequestException(
+        constructErrorBody('Invalid OTP', 'Please enter a valid OTP')
       )
     }
   }

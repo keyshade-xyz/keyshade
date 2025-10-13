@@ -18,9 +18,12 @@ import LoginCommand from './commands/login.command'
 const program = new Command()
 
 program.version(version, '-V, --version', 'Output the current version')
-program.option('--profile <string>', 'The profile to use')
-program.option('--api-key <string>', 'The API key to use')
-program.option('--base-url <string>', 'The base URL to use')
+program.option('-p, --profile <string>', 'The profile to use')
+program.option(
+  '-k, --token <string>',
+  'Token used to authenticate your requests'
+)
+program.option('-u, --base-url <string>', 'The base URL to use')
 
 const COMMANDS: BaseCommand[] = [
   new RunCommand(),
