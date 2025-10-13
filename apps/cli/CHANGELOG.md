@@ -292,3 +292,22 @@
 - `keyshade profile list` command updated
 - `keyshade profile switch` allows users to switch between profiles
 - `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend
+
+# 3.4.0
+
+### Features
+
+- `keyshade login` command added to support interactive login
+- `keyshade profile create, delete, use` commands deleted
+- `keyshade profile list` command updated
+- `keyshade profile switch` allows users to switch between profiles
+- `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend
+- 
+### Minor Changes
+
+- Interactive code for `keyshade init` command
+- Interactive mode for `keyshade run` command
+
+### Patches
+
+- `keyshade init` no longer overwrites existing private-keys.json file.
