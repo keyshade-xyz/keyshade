@@ -1,3 +1,9 @@
+## [2.34.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0...v2.34.1-stage.1) (2025-10-13)
+
+### 🐛 Bug Fixes
+
+* **api:** wrong imports ([cef08c4](https://github.com/keyshade-xyz/keyshade/commit/cef08c4351dddf536ba0b05705e7b5328d2f1856))
+
 ## [2.34.0](https://github.com/keyshade-xyz/keyshade/compare/v2.33.0...v2.34.0) (2025-10-13)
 
 ### 🚀 Features
