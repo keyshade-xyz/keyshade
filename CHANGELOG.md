@@ -1,3 +1,9 @@
+## [2.34.0-stage.24](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.23...v2.34.0-stage.24) (2025-10-13)
+
+### 🚀 Features
+
+* introduce `keyshade login`; add session management; token revamp ([#1199](https://github.com/keyshade-xyz/keyshade/issues/1199)) ([7c4d369](https://github.com/keyshade-xyz/keyshade/commit/7c4d369113dea6a040f0edc8f22d8c1f6b39c2da))
+
 ## [2.34.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.22...v2.34.0-stage.23) (2025-10-12)
 
 ### 🚀 Features
