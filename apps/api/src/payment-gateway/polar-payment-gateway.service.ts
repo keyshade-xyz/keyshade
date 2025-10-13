@@ -726,13 +726,8 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     const basePrice = isAnnual
       ? PER_SEAT_PRICE[plan].annually
       : PER_SEAT_PRICE[plan].monthly
-    return (
-      (Math.round(
-        (seats * basePrice * (isAnnual ? 12 : 1) + Number.EPSILON) * 100
-      ) /
-        100) *
-      100
-    )
+    const total = seats * basePrice * (isAnnual ? 12 : 1)
+    return Math.round((total + Number.EPSILON) * 100)
   }
 
   private async getWorkspace(id: Workspace['id']): Promise<Workspace> {
