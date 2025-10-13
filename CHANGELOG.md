@@ -1,3 +1,52 @@
+## [2.34.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.22...v2.34.0-stage.23) (2025-10-12)
+
+### 🚀 Features
+
+* **web:** add onClick functionality to pricing page buttons ([#1195](https://github.com/keyshade-xyz/keyshade/issues/1195)) ([3d54fb5](https://github.com/keyshade-xyz/keyshade/commit/3d54fb54b86fe83d7364cefccfff3c476f037576))
+
+### 📚 Documentation
+
+* fix minor typos and standardize Keyshade capitalization ([#1194](https://github.com/keyshade-xyz/keyshade/issues/1194)) ([822db37](https://github.com/keyshade-xyz/keyshade/commit/822db378971c37e0ab8d532c232737573e758edf))
+* fix typos in setting-things-up.md ([#1192](https://github.com/keyshade-xyz/keyshade/issues/1192)) ([88ce2c9](https://github.com/keyshade-xyz/keyshade/commit/88ce2c9755ab9d6c89b5e8acb877fbdfcb7c1f7c))
+
+### 🔨 Code Refactoring
+
+* **platform:** enhance layout and sidebar components for improved responsiveness and usability ([#1193](https://github.com/keyshade-xyz/keyshade/issues/1193)) ([3f7fb18](https://github.com/keyshade-xyz/keyshade/commit/3f7fb18f4c3ed167e5aeb0ba80da908d7721b6e3))
+
+## [2.34.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.21...v2.34.0-stage.22) (2025-10-06)
+
+### 🐛 Bug Fixes
+
+* **platform:** updated the logic for leaving workspace deletion & enhanced tooltip messages ([#1133](https://github.com/keyshade-xyz/keyshade/issues/1133)) ([f1baeba](https://github.com/keyshade-xyz/keyshade/commit/f1baeba91dd28d7ef0b5250402bf9faff47b9963))
+
+### 🔨 Code Refactoring
+
+* **[secure]-scan:** enable support for generic [secure] key regex ([#1113](https://github.com/keyshade-xyz/keyshade/issues/1113)) ([ae0a923](https://github.com/keyshade-xyz/keyshade/commit/ae0a923205db34bcb08e7a06ea9b1f3051d8826a))
+
+## [2.34.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.20...v2.34.0-stage.21) (2025-10-03)
+
+### 🐛 Bug Fixes
+
+* **platform:** description text overflow in project cards ([#1174](https://github.com/keyshade-xyz/keyshade/issues/1174)) ([ad823a7](https://github.com/keyshade-xyz/keyshade/commit/ad823a74b2e09ec470cc48ef363cbb756badc21a))
+
+## [2.34.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.19...v2.34.0-stage.20) (2025-09-26)
+
+### 🐛 Bug Fixes
+
+* **platform:** trigger count now displays correct number of triggers ([#1168](https://github.com/keyshade-xyz/keyshade/issues/1168)) ([e44c7d1](https://github.com/keyshade-xyz/keyshade/commit/e44c7d1876602800f04e64b57c1e9a70fea3da3f))
+
+## [2.34.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.18...v2.34.0-stage.19) (2025-09-22)
+
+### 🚀 Features
+
+* **platform:** update import environment button text and description ([#1167](https://github.com/keyshade-xyz/keyshade/issues/1167)) ([e82686e](https://github.com/keyshade-xyz/keyshade/commit/e82686e8256b44d1158b2f664430c3c04416d759))
+
+## [2.34.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.17...v2.34.0-stage.18) (2025-09-21)
+
+### 🚀 Features
+
+* update lockfile ([ec86db9](https://github.com/keyshade-xyz/keyshade/commit/ec86db98b6b142d8f0edf6b89a70328a250fc49b))
+
 ## [2.34.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0-stage.16...v2.34.0-stage.17) (2025-09-18)
 
 ### 🚀 Features

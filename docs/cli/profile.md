@@ -4,7 +4,7 @@ description: The `profile` command
 
 # `profile`
 
-The `profile` command is used to manage all the profiles in the CLI. A profile is a collection of configurations that are used to interact with the keyshade API. It has a set of subcommands:
+The `profile` command is used to manage all the profiles in the CLI. A profile is a collection of configurations that are used to interact with the Keyshade API. It has a set of subcommands:
 
 - [`create`](#create): This command is used to create a new profile.
 - [`update`](#update): This command is used to update the properties of an existing profile.

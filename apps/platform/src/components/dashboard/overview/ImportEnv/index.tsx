@@ -31,7 +31,7 @@ function ImportEnvButton({ projectSlug }): React.JSX.Element {
           Import your configurations
         </h1>
         <p className="text-sm text-white/60">
-          Sync your local configurations in your projects with a single click
+          Transfer your .env file from your computer into this project
         </p>
       </div>
       <div>
@@ -41,7 +41,7 @@ function ImportEnvButton({ projectSlug }): React.JSX.Element {
           type="button"
           variant="secondary"
         >
-          Get started
+          Import
         </Button>
 
         <ImportEnvModal

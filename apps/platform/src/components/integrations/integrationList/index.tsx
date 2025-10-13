@@ -31,6 +31,7 @@ function IntegrationList() {
   const setSelectedIntegration = useSetAtom(selectedIntegrationAtom)
   const [integrations, setIntegrations] = useAtom(integrationsOfWorkspaceAtom)
   const [loading, setLoading] = useState<boolean>(true)
+  const [runCounts, setRunCounts] = useState<Record<string, number>>({})
   const router = useRouter()
 
   const isAuthorizedToReadIntegration =
@@ -40,6 +41,13 @@ function IntegrationList() {
   const getAllIntegrations = useHttp(() =>
     ControllerInstance.getInstance().integrationController.getAllIntegrations(
       { workspaceSlug: selectedWorkspace!.slug },
+      {}
+    )
+  )
+
+  const getAllRunsOfIntegration = useHttp((integrationSlug: string) =>
+    ControllerInstance.getInstance().integrationController.getAllIntegrationRuns(
+      { integrationSlug },
       {}
     )
   )
@@ -74,6 +82,22 @@ function IntegrationList() {
     setIntegrations,
     isAuthorizedToReadIntegration
   ])
+
+  useEffect(() => {
+    integrations.forEach((integration) =>
+      getAllRunsOfIntegration(integration.slug).then(({ data, success }) => {
+        if (success && data) {
+          setRunCounts((prev) => ({
+            ...prev,
+            [integration.slug]:
+              typeof data.metadata.totalCount === 'number'
+                ? data.metadata.totalCount
+                : 0
+          }))
+        }
+      })
+    )
+  }, [integrations, getAllRunsOfIntegration])
 
   // Move conditional return AFTER all hooks
   if (!isAuthorizedToReadIntegration) {
@@ -133,7 +157,7 @@ function IntegrationList() {
                     title={formatText(integration.type)}
                   >
                     {formatText(integration.type)} | Total no of triggers:{' '}
-                    {integration.notifyOn.length}
+                    {runCounts[integration.slug]}
                   </p>
                 </div>
               </div>
