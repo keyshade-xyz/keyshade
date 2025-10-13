@@ -19,6 +19,7 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
 import { isEmailValid } from '@/lib/is-email-valid'
+import { accountManager } from '@/lib/account-manager'
 
 interface OtpInputFormProps {
   isLoading: boolean
@@ -75,6 +76,9 @@ export default function OtpInputForm({
 
       if (success && data) {
         setUser(data)
+
+        // Add the account to the account manager (token managed by backend cookie)
+        accountManager.addProfile(data)
 
         if (data.isOnboardingFinished) {
           router.push('/')
