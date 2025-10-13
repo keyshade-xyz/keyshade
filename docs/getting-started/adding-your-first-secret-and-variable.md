@@ -79,4 +79,4 @@ If created successfully, your environment should look like this:
 
 ## That's it!
 
-We are now in a pretty good shape. We have added our first secret and variable. Now, let's get the CLI installed and set up locally.
+We are now in a pretty good shape. We have added our first secret, variable and environment. Now, let's get the CLI installed and set up locally.
