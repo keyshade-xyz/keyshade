@@ -7,9 +7,9 @@ import {
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { BrowserSessionResponse } from '@/session/session.types'
-import { sDecrypt } from '@keyshade/common'
 import { BrowserSession } from '@prisma/client'
 import { constructErrorBody } from '@/common/util'
+import { sDecrypt } from '@/common/cryptography'
 
 @Injectable()
 export class BrowserSessionService {
