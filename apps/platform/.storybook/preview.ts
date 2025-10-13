@@ -3,13 +3,12 @@ import { Preview } from '@storybook/nextjs'
 const preview: Preview = {
   parameters: {
     backgrounds: {
-      default: 'keyshade',
-      values: [
-        {
-          name: 'keyshade',
-          value: '#0E0E12'
-        }
-      ]
+      options: {
+        // dark: { name: 'Dark', value: '#333' },
+        // light: { name: 'Light', value: '#F7F9F2' },
+        // 👇 Add your own
+        keyshade: { name: 'keyshade', value: '#0E0E12' }
+      }
     },
     controls: {
       matchers: {
@@ -24,6 +23,10 @@ const preview: Preview = {
       // 'off' - skip a11y checks entirely
       test: 'todo'
     }
+  },
+  initialGlobals: {
+    // 👇 Set the initial background color
+    backgrounds: { value: 'keyshade' }
   }
 }
 
