@@ -8,8 +8,8 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { CliSessionResponse } from '@/session/session.types'
 import { CliSession } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
-import { sDecrypt } from '@keyshade/common'
 import { constructErrorBody } from '@/common/util'
+import { sDecrypt } from '@/common/cryptography'
 
 @Injectable()
 export class CliSessionService {
