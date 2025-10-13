@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { useAtomValue } from 'jotai'
+import Link from 'next/link'
 import {
   CardSVG,
   DashboardSVG,
@@ -10,8 +11,8 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import SidebarTab from './sidebarTab'
 import TierLimit from './tierLimit'
+import SidebarTab from './sidebarTab'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { VERSION_BADGE } from '@/constants/sidebar'
@@ -77,9 +78,7 @@ function Sidebar(): JSX.Element {
         </div>
 
         {/* Scrollable Menu Items */}
-        <div
-          className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent min-h-0 flex-1 overflow-y-auto overscroll-contain"
-        >
+        <div className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {sidebarTabData.map((tabData) => {
             return (
               <SidebarTab
@@ -93,8 +92,16 @@ function Sidebar(): JSX.Element {
           })}
         </div>
 
+        {/* Contact Us */}
+        <Link
+          className="relative flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:text-white/60"
+          href="mailto:support@keyshade.xyz?subject=Query"
+        >
+          <div>Contact Us</div>
+        </Link>
+
         {/* Sticky Footer */}
-        <div className="sticky bottom-0 z-50 bg-[#0A0A0A] pt-4 mb-5">
+        <div className="sticky bottom-0 z-50  mb-5 pt-4">
           <TierLimit />
         </div>
       </div>
