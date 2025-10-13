@@ -13,6 +13,8 @@ import UserController from '@api-client/controllers/user'
 import ApiKeyController from './controllers/api-key'
 import PaymentController from './controllers/payment'
 import ShareSecretController from './controllers/share-secret'
+import CliSessionController from './controllers/cli-session'
+import BrowserSessionController from './controllers/browser-session'
 export {
   AppController,
   EnvironmentController,
@@ -28,5 +30,7 @@ export {
   UserController,
   ApiKeyController,
   PaymentController,
-  ShareSecretController
+  ShareSecretController,
+  CliSessionController,
+  BrowserSessionController
 }

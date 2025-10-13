@@ -114,8 +114,8 @@ function PriceCard({
 
         <button
           className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
-          type="button"
           onClick={handleButtonClick}
+          type="button"
         >
           {returnButtonLabel()}
         </button>

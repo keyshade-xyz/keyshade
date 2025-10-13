@@ -8,13 +8,11 @@ import { AuthModule } from './auth.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { AppModule } from '@/app/app.module'
-import { AuthService } from './service/auth.service'
 import { UserModule } from '@/user/user.module'
 
 describe('Auth Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
-  let authService: AuthService
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -28,7 +26,6 @@ describe('Auth Controller Tests', () => {
       new FastifyAdapter()
     )
     prisma = moduleRef.get(PrismaService)
-    authService = moduleRef.get(AuthService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -71,7 +68,10 @@ describe('Auth Controller Tests', () => {
   })
 
   it('should have generated an otp', async () => {
-    await authService.sendOtp('johndoe@keyshade.xyz')
+    await app.inject({
+      method: 'POST',
+      url: '/auth/send-otp/johndoe@keyshade.xyz'
+    })
 
     const otp = await prisma.otp.findFirst({
       where: {
@@ -88,7 +88,11 @@ describe('Auth Controller Tests', () => {
   })
 
   it('should upsert otp if regenerated', async () => {
-    await authService.sendOtp('johndoe@keyshade.xyz')
+    await app.inject({
+      method: 'POST',
+      url: '/auth/send-otp/johndoe@keyshade.xyz'
+    })
+
     const otp = await prisma.otp.findFirst({
       where: {
         user: {
@@ -120,14 +124,17 @@ describe('Auth Controller Tests', () => {
   it('should not be able to validate otp with invalid email', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/auth/validate-otp?email=abcdef&otp=123456'
+      url: '/auth/validate-otp?email=abcdef@example.com&otp=123456'
     })
 
     expect(response.statusCode).toBe(404)
   })
 
   it('should not be able to validate otp with invalid otp', async () => {
-    await authService.sendOtp('johndoe@keyshade.xyz')
+    await app.inject({
+      method: 'POST',
+      url: '/auth/send-otp/johndoe@keyshade.xyz'
+    })
 
     const response = await app.inject({
       method: 'POST',
