@@ -28,7 +28,7 @@ export default class AuthController {
   }): string {
     const query = new URLSearchParams()
     for (const [key, value] of Object.entries(params)) {
-      if (value) query.append(key, value)
+      if (value != undefined) query.append(key, value)
     }
     const result = query.toString()
     return result ? `?${result}` : ''
