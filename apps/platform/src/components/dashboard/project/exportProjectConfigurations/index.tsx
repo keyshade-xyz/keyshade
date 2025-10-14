@@ -45,11 +45,11 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     >
       <DialogContent className="rounded-[12px] border bg-[#1E1E1F] ">
         <div className="flex w-full flex-col items-start justify-center">
-          <DialogTitle className=" font-geist h-[1.875rem] text-[1.125rem] font-semibold text-white ">
+          <DialogTitle className=" font-geist h-7.5 text-[1.125rem] font-semibold text-white ">
             Export Configurations
           </DialogTitle>
 
-          <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
+          <DialogDescription className=" font-inter h-5 w-full text-[0.875rem] font-normal text-[#D4D4D4]">
             Pick options and export selected configurations for project{' '}
             <strong>{selectedProject.name}</strong>
           </DialogDescription>
@@ -85,7 +85,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
             </Visible>
           </div>
         </div>
-        <div className="flex h-[2.25rem] w-full justify-end">
+        <div className="flex h-9 w-full justify-end">
           <Button
             disabled={isLoading}
             onClick={handleExport}

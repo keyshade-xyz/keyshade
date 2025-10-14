@@ -100,7 +100,7 @@ export default function AddApiKeyDialog() {
             <AddSVG /> Add API Key
           </Button>
         </DialogTrigger>
-        <DialogContent className="flex h-[90vh] min-w-[42rem] flex-col bg-[#18181B] text-white">
+        <DialogContent className="flex h-[90vh] min-w-2xl flex-col bg-[#18181B] text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new API Key
@@ -114,15 +114,15 @@ export default function AddApiKeyDialog() {
 
         <div className="text-white">
           <div className="space-y-4">
-            <div className="flex h-[2.75rem] items-center justify-start gap-6">
+            <div className="flex h-11 items-center justify-start gap-6">
               <label
-                className="h-[1.25rem] w-[7rem] text-base font-semibold"
+                className="h-5 w-28 text-base font-semibold"
                 htmlFor="secret-name"
               >
                 API Key Name
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                 id="secret-name"
                 onChange={(e) =>
                   setNewApiKeyData((prev) => ({
@@ -135,9 +135,9 @@ export default function AddApiKeyDialog() {
               />
             </div>
 
-            <div className="flex h-[2.75rem] items-center justify-start gap-6">
+            <div className="flex h-11 items-center justify-start gap-6">
               <label
-                className="h-[1.25rem] w-[7rem] text-base font-semibold"
+                className="h-5 w-28 text-base font-semibold"
                 htmlFor="expiry-date"
               >
                 Expiry Date
@@ -152,7 +152,7 @@ export default function AddApiKeyDialog() {
                 }
                 value={newApiKeyData.expiresAfter}
               >
-                <SelectTrigger className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300">
+                <SelectTrigger className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="border border-white/10 bg-neutral-800 text-gray-300">
@@ -175,7 +175,7 @@ export default function AddApiKeyDialog() {
 
             <div className="flex justify-end pt-4">
               <Button
-                className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                className="h-10.5 w-25 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 disabled={isLoading}
                 onClick={handleAddApiKey}
               >

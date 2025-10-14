@@ -54,7 +54,7 @@ function CreateIntegration(): React.JSX.Element {
               </div>
               <ArrowLeftRight className="h-6 w-6" />
               <IntegrationIcon
-                className="h-[4.5rem] w-[4.5rem] p-4"
+                className="h-18 w-18 p-4"
                 type={integrationType}
               />
             </div>

@@ -47,7 +47,7 @@ export default function EnvironmentCard({
     <ContextMenu key={environment.id}>
       <ContextMenuTrigger className="w-full" id={`secret-${environment.slug}`}>
         <div
-          className={`flex h-fit flex-col overflow-hidden rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%] ${className}`}
+          className={`flex h-fit flex-col overflow-hidden rounded-xl border border-white/20 bg-white/2 transition-all duration-150 ease-in hover:bg-white/5 ${className}`}
         >
           <div className="flex flex-col gap-y-2 px-6 py-4">
             <div className="flex w-full flex-row flex-wrap items-center justify-between gap-4">
@@ -68,7 +68,7 @@ export default function EnvironmentCard({
               </div>
             </div>
           </div>
-          <div className="flex flex-row justify-between rounded-b-xl bg-white/[6%] px-6 py-4 text-sm text-white/50">
+          <div className="flex flex-row justify-between rounded-b-xl bg-white/6 px-6 py-4 text-sm text-white/50">
             <div className="flex flex-col">
               <div>Created At</div>
               <div>{formatDate(environment.createdAt)}</div>

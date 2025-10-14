@@ -117,7 +117,7 @@ export default function AddVariableDialogue() {
           <AddSVG /> Add Variable
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[31.625rem] bg-[#18181B] text-white ">
+      <DialogContent className="w-126.5 bg-[#18181B] text-white ">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new variable
@@ -129,15 +129,15 @@ export default function AddVariableDialogue() {
 
         <div className=" text-white">
           <div className="space-y-4">
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="h-5 w-28.5 text-base font-semibold"
                 htmlFor="variable-name"
               >
                 Variable Name
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                 id="variable-name"
                 onChange={(e) =>
                   setRequestData({
@@ -150,15 +150,15 @@ export default function AddVariableDialogue() {
               />
             </div>
 
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="h-5 w-28.5 text-base font-semibold"
                 htmlFor="variable-name"
               >
                 Extra Note
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                 id="variable-name"
                 onChange={(e) =>
                   setRequestData({
@@ -178,7 +178,7 @@ export default function AddVariableDialogue() {
 
             <div className="flex justify-end pt-4">
               <Button
-                className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                className="h-10.5 w-25 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 disabled={isLoading}
                 onClick={handleAddVariable}
               >
