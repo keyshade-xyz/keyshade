@@ -1,3 +1,9 @@
+## [2.35.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0-stage.3...v2.35.0-stage.4) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **api,api-client:** handle login client issue and invalid payment amount ([#1202](https://github.com/keyshade-xyz/keyshade/issues/1202)) ([969ad7c](https://github.com/keyshade-xyz/keyshade/commit/969ad7c539216c1565632148a73c7985685dba0b))
+
 ## [2.35.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0-stage.2...v2.35.0-stage.3) (2025-10-14)
 
 ### 🚀 Features
