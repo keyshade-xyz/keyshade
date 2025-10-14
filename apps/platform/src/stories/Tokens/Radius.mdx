@@ -1,0 +1,94 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import '../../app/global.css'
+
+export const Radius = ({ radius }) => (
+  <div className={`aspect-square h-32 w-32 bg-gray-300 ${radius} border`} />
+)
+
+<Meta title="Tokens/Radius" />
+
+# Radius Tokens
+
+At Keyshade we use a consistent set of border radius values to ensure a cohesive design language across our platform. These radius tokens are from default Tailwind CSS configuration.
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Dimension (REM)</th>
+      <th>Preview</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>rounded-none</td>
+      <td>0</td>
+      <td>
+        <Radius radius="rounded-none" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-xs</td>
+      <td>0.125rem</td>
+      <td>
+        <Radius radius="rounded-xs" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-sm</td>
+      <td>0.25rem</td>
+      <td>
+        <Radius radius="rounded-sm" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-md</td>
+      <td>0.375rem</td>
+      <td>
+        <Radius radius="rounded-md" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-lg</td>
+      <td>0.5rem</td>
+      <td>
+        <Radius radius="rounded-lg" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-xl</td>
+      <td>0.75rem</td>
+      <td>
+        <Radius radius="rounded-xl" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-2xl</td>
+      <td>1rem</td>
+      <td>
+        <Radius radius="rounded-2xl" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-3xl</td>
+      <td>1.5rem</td>
+      <td>
+        <Radius radius="rounded-3xl" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-4xl</td>
+      <td>2rem</td>
+      <td>
+        <Radius radius="rounded-4xl" />
+      </td>
+    </tr>
+    <tr>
+      <td>rounded-full</td>
+      <td>calc(infinity * 1px)</td>
+      <td>
+        <Radius radius="rounded-full" />
+      </td>
+    </tr>
+  </tbody>
+</table>
