@@ -816,10 +816,10 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       )
       productId = await this.createProduct(dto.plan, dto.seats, dto.isAnnual)
     } else {
+      productId = matchingProducts[0].id
       this.logger.log(
         `Product ${formattedPlanName} exists with ID ${productId}. Using it...`
       )
-      productId = matchingProducts[0].id
     }
 
     return productId
