@@ -3,7 +3,7 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { IntegrationService } from './integration.service'
 import { WorkspaceService } from '@/workspace/workspace.service'
 import { Test } from '@nestjs/testing'

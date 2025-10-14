@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import { useAtomValue } from 'jotai'
 import type { AllowedPlans } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import Visible from '@/components/common/visible'
 import { Slider } from '@/components/ui/slider'
 import {

@@ -16,7 +16,13 @@ class SecretDetector {
    */
   detect(input: string): SecretResult {
     for (const regex of this.patterns) {
-      if (regex.test(input)) {
+      // If the regex has a filter, use it for post-processing
+      if ((regex as any).filter) {
+        const matches = input.match(regex)
+        if (matches && matches.some((m: string) => (regex as any).filter(m))) {
+          return { found: true, regex }
+        }
+      } else if (regex.test(input)) {
         return { found: true, regex }
       }
     }

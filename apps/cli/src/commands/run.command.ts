@@ -71,7 +71,7 @@ export default class RunCommand extends BaseCommand {
       configurations.environment = options.environment
     }
 
-    await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
+    await this.checkApiKeyValidity(this.baseUrl, this.token)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
     await this.prefetchConfigurations(configurations.privateKey)
@@ -121,7 +121,7 @@ export default class RunCommand extends BaseCommand {
     const ioClient = io(websocketUrl, {
       autoConnect: false,
       extraHeaders: {
-        'x-keyshade-token': this.apiKey
+        'x-keyshade-token': this.token
       },
       transports: ['websocket']
     })
@@ -233,7 +233,7 @@ export default class RunCommand extends BaseCommand {
         projectSlug: this.projectSlug
       },
       {
-        'x-keyshade-token': this.apiKey
+        'x-keyshade-token': this.token
       }
     )
 
@@ -248,7 +248,7 @@ export default class RunCommand extends BaseCommand {
           projectSlug: this.projectSlug
         },
         {
-          'x-keyshade-token': this.apiKey
+          'x-keyshade-token': this.token
         }
       )
 

@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
-import { InfiniteScrollList } from './infinite-scroll-list'
-import { WorkspaceListItem } from './workspace-list-item'
 import { Skeleton } from './skeleton'
+import { WorkspaceListItem } from './workspace-list-item'
+import { InfiniteScrollList } from './infinite-scroll-list'
 import {
   Popover,
   PopoverContent,
@@ -145,7 +145,7 @@ export function Combobox(): React.JSX.Element {
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="flex w-[16rem] items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
+          className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
           role="combobox"
           type="button"
         >

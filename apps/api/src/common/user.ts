@@ -142,7 +142,7 @@ export async function getUserByEmailOrId(
   }
 
   if (!user) {
-    logger.error(`User not found: ${input}`)
+    logger.warn(`User not found: ${input}`)
     throw new NotFoundException(
       constructErrorBody('User not found', `User ${input} not found`)
     )

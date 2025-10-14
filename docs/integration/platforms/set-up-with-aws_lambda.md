@@ -24,7 +24,7 @@ Here's what this guide covers:
 > 💡 If you're not familiar with how Keyshade works, we recommend starting with [What is Keyshade?](/docs/getting-started/introduction.md)
 
 ## Create or Use an Existing Lambda Function
-You can either create a new Lambda function or use and existing one. Based on your preference follow the below steps:
+You can either create a new Lambda function or use an existing one. Based on your preference follow the below steps:
 
 ### Creating a New Lambda Function
 

@@ -7,7 +7,7 @@ import SharePageWrapper from '@/components/shareScention/sharePageWrapper'
 import ShareSecretBodyWrapper from '@/components/shareScention/shareSecretBodyWrapper'
 import ShareSecretLink from '@/components/shareScention/shareSecretLink'
 
-function SharePage() {
+function SharePage(): React.JSX.Element {
   const [shareHash, setShareHash] = useState<string>('')
   return (
     <SharePageWrapper>

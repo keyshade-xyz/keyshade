@@ -2,8 +2,8 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useState } from 'react'
 import type { Integration } from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
-import IntegrationIcon from '../integrationIcon'
 import EmptyIntegration from '../emptyIntegration'
+import IntegrationIcon from '../integrationIcon'
 import {
   integrationsOfWorkspaceAtom,
   selectedIntegrationAtom,

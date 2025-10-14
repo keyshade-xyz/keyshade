@@ -5,6 +5,14 @@ export interface IMailService {
 
   sendEmailChangedOtp(email: string, otp: string): Promise<void>
 
+  sendSignInCode(
+    email: string,
+    code: string,
+    name: string,
+    device: string,
+    location: string
+  ): Promise<void>
+
   invitedToWorkspace(
     email: string,
     workspaceName: string,
@@ -37,7 +45,7 @@ export interface IMailService {
       device: string
       date: string
       time: string
-      location?: string
+      location: string
     }
   ): Promise<void>
 
