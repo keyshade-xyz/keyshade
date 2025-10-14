@@ -21,9 +21,9 @@
     "dev": "bun run src/index.ts",
     "test": "bun test",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+    "format": "prettier --write \"{src,tests}/**/*.ts\""
   },
-  "dependencies": {
-    "zod": "^3.23.6"
+  "devDependencies": {
+    "prettier-plugin-tailwindcss": "^0.7.0"
   }
 }
