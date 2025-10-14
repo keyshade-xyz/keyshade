@@ -13,6 +13,6 @@
     "resolveFullPaths": true,
     "verbose": false
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "jest.config.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
