@@ -318,3 +318,20 @@
 
 - Removed API key validation from `keyshade run`
 - Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.0.stage-1
+
+### Minor changes
+
+- Improved DX of `keyshade run` command
+
+# 3.5.0
+
+### Minor changes
+
+- Improved DX of `keyshade run` command
+
+### Patches
+
+- Removed API key validation from `keyshade run`
+- Fixed invalid field referencing in variable, and secret commands
