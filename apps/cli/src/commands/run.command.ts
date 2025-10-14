@@ -8,7 +8,6 @@ import type {
   CommandOption
 } from '@/types/command/command.types'
 import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
-import { Logger } from '@/util/logger'
 import type {
   ClientRegisteredResponse,
   Configuration,
@@ -18,6 +17,8 @@ import type {
 import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
+import { log, spinner } from '@clack/prompts'
+import { clearSpinnerLines, showError, showSuccess } from '@/util/prompt'
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -110,7 +111,10 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async connectToSocket(data: RunData) {
-    Logger.info('Connecting to socket...')
+    const loading = spinner()
+    loading.start('Connecting to keyshade servers...')
+    await this.sleep(2000)
+
     // Fix: Parse the full host from baseUrl, not just the last segment
     const url = new URL(this.baseUrl)
     const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${url.host}/change-notifier`
@@ -134,22 +138,20 @@ export default class RunCommand extends BaseCommand {
       })
 
       ioClient.on('configuration-updated', async (data: Configuration) => {
-        Logger.info(
-          `Configuration change received from API (name: ${data.name})`
-        )
+        log.info(`${data.name} got updated. Restarting the process...`)
 
         if (!data.isPlaintext) {
           try {
             data.value = await decrypt(privateKey, data.value)
           } catch (error) {
             if (quitOnDecryptionFailure) {
-              Logger.error(
-                `Decryption failed for ${data.name}. Stopping the process.`
+              await showError(
+                `Failed decrypting ${data.name}'s value. Stopping the process.`
               )
               process.exit(1)
             } else {
-              Logger.warn(
-                `Decryption failed for ${data.name}. Skipping this configuration.`
+              await showError(
+                `Failed decrypting ${data.name}'s value. No changes will be made to the process.`
               )
               return
             }
@@ -161,20 +163,25 @@ export default class RunCommand extends BaseCommand {
       })
       // Set a timeout for registration response
       const registrationTimeout = setTimeout(() => {
-        Logger.error(
-          'Connection timeout: No response from server after 30 seconds'
+        showError(
+          'We tried connecting to keyshade servers for 30 seconds but failed. Please try again later.'
         )
-        process.exit(1)
+          .catch(() => {})
+          .finally(() => process.exit(1))
       }, 30000)
 
       ioClient.on(
         'client-registered',
-        (registrationResponse: ClientRegisteredResponse) => {
+        async (registrationResponse: ClientRegisteredResponse) => {
           clearTimeout(registrationTimeout)
+
           if (registrationResponse.success) {
             this.projectSlug = data.project
             this.environmentSlug = data.environment
-            Logger.info('Successfully registered to API')
+
+            loading.stop()
+            clearSpinnerLines()
+            await showSuccess('Successfully connected to keyshade servers!')
           } else {
             // Extract meaningful error message
             let errorMessage = 'Unknown error'
@@ -213,7 +220,11 @@ export default class RunCommand extends BaseCommand {
               errorMessage = String(registrationResponse.message)
             }
 
-            Logger.error(`Error registering to API: ${errorMessage}`)
+            loading.stop()
+            clearSpinnerLines()
+            await showError(
+              `We encountered an error while connecting you to our servers: ${errorMessage}`
+            )
             process.exit(1)
           }
         }
@@ -222,7 +233,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async prefetchConfigurations(privateKey: string) {
-    Logger.info('Prefetching configurations...')
+    log.info('Fetching existing secrets and variables from your project...')
     const secretController = new SecretController(this.baseUrl)
     const variableController = new VariableController(this.baseUrl)
 
@@ -267,8 +278,8 @@ export default class RunCommand extends BaseCommand {
 
     // Merge secrets and variables
     const configurations = [...decryptedSecrets, ...variablesResponse.data]
-    Logger.info(
-      `Fetched ${configurations.length} configurations (${secretsResponse.data.length} secrets, ${variablesResponse.data.length} variables)`
+    log.info(
+      `Fetched ${secretsResponse.data.length} secrets and ${variablesResponse.data.length} variables`
     )
 
     // Set the configurations as environmental variables
@@ -297,7 +308,7 @@ export default class RunCommand extends BaseCommand {
     this.childProcess.on('exit', (code: number | null) => {
       // Code is 0 only if the command exits on its own
       if (code === 0) {
-        Logger.info('Command exited successfully!')
+        log.info('Stopped all processes. See you later!')
         process.exit(1)
       }
     })
@@ -309,8 +320,14 @@ export default class RunCommand extends BaseCommand {
   }
 
   private killCommand() {
-    if (this.childProcess !== null) {
-      process.kill(-this.childProcess.pid, 'SIGKILL')
+    if (this.childProcess) {
+      try {
+        process.kill(-this.childProcess.pid, 'SIGKILL')
+      } catch (error: any) {
+        if (error.code !== 'ESRCH') throw error
+      }
+      this.childProcess = null
+      log.success('Stopped all processes. See you later!')
     }
   }
 }
