@@ -1,3 +1,9 @@
+## [2.35.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0-stage.2...v2.35.0-stage.3) (2025-10-14)
+
+### 🚀 Features
+
+* **cli:** improve dx of keyshade run command ([68e2541](https://github.com/keyshade-xyz/keyshade/commit/68e25416fb7389d7bb361730d0a41ebd8146c34d))
+
 ## [2.35.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0-stage.1...v2.35.0-stage.2) (2025-10-14)
 
 ### 🐛 Bug Fixes
