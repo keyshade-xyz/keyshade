@@ -22,8 +22,5 @@
     "test": "bun test",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
     "format": "prettier --write \"{src,tests}/**/*.ts\""
-  },
-  "devDependencies": {
-    "prettier-plugin-tailwindcss": "^0.7.0"
   }
 }
