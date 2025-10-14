@@ -1,4 +1,4 @@
-import { HydratedIntegration } from '@/integration/integration.types'
+import { HydratedIntegration, RawIntegration } from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Injectable, Logger } from '@nestjs/common'
@@ -48,7 +48,7 @@ type RootHydrationParams = {
 }
 
 type IntegrationHydrationParams = RootHydrationParams & {
-  integration: HydratedIntegration
+  integration: RawIntegration
 }
 
 type SecretHydrationParams = RootHydrationParams & {
@@ -148,7 +148,8 @@ export class HydrationService {
     // Add entitlements to the return type if missing
     return {
       ...integration,
-      entitlements
+      entitlements,
+      totalTriggers
     }
   }
 
