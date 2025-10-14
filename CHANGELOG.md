@@ -1,3 +1,23 @@
+## [2.35.0](https://github.com/keyshade-xyz/keyshade/compare/v2.34.1...v2.35.0) (2025-10-14)
+
+### 🚀 Features
+
+* **cli:** bump version to v3.5.0 ([fdbeb37](https://github.com/keyshade-xyz/keyshade/commit/fdbeb37b0def55f54c014055ad6b5b8e6d3ec2df))
+* **cli:** improve dx of keyshade run command ([68e2541](https://github.com/keyshade-xyz/keyshade/commit/68e25416fb7389d7bb361730d0a41ebd8146c34d))
+* **platform:** migrated to tailwind 4 ([#1203](https://github.com/keyshade-xyz/keyshade/issues/1203)) ([7581828](https://github.com/keyshade-xyz/keyshade/commit/75818284cc67d3b9c70a7400d798693fc17a4978))
+
+### 🐛 Bug Fixes
+
+* **api,api-client:** handle login client issue and invalid payment amount ([#1202](https://github.com/keyshade-xyz/keyshade/issues/1202)) ([969ad7c](https://github.com/keyshade-xyz/keyshade/commit/969ad7c539216c1565632148a73c7985685dba0b))
+* **cli:** resolved undefined references ([851a78e](https://github.com/keyshade-xyz/keyshade/commit/851a78e8271aeae8988ab230e46c6658f44aac75))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.35.0-stage.1 [skip ci] ([2c045a3](https://github.com/keyshade-xyz/keyshade/commit/2c045a306d7fc6a3442afc15d069fe2d898b4fb6))
+* **release:** 2.35.0-stage.2 [skip ci] ([e0677da](https://github.com/keyshade-xyz/keyshade/commit/e0677dac68a0b7340798334e8499358c753f382c))
+* **release:** 2.35.0-stage.3 [skip ci] ([8d56311](https://github.com/keyshade-xyz/keyshade/commit/8d5631141c75d9a3077cb9fa79db21997ba29718))
+* **release:** 2.35.0-stage.4 [skip ci] ([3f48159](https://github.com/keyshade-xyz/keyshade/commit/3f4815939c94708f1a0f0676a84151f78667d0fd))
+
 ## [2.35.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0-stage.3...v2.35.0-stage.4) (2025-10-14)
 
 ### 🐛 Bug Fixes
