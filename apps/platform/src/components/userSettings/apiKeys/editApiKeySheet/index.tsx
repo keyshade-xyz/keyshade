@@ -134,7 +134,7 @@ export default function EditApiKeySheet(): JSX.Element {
 
   return (
     <Sheet onOpenChange={handleClose} open={isEditApiKeyOpen}>
-      <SheetContent className="min-w-[33rem] overflow-y-auto border-white/15 bg-[#222425] p-0">
+      <SheetContent className="min-w-132 overflow-y-auto border-white/15 bg-[#222425] p-0">
         <SheetHeader className="mx-5 mt-10">
           <SheetTitle className="text-white">Edit API Key</SheetTitle>
           <SheetDescription className="text-white/60" />
@@ -145,7 +145,7 @@ export default function EditApiKeySheet(): JSX.Element {
               API Key Name
             </Label>
             <Input
-              className="col-span-3 h-[2.75rem]"
+              className="col-span-3 h-11"
               id="name"
               onChange={(e) => {
                 setRequestData((prev) => ({
@@ -171,7 +171,7 @@ export default function EditApiKeySheet(): JSX.Element {
               }
               value={requestData.expiresAfter}
             >
-              <SelectTrigger className="h-[2.75rem] border border-white/10 bg-neutral-800 text-gray-300">
+              <SelectTrigger className="h-11 border border-white/10 bg-neutral-800 text-gray-300">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="border border-white/10 bg-neutral-800 text-gray-300">

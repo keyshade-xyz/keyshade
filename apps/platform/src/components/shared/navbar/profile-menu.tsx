@@ -54,7 +54,7 @@ export default function ProfileMenu() {
             {!user.name ? (
               <>
                 <span className="h-6 w-6 animate-pulse rounded-full bg-white/20" />
-                <span className="h-5 w-20 animate-pulse rounded bg-white/20" />
+                <span className="h-5 w-20 animate-pulse rounded-sm bg-white/20" />
               </>
             ) : (
               <>

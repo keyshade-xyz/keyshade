@@ -54,7 +54,7 @@ export default function ApiKeyCard({
   return (
     <ContextMenu key={apiKey.id}>
       <ContextMenuTrigger className="w-full">
-        <div className="flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%]">
+        <div className="flex h-fit flex-col rounded-xl border border-white/20 bg-white/2 transition-all duration-150 ease-in hover:bg-white/5">
           <div className="flex flex-col gap-y-6 px-6 py-4">
             <div className="flex flex-row flex-wrap justify-between gap-2">
               <div className="text-2xl font-normal"> {apiKey.name} </div>
@@ -70,14 +70,14 @@ export default function ApiKeyCard({
                       {apiKey.authorities.length}
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="rounded border-none bg-[#3F3F46] text-sm font-bold text-white">
+                  <TooltipContent className="rounded-sm border-none bg-[#3F3F46] text-sm font-bold text-white">
                     <p>Show Authorities</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
           </div>
-          <div className="flex flex-row items-end justify-between rounded-b-xl bg-white/[6%] px-6 py-4 text-sm text-white/50">
+          <div className="flex flex-row items-end justify-between rounded-b-xl bg-white/6 px-6 py-4 text-sm text-white/50">
             <div className="flex flex-col items-start text-sm font-medium">
               <div>Created on</div>
               <div>{dayjs(apiKey.createdAt).format('D MMMM, YYYY')}</div>

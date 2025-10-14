@@ -69,15 +69,15 @@
     "@next/eslint-plugin-next": "15.2.3",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/postcss": "^4.1.14",
     "@types/dayjs-precise-range": "^1.0.5",
     "@types/eccrypto": "^1.1.6",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.1",
-    "autoprefixer": "^10.4.16",
     "eslint-config-custom": "workspace:*",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.3",
+    "tailwindcss": "^4.1.14",
     "tsconfig": "workspace:*"
   }
 }
