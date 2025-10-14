@@ -1,3 +1,9 @@
+## [2.35.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0-stage.1...v2.35.0-stage.2) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **cli:** resolved undefined references ([851a78e](https://github.com/keyshade-xyz/keyshade/commit/851a78e8271aeae8988ab230e46c6658f44aac75))
+
 ## [2.35.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.34.1...v2.35.0-stage.1) (2025-10-14)
 
 ### 🚀 Features
