@@ -1,3 +1,9 @@
+## [2.35.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.34.1...v2.35.0-stage.1) (2025-10-14)
+
+### 🚀 Features
+
+* **platform:** migrated to tailwind 4 ([#1203](https://github.com/keyshade-xyz/keyshade/issues/1203)) ([7581828](https://github.com/keyshade-xyz/keyshade/commit/75818284cc67d3b9c70a7400d798693fc17a4978))
+
 ## [2.34.1](https://github.com/keyshade-xyz/keyshade/compare/v2.34.0...v2.34.1) (2025-10-13)
 
 ### 🐛 Bug Fixes
