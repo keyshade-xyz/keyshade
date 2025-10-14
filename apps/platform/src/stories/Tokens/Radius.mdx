@@ -5,6 +5,49 @@ export const Radius = ({ radius }) => (
   <div className={`aspect-square h-32 w-32 bg-gray-300 ${radius} border`} />
 )
 
+export const radiusTokens = [
+  {
+    class: 'rounded-none',
+    dimension: '0rem'
+  },
+  {
+    class: 'rounded-xs',
+    dimension: '0.125rem'
+  },
+  {
+    class: 'rounded-sm',
+    dimension: '0.25rem'
+  },
+  {
+    class: 'rounded-md',
+    dimension: '0.375rem'
+  },
+  {
+    class: 'rounded-lg',
+    dimension: '0.5rem'
+  },
+  {
+    class: 'rounded-xl',
+    dimension: '0.75rem'
+  },
+  {
+    class: 'rounded-2xl',
+    dimension: '1rem'
+  },
+  {
+    class: 'rounded-3xl',
+    dimension: '1.5rem'
+  },
+  {
+    class: 'rounded-4xl',
+    dimension: '2rem'
+  },
+  {
+    class: 'rounded-full',
+    dimension: 'calc(infinity * 1px)'
+  }
+]
+
 <Meta title="Tokens/Radius" />
 
 # Radius Tokens
@@ -20,75 +63,14 @@ At Keyshade we use a consistent set of border radius values to ensure a cohesive
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>rounded-none</td>
-      <td>0</td>
-      <td>
-        <Radius radius="rounded-none" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-xs</td>
-      <td>0.125rem</td>
-      <td>
-        <Radius radius="rounded-xs" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-sm</td>
-      <td>0.25rem</td>
-      <td>
-        <Radius radius="rounded-sm" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-md</td>
-      <td>0.375rem</td>
-      <td>
-        <Radius radius="rounded-md" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-lg</td>
-      <td>0.5rem</td>
-      <td>
-        <Radius radius="rounded-lg" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-xl</td>
-      <td>0.75rem</td>
-      <td>
-        <Radius radius="rounded-xl" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-2xl</td>
-      <td>1rem</td>
-      <td>
-        <Radius radius="rounded-2xl" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-3xl</td>
-      <td>1.5rem</td>
-      <td>
-        <Radius radius="rounded-3xl" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-4xl</td>
-      <td>2rem</td>
-      <td>
-        <Radius radius="rounded-4xl" />
-      </td>
-    </tr>
-    <tr>
-      <td>rounded-full</td>
-      <td>calc(infinity * 1px)</td>
-      <td>
-        <Radius radius="rounded-full" />
-      </td>
-    </tr>
+    {radiusTokens.map((token) => (
+      <tr key={token.class}>
+        <td>{token.class}</td>
+        <td>{token.dimension}</td>
+        <td>
+          <Radius radius={token.class} />
+        </td>
+      </tr>
+    ))}
   </tbody>
 </table>
