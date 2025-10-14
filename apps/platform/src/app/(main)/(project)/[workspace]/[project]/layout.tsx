@@ -103,7 +103,7 @@ function DetailedProjectPage(): JSX.Element {
   return (
     <main className="flex h-full flex-col gap-4">
       {tab !== 'overview' && (
-        <div className="flex h-[3.625rem] w-full justify-between p-3 ">
+        <div className="flex h-14.5 w-full justify-between p-3 ">
           <div className="text-3xl">{selectedProject?.name}</div>
           {tab === 'secret' && <AddSecretDialog />}
           {tab === 'variable' && <AddVariableDialogue />}

@@ -60,7 +60,7 @@ function Sidebar(): JSX.Element {
   ]
 
   return (
-    <aside className="ml-4 h-screen w-[18rem] min-w-[16rem] flex-shrink-0">
+    <aside className="ml-4 h-screen w-[18rem] min-w-[16rem] shrink-0">
       <div className="flex h-full flex-col gap-2">
         {/* Sticky Header */}
         <div className="sticky top-0 z-50 bg-[#0A0A0A] pb-4">
@@ -68,7 +68,7 @@ function Sidebar(): JSX.Element {
             <div className=" flex gap-2 text-xl">
               <KeyshadeLogoSVG /> Keyshade
             </div>
-            <div className="rounded bg-white/10 px-2 py-[0.12rem] text-xs font-bold">
+            <div className="rounded-sm bg-white/10 px-2 py-[0.12rem] text-xs font-bold">
               {VERSION_BADGE}
             </div>
           </div>
@@ -94,7 +94,7 @@ function Sidebar(): JSX.Element {
 
         {/* Contact Us */}
         <Link
-          className="relative flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:text-white/60"
+          className="relative flex w-full gap-x-3 rounded-md p-2.5 capitalize transition-colors hover:text-white/60"
           href="mailto:support@keyshade.xyz?subject=Query"
         >
           <div>Contact Us</div>

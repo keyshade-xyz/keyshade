@@ -86,7 +86,7 @@ export default function DeleteIntegrationDialog() {
           <div className="flex gap-2 border-y-[0.5px] border-white/20 py-3">
             <Checkbox
               checked={confirmed}
-              className="mt-1 h-5 w-5 rounded border-[0.2px] border-white/40 bg-[#242528] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
+              className="mt-1 h-5 w-5 rounded-sm border-[0.2px] border-white/40 bg-[#242528] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
               id="confirm-delete-integration"
               onCheckedChange={(checked) => setConfirmed(Boolean(checked))}
             />

@@ -34,7 +34,7 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
   )
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
           <IntegrationIcon

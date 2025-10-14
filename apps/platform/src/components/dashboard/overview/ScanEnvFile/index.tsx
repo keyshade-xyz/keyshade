@@ -301,7 +301,7 @@ function ScanEnvModal({
               }
             >
               <SelectTrigger
-                className="h-fit w-full rounded-[0.375rem] bg-[#393A3B]"
+                className="h-fit w-full rounded-md bg-[#393A3B]"
                 id="environment-select"
               >
                 <SelectValue placeholder="Select environment">

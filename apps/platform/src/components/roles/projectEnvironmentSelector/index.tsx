@@ -68,7 +68,7 @@ function SelectedProjectComponent({
   }, [combinationEnvironments, project.slug, projectEnvironmentSelection])
 
   return (
-    <div className="flex w-[20rem] flex-col items-center justify-between gap-y-5 rounded-[0.375rem] border-[0.013rem] border-white/10 bg-neutral-800 px-3 py-2 text-white">
+    <div className="flex w-[20rem] flex-col items-center justify-between gap-y-5 rounded-md border-[0.013rem] border-white/10 bg-neutral-800 px-3 py-2 text-white">
       <div className="flex w-full items-center justify-between gap-4">
         <span className="text-sm font-medium">{project.name}</span>
         <button
@@ -83,7 +83,7 @@ function SelectedProjectComponent({
           <div className="flex items-center gap-x-3" key={env.slug}>
             <Checkbox
               checked={isChecked[env.slug]}
-              className="h-5 w-5 rounded border-white/30 bg-transparent accent-white"
+              className="h-5 w-5 rounded-sm border-white/30 bg-transparent accent-white"
               id={env.slug}
               onCheckedChange={() =>
                 handleToggleEnvironmentSelect(project, env)
@@ -258,7 +258,7 @@ export default function ProjectEnvironmentSelector({
               handleAddProjectSelection(project)
             }}
           >
-            <SelectTrigger className="h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5">
+            <SelectTrigger className="h-9 w-[20rem] rounded-md border-[0.013rem] border-white/10 bg-white/5">
               <SelectValue placeholder="Select project" />
             </SelectTrigger>
             <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
@@ -276,7 +276,7 @@ export default function ProjectEnvironmentSelector({
         ))}
 
       <Button
-        className="flex w-[9rem] items-center justify-between gap-x-2 border border-white/10 bg-neutral-800 px-4"
+        className="flex w-36 items-center justify-between gap-x-2 border border-white/10 bg-neutral-800 px-4"
         disabled={
           Object.entries(projectEnvironmentCombinations).length ===
           Object.entries(projectEnvironmentSelection).length +

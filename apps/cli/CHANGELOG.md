@@ -311,3 +311,10 @@
 ### Patches
 
 - `keyshade init` no longer overwrites existing private-keys.json file.
+
+# 3.4.1.stage-1
+
+### Patches
+
+- Removed API key validation from `keyshade run`
+- Fixed invalid field referencing in variable, and secret commands
