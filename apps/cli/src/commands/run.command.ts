@@ -71,7 +71,6 @@ export default class RunCommand extends BaseCommand {
       configurations.environment = options.environment
     }
 
-    await this.checkApiKeyValidity(this.baseUrl, this.token)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
     await this.prefetchConfigurations(configurations.privateKey)
@@ -282,26 +281,6 @@ export default class RunCommand extends BaseCommand {
     return await new Promise((resolve) => {
       setTimeout(resolve, ms)
     })
-  }
-
-  private async checkApiKeyValidity(
-    baseUrl: string,
-    apiKey: string
-  ): Promise<void> {
-    Logger.info('Checking API key validity...')
-    const response = await fetch(`${baseUrl}/api/api-key/access/live-updates`, {
-      headers: {
-        'x-keyshade-token': apiKey
-      }
-    })
-
-    if (!response.ok) {
-      throw new Error(
-        'API key is not valid. Please check the key and try again.'
-      )
-    }
-
-    Logger.info('API key is valid!')
   }
 
   private spawnCommand() {

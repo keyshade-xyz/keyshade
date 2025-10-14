@@ -116,10 +116,6 @@ export default class CreateSecret extends BaseCommand {
       })
     }
 
-    if (!note) {
-      note = name
-    }
-
     if (rawEntries) {
       for (const entry of rawEntries) {
         // Check for entry format
