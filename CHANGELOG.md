@@ -1,3 +1,9 @@
+## [2.36.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0...v2.36.0-stage.1) (2025-10-15)
+
+### 🚀 Features
+
+* Setup design system with design tokens ([#1200](https://github.com/keyshade-xyz/keyshade/issues/1200)) ([13b596e](https://github.com/keyshade-xyz/keyshade/commit/13b596e3cccd638f07f0e9d7dbacecf23e36509a))
+
 ## [2.35.0](https://github.com/keyshade-xyz/keyshade/compare/v2.34.1...v2.35.0) (2025-10-14)
 
 ### 🚀 Features
