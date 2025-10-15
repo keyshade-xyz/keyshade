@@ -170,22 +170,23 @@ export class WorkspaceCacheService {
   }
 
   async getWorkspaceAdmin(
-    workspaceSlug: Workspace['slug']
+    workspaceId: Workspace['id']
   ): Promise<User['id'] | null> {
     this.logger.log(
-      `Attempting to fetch workspace ${workspaceSlug} admin from cache`
+      `Attempting to fetch workspace admin for workspace ${workspaceId} from cache`
     )
 
-    const key = this.getWorkspaceAdminKey(workspaceSlug)
-    const userId = this.redisClient.publisher.get(key)
+    const key = this.getWorkspaceAdminKey(workspaceId)
+    const userId = await this.redisClient.publisher.get(key)
 
-    if (userId === null) {
+    if (!userId) {
       this.logger.log('Workspace admin not found in cache')
-    } else {
-      this.logger.log(
-        `Workspace admin found in cache for workspace ${workspaceSlug}`
-      )
+      return null
     }
+
+    this.logger.log(
+      `Workspace admin found in cache for workspace ${workspaceId}`
+    )
 
     return userId
   }
@@ -362,8 +363,8 @@ export class WorkspaceCacheService {
     return `${WorkspaceCacheService.RAW_WORKSPACE_PREFIX}${workspaceSlug}`
   }
 
-  private getWorkspaceAdminKey(workspaceSlug: Workspace['slug']): string {
-    return `${WorkspaceCacheService.WORKSPACE_ADMIN_PREFIX}${workspaceSlug}`
+  private getWorkspaceAdminKey(workspaceId: Workspace['id']): string {
+    return `${WorkspaceCacheService.WORKSPACE_ADMIN_PREFIX}${workspaceId}`
   }
 
   private getWorkspaceKeysKey(workspaceId: Workspace['id']): string {

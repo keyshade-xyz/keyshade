@@ -97,20 +97,33 @@ export type IntegrationWithEnvironmentsAndMetadata<
 
 export interface HydratedIntegration extends Integration {
   lastUpdatedBy: {
-  /** Integration triggers/events */
-  notifyOn: string[]
-  /** Integration slug */
-  slug: string
-  /** Workspace ID for the integration */
-  workspaceId: string
-  /** Total number of triggers for this integration */
-  totalTriggers: number
+    id: string
+    name?: string | null
+    profilePictureUrl?: string | null
+  } | null
 
+  /** Total number of triggers for this integration (computed by hydration) */
+  totalTriggers?: number
+
+  entitlements: {
+    canDelete: boolean
+    canUpdate: boolean
+  }
+  // Included relational fields from Prisma InclusionQuery.Integration
+  workspace?: Workspace
+  project?: {
+    id: Project['id']
+    name: Project['name']
+    slug: Project['slug']
+    workspaceId: Project['workspaceId']
+  } | null
+  environments?: Array<{
+    id: Environment['id']
+    name: Environment['name']
+    slug: Environment['slug']
+  }>
 }
 
 export interface RawIntegration
-  extends Omit<HydratedIntegration, 'entitlements'> {
-  id: string
-}
-
+  extends Omit<HydratedIntegration, 'entitlements' | 'totalTriggers'> {}
 export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'

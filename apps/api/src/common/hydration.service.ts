@@ -1,4 +1,7 @@
-import { HydratedIntegration, RawIntegration } from '@/integration/integration.types'
+import {
+  HydratedIntegration,
+  RawIntegration
+} from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Injectable, Logger } from '@nestjs/common'
