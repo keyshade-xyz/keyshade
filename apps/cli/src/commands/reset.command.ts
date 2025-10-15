@@ -5,10 +5,14 @@ import type {
 import BaseCommand from '@/commands/base.command'
 import { confirm, log } from '@clack/prompts'
 import { handleSIGINT } from '@/util/prompt'
-import os from 'os'
-import path from 'path'
-import { access, chmod, mkdir, writeFile } from 'fs/promises'
-import { constants } from 'fs'
+import { existsSync } from 'fs'
+import { chmod } from 'fs/promises'
+import {
+  getDefaultProfileConfigurationFilePath,
+  getProfileConfigurationFilePath,
+  writeDefaultProfileConfig,
+  writeProfileConfig
+} from '@/util/configuration'
 
 const KEY_PERMISSIONS = 0o600
 
@@ -18,7 +22,13 @@ export default class ResetCommand extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'Reset local Keyshade CLI profiles to empty objects'
+    return 'Resets your local profile configurations'
+  }
+
+  getUsage(): string {
+    return `keyshade reset [options]
+
+Resets your local profile configurations stored in ~/.keyshade/default-profile.json and ~/.keyshade/profiles.json.`
   }
 
   getOptions(): CommandOption[] {
@@ -54,49 +64,47 @@ export default class ResetCommand extends BaseCommand {
       }
     }
 
-    const homeDirectory = os.homedir()
-    const keyshadeDirectory = path.join(homeDirectory, '.keyshade')
     const targets = [
       {
         fileName: 'default-profile.json',
         displayName: 'Default profile',
-        filePath: path.join(keyshadeDirectory, 'default-profile.json')
+        filePath: getDefaultProfileConfigurationFilePath(),
+        reset: async () => {
+          await writeDefaultProfileConfig(JSON.parse('{}'))
+        }
       },
       {
         fileName: 'profiles.json',
         displayName: 'Profiles',
-        filePath: path.join(keyshadeDirectory, 'profiles.json')
+        filePath: getProfileConfigurationFilePath(),
+        reset: async () => {
+          await writeProfileConfig(JSON.parse('{}'))
+        }
       }
     ]
 
-    if (!dryRun) {
-      await this.ensureDirectory(keyshadeDirectory)
-    }
-
     for (const target of targets) {
-      const exists = await this.fileExists(target.filePath)
+      const existed = existsSync(target.filePath)
 
       if (dryRun) {
         log.info(
-          `[dry-run] Would ${exists ? 'reset' : 'create'} ${target.displayName}`
+          `[dry-run] Would ${existed ? 'reset' : 'create'} ${target.displayName}`
         )
         continue
       }
 
       try {
-        if (exists) {
-          await this.writeResetFile(target.filePath)
-          log.info(`Reset ${target.displayName}`)
-        } else {
-          await this.createResetFile(target.filePath)
-          log.info(`Created ${target.displayName}`)
+        await target.reset()
+
+        if (!existed) {
+          await chmod(target.filePath, KEY_PERMISSIONS)
         }
+
+        log.info(`${existed ? 'Reset' : 'Created'} ${target.displayName}`)
       } catch (error) {
         const { message } = error as Error
         process.exitCode = 1
-        throw new Error(
-          `Failed to reset ${target.fileName}. ${message}. See --verbose for more info.`
-        )
+        throw new Error(`Failed to reset ${target.fileName}. ${message}`)
       }
     }
 
@@ -105,30 +113,5 @@ export default class ResetCommand extends BaseCommand {
     } else {
       log.success('Local Keyshade profile files were reset successfully.')
     }
-  }
-
-  private async fileExists(filePath: string): Promise<boolean> {
-    try {
-      await access(filePath, constants.F_OK)
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  private async ensureDirectory(directory: string): Promise<void> {
-    await mkdir(directory, { recursive: true })
-  }
-
-  private async writeResetFile(filePath: string): Promise<void> {
-    await writeFile(filePath, '{}\n', { encoding: 'utf8' })
-  }
-
-  private async createResetFile(filePath: string): Promise<void> {
-    await writeFile(filePath, '{}\n', {
-      encoding: 'utf8',
-      mode: KEY_PERMISSIONS
-    })
-    await chmod(filePath, KEY_PERMISSIONS)
   }
 }
