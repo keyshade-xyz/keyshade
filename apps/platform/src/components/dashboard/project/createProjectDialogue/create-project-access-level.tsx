@@ -26,9 +26,9 @@ export default function CreateProjectAccessLevel({
   ] as const satisfies readonly CreateProjectRequest['accessLevel'][]
 
   return (
-    <div className="flex h-[2.25rem] w-full items-center gap-4">
+    <div className="flex h-9 w-full items-center gap-4">
       <Label
-        className="font-geist h-[0.875rem] w-[5.5rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+        className="font-geist h-3.5 w-22 gap-1 text-left text-[0.875rem] font-medium "
         htmlFor="accessLevel"
       >
         Access Level
@@ -39,14 +39,14 @@ export default function CreateProjectAccessLevel({
         }}
         value={value}
       >
-        <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 focus:border-[#3b82f6]">
+        <SelectTrigger className=" h-9 w-[20rem] rounded-md border-[0.013rem] border-white/10 bg-white/5 focus:border-[#3b82f6]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white ">
           <SelectGroup>
             {ACCESS_LEVELS.map((accessValue) => (
               <SelectItem
-                className="group cursor-pointer rounded-sm"
+                className="group cursor-pointer rounded-xs"
                 key={accessValue.toUpperCase()}
                 value={accessValue.toUpperCase()}
               >

@@ -19,6 +19,21 @@ export default class AuthController {
     this.apiClient = new APIClient(this.backendURL)
   }
 
+  private buildQueryParams(params: {
+    mode?: string
+    os?: string
+    agent?: string
+    email?: string
+    otp?: string
+  }): string {
+    const query = new URLSearchParams()
+    for (const [key, value] of Object.entries(params)) {
+      if (value != undefined) query.append(key, value)
+    }
+    const result = query.toString()
+    return result ? `?${result}` : ''
+  }
+
   async resendOTP(
     request: ResendOTPRequest,
     headers?: Record<string, string>
@@ -35,8 +50,16 @@ export default class AuthController {
     request: ValidateOTPRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<ValidateOTPResponse>> {
+    const queryParams = this.buildQueryParams({
+      email: request.email,
+      otp: request.otp,
+      mode: request.mode,
+      os: request.os,
+      agent: request.agent
+    })
+
     const response = await this.apiClient.post(
-      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}&mode=${request.mode}&os=${request.os}&agent=${request.agent}`,
+      `/api/auth/validate-otp${queryParams}`,
       request,
       headers
     )
@@ -47,8 +70,14 @@ export default class AuthController {
     request: SendOTPRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<SendOTPResponse>> {
+    const queryParams = this.buildQueryParams({
+      mode: request.mode,
+      os: request.os,
+      agent: request.agent
+    })
+
     const response = await this.apiClient.post(
-      `/api/auth/send-otp/${encodeURIComponent(request.email)}?mode=${request.mode}&os=${request.os}&agent=${request.agent}`,
+      `/api/auth/send-otp/${encodeURIComponent(request.email)}${queryParams}`,
       request,
       headers
     )

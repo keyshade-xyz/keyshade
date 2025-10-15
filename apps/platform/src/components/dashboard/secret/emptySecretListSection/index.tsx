@@ -13,17 +13,17 @@ export default function EmptySecretListContent(): React.JSX.Element {
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
       <SecretSVG width="100" />
 
-      <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
-        <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
+      <div className="flex h-20 w-121 flex-col items-center justify-center gap-4">
+        <p className="h-10 w-121 text-center text-[32px] font-normal">
           Declare your first secret
         </p>
-        <p className="h-[1.5rem] w-[30.25rem] text-center text-[16px] font-[500]">
+        <p className="h-6 w-121 text-center text-[16px] font-medium">
           Declare and store a secret against different environments
         </p>
       </div>
 
       <Button
-        className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+        className="h-9 rounded-md bg-white text-black hover:bg-gray-300"
         disabled={!isAuthorizedToCreateSecrets}
         onClick={() => setIsCreateSecretOpen(true)}
       >
