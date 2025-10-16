@@ -104,7 +104,7 @@ describe('Project Controller Tests', () => {
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
       name: 'John Doe',
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       isOnboardingFinished: true,
       isActive: true,
       isAdmin: false

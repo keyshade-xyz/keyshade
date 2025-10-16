@@ -5,7 +5,7 @@ describe('Util Tests', () => {
     const object = {
       id: '1',
       name: 'John Doe',
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       profilePictureUrl: 'https://keyshade.xyz/johndoe.jpg',
       isActive: true,
       isOnboardingFinished: false,

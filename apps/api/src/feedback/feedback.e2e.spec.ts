@@ -45,7 +45,7 @@ describe('Feedback Controller (E2E)', () => {
 
   beforeEach(async () => {
     user = await userService.createUser({
-      email: 'janice@keyshade.xyz',
+      email: 'janice@keyshade.io',
       name: 'Janice',
       isActive: true,
       isAdmin: false,

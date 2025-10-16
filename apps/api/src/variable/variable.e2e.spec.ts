@@ -109,7 +109,7 @@ describe('Variable Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })

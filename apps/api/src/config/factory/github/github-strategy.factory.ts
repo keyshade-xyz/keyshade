@@ -31,7 +31,7 @@ export class GithubOAuthStrategyFactory implements OAuthStrategyFactory {
       ) as GithubStrategy
     } else {
       logger.error(
-        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.'
+        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.'
       )
       return null
     }
