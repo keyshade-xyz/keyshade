@@ -1,3 +1,9 @@
+## [2.36.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.36.0-stage.1...v2.36.0-stage.2) (2025-10-16)
+
+### 🚀 Features
+
+* renamed to keyshade.io ([48bc1a5](https://github.com/keyshade-xyz/keyshade/commit/48bc1a5e390653b0beb1fd918741b187b31caf6c))
+
 ## [2.36.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0...v2.36.0-stage.1) (2025-10-15)
 
 ### 🚀 Features
