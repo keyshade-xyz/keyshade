@@ -22,7 +22,7 @@ function Footer(): React.JSX.Element {
             particleColor="#FFFFFF"
             particleDensity={1200}
           />
-          <div className="absolute inset-0 h-full w-full bg-[#04050A] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
+          <div className="absolute inset-0 h-full w-full bg-[#010f13] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
         </div>
       </div>
       <div className="mx-auto flex w-[90%] items-center justify-center">
@@ -45,8 +45,9 @@ function Footer(): React.JSX.Element {
                 >
                   <EncryptText TARGET_TEXT="Docs" />
                 </a>
-                <a className="text-white/60 transition-colors hover:text-white"
-                  href='https://blog.keyshade.xyz/'
+                <a
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="https://blog.keyshade.xyz/"
                   rel="noreferrer"
                   target="_blank"
                 >

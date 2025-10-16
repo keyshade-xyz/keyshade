@@ -1,80 +1,76 @@
 'use client'
 import Link from 'next/link'
-import { Logo, LogoM } from '@public/shared'
-import { Button } from '@/components/ui/moving-border'
+import { ArrowRight, Logo } from '@public/shared'
+import { GithubSVG } from '@public/navbar'
+import { Geist } from 'next/font/google'
 import { isUserLoggedIn } from '@/utils/is-user-logged-in'
+import CtaButton from '@/components/CtaButton'
+import TertiaryButton from '@/components/TertiaryButton'
+
+const geist = Geist({
+  subsets: ['latin']
+})
 
 function Navbar(): React.JSX.Element {
+  const navContent: { name: string; href: string }[] = [
+    {
+      name: 'Docs',
+      href: 'https://docs.keyshade.xyz/'
+    },
+    {
+      name: 'About',
+      href: '/about'
+    },
+    {
+      name: 'Pricing',
+      href: '/pricing'
+    },
+    {
+      name: 'Blog',
+      href: 'https://blog.keyshade.xyz/'
+    }
+  ]
+
   return (
-    <nav
-      className="mx-10 mt-5 flex w-full items-center justify-between rounded-full border border-[#728689]/60 px-2 py-1 md:w-[79.625rem] md:px-[2.94rem]"
-      style={{
-        background:
-          'linear-gradient(180deg, rgba(226, 232, 255, 0.15) 0%, rgba(226, 232, 255, 0.03) 100%)'
-      }}
-    >
-      <Link href="/" tabIndex={-1}>
-        <Logo className="hidden md:flex" />
-        <LogoM className="flex md:hidden" />
+    <div className="mx-12 my-4 flex w-full max-w-[82rem] items-center justify-between">
+      <Link href="/">
+        <Logo className="w-[270px]" />
       </Link>
-      <ul className="hidden gap-x-4 text-white/60 md:flex">
-        <li>
-          <a
-            href="https://docs.keyshade.xyz/"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Docs
-          </a>
-        </li>
-        <li>
-          <Link href="/about">About</Link>
-        </li>
-        <li>
-          <Link href="/pricing">Pricing</Link>
-        </li>
-        <li>
-          <Link href="/share">Share</Link>
-        </li>
-        <li>
-          <a
-            href="https://blog.keyshade.xyz/"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Blog
-          </a>
-        </li>
-        <li className="text-white/70">
-          <a
-            href="https://cal.com/keyshade/demo"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Book a Demo
-          </a>
-        </li>
-      </ul>
-      <div className="flex items-center gap-x-4">
-        <a href="https://git.new/keyshade">
-          <button
-            className="hidden rounded-full border border-white/50 px-4 py-2 text-white/80 md:flex"
-            type="button"
-          >
-            View GitHub
-          </button>
+      <div className={geist.className}>
+        {navContent.map((item) => {
+          return (
+            <Link className="px-4 py-2" href={item.href} key={item.name}>
+              {item.name}
+            </Link>
+          )
+        })}
+      </div>
+      <div className="flex items-center gap-4">
+        <a
+          href="https://github.com/keyshade-xyz/keyshade"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <TertiaryButton>
+            <GithubSVG height={24} width={26} /> Github
+          </TertiaryButton>
         </a>
         <a
           href="https://app.keyshade.xyz"
           rel="noopener noreferrer"
           target="_blank"
         >
-          <Button duration={6 * 1000}>
-            {isUserLoggedIn() ? 'Open app' : 'Join in'}
-          </Button>
+          <CtaButton>
+            {isUserLoggedIn() ? (
+              <span>Open App</span>
+            ) : (
+              <span>Get Started</span>
+            )}{' '}
+            <ArrowRight />
+          </CtaButton>
         </a>
       </div>
-    </nav>
+    </div>
   )
 }
 
