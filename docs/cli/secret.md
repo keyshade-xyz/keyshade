@@ -315,7 +315,7 @@ An optional note describing the usage of the secret.
 
 #### `-r, --rotate-after <string>`
 
-The duration in days after which the value of the secret should be rotated. Accepted values are `24` (1 day), `168` (7 days), `720` (30 days), `8760` (365 days) and `never`. Defaults to `never`.
+The duration in hours after which the value of the secret should be rotated. Accepted values are `24` (1 day), `168` (7 days), `720` (30 days), `8760` (365 days) and `never`. Defaults to `never`.
 
 #### `-e, --entry [entries...]`
 
