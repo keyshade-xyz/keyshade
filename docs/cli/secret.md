@@ -325,7 +325,7 @@ An array of values for the secret. If specified, should be in the form `<environ
 
 ```bash
 # Update secret's name and note
-keyshade secret update secret-1 --name "My Secret" --note "This is a secret"
+keyshade secret update secret-1 --name "MY_NEW_SECRET" --note "This is a secret"
 
 # Update the rotation time of a secret
 keyshade secret update secret-1 --rotate-after "24"

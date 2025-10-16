@@ -310,7 +310,7 @@ An array of values for the variable. If specified, should be in the form `<envir
 
 ```bash
 # Update variable's name and note
-keyshade variable update variable-1 --name "My Variable" --note "This is a variable"
+keyshade variable update variable-1 --name "MY_NEW_VARIABLE" --note "This is a variable"
 
 # Add more entries to a variable
 keyshade variable update port-1 --entry "dev=3000" "prod=8080"
