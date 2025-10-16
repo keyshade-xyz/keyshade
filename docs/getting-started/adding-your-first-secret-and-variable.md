@@ -26,6 +26,8 @@ Now, we can start creating our project.
 - Edit or add environments if you want to
 - Finally, click on **Create Project**
 
+> 💡 **Want to learn more about environments?** Check out our comprehensive [Environments documentation](../../internals/environments.md) to understand what environments are, how they work, and all the functionalities available for managing them.
+
 If the creation was successful, you should be greeted with a dialog like this:
 ![Success](../../blob/create-project-success.png) 
 You can download the private and public key then hit on **Close**.
@@ -48,6 +50,8 @@ If created successfully, your secret should look like this:
 
 ![Success](../../blob/secret.png)
 
+> 💡 **Want to learn more about secrets?** Check out our comprehensive [Secrets documentation](../../internals/secrets.md) to understand what secrets are, why they're used, and all the functionalities available for managing them.
+
 ## Creating a variable
 
 Lastly, let's create our first variable.
@@ -60,6 +64,8 @@ Lastly, let's create our first variable.
 If created successfully, your variable should look like this:
 
 ![Success](../../blob/variable.png)
+
+> 💡 **Want to learn more about variables?** Check out our comprehensive [Variables documentation](../../internals/variables.md) to understand what variables are, how they differ from secrets, and all the functionalities available for managing them.
 
 ## That's it!
 
