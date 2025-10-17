@@ -341,3 +341,9 @@
 ## Patches
 
 - Update domain to keyshade.io
+
+# 3.5.2
+
+## Patches
+
+- Update URL retrival in login command

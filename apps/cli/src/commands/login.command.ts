@@ -51,11 +51,22 @@ export default class LoginCommand extends BaseCommand {
           'Your email address to receive the sign-in verification code'
       },
       {
-        short: '-u',
+        short: '-b',
         long: '--base-url <string>',
         description: 'Custom Keyshade deployment URL'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade login [options]
+    
+    Log in with predefined email
+    keyshade login --email <email>
+    
+    Log in with a predefined deployment URL
+    keyshade login --base-url <api url>
+    `
   }
 
   async action({ options }: CommandActionData): Promise<void> {
@@ -75,7 +86,7 @@ export default class LoginCommand extends BaseCommand {
   private async gatherLoginInputs(
     options: CommandActionData['options']
   ): Promise<LoginState> {
-    const baseUrl = await this.getBaseUrl(options.baseUrl || this.baseUrl)
+    const baseUrl = await this.getBaseUrl(options.baseUrl)
     const email = await this.getEmail(options.email)
     return { email, baseUrl }
   }
@@ -265,6 +276,7 @@ export default class LoginCommand extends BaseCommand {
       /\/$/,
       ''
     )
+
     // since before login we won't have the base url, we initialize it here
     // defaulting to the main Keyshade deployment
     // this can be overridden by the user using --base-url option
