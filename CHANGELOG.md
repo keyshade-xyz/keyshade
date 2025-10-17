@@ -1,3 +1,14 @@
+## [2.36.0](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0...v2.36.0) (2025-10-17)
+
+### 🚀 Features
+
+* renamed to keyshade.io ([48bc1a5](https://github.com/keyshade-xyz/keyshade/commit/48bc1a5e390653b0beb1fd918741b187b31caf6c))
+* Setup design system with design tokens ([#1200](https://github.com/keyshade-xyz/keyshade/issues/1200)) ([13b596e](https://github.com/keyshade-xyz/keyshade/commit/13b596e3cccd638f07f0e9d7dbacecf23e36509a))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.36.0-stage.1 [skip ci] ([bfc6e62](https://github.com/keyshade-xyz/keyshade/commit/bfc6e62f1332d972339c3ac715d2a70c78182242))
+
 ## [2.36.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0...v2.36.0-stage.1) (2025-10-15)
 
 ### 🚀 Features
