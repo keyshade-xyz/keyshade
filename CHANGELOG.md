@@ -1,3 +1,9 @@
+## [2.39.0](https://github.com/keyshade-xyz/keyshade/compare/v2.38.0...v2.39.0) (2025-10-17)
+
+### 🚀 Features
+
+* **cli:** update URL determination in login command ([2c2b454](https://github.com/keyshade-xyz/keyshade/commit/2c2b454348646c0f161e2cb15eff90d8d9327647))
+
 ## [2.38.0](https://github.com/keyshade-xyz/keyshade/compare/v2.37.0...v2.38.0) (2025-10-17)
 
 ### 🚀 Features
