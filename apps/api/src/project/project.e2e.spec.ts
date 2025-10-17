@@ -112,7 +112,7 @@ describe('Project Controller Tests', () => {
 
     const createUser2 = await userService.createUser({
       name: 'Jane Doe',
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       isOnboardingFinished: true,
       isActive: true,
       isAdmin: false
@@ -955,7 +955,7 @@ describe('Project Controller Tests', () => {
       // Create a user
       const user = await userService.createUser({
         name: 'Johnny Doe',
-        email: 'johhny@keyshade.xyz',
+        email: 'johhny@keyshade.io',
         isOnboardingFinished: true,
         isActive: true,
         isAdmin: false

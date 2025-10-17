@@ -6,7 +6,7 @@ export default function AuthTnC() {
       By continuing, you acknowledge and agree to our <br />
       <a
         className="underline"
-        href="https://keyshade.xyz/terms_and_condition"
+        href="https://keyshade.io/terms_and_condition"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -15,7 +15,7 @@ export default function AuthTnC() {
       and{' '}
       <a
         className="underline"
-        href="https://keyshade.xyz/privacy"
+        href="https://keyshade.io/privacy"
         rel="noopener noreferrer"
         target="_blank"
       >
