@@ -11,8 +11,8 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import SidebarTab from './sidebarTab'
 import TierLimit from './tierLimit'
+import SidebarTab from './sidebarTab'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { VERSION_BADGE } from '@/constants/sidebar'
@@ -95,7 +95,7 @@ function Sidebar(): JSX.Element {
         {/* Contact Us */}
         <Link
           className="relative flex w-full gap-x-3 rounded-md p-2.5 capitalize transition-colors hover:text-white/60"
-          href="mailto:support@keyshade.xyz?subject=Query"
+          href="mailto:support@keyshade.io?subject=Query"
         >
           <div>Contact Us</div>
         </Link>

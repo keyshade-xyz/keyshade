@@ -34,7 +34,7 @@ function CreateIntegration(): React.JSX.Element {
     setSetupModalOpen(true)
   }
   const handleHowItWorks = () => {
-    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
+    const url = `https://docs.keyshade.io/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
     window.location.href = url
   }
   const handleSetupOpenChange = (open: boolean) => {

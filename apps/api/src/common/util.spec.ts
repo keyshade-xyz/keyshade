@@ -6,7 +6,7 @@ describe('Util Tests', () => {
       id: '1',
       name: 'John Doe',
       email: 'johndoe@keyshade.io',
-      profilePictureUrl: 'https://keyshade.xyz/johndoe.jpg',
+      profilePictureUrl: 'https://keyshade.io/johndoe.jpg',
       isActive: true,
       isOnboardingFinished: false,
       isAdmin: false

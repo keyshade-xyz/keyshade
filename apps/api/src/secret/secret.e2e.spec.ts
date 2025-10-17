@@ -125,7 +125,7 @@ describe('Secret Controller Tests', () => {
     })
 
     const createUser2 = await userService.createUser({
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
