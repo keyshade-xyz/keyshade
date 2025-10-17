@@ -139,6 +139,8 @@ export class AuthorityCheckerService {
             this.collectiveAuthoritiesCacheService
           )
 
+    // computed permittedAuthorities available for auth checks
+
     if (
       projectAccessLevel !== ProjectAccessLevel.GLOBAL ||
       authorities.length !== 1 ||
