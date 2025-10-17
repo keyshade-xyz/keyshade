@@ -4,8 +4,8 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
 import { Integrations } from '@keyshade/common'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import SetupIntegration from '../integrationSetup'
 import IntegrationIcon from '../integrationIcon'
+import SetupIntegration from '../integrationSetup'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,7 +27,7 @@ function CreateIntegration(): React.JSX.Element {
   }
   const integrationConfig = Integrations[integrationType]
   const integrationPermissions =
-    integrationConfig.events?.map(  
+    integrationConfig.events?.map(
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
   const handleNext = () => {
@@ -64,8 +64,8 @@ function CreateIntegration(): React.JSX.Element {
                   Integrate Keyshade with {integrationConfig.name}
                 </h2>
                 <p className="text-sm text-gray-400">
-                  Connect Keyshade with {integrationConfig.name} to send real-time
-                  project updates directly to your server.
+                  Connect Keyshade with {integrationConfig.name} to send
+                  real-time project updates directly to your server.
                 </p>
               </div>
             </DialogTitle>
