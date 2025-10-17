@@ -11,8 +11,8 @@ export const OnboardingReminder4Email = () => {
       </p>
       <p>
         Need help? Check our{' '}
-        <a href="https://docs.keyshade.xyz">documentation</a> or reach out to
-        our team for guidance.
+        <a href="https://docs.keyshade.io">documentation</a> or reach out to our
+        team for guidance.
       </p>
       <p>We’re here to help you secure your stack!</p>
     </BaseEmailTemplate>

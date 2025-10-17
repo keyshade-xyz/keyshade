@@ -335,3 +335,9 @@
 
 - Removed API key validation from `keyshade run`
 - Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.1
+
+## Patches
+
+- Update domain to keyshade.io

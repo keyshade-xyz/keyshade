@@ -220,7 +220,7 @@ export default class LoginCommand extends BaseCommand {
   private async handleLoginError(error?: string): Promise<void> {
     await showError(error || 'An unexpected error occurred during login')
     note(
-      `If you don't have an account, please sign up at ${chalk.blue.underline('https://app.keyshade.xyz/auth')}`
+      `If you don't have an account, please sign up at ${chalk.blue.underline('https://app.keyshade.io/auth')}`
     )
     process.exit(1)
   }
@@ -261,7 +261,7 @@ export default class LoginCommand extends BaseCommand {
     email: string,
     baseUrl?: string | null
   ): Promise<VerificationResult> {
-    const cleanBaseUrl = (baseUrl ?? 'https://api.keyshade.xyz').replace(
+    const cleanBaseUrl = (baseUrl ?? 'https://api.keyshade.io').replace(
       /\/$/,
       ''
     )
@@ -289,7 +289,7 @@ export default class LoginCommand extends BaseCommand {
     email: string,
     baseUrl?: string | null
   ): Promise<VerificationResult> {
-    const cleanBaseUrl = (baseUrl ?? 'https://api.keyshade.xyz').replace(
+    const cleanBaseUrl = (baseUrl ?? 'https://api.keyshade.io').replace(
       /\/$/,
       ''
     )
@@ -330,7 +330,7 @@ export default class LoginCommand extends BaseCommand {
       },
       token: data.token,
       sessionId: data.cliSessionId,
-      baseUrl: baseUrl ?? 'https://api.keyshade.xyz',
+      baseUrl: baseUrl ?? 'https://api.keyshade.io',
       metricsEnabled: false
     }
 
