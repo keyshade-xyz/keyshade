@@ -1,3 +1,9 @@
+## [2.38.0](https://github.com/keyshade-xyz/keyshade/compare/v2.37.0...v2.38.0) (2025-10-17)
+
+### 🚀 Features
+
+* updated links ([550aff1](https://github.com/keyshade-xyz/keyshade/commit/550aff1368eda810b655a09075dce2a896ed87ef))
+
 ## [2.37.0](https://github.com/keyshade-xyz/keyshade/compare/v2.36.0...v2.37.0) (2025-10-17)
 
 ### 🚀 Features
