@@ -3,21 +3,21 @@
 import { Check } from 'lucide-react'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
-import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
+import type { Workspace } from '@keyshade/schema'
 import { cn } from '@/lib/utils'
 import { selectedWorkspaceAtom } from '@/store'
 import { CommandItem } from '@/components/ui/command'
 import { setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 interface WorkspaceListItemProps {
-  workspace: WorkspaceWithTierLimitAndProjectCount
+  workspace: Workspace
   onClose: () => void
 }
 
 export function WorkspaceListItem({
   workspace,
   onClose
-}: WorkspaceListItemProps) {
+}: WorkspaceListItemProps): React.JSX.Element {
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
@@ -27,7 +27,7 @@ export function WorkspaceListItem({
 
   const handleSelect = () => {
     setSelectedWorkspace(workspace)
-    setSelectedWorkspaceToStorage(workspace);
+    setSelectedWorkspaceToStorage(workspace)
     router.replace('/')
     onClose()
   }

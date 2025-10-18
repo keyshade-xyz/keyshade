@@ -8,22 +8,11 @@ import { Skeleton } from './skeleton'
 import { WorkspaceListItem } from './workspace-list-item'
 import { InfiniteScrollList } from './infinite-scroll-list'
 import { Badge } from './badge'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import ControllerInstance from '@/lib/controller-instance'
-import {
-  allWorkspacesAtom,
-  globalSearchDataAtom,
-  selectedWorkspaceAtom
-} from '@/store'
+import { allWorkspacesAtom, globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import {
-  getSelectedWorkspaceFromStorage,
-  setSelectedWorkspaceToStorage
-} from '@/store/workspace'
+import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 export function Combobox(): React.JSX.Element {
   const workspaceFromStorage = getSelectedWorkspaceFromStorage()
