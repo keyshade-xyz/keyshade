@@ -64,11 +64,11 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
 
   const footerLegalLinks = {
     privacyPolicy: {
-      href: 'https://www.keyshade.xyz/privacy',
+      href: 'https://www.keyshade.io/privacy',
       text: 'Privacy Policy'
     },
     termsAndConditions: {
-      href: 'https://www.keyshade.xyz/terms_and_condition',
+      href: 'https://www.keyshade.io/terms_and_condition',
       text: 'Terms and Conditions'
     },
     unsubscribe: { href: '#', text: 'Unsubscribe' }

@@ -1,3 +1,45 @@
+## [2.40.0](https://github.com/keyshade-xyz/keyshade/compare/v2.39.0...v2.40.0) (2025-10-18)
+
+### 🚀 Features
+
+* **cli:** update keyshade run command ([f139ec3](https://github.com/keyshade-xyz/keyshade/commit/f139ec3309fc78bb5dcaa53b435fec298b572c1d))
+
+## [2.39.0](https://github.com/keyshade-xyz/keyshade/compare/v2.38.0...v2.39.0) (2025-10-17)
+
+### 🚀 Features
+
+* **cli:** update URL determination in login command ([2c2b454](https://github.com/keyshade-xyz/keyshade/commit/2c2b454348646c0f161e2cb15eff90d8d9327647))
+
+## [2.38.0](https://github.com/keyshade-xyz/keyshade/compare/v2.37.0...v2.38.0) (2025-10-17)
+
+### 🚀 Features
+
+* updated links ([550aff1](https://github.com/keyshade-xyz/keyshade/commit/550aff1368eda810b655a09075dce2a896ed87ef))
+
+## [2.37.0](https://github.com/keyshade-xyz/keyshade/compare/v2.36.0...v2.37.0) (2025-10-17)
+
+### 🚀 Features
+
+* renamed more links ([f743191](https://github.com/keyshade-xyz/keyshade/commit/f7431915f3797a8604536d2eff890b7a0ef0c2fd))
+* renamed more links ([ebf8621](https://github.com/keyshade-xyz/keyshade/commit/ebf8621b843c3a9594cc5b605a93b02a7072d3ad))
+
+## [2.36.0](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0...v2.36.0) (2025-10-17)
+
+### 🚀 Features
+
+* renamed to keyshade.io ([48bc1a5](https://github.com/keyshade-xyz/keyshade/commit/48bc1a5e390653b0beb1fd918741b187b31caf6c))
+* Setup design system with design tokens ([#1200](https://github.com/keyshade-xyz/keyshade/issues/1200)) ([13b596e](https://github.com/keyshade-xyz/keyshade/commit/13b596e3cccd638f07f0e9d7dbacecf23e36509a))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.36.0-stage.1 [skip ci] ([bfc6e62](https://github.com/keyshade-xyz/keyshade/commit/bfc6e62f1332d972339c3ac715d2a70c78182242))
+
+## [2.36.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.36.0-stage.1...v2.36.0-stage.2) (2025-10-16)
+
+### 🚀 Features
+
+* renamed to keyshade.io ([48bc1a5](https://github.com/keyshade-xyz/keyshade/commit/48bc1a5e390653b0beb1fd918741b187b31caf6c))
+
 ## [2.36.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.35.0...v2.36.0-stage.1) (2025-10-15)
 
 ### 🚀 Features

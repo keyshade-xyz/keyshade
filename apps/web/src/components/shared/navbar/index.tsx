@@ -20,7 +20,7 @@ function Navbar(): React.JSX.Element {
       <ul className="hidden gap-x-4 text-white/60 md:flex">
         <li>
           <a
-            href="https://docs.keyshade.xyz/"
+            href="https://docs.keyshade.io/"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -38,7 +38,7 @@ function Navbar(): React.JSX.Element {
         </li>
         <li>
           <a
-            href="https://blog.keyshade.xyz/"
+            href="https://blog.keyshade.io/"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -65,7 +65,7 @@ function Navbar(): React.JSX.Element {
           </button>
         </a>
         <a
-          href="https://app.keyshade.xyz"
+          href="https://app.keyshade.io"
           rel="noopener noreferrer"
           target="_blank"
         >
