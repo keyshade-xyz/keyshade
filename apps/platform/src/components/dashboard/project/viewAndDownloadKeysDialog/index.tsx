@@ -97,7 +97,7 @@ export default function ViewAndDownloadProjectKeysDialog({
             </Label>
             <a
               className="flex items-center gap-1 text-xs text-blue-400 transition-colors hover:text-blue-300"
-              href="https://docs.keyshade.xyz/cli/introduction"
+              href="https://docs.keyshade.io/cli/introduction"
               rel="noopener noreferrer"
               target="_blank"
             >

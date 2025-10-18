@@ -22,7 +22,7 @@ import { AuthorityCheckerService } from './service/authority-checker.service'
       secret: process.env.JWT_SECRET ?? 'secret',
       signOptions: {
         expiresIn: '30d',
-        issuer: 'keyshade.xyz',
+        issuer: 'keyshade.io',
         algorithm: 'HS256'
       }
     }),

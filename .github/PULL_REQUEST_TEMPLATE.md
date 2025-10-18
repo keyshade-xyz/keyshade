@@ -37,5 +37,5 @@ _Add screenshots of relevant screens_
 
 ### Documentation Update
 
-- [ ] This PR requires an update to the documentation at [docs.keyshade.xyz](https://docs.keyshade.xyz)
+- [ ] This PR requires an update to the documentation at [docs.keyshade.io](https://docs.keyshade.io)
 - [ ] I have made the necessary updates to the documentation, or no documentation changes are required.

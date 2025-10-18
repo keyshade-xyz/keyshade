@@ -146,7 +146,7 @@ describe('Share Secret Tests', () => {
         method: 'PUT',
         url: `/share-secret/${share.hash}/add-email`,
         query: {
-          email: 'john@keyshade.xyz'
+          email: 'john@keyshade.io'
         }
       })
 
@@ -159,14 +159,14 @@ describe('Share Secret Tests', () => {
       })
 
       expect(updatedShare).toBeDefined()
-      expect(updatedShare.recepientEmails).toContain('john@keyshade.xyz')
+      expect(updatedShare.recepientEmails).toContain('john@keyshade.io')
     })
     it('should be able to add the same email to the same share twice', async () => {
       const response = await app.inject({
         method: 'PUT',
         url: `/share-secret/${share.hash}/add-email`,
         query: {
-          email: 'john@keyshade.xyz'
+          email: 'john@keyshade.io'
         }
       })
 
@@ -176,7 +176,7 @@ describe('Share Secret Tests', () => {
         method: 'PUT',
         url: `/share-secret/${share.hash}/add-email`,
         query: {
-          email: 'john@keyshade.xyz'
+          email: 'john@keyshade.io'
         }
       })
 
@@ -190,14 +190,14 @@ describe('Share Secret Tests', () => {
 
       expect(updatedShare).toBeDefined()
       expect(updatedShare.recepientEmails).toHaveLength(1)
-      expect(updatedShare.recepientEmails).toContain('john@keyshade.xyz')
+      expect(updatedShare.recepientEmails).toContain('john@keyshade.io')
     })
     it('should be able to add multiple emails to a share', async () => {
       const response = await app.inject({
         method: 'PUT',
         url: `/share-secret/${share.hash}/add-email`,
         query: {
-          email: 'john@keyshade.xyz'
+          email: 'john@keyshade.io'
         }
       })
 
@@ -207,7 +207,7 @@ describe('Share Secret Tests', () => {
         method: 'PUT',
         url: `/share-secret/${share.hash}/add-email`,
         query: {
-          email: 'jane@keyshade.xyz'
+          email: 'jane@keyshade.io'
         }
       })
 
@@ -221,15 +221,15 @@ describe('Share Secret Tests', () => {
 
       expect(updatedShare).toBeDefined()
       expect(updatedShare.recepientEmails).toHaveLength(2)
-      expect(updatedShare.recepientEmails).toContain('john@keyshade.xyz')
-      expect(updatedShare.recepientEmails).toContain('jane@keyshade.xyz')
+      expect(updatedShare.recepientEmails).toContain('john@keyshade.io')
+      expect(updatedShare.recepientEmails).toContain('jane@keyshade.io')
     })
     it('should not be able to add email to a non-existing share', async () => {
       const response = await app.inject({
         method: 'PUT',
         url: `/share-secret/invalid-hash/add-email`,
         query: {
-          email: 'john@keyshade.xyz'
+          email: 'john@keyshade.io'
         }
       })
 

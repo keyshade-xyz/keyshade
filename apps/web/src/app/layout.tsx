@@ -9,7 +9,7 @@ const description =
 const name = 'keyshade'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://keyshade.xyz/'),
+  metadataBase: new URL('https://keyshade.io/'),
 
   title: {
     default: name,
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     description,
     type: 'website',
     locale: 'en_US',
-    images: 'https://keyshade.xyz/thumbnail.png'
+    images: 'https://keyshade.io/thumbnail.png'
   },
 
   twitter: {

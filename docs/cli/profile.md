@@ -40,7 +40,7 @@ The API key to use with this profile. This is a required field.
 
 #### `-b, --base-url <url>`
 
-The base URL of the API to use with this profile. The default is `https://api.keyshade.xyz`.
+The base URL of the API to use with this profile. The default is `https://api.keyshade.io`.
 
 #### `--set-default`
 

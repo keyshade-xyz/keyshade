@@ -80,7 +80,7 @@ echo "📄 Updating Homebrew formula..."
 cat > Formula/keyshade.rb <<EOF
 class Keyshade < Formula
   desc "Keyshade CLI - Secure, real-time secret and configuration management"
-  homepage "https://keyshade.xyz"
+  homepage "https://keyshade.io"
   version "${CLI_VERSION}"
   license "MIT"
 

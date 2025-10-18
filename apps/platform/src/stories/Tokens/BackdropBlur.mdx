@@ -1,0 +1,78 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import '../../app/global.css'
+
+export const BackdropBlur = ({ blur }) => (
+  <div
+    className={`aspect-square h-32 w-32 bg-white/50 ${blur} rounded-full border`}
+  />
+)
+
+export const backdropBlurTokens = [
+  {
+    class: 'backdrop-blur-none',
+    dimension: 'none'
+  },
+  {
+    class: 'backdrop-blur-xs',
+    dimension: '4px'
+  },
+  {
+    class: 'backdrop-blur-sm',
+    dimension: '8px'
+  },
+  {
+    class: 'backdrop-blur-md',
+    dimension: '12px'
+  },
+  {
+    class: 'backdrop-blur-lg',
+    dimension: '16px'
+  },
+  {
+    class: 'backdrop-blur-xl',
+    dimension: '24px'
+  },
+  {
+    class: 'backdrop-blur-2xl',
+    dimension: '40px'
+  },
+  {
+    class: 'backdrop-blur-3xl',
+    dimension: '64px'
+  }
+]
+
+<Meta title="Tokens/Backdrop Blur" />
+
+# Backdrop Blur Tokens
+
+At Keyshade we use a consistent set of backdrop blur values to ensure a cohesive design language across our platform. These backdrop blur tokens are from default Tailwind CSS configuration.
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Dimension</th>
+      <th>Preview</th>
+    </tr>
+  </thead>
+  <tbody>
+    {backdropBlurTokens.map((token) => (
+      <tr key={token.class}>
+        <td>{token.class}</td>
+        <td>{token.dimension}</td>
+        <td
+          style={{
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            padding: '8px'
+          }}
+        >
+          <BackdropBlur blur={token.class} />
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>

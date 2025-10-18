@@ -39,14 +39,15 @@ function Footer(): React.JSX.Element {
               </span>
               <ul className="mt-3 flex flex-col gap-y-3">
                 <a
-                  href="https://docs.keyshade.xyz/"
+                  href="https://docs.keyshade.io/"
                   rel="noreferrer"
                   target="_blank"
                 >
                   <EncryptText TARGET_TEXT="Docs" />
                 </a>
-                <a className="text-white/60 transition-colors hover:text-white"
-                  href='https://blog.keyshade.xyz/'
+                <a
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="https://blog.keyshade.io/"
                   rel="noreferrer"
                   target="_blank"
                 >
@@ -86,7 +87,7 @@ function Footer(): React.JSX.Element {
                   </Link>
                 </li>
                 <li className="text-white/60 transition-colors hover:text-white">
-                  <Link href="mailto:support@keyshade.xyz">
+                  <Link href="mailto:support@keyshade.io">
                     <EncryptText TARGET_TEXT="Contact" />
                   </Link>
                 </li>

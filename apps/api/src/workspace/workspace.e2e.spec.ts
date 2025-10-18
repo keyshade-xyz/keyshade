@@ -124,19 +124,19 @@ describe('Workspace Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
 
     const createUser3 = await userService.createUser({
-      email: 'sadie@keyshade.xyz',
+      email: 'sadie@keyshade.io',
       name: 'Sadie',
       isOnboardingFinished: true
     })

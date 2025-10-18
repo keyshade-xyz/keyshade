@@ -78,7 +78,7 @@ export default class RunCommand extends BaseCommand {
     this.spawnCommand()
 
     process.on('SIGINT', () => {
-      this.killCommand()
+      void this.killCommand()
       process.exit(0)
     })
   }
@@ -159,7 +159,7 @@ export default class RunCommand extends BaseCommand {
         }
 
         this.processEnvironmentalVariables[data.name] = data.value
-        this.restartCommand()
+        await this.restartCommand()
       })
       // Set a timeout for registration response
       const registrationTimeout = setTimeout(() => {
@@ -294,40 +294,155 @@ export default class RunCommand extends BaseCommand {
     })
   }
 
+  private async waitForExit(
+    child: ReturnType<typeof spawn>,
+    timeoutMs = 15000
+  ): Promise<void> {
+    if (!child) return
+
+    await new Promise<void>((resolve, reject) => {
+      let settled = false
+
+      const onExit = () => {
+        if (!settled) {
+          settled = true
+          resolve()
+        }
+      }
+
+      child.once('exit', onExit)
+      child.once('close', onExit)
+
+      const t = setTimeout(() => {
+        if (!settled) {
+          settled = true
+          reject(new Error('Child did not exit before timeout'))
+        }
+      }, timeoutMs)
+
+      // Cleanup if promise resolves early
+      const cleanup = () => {
+        clearTimeout(t)
+      }
+      child.once('exit', cleanup)
+      child.once('close', cleanup)
+    })
+  }
+
   private spawnCommand() {
+    // POSIX: create a new process group so -PID signals the entire tree
+    const isWin = process.platform === 'win32'
+
     this.childProcess = spawn(this.command, {
-      // @ts-expect-error this just works
-      stdio: 'inherit',
       shell: true,
+      stdio: 'inherit',
       env: {
         ...process.env,
         ...this.processEnvironmentalVariables
-      }
+      },
+      detached: !isWin // only on POSIX
     })
 
-    this.childProcess.on('exit', (code: number | null) => {
-      // Code is 0 only if the command exits on its own
-      if (code === 0) {
-        log.info('Stopped all processes. See you later!')
-        process.exit(1)
+    // Allow parent to exit independently of child on POSIX process groups
+    if (!isWin && this.childProcess?.pid) {
+      this.childProcess.unref()
+    }
+
+    this.childProcess.on(
+      'exit',
+      (code: number | null, signal: NodeJS.Signals | null) => {
+        // Do NOT exit the CLI on child exit; we want to keep listening & restart on updates.
+        if (code === 0) {
+          log.info(
+            `Command exited successfully${signal ? ` (signal ${signal})` : ''}.`
+          )
+        } else {
+          log.info(
+            `Command exited${code !== null ? ` with code ${code}` : ''}${signal ? ` (signal ${signal})` : ''}.`
+          )
+        }
       }
-    })
+    )
   }
 
-  private restartCommand() {
-    this.killCommand()
-    this.spawnCommand()
+  private async restartCommand() {
+    try {
+      await this.killCommand() // now truly awaits exit
+      this.spawnCommand()
+    } catch (e) {
+      console.error('Failed to restart command:', e)
+      // As a last resort, try to spawn anyway
+      this.spawnCommand()
+    }
   }
 
-  private killCommand() {
-    if (this.childProcess) {
+  private async killCommand() {
+    const child = this.childProcess
+    if (!child?.pid) return
+
+    const isWin = process.platform === 'win32'
+    const pid = child.pid
+
+    try {
+      // 1) Try graceful termination
+      if (isWin) {
+        // /T kills the whole tree; /F is force; first attempt without /F
+        await new Promise<void>((resolve) => {
+          const killer = spawn('taskkill', ['/PID', String(pid), '/T'], {
+            stdio: 'ignore'
+          })
+          killer.on('exit', () => {
+            resolve()
+          })
+          killer.on('error', () => {
+            resolve()
+          }) // ignore errors, we’ll force kill below if needed
+        })
+      } else {
+        // Negative PID targets the process group (requires detached: true at spawn)
+        try {
+          process.kill(-pid, 'SIGTERM')
+        } catch {
+          // Fallback to direct child if not in its own group
+          try {
+            process.kill(pid, 'SIGTERM')
+          } catch {}
+        }
+      }
+
+      // 2) Wait up to 5s for clean exit
       try {
-        process.kill(-this.childProcess.pid, 'SIGKILL')
-      } catch (error: any) {
-        if (error.code !== 'ESRCH') throw error
+        await this.waitForExit(child, 5000)
+      } catch {
+        // 3) Force kill if it didn’t exit
+        if (isWin) {
+          await new Promise<void>((resolve) => {
+            const killer = spawn(
+              'taskkill',
+              ['/PID', String(pid), '/T', '/F'],
+              { stdio: 'ignore' }
+            )
+            killer.on('exit', () => {
+              resolve()
+            })
+            killer.on('error', () => {
+              resolve()
+            })
+          })
+        } else {
+          try {
+            process.kill(-pid, 'SIGKILL')
+          } catch {
+            try {
+              process.kill(pid, 'SIGKILL')
+            } catch {}
+          }
+          // Give the OS a moment to reap and free the port
+          await this.sleep(200)
+        }
       }
+    } finally {
       this.childProcess = null
-      log.success('Stopped all processes. See you later!')
     }
   }
 }

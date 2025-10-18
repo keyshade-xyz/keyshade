@@ -49,7 +49,7 @@ First, deploy your project to Vercel **without** adding environment variables du
 
 Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
 
-1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+1. Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 2. Click **"Create Project"**
 3. Name your project (e.g., `my-vercel-app`)
 4. **Note:** You can skip adding secrets and variables during project creation; these can be added after the integration is set up.
@@ -87,7 +87,7 @@ Now you're ready to set up the integration in Keyshade.
 
 ### Step 1: Access Integrations
 
-1. Go to your [Keyshade Dashboard](https://app.keyshade.xyz/)
+1. Go to your [Keyshade Dashboard](https://app.keyshade.io/)
 2. Navigate to **"Integrations"** in the sidebar
 3. Select **"Vercel"** from the available integrations
 
@@ -227,7 +227,7 @@ To confirm the integration is working:
 
 Still stuck? We’re here to help.
 
-* 📧 Email us at: [support@keyshade.xyz](mailto:support@keyshade.xyz)
+* 📧 Email us at: [support@keyshade.io](mailto:support@keyshade.io)
 * 💬 Join our community on [Discord](https://discord.com/invite/mV9PsXsjaH)
 
 Don't hesitate to reach out — we're happy to help with setup, debugging, or general questions.

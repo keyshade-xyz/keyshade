@@ -700,7 +700,7 @@ export class IntegrationService {
         throw new InternalServerErrorException(
           constructErrorBody(
             'Uh-oh, something went wront on our end',
-            'We have faced an issue while validating your integration. Please try again later, or get in touch with us at support@keyshade.xyz'
+            'We have faced an issue while validating your integration. Please try again later, or get in touch with us at support@keyshade.io'
           )
         )
       }

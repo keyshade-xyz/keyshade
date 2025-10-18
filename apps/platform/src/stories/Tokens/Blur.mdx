@@ -1,0 +1,93 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import '../../app/global.css'
+
+export const Blur = ({ blur }) => (
+  <div
+    style={{
+      backgroundImage:
+        'url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      padding: '8px'
+    }}
+    className={`aspect-square h-32 w-32 ${blur} rounded-md`}
+  />
+)
+
+export const blurTokens = [
+  {
+    class: 'blur-none',
+    dimension: 'none',
+    filter: 'filter: ;'
+  },
+  {
+    class: 'blur-xs',
+    dimension: '4px',
+    filter: 'filter: blur(var(--blur-xs));'
+  },
+  {
+    class: 'blur-sm',
+    dimension: '8px',
+    filter: 'filter: blur(var(--blur-sm));'
+  },
+  {
+    class: 'blur-md',
+    dimension: '12px',
+    filter: 'filter: blur(var(--blur-md));'
+  },
+  {
+    class: 'blur-lg',
+    dimension: '16px',
+    filter: 'filter: blur(var(--blur-lg));'
+  },
+  {
+    class: 'blur-xl',
+    dimension: '24px',
+    filter: 'filter: blur(var(--blur-xl));'
+  },
+  {
+    class: 'blur-2xl',
+    dimension: '40px',
+    filter: 'filter: blur(var(--blur-2xl));'
+  },
+  {
+    class: 'blur-3xl',
+    dimension: '64px',
+    filter: 'filter: blur(var(--blur-3xl));'
+  }
+]
+
+<Meta title="Tokens/Blur" />
+
+# Blur Tokens
+
+At Keyshade we use a consistent set of blur values to ensure a cohesive design language across our platform. These blur tokens are from default Tailwind CSS configuration.
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Dimension (px)</th>
+      <th>Preview</th>
+    </tr>
+  </thead>
+  <tbody>
+    {blurTokens.map((token) => (
+      <tr key={token.class}>
+        <td>{token.class}</td>
+        <td>{token.dimension}</td>
+        <td
+        // style={{
+        //   backgroundImage:
+        //     'url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop")',
+        //   backgroundSize: 'cover',
+        //   backgroundPosition: 'center',
+        //   padding: '8px'
+        // }}
+        >
+          <Blur blur={token.class} />
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>

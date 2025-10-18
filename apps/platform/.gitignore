@@ -1,1 +1,4 @@
 .env
+
+*storybook.log
+storybook-static

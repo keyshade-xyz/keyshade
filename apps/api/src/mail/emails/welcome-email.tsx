@@ -21,7 +21,7 @@ export const WelcomeEmail = ({ username, actionUrl }: WelcomeEmailProps) => {
     >
       <Text style={text}>
         Thank you for joining{' '}
-        <Link href="https://www.keyshade.xyz/">Keyshade</Link>. We're excited to
+        <Link href="https://www.keyshade.io/">Keyshade</Link>. We're excited to
         have you on board and help you manage your secrets and API keys
         securely.
       </Text>

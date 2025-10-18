@@ -169,7 +169,7 @@ You can either create a new IAM user specifically for Keyshade or use an existin
 ## Create a Keyshade Project and Add Secrets
 
 1. **Access Keyshade Dashboard**
-    - Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+    - Go to the [Keyshade Dashboard](https://app.keyshade.io/)
     - Sign in to your account
 
 2. **Create or Select Project**

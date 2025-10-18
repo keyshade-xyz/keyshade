@@ -335,3 +335,22 @@
 
 - Removed API key validation from `keyshade run`
 - Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.1
+
+## Patches
+
+- Update domain to keyshade.io
+
+# 3.5.2
+
+## Patches
+
+- Update URL retrival in login command
+
+# 3.5.3
+
+## Patches
+
+- Updated `keyshade run` command to use POSIX
+- `keyshade run` command now compatible with both Windows and Unix/Linux

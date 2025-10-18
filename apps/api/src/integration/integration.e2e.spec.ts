@@ -204,7 +204,7 @@ describe('Integration Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = (await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John',
       isActive: true,
       isAdmin: false,
@@ -212,7 +212,7 @@ describe('Integration Controller Tests', () => {
     })) as UserWithWorkspace
 
     const createUser2 = (await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane',
       isActive: true,
       isAdmin: false,

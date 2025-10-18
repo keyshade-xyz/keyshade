@@ -80,7 +80,7 @@ keyshade workspace list
 
 To get started:
 
-1.  Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+1.  Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 2.  Click **"Create Project"**
 3.  Name your project (e.g. `nodejs-app`)
 4.  Inside the project, click the **"Secrets"** tab

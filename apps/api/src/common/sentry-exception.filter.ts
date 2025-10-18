@@ -1,6 +1,6 @@
 import {
-  Catch,
   ArgumentsHost,
+  Catch,
   HttpException,
   InternalServerErrorException,
   Logger
@@ -49,7 +49,7 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
         response.status(500).json({
           message: constructErrorBody(
             'Internal Server Error',
-            'Something went wrong on our end. If the error persists, please get in touch with us at support@keyshade.xyz'
+            'Something went wrong on our end. If the error persists, please get in touch with us at support@keyshade.io'
           ),
           statusCode: 500,
           error: 'InternalServerException'
