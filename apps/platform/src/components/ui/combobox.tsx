@@ -31,8 +31,6 @@ import {
 } from '@/store/workspace'
 
 export function Combobox(): React.JSX.Element {
-  const workspaceFromStorage = getSelectedWorkspaceFromStorage()
-
   const [open, setOpen] = useState<boolean>(false)
 
   const getWorkspacesOfUser = useHttp(() =>
@@ -97,6 +95,8 @@ export function Combobox(): React.JSX.Element {
 
   useEffect(() => {
     if (allWorkspaces.length === 0) {
+      const workspaceFromStorage = getSelectedWorkspaceFromStorage()
+
       getWorkspacesOfUser().then(({ success, data }) => {
         if (success && data) {
           setGlobalSearchData((prev) => ({
@@ -135,8 +135,7 @@ export function Combobox(): React.JSX.Element {
     getWorkspacesOfUser,
     setGlobalSearchData,
     setAllWorkspaces,
-    allWorkspaces,
-    workspaceFromStorage
+    allWorkspaces
   ])
 
   return (
