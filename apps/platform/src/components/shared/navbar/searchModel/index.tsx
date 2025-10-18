@@ -3,16 +3,11 @@ import type { Dispatch, SetStateAction } from 'react'
 import React, { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 import { useAtom, useAtomValue } from 'jotai'
-import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import type { Workspace } from '@keyshade/schema'
 import { ArrowDownSVG, ArrowUpSVG, SelectSVG } from '@public/svg/shared'
-import {
-  EnvironmentSVG,
-  FolderSVG,
-  SecretSVG,
-  VariableSVG
-} from '@public/svg/dashboard'
+import { EnvironmentSVG, FolderSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import type { CommandDialogProps } from '@/components/ui/command'
 import {
   CommandDialog,
@@ -24,11 +19,7 @@ import {
   CommandSeparator,
   CommandShortcut
 } from '@/components/ui/command'
-import {
-  globalSearchDataAtom,
-  selectedProjectAtom,
-  selectedWorkspaceAtom
-} from '@/store'
+import { globalSearchDataAtom, selectedProjectAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { useDebounce } from '@/hooks/use-debounce'
@@ -150,9 +141,7 @@ function SearchModel({
     debouncedSetValue(searchQuery)
   }, [debouncedSetValue, searchQuery])
 
-  const handleChangeWorkspace = (
-    workspace: WorkspaceWithTierLimitAndProjectCount
-  ) => {
+  const handleChangeWorkspace = (workspace: Workspace) => {
     const newWorkspace = { ...workspace, projects: 0 }
     setSelectedWorkspace(newWorkspace)
     router.push('/')
@@ -177,9 +166,7 @@ function SearchModel({
                     <CommandItem
                       key={workspace.id}
                       onClick={() => {
-                        handleChangeWorkspace(
-                          workspace as WorkspaceWithTierLimitAndProjectCount
-                        )
+                        handleChangeWorkspace(workspace)
                         setIsOpen(false)
                       }}
                     >
