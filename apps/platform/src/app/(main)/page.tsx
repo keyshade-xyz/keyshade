@@ -54,7 +54,7 @@ export default function Index(): React.JSX.Element {
       <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
       <div className="flex items-center justify-between">
         <Visible if={!isProjectsEmpty}>
-          <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
+          <h1 className="text-[1.75rem] font-medium">All Projects</h1>
         </Visible>
         <CreateProjectDialogue />
       </div>

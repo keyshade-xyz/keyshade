@@ -42,6 +42,7 @@
   --color-night-b: oklch(0.182 0.0044 264.46);
   --color-night-c: oklch(0.1955 0.0043 264.47);
   --color-night-d: oklch(0.1657 0.0083 285.46);
+  --color-night-e: oklch(0.1744 0.0061 285.74);
 
   --color-charcoal: oklch(0.2121 0.005 248.06);
   --color-slate-black: oklch(0.2084 0.0025 247.95);
@@ -111,7 +112,7 @@
 }
 
 body {
-  @apply bg-[#0b0d0f] text-white;
+  @apply bg-night-e text-white;
 }
 
 /* For WebKit Browsers such as Chrome, Safari */

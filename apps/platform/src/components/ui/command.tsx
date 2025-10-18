@@ -11,7 +11,7 @@ const Command = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive
     className={cn(
-      'flex h-full w-full flex-col overflow-hidden rounded-md bg-[#171717] text-white dark:bg-zinc-950 dark:text-zinc-50',
+      'flex h-full w-full flex-col overflow-hidden rounded-md bg-[#171717] text-white',
       className
     )}
     ref={ref}
@@ -48,7 +48,7 @@ const CommandInput = React.forwardRef<
     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       className={cn(
-        'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-hidden placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-zinc-400',
+        'outline-hidden flex h-11 w-full rounded-md bg-transparent py-3 text-sm placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-zinc-400',
         className
       )}
       ref={ref}
@@ -119,7 +119,7 @@ const CommandItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
     className={cn(
-      'relative flex cursor-pointer select-none items-center rounded-xs px-2 py-1.5 text-sm outline-hidden aria-selected:bg-white/20 aria-selected:text-white data-disabled:opacity-50 dark:aria-selected:bg-zinc-800 dark:aria-selected:text-zinc-50',
+      'rounded-xs outline-hidden data-disabled:opacity-50 relative flex cursor-pointer select-none items-center px-2 py-1.5 text-sm aria-selected:bg-white/20 aria-selected:text-white dark:aria-selected:bg-zinc-800 dark:aria-selected:text-zinc-50',
       className
     )}
     ref={ref}

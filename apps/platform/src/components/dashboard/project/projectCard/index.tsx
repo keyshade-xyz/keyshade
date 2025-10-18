@@ -3,14 +3,8 @@ import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
-import {
-  SecretSVG,
-  EnvironmentSVG,
-  VariableSVG,
-  GlobalSVG,
-  PrivateSVG,
-  InternalSVG
-} from '@public/svg/dashboard'
+import { SecretSVG, EnvironmentSVG, VariableSVG } from '@public/svg/dashboard'
+import { MoreHorizontalIcon } from 'lucide-react'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -26,6 +20,16 @@ import {
   selectedWorkspaceAtom
 } from '@/store'
 import { copyToClipboard } from '@/lib/clipboard'
+import { ProjectTag } from '@/components/ui/project-tag'
+import { GeistSansFont } from '@/fonts'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 
 interface ProjectCardProps {
   project: GetAllProjectsResponse['items'][number]
@@ -80,45 +84,98 @@ export default function ProjectCard({
     setIsExportConfigurationDialogOpen(true)
   }
 
-  const accessLevelToSVG = (
-    accessLvl: GetAllProjectsResponse['items'][number]['accessLevel']
-  ) => {
-    switch (accessLvl) {
-      case 'GLOBAL':
-        return <GlobalSVG width={16} />
-      case 'PRIVATE':
-        return <PrivateSVG width={16} />
-      case 'INTERNAL':
-        return <InternalSVG width={16} />
-      default:
-        return null
-    }
-  }
-
   return (
     <ContextMenu>
       <ContextMenuTrigger className="flex h-28">
         <Link
-          className="flex h-28 w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
+          className={`${GeistSansFont.className} bg-night-c hover:bg-night-b border-white/8 flex h-fit w-full flex-col justify-between gap-y-10 rounded-lg border p-4 shadow-lg`}
           href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
           key={id}
         >
-          <div className="flex min-w-0 items-center gap-x-5">
-            <div className="shrink-0">
-              <Avvvatars size={56} style="shape" value={id} />
+          <div className="flex justify-between">
+            <div className="flex min-w-0 items-center gap-x-2">
+              <div className="shrink-0">
+                <Avvvatars radius={4} size={40} style="shape" value={id} />
+              </div>
+              <div className="flex min-w-0 flex-col overflow-hidden">
+                <div className="w-[199px] truncate text-base font-semibold">
+                  {name}
+                </div>
+                <span className="line-clamp-2 w-[199px] truncate break-words text-sm text-white/60">
+                  {description}
+                </span>
+              </div>
             </div>
-            <div className="flex min-w-0 flex-col overflow-hidden">
-              <div className="truncate font-semibold">{name}</div>
-              <span className="line-clamp-2 break-words text-xs font-semibold text-white/60">
-                {description}
-              </span>
-            </div>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  type="button"
+                >
+                  <MoreHorizontalIcon />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuGroup>
+                  <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
+                    <DropdownMenuItem>Open</DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      window.open(
+                        `/${selectedWorkspace?.slug}/${slug}?tab=secret`,
+                        '_blank',
+                        'noopener,noreferrer'
+                      )
+                    }}
+                  >
+                    Open in new tab
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      copyToClipboard(
+                        `${window.location.origin}/project/${slug}`
+                      )
+                    }}
+                  >
+                    Copy link
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={handleCopyToClipboard}>
+                    Copy slug
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleExportConfiguration}>
+                    Export configuration
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    disabled={!isAuthorizedToEditProjects}
+                    onClick={handleEditProject}
+                  >
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={!isAuthorizedToDeleteProjects}
+                    onClick={handleDeleteProject}
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <div className="flex h-full flex-col items-end justify-between">
-            <div className="flex items-center gap-1 rounded-md border border-white/70 px-2 py-1 capitalize">
-              {accessLevelToSVG(accessLevel)}
-              {accessLevel.toLowerCase()}
-            </div>
+
+          <div className="flex h-full items-end justify-between">
             <div className="grid grid-cols-3 gap-x-3">
               <div className="flex items-center gap-x-1">
                 <EnvironmentSVG width={16} />
@@ -133,6 +190,11 @@ export default function ProjectCard({
                 {totalSecrets}
               </div>
             </div>
+            <ProjectTag
+              variant={
+                accessLevel.toLowerCase() as 'private' | 'internal' | 'global'
+              }
+            />
           </div>
         </Link>
       </ContextMenuTrigger>

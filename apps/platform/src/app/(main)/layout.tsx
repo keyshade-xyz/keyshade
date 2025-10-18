@@ -10,7 +10,7 @@ export default function AppLayout({
   return (
     <main className="flex h-screen">
       <Sidebar />
-      <div className="m-4 h-dvh overflow-hidden rounded-[1.125rem] bg-[#161819] md:h-[96vh] md:w-[90vw] 2xl:h-[96.5vh] flex-1 min-w-0">
+      <div className="bg-night-d border-white/8 h-dvh min-w-0 flex-1 overflow-hidden border-l md:w-[90vw] ">
         <div className="flex h-full flex-col">
           <Navbar />
           <div className="flex-1 overflow-auto p-4">{children}</div>
