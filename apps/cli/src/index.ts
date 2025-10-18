@@ -14,6 +14,7 @@ import { version } from '../package.json'
 import ConfigCommand from './commands/config.command'
 import IntegrationCommand from './commands/integration.command'
 import LoginCommand from './commands/login.command'
+import ResetCommand from './commands/reset.command'
 
 const program = new Command()
 
@@ -29,6 +30,7 @@ const COMMANDS: BaseCommand[] = [
   new RunCommand(),
   new InitCommand(),
   new ProfileCommand(),
+  new ResetCommand(),
   new WorkspaceCommand(),
   new ProjectCommand(),
   new EnvironmentCommand(),
