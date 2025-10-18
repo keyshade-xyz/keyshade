@@ -243,6 +243,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.7
+      csurf:
+        specifier: ^1.11.0
+        version: 1.11.0
       dayjs:
         specifier: ^1.11.11
         version: 1.11.18
@@ -307,6 +310,9 @@ importers:
       '@types/cookie-parser':
         specifier: ^1.4.7
         version: 1.4.9(@types/express@4.17.23)
+      '@types/csurf':
+        specifier: ^1.11.5
+        version: 1.11.5
       '@types/eccrypto':
         specifier: ^1.1.6
         version: 1.1.6

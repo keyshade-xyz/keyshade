@@ -14,6 +14,7 @@ import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
 import cookieParser from 'cookie-parser'
 import { SentryExceptionFilter } from './common/sentry-exception.filter'
+import csrf from 'csurf'
 
 export const sentryEnv = process.env.SENTRY_API_ENVIRONMENT || 'production'
 
@@ -88,6 +89,8 @@ async function initializeNestApp() {
     ]
   })
   app.use(cookieParser())
+  const csrfProtection = csrf({ cookie: true })
+  app.use(csrfProtection)
   const port = process.env.API_PORT
   const domain = process.env.DOMAIN
   const isHttp = domain.includes('localhost')
