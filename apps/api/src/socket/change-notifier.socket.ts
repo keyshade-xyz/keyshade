@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Logger,
@@ -27,13 +28,14 @@ import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { constructErrorBody } from '@/common/util'
-import { AuthenticatedUserContext } from '@/auth/auth.types'
-import { toSHA256 } from '@/common/cryptography'
-import SlugGenerator from '@/common/slug-generator.service' // The redis subscription channel for configuration updates
+import { ActorType, AuthenticatedUserContext } from '@/auth/auth.types'
+import { TokenService } from '@/common/token.service' // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
 const ENV_TO_SOCKET_PREFIX = 'env_to_socket:'
+const SOCKET_TO_USER_PREFIX = 'socket_to_user:'
+const LIVE_USERS_KEY = 'live_cli_users'
 
 @WebSocketGateway({
   namespace: 'change-notifier',
@@ -56,7 +58,7 @@ export default class ChangeNotifier
     },
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly tokenService: TokenService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -126,6 +128,18 @@ export default class ChangeNotifier
       // First, we need to authenticate the user from the socket connection
       const user = await this.extractAndValidateUser(client)
 
+      // Check if the user is already registered for live changes
+      const isRegistered = await this.redis.sIsMember(LIVE_USERS_KEY, user.id)
+      if (isRegistered) {
+        this.logger.log(
+          `User ${user.id} is already registered for live changes`
+        )
+        throw new ConflictException(
+          'You are already connected to keyshade',
+          'One of your CLI sessions is already connected to keyshade. Please disconnect it before connecting another CLI session.'
+        )
+      }
+
       // Check if the user has access to the workspace
       this.logger.log('Checking user access to workspace')
       const workspace =
@@ -140,7 +154,7 @@ export default class ChangeNotifier
         })
 
       if (workspace.isDisabled) {
-        this.logger.log(`Workspace ${workspace.slug} is disabled`)
+        this.logger.warn(`Workspace ${workspace.slug} is disabled`)
         throw new BadRequestException(
           constructErrorBody(
             'This workspace has been disabled',
@@ -169,7 +183,7 @@ export default class ChangeNotifier
         })
 
       // Add the client to the environment
-      await this.addClientToEnvironment(client, environment.id)
+      await this.addClientToEnvironment(client, environment.id, user.id)
 
       // Send ACK to client
       this.logger.log('Sending ACK to client')
@@ -276,7 +290,11 @@ export default class ChangeNotifier
     this.logger.log('Rehydrated ChangeNotifier cache')
   }
 
-  private async addClientToEnvironment(client: Socket, environmentId: string) {
+  private async addClientToEnvironment(
+    client: Socket,
+    environmentId: string,
+    userId: string
+  ) {
     this.logger.log('Adding client to environment')
 
     await this.prisma.changeNotificationSocketMap.create({
@@ -286,6 +304,8 @@ export default class ChangeNotifier
       }
     })
     await this.redis.sAdd(`${ENV_TO_SOCKET_PREFIX}${environmentId}`, client.id)
+    await this.redis.set(`${SOCKET_TO_USER_PREFIX}${client.id}`, userId)
+    await this.redis.sAdd(LIVE_USERS_KEY, userId)
 
     this.logger.log(
       `Client registered: ${client.id} for environment: ${environmentId}`
@@ -316,6 +336,14 @@ export default class ChangeNotifier
         environmentId
       }
     })
+
+    const userId = await this.redis.get(`${SOCKET_TO_USER_PREFIX}${client.id}`)
+
+    // Remove socketId -> userId mapping
+    await this.redis.del(`${SOCKET_TO_USER_PREFIX}${client.id}`)
+
+    // Remove userId from live users set
+    await this.redis.sRem(LIVE_USERS_KEY, userId)
 
     this.logger.log(
       `Client deregistered: ${client.id} from environment: ${environmentId}`
@@ -359,66 +387,41 @@ export default class ChangeNotifier
 
     // Extract API key from socket headers (similar to how AuthGuard does it)
     const headers = client.handshake.headers
-    const apiKeyValue = headers[X_KEYSHADE_TOKEN] as string
+    const tokenValue = headers[X_KEYSHADE_TOKEN] as string
 
-    if (!apiKeyValue) {
-      throw new ForbiddenException('No API key provided')
+    if (!tokenValue) {
+      throw new ForbiddenException('No token provided')
     }
 
-    // Validate API key
-    const apiKey = await this.prisma.apiKey.findUnique({
+    // Validate token
+    const userId = await this.tokenService.validateToken(tokenValue)
+
+    // Get the user from the database
+    const user = await this.prisma.user.findUnique({
       where: {
-        value: toSHA256(apiKeyValue)
-      },
-      include: {
-        user: true
+        id: userId
       }
     })
 
-    if (!apiKey) {
-      throw new ForbiddenException('Invalid API key')
-    }
-
-    // Check if user is active
-    if (!apiKey.user.isActive) {
+    // Check if the user is active
+    if (!user.isActive) {
       throw new UnauthorizedException('User account is not active')
     }
 
     // Get default workspace
     const defaultWorkspace = await this.prisma.workspace.findFirst({
       where: {
-        ownerId: apiKey.userId,
+        ownerId: user.id,
         isDefault: true
       }
     })
 
-    // Create authenticated user context
-    const userContext: AuthenticatedUserContext = {
-      ...apiKey.user,
+    // Create an authenticated user context
+    return {
+      ...user,
+      actorType: ActorType.USER,
       defaultWorkspace,
-      ipAddress: client.handshake.address,
-      isAuthViaApiKey: true,
-      apiKeyAuthorities: new Set(apiKey.authorities)
+      ipAddress: client.handshake.address
     }
-
-    // Check required authorities for this socket endpoint
-    const requiredAuthorities = [
-      Authority.READ_WORKSPACE,
-      Authority.READ_PROJECT,
-      Authority.READ_ENVIRONMENT
-    ]
-
-    // If user has ADMIN authority, bypass individual authority checks
-    if (!userContext.apiKeyAuthorities.has(Authority.ADMIN)) {
-      for (const requiredAuthority of requiredAuthorities) {
-        if (!userContext.apiKeyAuthorities.has(requiredAuthority)) {
-          throw new UnauthorizedException(
-            `API key is missing the required authority: ${requiredAuthority}`
-          )
-        }
-      }
-    }
-
-    return userContext
   }
 }

@@ -5,8 +5,8 @@
 <div align="left">
 
 <p align="center">
-    <a href="https://www.keyshade.xyz?ref=github" target="_blank"><b>Website</b></a> •
-    <a href="https://docs.keyshade.xyz/" target="_blank"><b>Documentation</b></a> •
+    <a href="https://www.keyshade.io?ref=github" target="_blank"><b>Website</b></a> •
+    <a href="https://docs.keyshade.io/" target="_blank"><b>Documentation</b></a> •
     <a href="https://discord.gg/dh8F3Dzt" target="_blank"><b>Join our Community</b></a> • 
     <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a>
     <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
@@ -30,11 +30,11 @@
 
 ---
 
-keyshade is designed to simplify the integration of your secrets and variables into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) empowered by [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
+Keyshade is designed to simplify the integration of your secrets and variables into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) empowered by [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
 
 With keyshade, managing your configurations becomes a breeze while ensuring their security.
 
-## Why keyshade?
+## Why Keyshade?
 
 Any application that you host on a cloud provider would need access to configurations. These configurations help you to access other APIs or perform internal actions. You would generally be managing this from the dashboard of your project in the cloud provider. However, this comes with a few caveats:
 
@@ -48,7 +48,7 @@ Any application that you host on a cloud provider would need access to configura
 
 - **Collaboration**: Collaboration is hard. You'll need to share your secrets with your team members, which means that you'll have to share your cloud provider's credentials with them. Worse, you will be sending them over insecure channels such as email, or your communication platform.
 
-This is where keyshade comes in. We intend to solve these shortcomings by providing you with a simple, secure, and easy-to-use solution for managing your secrets.
+This is where Keyshade comes in. We intend to solve these shortcomings by providing you with a simple, secure, and easy-to-use solution for managing your secrets.
 
 ## Features
 
@@ -78,7 +78,7 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 
 ## Setting things up
 
-We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.xyz/contributing-to-keyshade/setting-things-up).
+We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.io/contributing-to-keyshade/setting-things-up).
 
 ## Contributing
 

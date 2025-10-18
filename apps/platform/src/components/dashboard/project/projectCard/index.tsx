@@ -97,19 +97,19 @@ export default function ProjectCard({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="flex h-[7rem]">
+      <ContextMenuTrigger className="flex h-28">
         <Link
-          className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
+          className="flex h-28 w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
           href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
           key={id}
         >
           <div className="flex min-w-0 items-center gap-x-5">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <Avvvatars size={56} style="shape" value={id} />
             </div>
             <div className="flex min-w-0 flex-col overflow-hidden">
               <div className="truncate font-semibold">{name}</div>
-              <span className="truncate text-xs font-semibold text-white/60">
+              <span className="line-clamp-2 break-words text-xs font-semibold text-white/60">
                 {description}
               </span>
             </div>

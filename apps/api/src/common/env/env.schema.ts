@@ -97,13 +97,6 @@ const devSchema = z.object({
   PLATFORM_OAUTH_SUCCESS_REDIRECT_PATH: z.string(),
   PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string(),
 
-  MINIO_ENDPOINT: z.string().optional(),
-  MINIO_PORT: z.string().optional(),
-  MINIO_ACCESS_KEY: z.string().optional(),
-  MINIO_SECRET_KEY: z.string().optional(),
-  MINIO_BUCKET_NAME: z.string().optional(),
-  MINIO_USE_SSL: z.string().optional(),
-
   FEEDBACK_FORWARD_EMAIL: z.string().email(),
   THROTTLE_TTL: z.string().transform((val) => parseInt(val, 10)),
   THROTTLE_LIMIT: z.string().transform((val) => parseInt(val, 10)),
@@ -115,7 +108,7 @@ const devSchema = z.object({
   POLAR_API_KEY: z.string().optional(),
   POLAR_WEBHOOK_SECRET: z.string().optional(),
 
-  AZURE_STORAGE_CONNECTION_STRING: z.string().url().optional(),
+  AZURE_STORAGE_CONNECTION_STRING: z.string().optional(),
   AZURE_STORAGE_CONTAINER_NAME: z.string().optional()
 })
 
@@ -181,13 +174,6 @@ const prodSchema = z.object({
   PLATFORM_OAUTH_SUCCESS_REDIRECT_PATH: z.string().min(1),
   PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string().min(1),
 
-  MINIO_ENDPOINT: z.string().min(1),
-  MINIO_PORT: z.string().min(1),
-  MINIO_ACCESS_KEY: z.string().min(1),
-  MINIO_SECRET_KEY: z.string().min(1),
-  MINIO_BUCKET_NAME: z.string().min(1),
-  MINIO_USE_SSL: z.string().min(1),
-
   FEEDBACK_FORWARD_EMAIL: z.string().email().min(5),
 
   LOGTAIL_API_TOKEN: z.string().optional(),
@@ -197,7 +183,7 @@ const prodSchema = z.object({
   POLAR_API_KEY: z.string().optional(),
   POLAR_WEBHOOK_SECRET: z.string().optional(),
 
-  AZURE_STORAGE_CONNECTION_STRING: z.string().url(),
+  AZURE_STORAGE_CONNECTION_STRING: z.string(),
   AZURE_STORAGE_CONTAINER_NAME: z.string().optional()
 })
 

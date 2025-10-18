@@ -21,7 +21,7 @@ function Hero(): React.JSX.Element {
             <p>Stop DMing your Environment variables</p>
             <p>And start syncing them securely & instantly </p>
           </span>
-          <a href="https://app.keyshade.xyz" rel="noreferrer" target="_blank">
+          <a href="https://app.keyshade.io" rel="noreferrer" target="_blank">
             <div className="border-brandBlue/[8%] rounded-full border p-[0.31rem] ">
               <EncryptButton
                 TARGET_TEXT={

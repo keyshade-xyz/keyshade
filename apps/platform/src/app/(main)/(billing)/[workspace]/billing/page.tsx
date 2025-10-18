@@ -14,7 +14,7 @@ export default function Billing() {
   if (currentWorkspace?.subscription === undefined) {
     return (
       <div className="flex h-full w-full items-center justify-center justify-items-center">
-        <Loader2Icon className="h-[3rem] w-[3rem] animate-spin" />
+        <Loader2Icon className="h-12 w-12 animate-spin" />
       </div>
     )
   }

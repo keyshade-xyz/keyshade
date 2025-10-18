@@ -84,11 +84,9 @@ export default class CreateVariable extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(
-        `Variable ${data.variable.name} (${data.variable.slug}) created successfully!`
-      )
-      Logger.info(`Created at ${data.variable.createdAt}`)
-      Logger.info(`Updated at ${data.variable.updatedAt}`)
+      Logger.info(`Variable ${data.name} (${data.slug}) created successfully!`)
+      Logger.info(`Created at ${data.createdAt}`)
+      Logger.info(`Updated at ${data.updatedAt}`)
     } else {
       this.logError(error)
     }

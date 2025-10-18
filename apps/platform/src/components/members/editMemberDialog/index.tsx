@@ -166,7 +166,7 @@ export default function EditMemberDialog() {
                   )}
                 </div>
                 <ChevronDown
-                  className={`flex-shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                   size={16}
                 />
               </Button>
@@ -182,7 +182,7 @@ export default function EditMemberDialog() {
                         checked={selectedRoles.some(
                           (r) => r.roleSlug === role.slug
                         )}
-                        className="mr-2 rounded-sm border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
+                        className="mr-2 rounded-xs border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
                         onCheckedChange={() =>
                           toggleRole({ name: role.name, roleSlug: role.slug })
                         }

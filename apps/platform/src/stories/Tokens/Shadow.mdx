@@ -1,0 +1,73 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import '../../app/global.css'
+
+export const Shadow = ({ shadow }) => (
+  <div
+    className={`aspect-square h-32 w-32 bg-white ${shadow} rounded-full border`}
+  />
+)
+
+export const shadowTokens = [
+  {
+    class: 'shadow-none',
+    dimension: 'none'
+  },
+  {
+    class: 'shadow-2xs',
+    dimension: '0 1px rgb(0 0 0 / 0.05)'
+  },
+  {
+    class: 'shadow-xs',
+    dimension: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+  },
+  {
+    class: 'shadow-sm',
+    dimension: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'
+  },
+  {
+    class: 'shadow-md',
+    dimension:
+      '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+  },
+  {
+    class: 'shadow-lg',
+    dimension:
+      '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
+  },
+  {
+    class: 'shadow-xl',
+    dimension:
+      '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+  },
+  {
+    class: 'shadow-2xl',
+    dimension: '0 25px 50px -12px rgb(0 0 0 / 0.25)'
+  }
+]
+
+<Meta title="Tokens/Shadow" />
+
+# Shadow Tokens
+
+At Keyshade we use a consistent set of shadow values to ensure a cohesive design language across our platform. These shadow tokens are from default Tailwind CSS configuration.
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Box Shadow Value</th>
+      <th>Preview</th>
+    </tr>
+  </thead>
+  <tbody>
+    {shadowTokens.map((token) => (
+      <tr key={token.class}>
+        <td>{token.class}</td>
+        <td>{token.dimension}</td>
+        <td>
+          <Shadow shadow={token.class} />
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>

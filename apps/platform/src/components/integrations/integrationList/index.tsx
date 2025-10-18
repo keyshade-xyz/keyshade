@@ -2,8 +2,8 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useState } from 'react'
 import type { Integration } from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
-import IntegrationIcon from '../integrationIcon'
 import EmptyIntegration from '../emptyIntegration'
+import IntegrationIcon from '../integrationIcon'
 import {
   integrationsOfWorkspaceAtom,
   selectedIntegrationAtom,
@@ -31,6 +31,7 @@ function IntegrationList() {
   const setSelectedIntegration = useSetAtom(selectedIntegrationAtom)
   const [integrations, setIntegrations] = useAtom(integrationsOfWorkspaceAtom)
   const [loading, setLoading] = useState<boolean>(true)
+  const [runCounts, setRunCounts] = useState<Record<string, number>>({})
   const router = useRouter()
 
   const isAuthorizedToReadIntegration =
@@ -40,6 +41,13 @@ function IntegrationList() {
   const getAllIntegrations = useHttp(() =>
     ControllerInstance.getInstance().integrationController.getAllIntegrations(
       { workspaceSlug: selectedWorkspace!.slug },
+      {}
+    )
+  )
+
+  const getAllRunsOfIntegration = useHttp((integrationSlug: string) =>
+    ControllerInstance.getInstance().integrationController.getAllIntegrationRuns(
+      { integrationSlug },
       {}
     )
   )
@@ -74,6 +82,22 @@ function IntegrationList() {
     setIntegrations,
     isAuthorizedToReadIntegration
   ])
+
+  useEffect(() => {
+    integrations.forEach((integration) =>
+      getAllRunsOfIntegration(integration.slug).then(({ data, success }) => {
+        if (success && data) {
+          setRunCounts((prev) => ({
+            ...prev,
+            [integration.slug]:
+              typeof data.metadata.totalCount === 'number'
+                ? data.metadata.totalCount
+                : 0
+          }))
+        }
+      })
+    )
+  }, [integrations, getAllRunsOfIntegration])
 
   // Move conditional return AFTER all hooks
   if (!isAuthorizedToReadIntegration) {
@@ -115,7 +139,7 @@ function IntegrationList() {
                     type={integration.type}
                   />
 
-                  <div className="flex w-2/5 flex-shrink-0 items-start justify-center gap-x-2 pl-4">
+                  <div className="flex w-2/5 shrink-0 items-start justify-center gap-x-2 pl-4">
                     <CopyToClipboard text={integration.slug} />
                   </div>
                 </div>
@@ -133,7 +157,7 @@ function IntegrationList() {
                     title={formatText(integration.type)}
                   >
                     {formatText(integration.type)} | Total no of triggers:{' '}
-                    {integration.notifyOn.length}
+                    {runCounts[integration.slug]}
                   </p>
                 </div>
               </div>

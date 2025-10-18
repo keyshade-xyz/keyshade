@@ -9,7 +9,6 @@ import { useHttp } from '@/hooks/use-http'
 import GeneralSettings from '@/components/userSettings/profile/generalSettings'
 import EmailSettings from '@/components/userSettings/profile/emailSettings'
 import DeleteProfile from '@/components/userSettings/profile/deleteProfile'
-import ApiKeySection from '@/components/userSettings/apiKeys/apiKeySection'
 import AuthProvider from '@/components/userSettings/profile/authProvider'
 import ShareReferralCode from '@/components/userSettings/profile/shareReferralCode'
 
@@ -45,8 +44,6 @@ function ProfilePage(): React.JSX.Element {
       <AuthProvider />
       <Separator className="w-full bg-white/15" />
       <ShareReferralCode />
-      <Separator className="w-full bg-white/15" />
-      <ApiKeySection />
       <Separator className="w-full bg-white/15" />
       <DeleteProfile />
     </main>

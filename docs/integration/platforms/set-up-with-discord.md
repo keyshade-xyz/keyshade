@@ -19,7 +19,7 @@ Here's what this guide covers:
 - [Test the Integration](#test-the-integration)
 - [Best Practices and Troubleshooting](#best-practices-and-troubleshooting)
 
-> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/)
+> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/introduction.md)
 
 ---
 
@@ -52,13 +52,13 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 
 ### Step 1: Access Integration Settings
 
-- Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+- Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 
 ## Create a Keyshade Project
 
 Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
 
-1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+1. Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 2. Click **"Create Project"**
 3. Name your project (e.g., `my-discord-app`)
 4. **Note:** You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
@@ -76,7 +76,7 @@ Before setting up the integration, you need a Keyshade project with your secrets
 
 ### Select Project and Environments (optional)
 
-- If you don’t select a project: Keyshade will listen for events from all projects in the workspace
+- If you don’t select a project: Keyshade will listen for events from the entire workspace
 - If you select a project but no environment(s): it will listen for all environments in that project
 - If you select a project and one or more environments: it will listen only to those environments of that project
 
@@ -127,4 +127,7 @@ Finally, click **“Create Integration”**.
 
 _Your Keyshade project is now integrated with Discord for real-time alerts. Whether you're updating secrets or managing config variables, your team stays instantly informed._
 
-> Want to explore more integrations? Head over to the [Integrations Hub](/docs/integrations)
+> Want to explore more integrations? Check out our other integration guides:
+> - [Frameworks](/docs/integration/frameworks/README.md) - Next.js, Node.js
+> - [Languages](/docs/integration/languages/README.md) - Go, Rust, Python  
+> - [Platforms](/docs/integration/platforms/README.md) - AWS Lambda, Vercel, Slack, Discord

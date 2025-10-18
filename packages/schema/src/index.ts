@@ -1,7 +1,6 @@
 //Export all Schemas
 
 export * from './pagination'
-export * from './api-key'
 export * from './auth'
 export * from './enums'
 export * from './environment'
@@ -13,7 +12,7 @@ export * from './variable'
 export * from './workspace'
 export * from './workspace-role'
 export * from './event'
-export * from './api-key'
 export * from './workspace-membership'
 export * from './payment-gateway'
 export * from './share-secret'
+export * from './session'

@@ -625,7 +625,7 @@ export default function AuthoritySelector({
     <div
       className={`flex items-start justify-start ${isSheet ? 'flex-col gap-y-3' : 'flex-row gap-6'} h-full`}
     >
-      <label className="w-[9rem] text-base font-semibold" htmlFor="authorities">
+      <label className="w-36 text-base font-semibold" htmlFor="authorities">
         Authorities
       </label>
       <div
