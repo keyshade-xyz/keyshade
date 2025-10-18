@@ -14,7 +14,7 @@ import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
 import cookieParser from 'cookie-parser'
 import { SentryExceptionFilter } from './common/sentry-exception.filter'
-import csrf from 'csurf'
+import { doubleCsrf } from 'csrf-csrf'
 
 export const sentryEnv = process.env.SENTRY_API_ENVIRONMENT || 'production'
 
@@ -89,8 +89,24 @@ async function initializeNestApp() {
     ]
   })
   app.use(cookieParser())
-  const csrfMiddleware = csrf({ cookie: true })
-  app.use(csrfMiddleware)
+  const { doubleCsrfProtection } = doubleCsrf({
+    getSecret: () => process.env.CSRF_SECRET || 'csrf-secret',
+    size: 64,
+    cookieName: 'x-csrf-token',
+    cookieOptions: {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    },
+    getSessionIdentifier: (req) => {
+      // Use a cookie-based session identifier
+      const sessionCookie = req.cookies['session-id']
+      if (sessionCookie) {
+        return sessionCookie
+      }
+    }
+  })
+  app.use(doubleCsrfProtection)
   const port = process.env.API_PORT
   const domain = process.env.DOMAIN
   const isHttp = domain.includes('localhost')
