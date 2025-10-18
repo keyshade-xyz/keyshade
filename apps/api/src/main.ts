@@ -100,7 +100,7 @@ async function initializeNestApp() {
     },
     getSessionIdentifier: (req) => {
       // Use a cookie-based session identifier
-      const sessionCookie = req.cookies['session-id']
+      const sessionCookie = req.cookies['sessionId']
       if (sessionCookie) {
         return sessionCookie
       }
