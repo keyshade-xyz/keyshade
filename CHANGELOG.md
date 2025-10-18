@@ -1,3 +1,9 @@
+## [2.40.0](https://github.com/keyshade-xyz/keyshade/compare/v2.39.0...v2.40.0) (2025-10-18)
+
+### 🚀 Features
+
+* **cli:** update keyshade run command ([f139ec3](https://github.com/keyshade-xyz/keyshade/commit/f139ec3309fc78bb5dcaa53b435fec298b572c1d))
+
 ## [2.39.0](https://github.com/keyshade-xyz/keyshade/compare/v2.38.0...v2.39.0) (2025-10-17)
 
 ### 🚀 Features
