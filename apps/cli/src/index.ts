@@ -14,6 +14,7 @@ import { version } from '../package.json'
 import ConfigCommand from './commands/config.command'
 import IntegrationCommand from './commands/integration.command'
 import LoginCommand from './commands/login.command'
+import PatCommand from '@/commands/pat.command'
 
 const program = new Command()
 
@@ -26,18 +27,19 @@ program.option(
 program.option('-u, --base-url <string>', 'The base URL to use')
 
 const COMMANDS: BaseCommand[] = [
-  new RunCommand(),
+  new LoginCommand(),
   new InitCommand(),
+  new RunCommand(),
   new ProfileCommand(),
   new WorkspaceCommand(),
   new ProjectCommand(),
   new EnvironmentCommand(),
   new SecretCommand(),
-  new ScanCommand(),
   new VariableCommand(),
   new ConfigCommand(),
   new IntegrationCommand(),
-  new LoginCommand()
+  new ScanCommand(),
+  new PatCommand()
 ]
 
 COMMANDS.forEach((command) => {
