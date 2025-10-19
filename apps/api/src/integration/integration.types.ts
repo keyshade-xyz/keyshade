@@ -96,32 +96,41 @@ export type IntegrationWithEnvironmentsAndMetadata<
 }
 
 export interface HydratedIntegration extends Integration {
+  workspace: {
+    id: string
+    name: string
+    slug: string
+    createdAt: Date
+    updatedAt: Date
+    ownerId: string
+    isDefault: boolean
+    icon: string
+    blacklistedIpAddresses: string[]
+    isDisabled: boolean
+    workspaceLockdownIn: Date
+    lastUpdatedById: string
+  }
+  project: {
+    id: string
+    name: string
+    slug: string
+    workspaceId: string
+  }
+  environments: Array<{
+    id: string
+    name: string
+    slug: string
+  }>
   lastUpdatedBy: {
     id: string
-    name?: string | null
-    profilePictureUrl?: string | null
-  } | null
-
-  /** Total number of triggers for this integration (computed by hydration) */
-  totalTriggers?: number
-
-  entitlements: {
-    canDelete: boolean
-    canUpdate: boolean
+    name: string
+    profilePictureUrl: string | null
   }
-  // Included relational fields from Prisma InclusionQuery.Integration
-  workspace?: Workspace
-  project?: {
-    id: Project['id']
-    name: Project['name']
-    slug: Project['slug']
-    workspaceId: Project['workspaceId']
-  } | null
-  environments?: Array<{
-    id: Environment['id']
-    name: Environment['name']
-    slug: Environment['slug']
-  }>
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
+  totalTriggers: number
 }
 
 export interface RawIntegration

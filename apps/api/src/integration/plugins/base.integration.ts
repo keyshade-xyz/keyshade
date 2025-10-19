@@ -11,7 +11,8 @@ import {
   IntegrationEventData,
   IntegrationMetadata,
   IntegrationRunData,
-  IntegrationWithEnvironmentsAndMetadata
+  IntegrationWithEnvironmentsAndMetadata,
+  RawIntegration
 } from '../integration.types'
 import {
   BadRequestException,
@@ -30,6 +31,7 @@ export abstract class BaseIntegration {
   protected integration:
     | HydratedIntegration
     | Omit<HydratedIntegration, 'entitlements'>
+    | RawIntegration
     | null = null
 
   constructor(
@@ -118,7 +120,10 @@ export abstract class BaseIntegration {
   }
 
   public setIntegration<T extends IntegrationMetadata>(
-    integration: HydratedIntegration | Omit<HydratedIntegration, 'entitlements'>
+    integration:
+      | HydratedIntegration
+      | Omit<HydratedIntegration, 'entitlements'>
+      | RawIntegration
   ): void {
     this.integration = integration
 
