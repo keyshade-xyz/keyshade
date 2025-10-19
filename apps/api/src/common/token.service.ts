@@ -234,9 +234,10 @@ export class TokenService {
               id: userId
             }
           },
-          expiresOn: dto.expiresAfterDays
-            ? dayjs().add(dto.expiresAfterDays, 'days').toDate()
-            : undefined
+          expiresOn:
+            dto.expiresAfterDays && dto.expiresAfterDays > 0
+              ? dayjs().add(dto.expiresAfterDays, 'days').toDate()
+              : undefined
         }
       })
       this.logger.log(

@@ -1,11 +1,12 @@
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
-import { log, select, spinner } from '@clack/prompts'
+import { confirm, log, spinner } from '@clack/prompts'
 import { clearSpinnerLines, handleSIGINT } from '@/util/prompt'
 import {
   type CommandActionData,
   type CommandOption
 } from '@/types/command/command.types'
+import { PatUtils } from '@/util/pat'
 
 export default class DeletePat extends BaseCommand {
   getName(): string {
@@ -23,7 +24,7 @@ export default class DeletePat extends BaseCommand {
     keyshade pat delete
     
     Delete a personal access token with id mm53k2k32l77
-    keyshade pat delete mm53k2k32l77
+    keyshade pat delete --token-id mm53k2k32l77
     `
   }
 
@@ -31,7 +32,7 @@ export default class DeletePat extends BaseCommand {
     return [
       {
         short: '-i',
-        long: '--token-id',
+        long: '--token-id <string>',
         description: 'ID of the PAT that you want to delete.'
       }
     ]
@@ -45,7 +46,18 @@ export default class DeletePat extends BaseCommand {
     let tokenId = options.tokenId
 
     if (!tokenId) {
-      tokenId = await this.patSelectionMenu()
+      tokenId = await PatUtils.selectPatFromMenu(this.headers)
+    }
+
+    const shouldContinue = await confirm({
+      message: 'Do you really want to delete this token?'
+    })
+
+    handleSIGINT(shouldContinue, 'Deletion cancelled!')
+
+    if (!shouldContinue) {
+      log.message('Deletion cancelled!')
+      process.exit(0)
     }
 
     const loading = spinner()
@@ -62,7 +74,7 @@ export default class DeletePat extends BaseCommand {
       if (success) {
         loading.stop()
         clearSpinnerLines()
-        log.success('Personal Access Token Deleted Successfully!')
+        log.success('✅ Personal Access Token Deleted Successfully!')
       } else if (error) {
         loading.stop()
         clearSpinnerLines()
@@ -76,45 +88,6 @@ export default class DeletePat extends BaseCommand {
       loading.stop()
       log.error(
         'We encountered an error while deleting your personal access token!'
-      )
-    }
-  }
-
-  private async patSelectionMenu(): Promise<string> {
-    const loading = spinner()
-    loading.start('Fetching your personal access tokens...')
-
-    // Fetch all the PATs
-    const { data, success, error } =
-      await ControllerInstance.getInstance().personalAccessTokenController.getAllPersonalAccessTokens(
-        this.headers
-      )
-
-    loading.stop()
-    clearSpinnerLines()
-
-    if (success) {
-      if (data.length === 0) {
-        log.message("You don't have any personal access tokens!")
-        process.exit(1)
-      }
-
-      const pat = await select({
-        message: 'Select the personal access token you want to delete',
-        options: data.map((p) => ({
-          value: p.id,
-          label: p.name
-        }))
-      })
-
-      handleSIGINT(pat, 'Deletion cancelled!')
-
-      return pat as string
-    } else if (error) {
-      loading.stop()
-      clearSpinnerLines()
-      log.error(
-        `We encountered an error while fetching your personal access tokens: ${JSON.parse(error.message).body}`
       )
     }
   }

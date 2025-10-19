@@ -3,7 +3,11 @@ import { log, spinner } from '@clack/prompts'
 import ControllerInstance from '@/util/controller-instance'
 import { clearSpinnerLines } from '@/util/prompt'
 import { Table } from '@/util/table'
-import dayjs from 'dayjs'
+import formatDate from '@/util/date-formatter'
+import {
+  type CommandActionData,
+  type CommandOption
+} from '@/types/command/command.types'
 
 export default class ListPat extends BaseCommand {
   getName(): string {
@@ -14,11 +18,34 @@ export default class ListPat extends BaseCommand {
     return 'Lists all personal access tokens of the user'
   }
 
+  getUsage(): string {
+    return `keyshade pat list [options]
+    
+    Lists all personal access tokens of the user
+    keyshade pat list
+    
+    Lists all personal access tokens of the user with detailed information
+    keyshade pat list --verbose
+    `
+  }
+
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-v',
+        long: '--verbose',
+        defaultValue: false,
+        description:
+          'Prints detailed information about each personal access token'
+      }
+    ]
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
 
-  async action(): Promise<void> {
+  async action({ options }: CommandActionData): Promise<void> {
     const loading = spinner()
     loading.start('Fetching your personal access tokens...')
     try {
@@ -32,21 +59,34 @@ export default class ListPat extends BaseCommand {
         clearSpinnerLines()
         log.success(`Received ${data.length} personal access tokens.`)
 
-        const headers = [
-          '🏷️  Name',
-          '⏳  Expires On',
-          '🪄  Created On',
-          '📊  Last Used'
-        ]
+        let headers: string[]
+        let rows: string[][]
 
-        const rows = data.map((pat) => [
-          pat.name,
-          pat.expiresOn
-            ? dayjs(pat.expiresOn).format('hh:mm A, MMMM D, YYYY')
-            : '—',
-          dayjs(pat.createdAt).format('hh:mm A, MMMM D, YYYY'),
-          dayjs(pat.lastUsedOn).format('hh:mm A, MMMM D, YYYY')
-        ])
+        if (options.verbose) {
+          headers = [
+            '🏷️  Name',
+            '⏳  Expires On',
+            '🪄  Created On',
+            '📊  Last Used',
+            '🧩  ID'
+          ]
+
+          rows = data.map((pat) => [
+            pat.name,
+            pat.expiresOn ? formatDate(pat.expiresOn) : '—',
+            formatDate(pat.createdAt),
+            formatDate(pat.lastUsedOn),
+            pat.id
+          ])
+        } else {
+          headers = ['🏷️  Name', '⏳  Expires On', '🧩  ID']
+
+          rows = data.map((pat) => [
+            pat.name,
+            pat.expiresOn ? formatDate(pat.expiresOn) : '—',
+            pat.id
+          ])
+        }
 
         Table.render(headers, rows)
       } else if (error) {
