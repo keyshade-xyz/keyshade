@@ -87,9 +87,9 @@ export default class ListVariable extends BaseCommand {
             '👤 Created By'
           ]
 
-          variables.forEach(({ variable, values }) => {
+          variables.forEach((variable) => {
             Logger.info(` - ${chalk.bold(variable.name)}(${variable.slug})`)
-            const rows = values.map(
+            const rows = variable.versions.map(
               ({ environment, value, version, createdOn, createdBy }) => [
                 `${variable.name}(${variable.slug})`,
                 environment.name,
@@ -109,14 +109,16 @@ export default class ListVariable extends BaseCommand {
             '💾 Value'
           ]
 
-          variables.forEach(({ variable, values }) => {
+          variables.forEach((variable) => {
             Logger.info(` - ${chalk.bold(variable.name)}(${variable.slug})`)
-            const rows = values.map(({ environment, value, version }) => [
-              `${variable.name}(${variable.slug})`,
-              environment.name,
-              String(version),
-              value
-            ])
+            const rows = variable.versions.map(
+              ({ environment, value, version }) => [
+                `${variable.name}(${variable.slug})`,
+                environment.name,
+                String(version),
+                value
+              ]
+            )
             Table.render(headers, rows)
           })
         }

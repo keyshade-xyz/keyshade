@@ -184,7 +184,7 @@ export class SlackIntegration extends BaseIntegration {
           elements: [
             {
               type: 'mrkdwn',
-              text: '<https://keyshade.xyz|View in Keyshade>'
+              text: '<https://keyshade.io|View in Keyshade>'
             }
           ]
         }

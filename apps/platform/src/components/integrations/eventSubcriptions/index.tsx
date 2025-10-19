@@ -16,7 +16,7 @@ function EventSubscriptions({ selectedIntegration }: EventSubscriptionsProps) {
     : selectedIntegration.notifyOn.slice(0, INITIAL_EVENTS_COUNT)
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
       <div className="mb-4 flex flex-col gap-1">
         <h2 className="text-xl font-semibold text-white">Event Subscription</h2>
         <p className="text-sm text-white/60">

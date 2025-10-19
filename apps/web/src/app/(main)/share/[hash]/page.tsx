@@ -8,7 +8,7 @@ import ShareSecretAlert from '@/components/shareScention/ShareSecretAlert'
 import ShareSecretBodyWrapper from '@/components/shareScention/shareSecretBodyWrapper'
 import ViewShareSecret from '@/components/shareScention/viewSharedSecret'
 
-function ViewSharePage() {
+function ViewSharePage(): React.JSX.Element {
   const shareHash = useParams().hash as string
   const [error, setError] = useState<string>('')
 

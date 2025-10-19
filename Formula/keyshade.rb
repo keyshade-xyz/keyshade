@@ -1,6 +1,6 @@
 class Keyshade < Formula
   desc "Keyshade CLI - Secure, real-time secret and configuration management"
-  homepage "https://keyshade.xyz"
+  homepage "https://keyshade.io"
   version "3.3.0-stage.2"
   license "MIT"
 

@@ -10,9 +10,10 @@ import WorkspaceRoleController from '@api-client/controllers/workspace-role'
 import WorkspaceMembershipController from '@api-client/controllers/workspace-membership'
 import AuthController from '@api-client/controllers/auth'
 import UserController from '@api-client/controllers/user'
-import ApiKeyController from './controllers/api-key'
 import PaymentController from './controllers/payment'
 import ShareSecretController from './controllers/share-secret'
+import CliSessionController from './controllers/cli-session'
+import BrowserSessionController from './controllers/browser-session'
 export {
   AppController,
   EnvironmentController,
@@ -26,7 +27,8 @@ export {
   WorkspaceMembershipController,
   AuthController,
   UserController,
-  ApiKeyController,
   PaymentController,
-  ShareSecretController
+  ShareSecretController,
+  CliSessionController,
+  BrowserSessionController
 }

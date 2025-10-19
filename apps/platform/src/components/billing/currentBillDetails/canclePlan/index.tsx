@@ -115,7 +115,7 @@ export default function CancelPlan({ currentWorkspace }: CancelPlanProps) {
             </Select>
             <Visible if={cancelReason === 'other'}>
               <Textarea
-                className="col-span-3 mt-3 h-[5.625rem] w-[20vw] resize-none gap-[0.25rem]"
+                className="col-span-3 mt-3 h-22.5 w-[20vw] resize-none gap-1"
                 id="name"
                 onChange={(e) => {
                   setCancelMessage(e.target.value)

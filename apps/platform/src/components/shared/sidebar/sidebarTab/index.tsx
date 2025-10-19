@@ -34,7 +34,7 @@ function SidebarTab({
 
   return (
     <Link
-      className="relative flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:text-white/60"
+      className="relative flex w-full gap-x-3 rounded-md p-2.5 capitalize transition-colors hover:text-white/60"
       href={link}
     >
       {isCurrentActive(matchTo) && (

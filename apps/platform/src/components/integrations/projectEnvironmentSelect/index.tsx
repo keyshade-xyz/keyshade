@@ -232,7 +232,7 @@ export default function ProjectEnvironmentSelect({
           value={selectedProject ? JSON.stringify(selectedProject) : undefined}
         >
           <SelectTrigger
-            className={`h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 ${
+            className={`h-9 w-140 rounded-md border-[0.013rem] border-white/10 bg-white/5 ${
               isProjectDisabled ? 'cursor-not-allowed opacity-50' : ''
             }`}
             id="project-select"
@@ -267,7 +267,7 @@ export default function ProjectEnvironmentSelect({
             Project Private Key
           </label>
           <Input
-            className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            className="h-9 w-140 rounded-md border-[0.013rem] border-white/10 bg-white/5"
             disabled={isProjectDisabled}
             id="project-private-key"
             onChange={(e) => handleManualPrivateKeyChange(e.target.value)}
@@ -302,7 +302,7 @@ export default function ProjectEnvironmentSelect({
             ) : environments.length > 0 ? (
               environments.map((env) => (
                 <div
-                  className="mb-3 rounded border border-white/10 bg-white/5 p-2"
+                  className="mb-3 rounded-sm border border-white/10 bg-white/5 p-2"
                   key={env.id}
                 >
                   <div
@@ -314,7 +314,7 @@ export default function ProjectEnvironmentSelect({
                   >
                     <input
                       checked={isEnvironmentSelected(env.slug)}
-                      className="rounded border-white/20 bg-white/10 text-blue-500"
+                      className="rounded-sm border-white/20 bg-white/10 text-blue-500"
                       id={`env-checkbox-${env.id}`}
                       onChange={() => handleEnvironmentToggle(env)}
                       type="checkbox"
@@ -400,7 +400,7 @@ export default function ProjectEnvironmentSelect({
             value={formState.selectedEnvironments[0] || ''}
           >
             <SelectTrigger
-              className={`h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 ${
+              className={`h-9 w-140 rounded-md border-[0.013rem] border-white/10 bg-white/5 ${
                 !formState.selectedProjectSlug
                   ? 'cursor-not-allowed opacity-50'
                   : ''

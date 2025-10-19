@@ -1,5 +1,7 @@
 import {
   AppController,
+  AuthController,
+  CliSessionController,
   EnvironmentController,
   EventController,
   IntegrationController,
@@ -7,12 +9,21 @@ import {
   SecretController,
   VariableController,
   WorkspaceController,
-  WorkspaceRoleController,
-  WorkspaceMembershipController
+  WorkspaceMembershipController,
+  WorkspaceRoleController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
   private static instance: ControllerInstance | null
+
+  private _cliSessionController: CliSessionController | null = null
+
+  get cliSessionController(): CliSessionController {
+    if (!this._cliSessionController) {
+      throw new Error('ControllerInstance not initialized')
+    }
+    return this._cliSessionController
+  }
 
   private _appController: AppController | null = null
 
@@ -21,6 +32,15 @@ export default class ControllerInstance {
       throw new Error('ControllerInstance not initialized')
     }
     return this._appController
+  }
+
+  private _authController: AuthController | null = null
+
+  get authController(): AuthController {
+    if (!this._authController) {
+      throw new Error('ControllerInstance not initialized')
+    }
+    return this._authController
   }
 
   private _environmentController: EnvironmentController | null = null
@@ -106,23 +126,24 @@ export default class ControllerInstance {
   }
 
   static initialize(baseUrl: string) {
-    if (!ControllerInstance.instance) {
-      const instance = new ControllerInstance()
+    const instance = new ControllerInstance()
 
-      instance._appController = new AppController(baseUrl)
-      instance._environmentController = new EnvironmentController(baseUrl)
-      instance._eventController = new EventController(baseUrl)
-      instance._integrationController = new IntegrationController(baseUrl)
-      instance._projectController = new ProjectController(baseUrl)
-      instance._secretController = new SecretController(baseUrl)
-      instance._variableController = new VariableController(baseUrl)
-      instance._workspaceController = new WorkspaceController(baseUrl)
-      instance._workspaceRoleController = new WorkspaceRoleController(baseUrl)
-      instance._workspaceMembershipController =
-        new WorkspaceMembershipController(baseUrl)
+    instance._appController = new AppController(baseUrl)
+    instance._authController = new AuthController(baseUrl)
+    instance._environmentController = new EnvironmentController(baseUrl)
+    instance._eventController = new EventController(baseUrl)
+    instance._integrationController = new IntegrationController(baseUrl)
+    instance._projectController = new ProjectController(baseUrl)
+    instance._secretController = new SecretController(baseUrl)
+    instance._variableController = new VariableController(baseUrl)
+    instance._workspaceController = new WorkspaceController(baseUrl)
+    instance._workspaceRoleController = new WorkspaceRoleController(baseUrl)
+    instance._workspaceMembershipController = new WorkspaceMembershipController(
+      baseUrl
+    )
+    instance._cliSessionController = new CliSessionController(baseUrl)
 
-      ControllerInstance.instance = instance
-    }
+    ControllerInstance.instance = instance
   }
 
   static getInstance(): ControllerInstance {

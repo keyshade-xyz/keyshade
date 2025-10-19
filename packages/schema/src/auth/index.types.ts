@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  DeviceDetailSchema,
   LogOutRequestSchema,
   LogOutResponseSchema,
   ResendOTPRequestSchema,
@@ -9,6 +10,8 @@ import {
   ValidateOTPRequestSchema,
   ValidateOTPResponseSchema
 } from '.'
+
+export type DeviceDetail = z.infer<typeof DeviceDetailSchema>
 
 export type ResendOTPRequest = z.infer<typeof ResendOTPRequestSchema>
 

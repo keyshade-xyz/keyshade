@@ -146,7 +146,7 @@ export default function EditProjectSheet(): JSX.Element {
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label className="w-[10rem] text-left" htmlFor="storePrivateKey">
+            <Label className="w-40 text-left" htmlFor="storePrivateKey">
               Do you want us to store the private key?
             </Label>
             <div className="flex gap-1 text-sm">

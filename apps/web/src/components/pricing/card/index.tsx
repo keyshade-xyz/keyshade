@@ -43,11 +43,12 @@ function PriceCard({
   }
   const handleButtonClick = () => {
     if (price < 0) {
-      window.location.href = 'mailto:support@keyshade.xyz?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan. Please provide more details about pricing, features, and next steps.'
+      window.location.href =
+        'mailto:support@keyshade.io?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan. Please provide more details about pricing, features, and next steps.'
     } else if (isUserLoggedIn()) {
-      window.location.href = 'https://app.keyshade.xyz/dashboard/billing'
+      window.location.href = 'https://app.keyshade.io/dashboard/billing'
     } else {
-      window.location.href = 'https://app.keyshade.xyz/auth'
+      window.location.href = 'https://app.keyshade.io/auth'
     }
   }
 
@@ -114,8 +115,8 @@ function PriceCard({
 
         <button
           className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
-          type="button"
           onClick={handleButtonClick}
+          type="button"
         >
           {returnButtonLabel()}
         </button>

@@ -61,7 +61,7 @@ export default function CopyToClipboard({
           {text}
         </p>
       </div>{' '}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {copied ? (
           <CheckmarkSVG className="h-[20px] w-[20px]" />
         ) : (

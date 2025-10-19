@@ -167,12 +167,12 @@ export const ShareBaseEmailTemplate: React.FC<ShareBaseEmailTemplateProps> = ({
               This is an automated message. Please do not reply to this email.
               <br />
               Read our{' '}
-              <Link href="https://www.keyshade.xyz/privacy" style={link}>
+              <Link href="https://www.keyshade.io/privacy" style={link}>
                 Privacy Policy
               </Link>{' '}
               and{' '}
               <Link
-                href="https://www.keyshade.xyz/terms_and_condition"
+                href="https://www.keyshade.io/terms_and_condition"
                 style={link}
               >
                 Terms and Conditions

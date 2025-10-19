@@ -2,8 +2,8 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useState } from 'react'
 import type { Integration } from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
-import IntegrationIcon from '../integrationIcon'
 import EmptyIntegration from '../emptyIntegration'
+import IntegrationIcon from '../integrationIcon'
 import {
   integrationsOfWorkspaceAtom,
   selectedIntegrationAtom,
@@ -139,7 +139,7 @@ function IntegrationList() {
                     type={integration.type}
                   />
 
-                  <div className="flex w-2/5 flex-shrink-0 items-start justify-center gap-x-2 pl-4">
+                  <div className="flex w-2/5 shrink-0 items-start justify-center gap-x-2 pl-4">
                     <CopyToClipboard text={integration.slug} />
                   </div>
                 </div>

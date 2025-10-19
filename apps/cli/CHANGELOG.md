@@ -283,4 +283,74 @@
 
 ### Minor Changes
 
-- Interactive ode for `keyshade init` command
+- Interactive code for `keyshade init` command
+
+# 3.4.0-stage.1
+
+- `keyshade login` command added to support interactive login
+- `keyshade profile create, delete, use` commands deleted
+- `keyshade profile list` command updated
+- `keyshade profile switch` allows users to switch between profiles
+- `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend
+
+# 3.4.0
+
+### Features
+
+- `keyshade login` command added to support interactive login
+- `keyshade profile create, delete, use` commands deleted
+- `keyshade profile list` command updated
+- `keyshade profile switch` allows users to switch between profiles
+- `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend
+- 
+### Minor Changes
+
+- Interactive code for `keyshade init` command
+- Interactive mode for `keyshade run` command
+
+### Patches
+
+- `keyshade init` no longer overwrites existing private-keys.json file.
+
+# 3.4.1.stage-1
+
+### Patches
+
+- Removed API key validation from `keyshade run`
+- Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.0.stage-1
+
+### Minor changes
+
+- Improved DX of `keyshade run` command
+
+# 3.5.0
+
+### Minor changes
+
+- Improved DX of `keyshade run` command
+
+### Patches
+
+- Removed API key validation from `keyshade run`
+- Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.1
+
+## Patches
+
+- Update domain to keyshade.io
+
+# 3.5.2
+
+## Patches
+
+- Update URL retrival in login command
+
+# 3.5.3
+
+## Patches
+
+- Updated `keyshade run` command to use POSIX
+- `keyshade run` command now compatible with both Windows and Unix/Linux
