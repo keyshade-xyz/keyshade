@@ -1,3 +1,9 @@
+## [2.41.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.40.1-stage.1...v2.41.0-stage.1) (2025-10-19)
+
+### 🚀 Features
+
+* **cli:** ability to manage pat ([#1213](https://github.com/keyshade-xyz/keyshade/issues/1213)) ([0473463](https://github.com/keyshade-xyz/keyshade/commit/0473463c5af3bc09d108dea97e46b078cabd0d6f))
+
 ## [2.40.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.40.0...v2.40.1-stage.1) (2025-10-18)
 
 ### 🐛 Bug Fixes
