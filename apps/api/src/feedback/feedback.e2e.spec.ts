@@ -11,7 +11,7 @@ import { FeedbackModule } from './feedback.module'
 import { MailModule } from '@/mail/mail.module'
 import { PrismaService } from '@/prisma/prisma.service'
 import { User } from '@prisma/client'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 
 describe('Feedback Controller (E2E)', () => {
@@ -45,7 +45,7 @@ describe('Feedback Controller (E2E)', () => {
 
   beforeEach(async () => {
     user = await userService.createUser({
-      email: 'janice@keyshade.xyz',
+      email: 'janice@keyshade.io',
       name: 'Janice',
       isActive: true,
       isAdmin: false,

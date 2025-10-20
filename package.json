@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.34.0-stage.21",
+  "version": "2.41.0-stage.1",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -93,6 +93,7 @@
     "dev:api": "turbo run dev --filter=@keyshade/api",
     "dev:web": "turbo run dev --filter=@keyshade/web",
     "dev:platform": "turbo run dev --filter=@keyshade/platform",
+    "dev:platfrom:storybook": "pnpm --filter @keyshade/platform run storybook",
     "dev:cli": "turbo run dev --filter=@keyshade/cli",
     "add:global": "pnpm add -w",
     "add:api": "pnpm add --filter=@keyshade/api",

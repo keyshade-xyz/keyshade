@@ -3,6 +3,7 @@ import { CustomLoggerService } from './logger.service'
 import { TierLimitService } from './tier-limit.service'
 import SlugGenerator from './slug-generator.service'
 import { HydrationService } from './hydration.service'
+import { TokenService } from '@/common/token.service'
 
 @Global()
 @Module({
@@ -11,13 +12,15 @@ import { HydrationService } from './hydration.service'
     CustomLoggerService,
     TierLimitService,
     SlugGenerator,
-    HydrationService
+    HydrationService,
+    TokenService
   ],
   exports: [
     CustomLoggerService,
     TierLimitService,
     SlugGenerator,
-    HydrationService
+    HydrationService,
+    TokenService
   ]
 })
 export class CommonModule {}

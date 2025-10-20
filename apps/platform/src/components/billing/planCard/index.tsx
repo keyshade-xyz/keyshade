@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import { useAtomValue } from 'jotai'
 import type { AllowedPlans } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { EnterpriseSVG, HackerSVG, TeamSVG } from 'public/svg/billing'
 import Visible from '@/components/common/visible'
 import { Slider } from '@/components/ui/slider'
 import {
@@ -85,7 +85,7 @@ export default function PlanCard({
   const redirectToPayment = () => {
     if (tierName === 'Enterprise') {
       window.location.href =
-        'mailto:contact@keyshade.xyz?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan for my organization.'
+        'mailto:contact@keyshade.io?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan for my organization.'
       return
     }
     setIsLoading(true)
@@ -132,7 +132,7 @@ export default function PlanCard({
 
   return (
     <div className=" w-full  rounded-[28px] bg-white/5 px-1 py-1 shadow-lg">
-      <div className="flex h-full w-full flex-col justify-between rounded-[23px] bg-gradient-to-br from-black/80 via-white/5 to-transparent p-5">
+      <div className="bg-linear-to-br flex h-full w-full flex-col justify-between rounded-[23px] from-black/80 via-white/5 to-transparent p-5">
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">

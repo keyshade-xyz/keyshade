@@ -71,7 +71,7 @@ keyshade workspace list
 ## Create a Project and Add Secrets
 
 To get started:
-1.  Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+1.  Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 2.  Click **"Create Project"**
 3.  Name your project (e.g. `python-app`)
 4.  Inside the project, click the **"Secrets"** tab
@@ -88,7 +88,7 @@ To get started:
 
 ## Initialize Keyshade in Your Project
 
-In order to use the configurations you just created on the dashboard, you would need to initialize keyshade in your project. This generates the necessary configurations for the CLI to tap into your keyshade project.
+In order to use the configurations you just created on the dashboard, you would need to initialize Keyshade in your project. This generates the necessary configurations for the CLI to tap into your Keyshade project.
 
 From your project root:
 

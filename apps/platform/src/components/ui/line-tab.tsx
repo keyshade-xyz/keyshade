@@ -39,7 +39,7 @@ function Tab({
   return (
     <button
       className={cn(
-        selected ? '!text-white' : 'hover:text-white/40',
+        selected ? 'text-white!' : 'hover:text-white/40',
         `relative rounded-md px-2 py-1 text-sm font-medium text-white/50 transition-colors duration-300`
       )}
       onClick={() => {
@@ -60,7 +60,7 @@ function Tab({
           layoutId={`${customID}linetab`}
           transition={{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }}
         >
-          <span className="z-0 h-[1px] w-[80%] rounded-full bg-white" />
+          <span className="z-0 h-px w-[80%] rounded-full bg-white" />
         </motion.div>
       ) : null}
     </button>

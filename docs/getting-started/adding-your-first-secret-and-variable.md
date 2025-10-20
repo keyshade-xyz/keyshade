@@ -14,7 +14,7 @@ So, let's get started!
 
 ## Creating a new project
 
-Head over to [https://app.keyshade.xyz](https://app.keyshade.xyz). This is where you get to access our platform. Log in with your email, or your favourite OAuth provider. Once inside, you should be greeted with a similar page like this:
+Head over to [https://app.keyshade.io](https://app.keyshade.io). This is where you get to access our platform. Log in with your email, or your favourite OAuth provider. Once inside, you should be greeted with a similar page like this:
 
 ![Dashboard](../../blob/dashboard.png)
 
@@ -23,8 +23,10 @@ Now, we can start creating our project.
 - Click on **Create Project**
 - Enter your project name
 - Optionally, you can store the private key in the project **(not recommended in production projects)**
-- Edit or add environments if your want to
+- Edit or add environments if you want to
 - Finally, click on **Create Project**
+
+> 💡 **Want to learn more about environments?** Check out our comprehensive [Environments documentation](../../internals/environments.md) to understand what environments are, how they work, and all the functionalities available for managing them.
 
 If the creation was successful, you should be greeted with a dialog like this:
 ![Success](../../blob/create-project-success.png) 
@@ -44,9 +46,11 @@ Now, let's create our first secret.
 - Specify a value for the `dev` environment we created. We would use `ks_1234`.
 - Hit on **Add Secret**.
 
-If created successfully, you secret should look like this:
+If created successfully, your secret should look like this:
 
 ![Success](../../blob/secret.png)
+
+> 💡 **Want to learn more about secrets?** Check out our comprehensive [Secrets documentation](../../internals/secrets.md) to understand what secrets are, why they're used, and all the functionalities available for managing them.
 
 ## Creating a variable
 
@@ -57,10 +61,12 @@ Lastly, let's create our first variable.
 - Specify a value for the `dev` environment we created. We would use `3000`.
 - Hit on **Add Variable**.
 
-If created successfully, you variable should look like this:
+If created successfully, your variable should look like this:
 
 ![Success](../../blob/variable.png)
 
+> 💡 **Want to learn more about variables?** Check out our comprehensive [Variables documentation](../../internals/variables.md) to understand what variables are, how they differ from secrets, and all the functionalities available for managing them.
+
 ## That's it!
 
-We are now in a pretty good shape. We have added our first secret and variable. Now, lets get the CLI installed and set up locally.
+We are now in a pretty good shape. We have added our first secret and variable. Now, let's get the CLI installed and set up locally.

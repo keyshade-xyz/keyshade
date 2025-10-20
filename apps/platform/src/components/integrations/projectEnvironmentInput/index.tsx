@@ -134,7 +134,7 @@ export default function ProjectEnvironmentInput({
           value={selectedProject ? JSON.stringify(selectedProject) : undefined}
         >
           <SelectTrigger
-            className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            className="h-9 w-140 rounded-md border-[0.013rem] border-white/10 bg-white/5"
             id="project-select"
           >
             <SelectValue placeholder="Select project">
@@ -174,7 +174,7 @@ export default function ProjectEnvironmentInput({
                 aria-checked={selectedEnvironments.some(
                   (selected) => selected.id === env.id
                 )}
-                className="flex cursor-pointer items-center gap-2 rounded p-2 hover:bg-white/10"
+                className="flex cursor-pointer items-center gap-2 rounded-sm p-2 hover:bg-white/10"
                 key={env.id}
                 onClick={() => handleEnvironmentToggle(env)}
                 onKeyDown={(e) => {
@@ -190,7 +190,7 @@ export default function ProjectEnvironmentInput({
                   checked={selectedEnvironments.some(
                     (selected) => selected.id === env.id
                   )}
-                  className="rounded border-white/20 bg-white/10 text-blue-500"
+                  className="rounded-sm border-white/20 bg-white/10 text-blue-500"
                   onChange={() => handleEnvironmentToggle(env)}
                   type="checkbox"
                 />

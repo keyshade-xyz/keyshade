@@ -8,7 +8,7 @@ export default function GlobalError({
   error
 }: {
   error: Error & { digest?: string }
-}) {
+}): React.JSX.Element {
   useEffect(() => {
     Sentry.captureException(error)
   }, [error])

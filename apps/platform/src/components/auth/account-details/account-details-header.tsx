@@ -9,7 +9,7 @@ export default function AccountDetailsHeader() {
       <h1 className={`${GeistSansFont.className} text-[2.5rem] font-semibold`}>
         Almost Done
       </h1>
-      <div className="flex w-[15rem] flex-col items-center text-center">
+      <div className="flex w-60 flex-col items-center text-center">
         <span className={GeistSansFont.className}>
           Fill up the rest details and start your way to security
         </span>

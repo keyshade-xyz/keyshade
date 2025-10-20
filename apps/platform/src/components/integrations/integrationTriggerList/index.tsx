@@ -154,7 +154,7 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
 
   return (
     <div className="w-3/5 flex-1">
-      <div className="h-full rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+      <div className="h-full rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-xs">
         <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
           <h2 className="text-xl font-semibold text-white">Run History</h2>
           <div className="flex items-center justify-center">

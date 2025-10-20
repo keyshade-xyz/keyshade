@@ -1,0 +1,251 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import '../../app/global.css'
+
+export const Spacing = ({ space }) => (
+  <div
+    className={`h-5 ${space} bg-cyan-400 `}
+    style={{ display: 'inline-block', minWidth: 'unset' }}
+  />
+)
+
+export const spacingTokens = [
+  {
+    name: '0',
+    size: '0px',
+    pixels: '0px',
+    class: 'w-0'
+  },
+  {
+    name: 'px',
+    size: '1px',
+    pixels: '1px',
+    class: 'w-px'
+  },
+  {
+    name: '0.5',
+    size: '0.125rem',
+    pixels: '2px',
+    class: 'w-[2px]'
+  },
+  {
+    name: '1',
+    size: '0.25rem',
+    pixels: '4px',
+    class: 'w-1'
+  },
+  {
+    name: '1.5',
+    size: '0.375rem',
+    pixels: '6px',
+    class: 'w-1.5'
+  },
+  {
+    name: '2',
+    size: '0.5rem',
+    pixels: '8px',
+    class: 'w-2'
+  },
+  {
+    name: '2.5',
+    size: '0.625rem',
+    pixels: '10px',
+    class: 'w-2.5'
+  },
+  {
+    name: '3',
+    size: '0.75rem',
+    pixels: '12px',
+    class: 'w-3'
+  },
+  {
+    name: '3.5',
+    size: '0.875rem',
+    pixels: '14px',
+    class: 'w-3.5'
+  },
+  {
+    name: '4',
+    size: '1rem',
+    pixels: '16px',
+    class: 'w-4'
+  },
+  {
+    name: '5',
+    size: '1.25rem',
+    pixels: '20px',
+    class: 'w-5'
+  },
+  {
+    name: '6',
+    size: '1.5rem',
+    pixels: '24px',
+    class: 'w-6'
+  },
+  {
+    name: '7',
+    size: '1.75rem',
+    pixels: '28px',
+    class: 'w-7'
+  },
+  {
+    name: '8',
+    size: '2rem',
+    pixels: '32px',
+    class: 'w-8'
+  },
+  {
+    name: '9',
+    size: '2.25rem',
+    pixels: '36px',
+    class: 'w-9'
+  },
+  {
+    name: '10',
+    size: '2.5rem',
+    pixels: '40px',
+    class: 'w-10'
+  },
+  {
+    name: '11',
+    size: '2.75rem',
+    pixels: '44px',
+    class: 'w-11'
+  },
+  {
+    name: '12',
+    size: '3rem',
+    pixels: '48px',
+    class: 'w-12'
+  },
+  {
+    name: '14',
+    size: '3.5rem',
+    pixels: '56px',
+    class: 'w-14'
+  },
+  {
+    name: '16',
+    size: '4rem',
+    pixels: '64px',
+    class: 'w-16'
+  },
+  {
+    name: '20',
+    size: '5rem',
+    pixels: '80px',
+    class: 'w-20'
+  },
+  {
+    name: '24',
+    size: '6rem',
+    pixels: '96px',
+    class: 'w-24'
+  },
+  {
+    name: '28',
+    size: '7rem',
+    pixels: '112px',
+    class: 'w-28'
+  },
+  {
+    name: '32',
+    size: '8rem',
+    pixels: '128px',
+    class: 'w-32'
+  },
+  {
+    name: '36',
+    size: '9rem',
+    pixels: '144px',
+    class: 'w-36'
+  },
+  {
+    name: '40',
+    size: '10rem',
+    pixels: '160px',
+    class: 'w-40'
+  },
+  {
+    name: '44',
+    size: '11rem',
+    pixels: '176px',
+    class: 'w-44'
+  },
+  {
+    name: '48',
+    size: '12rem',
+    pixels: '192px',
+    class: 'w-48'
+  },
+  {
+    name: '52',
+    size: '13rem',
+    pixels: '208px',
+    class: 'w-52'
+  },
+  {
+    name: '56',
+    size: '14rem',
+    pixels: '224px',
+    class: 'w-56'
+  },
+  {
+    name: '60',
+    size: '15rem',
+    pixels: '240px',
+    class: 'w-60'
+  },
+  {
+    name: '64',
+    size: '16rem',
+    pixels: '256px',
+    class: 'w-64'
+  },
+  {
+    name: '72',
+    size: '18rem',
+    pixels: '288px',
+    class: 'w-72'
+  },
+  {
+    name: '80',
+    size: '20rem',
+    pixels: '320px',
+    class: 'w-80'
+  },
+  {
+    name: '96',
+    size: '24rem',
+    pixels: '384px',
+    class: 'w-96'
+  }
+]
+
+<Meta title="Tokens/Spacing" />
+
+# Spacing Tokens
+
+Keyshade uses a consistent set of spacing values to ensure a cohesive design language across our platform. These spacing tokens are from default [Tailwind CSS configuration](https://v3.tailwindcss.com/docs/customizing-spacing).
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Size (REM)</th>
+      <th>Pixels (PX)</th>
+      <th>Preview</th>
+    </tr>
+  </thead>
+  <tbody>
+    {spacingTokens.map((token) => (
+      <tr key={token.class}>
+        <td>{token.name}</td>
+        <td>{token.size}</td>
+        <td>{token.pixels}</td>
+        <td>
+          <Spacing space={token.class} />
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>

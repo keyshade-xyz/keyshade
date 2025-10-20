@@ -10,10 +10,10 @@ In this section, we will discuss how our codebase is organized. We have tried to
 
 The `apps` directory contains all the applications that are part of the project. Each application is a separate package and has its own `package.json` file. The applications are:
 
-- [**api**](../../../apps/api/): The main API server that serves the REST API.
-- [**web**](../../../apps/web/): The web application that serves the homepage.
-- [**cli**](../../../apps/cli/): The CLI application that allows users to interact with the API and tap into live updates for their application.
-- [**platform**](../../../apps/workspace/): The platform application hosts the UI that allows users to do the actual work.
+- [**api**](https://github.com/keyshade-xyz/keyshade/tree/develop/apps/api): The main API server that serves the REST API.
+- [**web**](https://github.com/keyshade-xyz/keyshade/tree/develop/apps/web): The web application that serves the homepage.
+- [**cli**](https://github.com/keyshade-xyz/keyshade/tree/develop/apps/cli): The CLI application that allows users to interact with the API and tap into live updates for their application.
+- [**platform**](https://github.com/keyshade-xyz/keyshade/tree/develop/apps/platform): The platform application hosts the UI that allows users to do the actual work.
 
 ## Packages under `packages` directory
 

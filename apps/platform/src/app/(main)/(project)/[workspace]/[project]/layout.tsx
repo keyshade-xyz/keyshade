@@ -2,10 +2,10 @@
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import VariablePage from './@variable/page'
-import SecretPage from './@secret/page'
-import EnvironmentPage from './@environment/page'
 import OverviewPage from './@overview/page'
+import EnvironmentPage from './@environment/page'
+import SecretPage from './@secret/page'
+import VariablePage from './@variable/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
 import {
@@ -103,7 +103,7 @@ function DetailedProjectPage(): JSX.Element {
   return (
     <main className="flex h-full flex-col gap-4">
       {tab !== 'overview' && (
-        <div className="flex h-[3.625rem] w-full justify-between p-3 ">
+        <div className="flex h-14.5 w-full justify-between p-3 ">
           <div className="text-3xl">{selectedProject?.name}</div>
           {tab === 'secret' && <AddSecretDialog />}
           {tab === 'variable' && <AddVariableDialogue />}
