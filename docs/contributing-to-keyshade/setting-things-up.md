@@ -18,9 +18,13 @@ Fill in the values for the environment variables in the `.env` file. You can fin
 
 We tend to use docker for doing the heavy lifting on our behalf. Currently, we use it to set up the integration test environment before you make a commit. To make sure your experience is smooth, consider installing docker from [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
+## Node Version
+
+Keyshade works with LTS NodeJS versions. At the time of writing this document, v22.20.0 is the LTS version. In order to install it, head over [here](https://nodejs.org/en/download) and get Node installed.
+
 ## Setting up `pnpm`
 
-Keyshade works with any version of **node (>=18)** and takes the liberty that you have it installed. The project uses `pnpm` as the package manager. To install `pnpm`, run the following command:
+The project uses `pnpm` as the package manager. To install `pnpm`, run the following command:
 
 ```bash
 npm install -g pnpm
