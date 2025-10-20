@@ -1,4 +1,4 @@
-![thumb](https://github.com/keyshade-xyz/keyshade/assets/74916308/d3d00d59-a031-40bc-a17e-c57871cfd166)
+![thumb](https://github.com/user-attachments/assets/8de65a07-2a21-43d9-bc8e-2d9b2e31a736)
 
 ---
 
