@@ -19,9 +19,14 @@ on:
         '.github/workflows/validate-web.yaml'
       ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     name: Validate Web
 
     steps:
@@ -38,6 +43,11 @@ jobs:
         with:
           version: 9.2.0
           run_install: false
+
+      - name: Enable corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.2.0 --activate
 
       - name: Get pnpm store directory
         shell: bash
@@ -70,3 +80,44 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           flags: web
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Web image
+        run: pnpm docker:build:web
+
+      - name: Verify Web image
+        run: docker image inspect keyshade/web:ci-${{ github.sha }}
+
+      - name: Run Web container
+        run: pnpm docker:run:web
+
+      - name: Web health check
+        run: |
+          set -euo pipefail
+          for i in {1..30}; do
+            if curl -fsS "http://127.0.0.1:3000/api/health" >/dev/null; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Waiting for service... ($i/30)"
+            sleep 2
+          done
+          echo "Service failed to become healthy in time"
+          docker logs web-ci || true
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          set -euo pipefail
+          docker ps -a || true
+          if [ "${{ job.status }}" != 'success' ]; then
+            docker logs web-ci || true
+          fi
+          docker rm -f web-ci || true
+          docker image rm -f keyshade/web:ci-${{ github.sha }} || true

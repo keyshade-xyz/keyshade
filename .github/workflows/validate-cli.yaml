@@ -23,9 +23,14 @@ on:
         '.github/workflows/validate-cli.yaml'
       ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     name: Validate CLI
 
     steps:
@@ -42,6 +47,11 @@ jobs:
         with:
           version: 9.2.0
           run_install: false
+
+      - name: Enable corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.2.0 --activate
 
       - name: Get pnpm store directory
         shell: bash
@@ -67,3 +77,29 @@ jobs:
       - name: Build
         run: |
           pnpm run build:cli
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build CLI image
+        run: pnpm docker:build:cli
+
+      - name: Verify CLI image
+        run: docker image inspect keyshade/cli:ci-${{ github.sha }}
+
+      - name: CLI smoke test
+        run: pnpm docker:run:cli
+
+      - name: Cleanup
+        if: always()
+        run: |
+          set -euo pipefail
+          docker ps -a || true
+          if [ "${{ job.status }}" != 'success' ]; then
+            docker logs cli-ci || true
+          fi
+          docker rm -f cli-ci || true
+          docker image rm -f keyshade/cli:ci-${{ github.sha }} || true

@@ -9,9 +9,14 @@ on:
   pull_request:
     paths: ['apps/api/**', '.github/workflows/validate-api.yaml']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     name: Validate API
 
     steps:
@@ -29,6 +34,11 @@ jobs:
           version: 9.2.0
           run_install: false
 
+      - name: Enable corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.2.0 --activate
+
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -38,7 +48,7 @@ jobs:
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
@@ -74,3 +84,92 @@ jobs:
         with:
           flags: api-e2e-tests
           files: /coverage/apps/api/coverage-final.json
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Ensure Docker network
+        run: docker network inspect keyshade-ci >/dev/null 2>&1 || docker network create keyshade-ci
+
+      - name: Build API image
+        run: pnpm docker:build:api
+
+      - name: Verify API image
+        run: docker image inspect keyshade/api:ci-${{ github.sha }}
+
+      - name: Start API dependencies
+        run: |
+          set -euo pipefail
+
+          docker run -d --rm --name keyshade-ci-postgres --network keyshade-ci \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=postgres \
+            postgres:15
+
+          docker run -d --rm --name keyshade-ci-redis --network keyshade-ci redis:7
+
+          for i in {1..30}; do
+            if docker exec keyshade-ci-postgres pg_isready -U postgres >/dev/null 2>&1; then
+              echo "Postgres is ready"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Postgres failed to become ready in time"
+              docker logs keyshade-ci-postgres || true
+              exit 1
+            fi
+            echo "Waiting for Postgres... ($i/30)"
+            sleep 2
+          done
+
+          for i in {1..30}; do
+            if docker exec keyshade-ci-redis redis-cli ping >/dev/null 2>&1; then
+              echo "Redis is ready"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Redis failed to become ready in time"
+              docker logs keyshade-ci-redis || true
+              exit 1
+            fi
+            echo "Waiting for Redis... ($i/30)"
+            sleep 2
+          done
+
+      - name: Run API container
+        run: pnpm docker:run:api
+
+      - name: API health check
+        run: |
+          set -euo pipefail
+          for i in {1..30}; do
+            if curl -fsS "http://127.0.0.1:4200/health" >/dev/null; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Waiting for service... ($i/30)"
+            sleep 2
+          done
+          echo "Service failed to become healthy in time"
+          docker logs api-ci || true
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          set -euo pipefail
+          docker ps -a || true
+          if [ "${{ job.status }}" != 'success' ]; then
+            docker logs api-ci || true
+            docker logs keyshade-ci-postgres || true
+            docker logs keyshade-ci-redis || true
+          fi
+          docker rm -f api-ci || true
+          docker rm -f keyshade-ci-postgres || true
+          docker rm -f keyshade-ci-redis || true
+          docker image rm -f keyshade/api:ci-${{ github.sha }} || true
+          docker network rm keyshade-ci || true
