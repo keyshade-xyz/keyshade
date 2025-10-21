@@ -1,5 +1,5 @@
 ---
-description: Instructions on how to build & run each part of keyshade using docker
+description: Instructions on how to build & run each part of Keyshade using docker
 ---
 
 # Docker Support

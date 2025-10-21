@@ -204,7 +204,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             <div className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
-            <div className="flex flex-grow flex-col gap-y-2 overflow-hidden">
+            <div className="flex grow flex-col gap-y-2 overflow-hidden">
               <h1 className="truncate text-2xl font-bold">
                 {selectedWorkspace?.name}
               </h1>
@@ -251,7 +251,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             </span>
           </div>
           <Input
-            className="w-fit flex-grow"
+            className="w-fit grow"
             id="name"
             onChange={handleNameChange}
             placeholder="Workspace name"
@@ -300,7 +300,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               Update the billing method of your workspace here
             </span>
           </div>
-          <div className="w-2/5 rounded-lg border-[1px] border-white/50 px-4 py-3 text-center">
+          <div className="w-2/5 rounded-lg border border-white/50 px-4 py-3 text-center">
             Coming Soon
           </div>
         </section>
@@ -352,7 +352,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         <Separator className="bg-white/20" />
 
         {/* Delete Workspace */}
-        <section className="my-5 flex w-full flex-row items-center rounded-lg border-[1px] border-red-500 bg-red-500/10 p-5">
+        <section className="my-5 flex w-full flex-row items-center rounded-lg border border-red-500 bg-red-500/10 p-5">
           <div className="flex w-3/5 flex-col gap-y-2">
             <span className="text-lg font-semibold text-red-500">
               Delete Workspace

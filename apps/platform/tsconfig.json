@@ -26,7 +26,8 @@
     "tailwind.config.ts",
     ".next/types/**/*.ts",
     "sentry.*.ts",
-    "next.config.ts"
+    "next.config.ts",
+    ".storybook/**/*"
   ],
   "exclude": ["node_modules"]
 }

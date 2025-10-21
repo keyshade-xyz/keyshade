@@ -1,6 +1,6 @@
-import { FolderIconSVG } from '@public/svg/dashboard'
 import { useSetAtom } from 'jotai'
 import React from 'react'
+import { FolderIconSVG } from '@public/svg/dashboard'
 import { createProjectOpenAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 

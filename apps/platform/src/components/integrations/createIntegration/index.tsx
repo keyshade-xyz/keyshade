@@ -27,14 +27,14 @@ function CreateIntegration(): React.JSX.Element {
   }
   const integrationConfig = Integrations[integrationType]
   const integrationPermissions =
-    integrationConfig.events?.map(  
+    integrationConfig.events?.map(
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
   const handleNext = () => {
     setSetupModalOpen(true)
   }
   const handleHowItWorks = () => {
-    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
+    const url = `https://docs.keyshade.io/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
     window.location.href = url
   }
   const handleSetupOpenChange = (open: boolean) => {
@@ -54,7 +54,7 @@ function CreateIntegration(): React.JSX.Element {
               </div>
               <ArrowLeftRight className="h-6 w-6" />
               <IntegrationIcon
-                className="h-[4.5rem] w-[4.5rem] p-4"
+                className="h-18 w-18 p-4"
                 type={integrationType}
               />
             </div>
@@ -64,8 +64,8 @@ function CreateIntegration(): React.JSX.Element {
                   Integrate Keyshade with {integrationConfig.name}
                 </h2>
                 <p className="text-sm text-gray-400">
-                  Connect Keyshade with {integrationConfig.name} to send real-time
-                  project updates directly to your server.
+                  Connect Keyshade with {integrationConfig.name} to send
+                  real-time project updates directly to your server.
                 </p>
               </div>
             </DialogTitle>

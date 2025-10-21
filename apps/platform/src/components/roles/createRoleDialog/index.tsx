@@ -3,8 +3,8 @@ import React, { useCallback, useState } from 'react'
 import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
+import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -163,28 +163,28 @@ export default function CreateRoleDialog() {
           <AddSVG /> Add Role
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[80vh] min-w-[42rem] overflow-auto rounded-[12px] border bg-[#1E1E1F]">
-        <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
-          <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
+      <DialogContent className="h-[80vh] min-w-2xl overflow-auto rounded-[12px] border bg-[#1E1E1F]">
+        <div className="flex h-12.5 w-full flex-col items-start justify-center">
+          <DialogHeader className=" font-geist h-7.5 w-34 text-[1.125rem] font-semibold text-white ">
             Create Role
           </DialogHeader>
 
-          <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
+          <DialogDescription className=" font-inter h-5 w-full text-[0.875rem] font-normal text-[#D4D4D4]">
             Create a new role for your workspace
           </DialogDescription>
         </div>
         <div className="flex flex-col gap-y-8">
-          <div className="flex h-full w-full flex-col gap-[1rem] py-[1rem] ">
+          <div className="flex h-full w-full flex-col gap-4 py-4 ">
             {/* NAME */}
-            <div className="flex h-[2.25rem] w-full items-center justify-start gap-[1rem]">
+            <div className="flex h-9 w-full items-center justify-start gap-4">
               <Label
-                className="font-geist h-[1.25rem] w-[7rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                className="font-geist h-5 w-28 gap-1 text-left text-[0.875rem] font-medium "
                 htmlFor="name"
               >
                 Name
               </Label>
               <Input
-                className="col-span-3 h-[2.25rem] w-[20rem] "
+                className="col-span-3 h-9 w-[20rem] "
                 id="name"
                 onChange={(e) =>
                   setCreateRoleData((prev) => ({
@@ -198,15 +198,15 @@ export default function CreateRoleDialog() {
             </div>
 
             {/* DESCRIPTION */}
-            <div className="flex h-[5.625rem] w-full items-center justify-start gap-[1rem]">
+            <div className="flex h-22.5 w-full items-center justify-start gap-4">
               <Label
-                className="font-geist h-[1.25rem] w-[7rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                className="font-geist h-5 w-28 gap-1 text-left text-[0.875rem] font-medium "
                 htmlFor="description"
               >
                 Description
               </Label>
               <Textarea
-                className="col-span-3 h-[5.625rem] w-[20rem] resize-none gap-[0.25rem]"
+                className="col-span-3 h-22.5 w-[20rem] resize-none gap-1"
                 id="description"
                 onChange={(e) =>
                   setCreateRoleData((prev) => ({
@@ -220,9 +220,9 @@ export default function CreateRoleDialog() {
             </div>
 
             {/* COLOR PICKER */}
-            <div className="flex h-[5.625rem] w-full items-center justify-start gap-[1rem]">
+            <div className="flex h-22.5 w-full items-center justify-start gap-4">
               <Label
-                className="font-geist h-[1.25rem] w-[7rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                className="font-geist h-5 w-28 gap-1 text-left text-[0.875rem] font-medium "
                 htmlFor="color"
               >
                 Color
@@ -239,7 +239,7 @@ export default function CreateRoleDialog() {
                   (color) => color.color === createRoleData.colorCode
                 ).toString()}
               >
-                <SelectTrigger className="h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5">
+                <SelectTrigger className="h-9 w-[20rem] rounded-md border-[0.013rem] border-white/10 bg-white/5">
                   <SelectValue placeholder="Select color" />
                 </SelectTrigger>
                 <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white ">
@@ -277,9 +277,9 @@ export default function CreateRoleDialog() {
             />
           </div>
         </div>
-        <div className="flex h-[2.25rem] w-full justify-end">
+        <div className="flex h-9 w-full justify-end">
           <Button
-            className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
+            className="font-inter h-9 w-32 rounded-md text-[0.875rem] font-medium"
             disabled={isLoading}
             onClick={handleCreateRole}
             variant="secondary"

@@ -3,7 +3,7 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { IntegrationService } from './integration.service'
 import { WorkspaceService } from '@/workspace/workspace.service'
 import { Test } from '@nestjs/testing'
@@ -204,7 +204,7 @@ describe('Integration Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = (await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John',
       isActive: true,
       isAdmin: false,
@@ -212,7 +212,7 @@ describe('Integration Controller Tests', () => {
     })) as UserWithWorkspace
 
     const createUser2 = (await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane',
       isActive: true,
       isAdmin: false,

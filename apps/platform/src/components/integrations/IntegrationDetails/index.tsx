@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
-import { EditTwoSVG, TrashWhiteSVG } from '@public/svg/shared'
 import type { Integration } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
+import { EditTwoSVG, TrashWhiteSVG } from '@public/svg/shared'
 import IntegrationIcon from '../integrationIcon'
 import { formatDate, formatText } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -34,7 +34,7 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
   )
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
           <IntegrationIcon
