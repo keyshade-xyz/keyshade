@@ -14,6 +14,86 @@ import { HydrationService } from './hydration.service'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 /**
+ * Adds an auth provider to a user's authProviders array if not already present
+ * @param user - The user to add the auth provider to
+ * @param authProvider - The auth provider to add
+ * @returns Updated authProviders array
+ */
+export function addAuthProvider(
+  user: any,
+  authProvider: AuthProvider
+): AuthProvider[] {
+  const currentProviders = user.authProviders || []
+
+  // Check if provider already exists
+  if (currentProviders.includes(authProvider)) {
+    return currentProviders
+  }
+
+  // Add the new provider
+  return [...currentProviders, authProvider]
+}
+
+/**
+ * Checks if a user has a specific auth provider
+ * @param user - The user to check
+ * @param authProvider - The auth provider to check for
+ * @returns True if the user has the auth provider, false otherwise
+ */
+export function hasAuthProvider(
+  user: any,
+  authProvider: AuthProvider
+): boolean {
+  const currentProviders = user.authProviders || []
+
+  // Check new array first
+  if (currentProviders.includes(authProvider)) {
+    return true
+  }
+
+  // Fall back to legacy field if array is empty
+  if (currentProviders.length === 0 && user.authProvider === authProvider) {
+    return true
+  }
+
+  return false
+}
+
+/**
+ * Gets the primary auth provider for backward compatibility
+ * Prefers the first provider in authProviders array, falls back to legacy authProvider field
+ * @param user - The user to get the primary auth provider from
+ * @returns The primary auth provider or null
+ */
+export function getPrimaryAuthProvider(user: any): AuthProvider | null {
+  const currentProviders = user.authProviders || []
+
+  // Return first provider from new array if available
+  if (currentProviders.length > 0) {
+    return currentProviders[0]
+  }
+
+  // Fall back to legacy field for backward compatibility
+  return user.authProvider || null
+}
+
+/**
+ * Migrates legacy authProvider to authProviders array
+ * @param user - The user to migrate
+ * @returns Updated authProviders array
+ */
+export function migrateAuthProvider(user: any): AuthProvider[] {
+  const currentProviders = user.authProviders || []
+
+  // If authProviders is empty but authProvider exists, migrate it
+  if (currentProviders.length === 0 && user.authProvider) {
+    return [user.authProvider]
+  }
+
+  return currentProviders
+}
+
+/**
  * Creates a new user and optionally creates a default workspace for them.
  * @param dto - The user data to create a user with.
  * @param prisma - The prisma service to use for database operations.
@@ -46,7 +126,8 @@ export async function createUser(
         isActive: dto.isActive ?? true,
         isAdmin: dto.isAdmin ?? false,
         isOnboardingFinished: dto.isOnboardingFinished ?? false,
-        authProvider: dto.authProvider,
+        authProvider: dto.authProvider, // Keep for backward compatibility
+        authProviders: [dto.authProvider], // New array field
         emailPreference: {
           create: {
             marketing: true,
