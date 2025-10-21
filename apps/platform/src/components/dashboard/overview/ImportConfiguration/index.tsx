@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { CheckCircle, Loader2, X } from 'lucide-react'
-import { useSetAtom } from 'jotai'
+import { useSetAtom, useAtomValue } from 'jotai'
 import { Button } from '@/components/ui/button'
 import ControllerInstance from '@/lib/controller-instance'
-import { projectSecretCountAtom, projectVariableCountAtom } from '@/store'
+import { projectSecretCountAtom, projectVariableCountAtom, selectedProjectAtom } from '@/store'
 
 interface ImportConfigurationProps {
   isOpen: boolean
@@ -22,7 +22,7 @@ interface ImportConfig {
   selectedVariables: Record<string, string>
 }
 
-type ImportStep = 'importing' | 'complete'
+type ImportStep = 'importing' | 'complete' | 'error'
 
 interface ImportStatus {
   secretsImported: number
@@ -44,6 +44,7 @@ function ImportConfiguration({
 }: ImportConfigurationProps): React.JSX.Element {
   const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
   const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
   const [step, setStep] = useState<ImportStep>('importing')
   const [selectedItems, setSelectedItems] = useState<
     Record<string, 'secret' | 'variable'>
@@ -84,7 +85,81 @@ function ImportConfiguration({
     setSelectedItems(initialSelection)
   }, [secretsAndVariables])
 
+  // Validate tier limits before import
+  const validateTierLimits = useCallback(() => {
+    if (!selectedProject) {
+      return {
+        isValid: false,
+        error: 'Project data is not loaded yet. Please wait and try again.'
+      }
+    }
+
+    if (Object.keys(selectedItems).length === 0) {
+      return {
+        isValid: false,
+        error: 'Items are still being processed. Please wait and try again.'
+      }
+    }
+
+    const selectedSecrets: Record<string, string> = {}
+    const selectedVariables: Record<string, string> = {}
+
+    Object.entries(selectedItems).forEach(([key, type]) => {
+      if (type === 'secret') {
+        selectedSecrets[key] = allItems[key]
+      } else {
+        selectedVariables[key] = allItems[key]
+      }
+    })
+
+    const secretsToImport = Object.keys(selectedSecrets).length
+    const variablesToImport = Object.keys(selectedVariables).length
+
+    // Check secret limits
+    if (selectedProject.maxAllowedSecrets !== -1) { // -1 means unlimited
+      const currentSecrets = selectedProject.totalSecrets || 0
+      const totalSecretsAfterImport = currentSecrets + secretsToImport
+      
+      if (totalSecretsAfterImport > selectedProject.maxAllowedSecrets) {
+        const availableSlots = selectedProject.maxAllowedSecrets - currentSecrets
+        return {
+          isValid: false,
+          error: `You can only import ${availableSlots} more secrets. Your plan allows ${selectedProject.maxAllowedSecrets} secrets per project, and you currently have ${currentSecrets} secrets.`
+        }
+      }
+    }
+
+    // Check variable limits
+    if (selectedProject.maxAllowedVariables !== -1) { // -1 means unlimited
+      const currentVariables = selectedProject.totalVariables || 0
+      const totalVariablesAfterImport = currentVariables + variablesToImport
+      
+      if (totalVariablesAfterImport > selectedProject.maxAllowedVariables) {
+        const availableSlots = selectedProject.maxAllowedVariables - currentVariables
+        return {
+          isValid: false,
+          error: `You can only import ${availableSlots} more variables. Your plan allows ${selectedProject.maxAllowedVariables} variables per project, and you currently have ${currentVariables} variables.`
+        }
+      }
+    }
+
+    return { isValid: true, error: null }
+  }, [selectedProject, selectedItems, allItems])
+
   const handleImport = useCallback(async () => {
+    // Validate tier limits before starting import
+    const validation = validateTierLimits()
+    if (!validation.isValid) {
+      setImportStatus((prev) => ({
+        ...prev,
+        errors: [validation.error!],
+        isImporting: false,
+        currentStep: 'Validation failed'
+      }))
+      setStep('error')
+      return
+    }
+
     setImportStatus((prev) => ({ ...prev, isImporting: true }))
 
     const selectedSecrets: Record<string, string> = {}
@@ -107,6 +182,8 @@ function ImportConfiguration({
       errors: [],
       isImporting: true
     })
+
+    const errors: string[] = []
 
     try {
       // Import secrets
@@ -134,6 +211,7 @@ function ImportConfiguration({
         }))
 
         if (!success) {
+          errors.push(`Failed to import secret "${key}": ${String(error)}`)
           setImportStatus((prev) => ({
             ...prev,
             errors: [
@@ -174,6 +252,7 @@ function ImportConfiguration({
         }))
 
         if (!success) {
+          errors.push(`Failed to import variable "${key}": ${String(error)}`)
           setImportStatus((prev) => ({
             ...prev,
             errors: [
@@ -198,7 +277,7 @@ function ImportConfiguration({
         await onImport({ selectedSecrets, selectedVariables })
       }
 
-      setStep('complete')
+      setStep(errors.length > 0 ? 'error' : 'complete')
     } catch (error) {
       setImportStatus((prev) => ({
         ...prev,
@@ -218,7 +297,8 @@ function ImportConfiguration({
     totalSecrets,
     totalVariables,
     setProjectSecretCount,
-    setProjectVariableCount
+    setProjectVariableCount,
+    validateTierLimits
   ])
 
   useEffect(() => {
@@ -403,12 +483,44 @@ function ImportConfiguration({
     </div>
   )
 
+  const renderErrorStep = () => (
+    <div className="relative mx-auto w-[450px] rounded-lg bg-[#1a1a1a] p-6 text-center">
+      <button
+        className="absolute right-4 top-4 text-gray-400 hover:text-white"
+        onClick={handleClose}
+        type="button"
+      >
+        <X className="h-5 w-5" />
+      </button>
+
+      <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-500">
+        <X className="h-8 w-8 text-white" />
+      </div>
+
+      <h2 className="mb-4 text-xl font-semibold text-white">Import Failed</h2>
+      <p className="mb-6 text-gray-400">
+        {importStatus.errors.length > 0 ? importStatus.errors[0] : 'An error occurred during import.'}
+      </p>
+
+      <div className="mb-6 text-sm text-gray-400">
+        <div>
+          Please check your tier limits and try again with fewer items.
+        </div>
+      </div>
+
+      <Button onClick={handleClose} variant="secondary">
+        Close
+      </Button>
+    </div>
+  )
+
   if (!isOpen) return <div />
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       {step === 'importing' && renderImportingStep()}
       {step === 'complete' && renderCompleteStep()}
+      {step === 'error' && renderErrorStep()}
     </div>
   )
 }
