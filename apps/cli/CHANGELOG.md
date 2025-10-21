@@ -355,6 +355,12 @@
 - Updated `keyshade run` command to use POSIX
 - `keyshade run` command now compatible with both Windows and Unix/Linux
 
+## 3.5.4.stage-1
+
+### Minor Changes
+
+- Added `keyshade reset` to wipe local profile configuration files.
+
 # 3.6.0-stage.1
 
 ### Minor Changes
