@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   forwardRef,
   Inject,
@@ -232,6 +233,46 @@ export class VariableService {
     this.logger.log(
       `User ${user.id} started bulk creation of ${variables.length} variables in project ${projectSlug}`
     )
+
+    // Get the project to check tier limits
+    const project = await this.prisma.project.findUnique({
+      where: {
+        slug: projectSlug
+      }
+    })
+
+    if (!project) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Project not found',
+          'The specified project does not exist'
+        )
+      )
+    }
+
+    // Check tier limits before bulk creation
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(project.workspaceId)
+    const variableTierLimit = workspaceTierLimit.MAX_VARIABLES_PER_PROJECT
+
+    if (variableTierLimit !== -1) {
+      // -1 represents infinite limit
+      const currentVariableCount = await this.prisma.variable.count({
+        where: { projectId: project.id }
+      })
+
+      const totalVariablesAfterImport = currentVariableCount + variables.length
+
+      if (totalVariablesAfterImport > variableTierLimit) {
+        const availableSlots = variableTierLimit - currentVariableCount
+        throw new BadRequestException(
+          constructErrorBody(
+            'Tier limit exceeded',
+            `You can only import ${availableSlots} more variables. Your plan allows ${variableTierLimit} variables per project, and you currently have ${currentVariableCount} variables.`
+          )
+        )
+      }
+    }
 
     const successful: HydratedVariable[] = []
     const failed: Array<{ name: string; error: string }> = []
