@@ -7,6 +7,7 @@ import GlobalSVG from './global.svg'
 import InternalSVG from './internal.svg'
 import FolderIconSVG from './folderIcon.svg'
 import LogoSVG from './logo.svg'
+import TickCircleFillSVG from './tick-circle-fill.svg'
 
 export {
   EnvironmentSVG,
@@ -17,5 +18,6 @@ export {
   GlobalSVG,
   InternalSVG,
   FolderIconSVG,
-  LogoSVG
+  LogoSVG,
+  TickCircleFillSVG
 }

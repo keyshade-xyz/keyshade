@@ -8,11 +8,22 @@ import { Skeleton } from './skeleton'
 import { WorkspaceListItem } from './workspace-list-item'
 import { InfiniteScrollList } from './infinite-scroll-list'
 import { Badge } from './badge'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
 import ControllerInstance from '@/lib/controller-instance'
-import { allWorkspacesAtom, globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  allWorkspacesAtom,
+  globalSearchDataAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
+import {
+  getSelectedWorkspaceFromStorage,
+  setSelectedWorkspaceToStorage
+} from '@/store/workspace'
 
 export function Combobox(): React.JSX.Element {
   const workspaceFromStorage = getSelectedWorkspaceFromStorage()
@@ -147,7 +158,7 @@ export function Combobox(): React.JSX.Element {
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="bg-night-d border-white/8 flex w-full items-center justify-between rounded-xl border p-3"
+          className="bg-night-d border-white/8 flex w-full cursor-pointer items-center justify-between rounded-xl border p-3"
           role="combobox"
           type="button"
         >
@@ -159,7 +170,9 @@ export function Combobox(): React.JSX.Element {
               <div className="text-start text-sm font-normal text-white">
                 {selectedWorkspace?.name ? (
                   <div className="flex items-center gap-x-1">
-                    {selectedWorkspace.name}{' '}
+                    <div className="w-[111px] truncate">
+                      {selectedWorkspace.name}{' '}
+                    </div>
                     <Badge
                       color={getSubscriptionPlanDisplay().color}
                       size="small"
@@ -181,7 +194,7 @@ export function Combobox(): React.JSX.Element {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="bg-zinc-900 text-white "
+        className="border-white/8 bg-night-d rounded-xl p-1 text-white"
         style={{ width: 'var(--radix-popper-anchor-width)' }}
       >
         <div className="max-h-40 overflow-auto">

@@ -26,7 +26,9 @@ export interface AddWorkspaceDialogProps {
   trigger?: React.ReactNode
 }
 
-export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
+export function AddWorkspaceDialog({
+  trigger
+}: AddWorkspaceDialogProps): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -86,11 +88,20 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        {trigger ?? (
-          <Button className="mt-5 w-full">
-            <AddSVG /> New workspace
-          </Button>
-        )}
+        <div>
+          <div className="bg-white/12 border-white/4 my-1 h-px w-full border" />
+          {trigger ?? (
+            <button
+              className="hover:bg-night-c flex w-full cursor-pointer items-center justify-start gap-x-2 rounded-lg p-2 text-sm text-neutral-500 transition-colors"
+              type="button"
+            >
+              <div className="bg-charcoal border-white/4 flex  aspect-square h-9 w-9 items-center justify-center rounded-lg border text-xl">
+                <AddSVG />
+              </div>
+              Create a New Workspace
+            </button>
+          )}
+        </div>
       </DialogTrigger>
       <DialogContent className="bg-[#1E1E1F]">
         <DialogHeader>

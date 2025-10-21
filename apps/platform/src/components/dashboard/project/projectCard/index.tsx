@@ -5,13 +5,9 @@ import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { SecretSVG, EnvironmentSVG, VariableSVG } from '@public/svg/dashboard'
 import { MoreHorizontalIcon } from 'lucide-react'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger
-} from '@/components/ui/context-menu'
+import ProjectContextMenu from './project-context-menu'
+import ProjectDropdownMenu from './project-dropdown-menu'
+import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
@@ -24,10 +20,6 @@ import { ProjectTag } from '@/components/ui/project-tag'
 import { GeistSansFont } from '@/fonts'
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 
@@ -119,59 +111,17 @@ export default function ProjectCard({
                   <MoreHorizontalIcon />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuGroup>
-                  <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
-                    <DropdownMenuItem>Open</DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      window.open(
-                        `/${selectedWorkspace?.slug}/${slug}?tab=secret`,
-                        '_blank',
-                        'noopener,noreferrer'
-                      )
-                    }}
-                  >
-                    Open in new tab
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem
-                    onClick={() => {
-                      copyToClipboard(
-                        `${window.location.origin}/project/${slug}`
-                      )
-                    }}
-                  >
-                    Copy link
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem onClick={handleCopyToClipboard}>
-                    Copy slug
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleExportConfiguration}>
-                    Export configuration
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    disabled={!isAuthorizedToEditProjects}
-                    onClick={handleEditProject}
-                  >
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    disabled={!isAuthorizedToDeleteProjects}
-                    onClick={handleDeleteProject}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
+              <ProjectDropdownMenu
+                copyToClipboard={copyToClipboard}
+                handleCopyToClipboard={handleCopyToClipboard}
+                handleDeleteProject={handleDeleteProject}
+                handleEditProject={handleEditProject}
+                handleExportConfiguration={handleExportConfiguration}
+                isAuthorizedToDeleteProjects={isAuthorizedToDeleteProjects}
+                isAuthorizedToEditProjects={isAuthorizedToEditProjects}
+                selectedWorkspace={selectedWorkspace!}
+                slug={slug}
+              />
             </DropdownMenu>
           </div>
 
@@ -198,49 +148,17 @@ export default function ProjectCard({
           </div>
         </Link>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
-          <ContextMenuItem inset>Open</ContextMenuItem>
-        </Link>
-        <a
-          href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <ContextMenuItem inset>Open in new tab</ContextMenuItem>
-        </a>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            copyToClipboard(`${window.location.origin}/project/${slug}`)
-          }}
-        >
-          Copy link
-        </ContextMenuItem>
-        <ContextMenuItem inset onClick={handleCopyToClipboard}>
-          Copy slug
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem inset onClick={handleExportConfiguration}>
-          Export configuration
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          disabled={!isAuthorizedToEditProjects}
-          inset
-          onClick={handleEditProject}
-        >
-          Edit
-        </ContextMenuItem>
-        <ContextMenuItem
-          disabled={!isAuthorizedToDeleteProjects}
-          inset
-          onClick={handleDeleteProject}
-        >
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <ProjectContextMenu
+        copyToClipboard={copyToClipboard}
+        handleCopyToClipboard={handleCopyToClipboard}
+        handleDeleteProject={handleDeleteProject}
+        handleEditProject={handleEditProject}
+        handleExportConfiguration={handleExportConfiguration}
+        isAuthorizedToDeleteProjects={isAuthorizedToDeleteProjects}
+        isAuthorizedToEditProjects={isAuthorizedToEditProjects}
+        selectedWorkspace={selectedWorkspace!}
+        slug={slug}
+      />
     </ContextMenu>
   )
 }
