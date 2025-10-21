@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   forwardRef,
   Inject,
@@ -240,6 +241,46 @@ export class SecretService {
     this.logger.log(
       `User ${user.id} initiated bulk creation of ${secrets.length} secrets in project ${projectSlug}`
     )
+
+    // Get the project to check tier limits
+    const project = await this.prisma.project.findUnique({
+      where: {
+        slug: projectSlug
+      }
+    })
+
+    if (!project) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Project not found',
+          'The specified project does not exist'
+        )
+      )
+    }
+
+    // Check tier limits before bulk creation
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(project.workspaceId)
+    const secretTierLimit = workspaceTierLimit.MAX_SECRETS_PER_PROJECT
+
+    if (secretTierLimit !== -1) {
+      // -1 represents infinite limit
+      const currentSecretCount = await this.prisma.secret.count({
+        where: { projectId: project.id }
+      })
+
+      const totalSecretsAfterImport = currentSecretCount + secrets.length
+
+      if (totalSecretsAfterImport > secretTierLimit) {
+        const availableSlots = secretTierLimit - currentSecretCount
+        throw new BadRequestException(
+          constructErrorBody(
+            'Tier limit exceeded',
+            `You can only import ${availableSlots} more secrets. Your plan allows ${secretTierLimit} secrets per project, and you currently have ${currentSecretCount} secrets.`
+          )
+        )
+      }
+    }
 
     const successful: HydratedSecret[] = []
     const failed: Array<{ name: string; error: string }> = []
