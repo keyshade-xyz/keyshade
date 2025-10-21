@@ -354,3 +354,14 @@
 
 - Updated `keyshade run` command to use POSIX
 - `keyshade run` command now compatible with both Windows and Unix/Linux
+
+# 3.6.0-stage.1
+
+### Minor Changes
+
+- Added `keyshade pat` base command
+- Added `keyshade pat create` command
+- Added `keyshade pat list` command
+- Added `keyshade pat delete` command
+- Added `keyshade pat update` command
+- Added `keyshade pat regenerate` command

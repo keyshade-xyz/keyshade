@@ -11,8 +11,9 @@ export interface AuthenticatedUser extends User {
 export interface PersonalAccessTokenResponse {
   id: string
   token?: string // Will be set only when the token is generated for the first time, and when regenerated
+  name: string
   createdAt: Date
   updatedAt: Date
-  expiresOn?: Date
-  lastUsedOn: Date
+  expiresOn: Date | null
+  lastUsedOn: Date | null
 }

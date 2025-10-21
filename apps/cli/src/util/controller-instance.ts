@@ -5,6 +5,7 @@ import {
   EnvironmentController,
   EventController,
   IntegrationController,
+  PersonalAccessTokenController,
   ProjectController,
   SecretController,
   VariableController,
@@ -15,6 +16,16 @@ import {
 
 export default class ControllerInstance {
   private static instance: ControllerInstance | null
+
+  private _personalAccessTokenController: PersonalAccessTokenController | null =
+    null
+
+  get personalAccessTokenController(): PersonalAccessTokenController {
+    if (!this._personalAccessTokenController) {
+      throw new Error('ControllerInstance not initialized')
+    }
+    return this._personalAccessTokenController
+  }
 
   private _cliSessionController: CliSessionController | null = null
 
@@ -142,6 +153,9 @@ export default class ControllerInstance {
       baseUrl
     )
     instance._cliSessionController = new CliSessionController(baseUrl)
+    instance._personalAccessTokenController = new PersonalAccessTokenController(
+      baseUrl
+    )
 
     ControllerInstance.instance = instance
   }

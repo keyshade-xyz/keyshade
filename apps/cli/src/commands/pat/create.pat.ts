@@ -6,6 +6,7 @@ import {
 import ControllerInstance from '@/util/controller-instance'
 import { log, spinner } from '@clack/prompts'
 import { clearSpinnerLines } from '@/util/prompt'
+import { PatUtils } from '@/util/pat'
 
 export default class CreatePat extends BaseCommand {
   getName(): string {
@@ -48,7 +49,7 @@ export default class CreatePat extends BaseCommand {
   }
 
   async action({ options }: CommandActionData): Promise<void> {
-    const { name, expiresAfterDays } = this.parseOptions(options)
+    const { name, expiresAfterDays } = await this.parseOptions(options)
 
     const loading = spinner()
     loading.start('Creating your personal access token...')
@@ -72,7 +73,7 @@ export default class CreatePat extends BaseCommand {
 🔖 Name: ${data.name}
 🔑 Token: ${data.token}
 
-⚠️  This token will only be shown **once**.  
+⚠️ This token will only be shown **once**.  
    Please copy and store it securely — you won’t be able to view it again!
 `.trim()
         )
@@ -93,14 +94,21 @@ export default class CreatePat extends BaseCommand {
     }
   }
 
-  private parseOptions(options: CommandActionData['options']): {
+  private async parseOptions(options: CommandActionData['options']): Promise<{
     name: string
     expiresAfterDays?: number
-  } {
-    const { name, expiresAfterDays } = options
+  }> {
+    let { name, expiresAfterDays } = options
 
-    if (!name) {
-      throw new Error('No name provided. Please provide a name for the PAT.')
+    console.log('options', options)
+
+    if (Object.keys(options).length === 0) {
+      name = await PatUtils.readName()
+      expiresAfterDays = await PatUtils.readExpiresAfterDays()
+    } else {
+      if (!name) {
+        throw new Error('No name provided. Please provide a name for the PAT.')
+      }
     }
 
     return {

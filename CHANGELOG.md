@@ -1,3 +1,29 @@
+## [2.41.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.1...v2.41.0-stage.2) (2025-10-20)
+
+### 🚀 Features
+
+* **platform:** add search functionality to integrations page ([#1184](https://github.com/keyshade-xyz/keyshade/issues/1184)) ([83b0374](https://github.com/keyshade-xyz/keyshade/commit/83b0374fc2c3dd0a309b65476b5e58ab9a28140f))
+
+## [2.41.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.40.1-stage.1...v2.41.0-stage.1) (2025-10-19)
+
+### 🚀 Features
+
+* **cli:** ability to manage pat ([#1213](https://github.com/keyshade-xyz/keyshade/issues/1213)) ([0473463](https://github.com/keyshade-xyz/keyshade/commit/0473463c5af3bc09d108dea97e46b078cabd0d6f))
+
+## [2.40.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.40.0...v2.40.1-stage.1) (2025-10-18)
+
+### 🐛 Bug Fixes
+
+* resolve hero image overlap with [secure] section text ([#1161](https://github.com/keyshade-xyz/keyshade/issues/1161)) ([3b1d4b6](https://github.com/keyshade-xyz/keyshade/commit/3b1d4b6dc9a49e0359f2fdbeeb29bb0c865b84fb))
+
+### 📚 Documentation
+
+* add new internals pages for [secure], variable and env creation + cli docs for [secure] and variables ([#1208](https://github.com/keyshade-xyz/keyshade/issues/1208)) ([2bd595d](https://github.com/keyshade-xyz/keyshade/commit/2bd595d706c53c606f19d1adf8b94bb9668b5414))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.36.0-stage.2 [skip ci] ([14aedf9](https://github.com/keyshade-xyz/keyshade/commit/14aedf95590e3fc8ce61ce6a5e51c9e0b6b5552e))
+
 ## [2.40.0](https://github.com/keyshade-xyz/keyshade/compare/v2.39.0...v2.40.0) (2025-10-18)
 
 ### 🚀 Features
