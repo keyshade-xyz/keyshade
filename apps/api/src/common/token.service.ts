@@ -137,7 +137,7 @@ export class TokenService {
       throw new InternalServerErrorException(
         constructErrorBody(
           'Uh-oh! Something went wrong on our end.',
-          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.xyz'
+          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.io'
         )
       )
     }
@@ -204,7 +204,7 @@ export class TokenService {
       throw new InternalServerErrorException(
         constructErrorBody(
           'Uh-oh! Something went wrong on our end.',
-          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.xyz'
+          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.io'
         )
       )
     }
@@ -234,9 +234,10 @@ export class TokenService {
               id: userId
             }
           },
-          expiresOn: dto.expiresAfterDays
-            ? dayjs().add(dto.expiresAfterDays, 'days').toDate()
-            : undefined
+          expiresOn:
+            dto.expiresAfterDays && dto.expiresAfterDays > 0
+              ? dayjs().add(dto.expiresAfterDays, 'days').toDate()
+              : undefined
         }
       })
       this.logger.log(
@@ -254,7 +255,7 @@ export class TokenService {
       throw new InternalServerErrorException(
         constructErrorBody(
           'Uh-oh! Something went wrong on our end.',
-          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.xyz'
+          'We encountered an error while generating your secure token. Please try again later. If the problem persists, get in touch with us at support@keyshade.io'
         )
       )
     }
