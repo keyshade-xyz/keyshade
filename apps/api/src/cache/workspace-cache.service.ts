@@ -31,7 +31,7 @@ export class WorkspaceCacheService {
     private readonly prisma: PrismaService
   ) {}
 
-  async addWorkspaceKey(workspaceId: Workspace['id'], newKey: string) {
+  async addWorkspaceKey(workspaceId: Workspace['slug'], newKey: string) {
     this.logger.log(
       `Adding workspace key ${newKey} to cache for workspace ${workspaceId}`
     )

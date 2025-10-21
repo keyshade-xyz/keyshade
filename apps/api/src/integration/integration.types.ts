@@ -96,40 +96,6 @@ export type IntegrationWithEnvironmentsAndMetadata<
 }
 
 export interface HydratedIntegration extends Integration {
-  workspace: {
-    id: string
-    name: string
-    slug: string
-    createdAt: Date
-    updatedAt: Date
-    ownerId: string
-    isDefault: boolean
-    icon: string
-    blacklistedIpAddresses: string[]
-    isDisabled: boolean
-    workspaceLockdownIn: Date
-    lastUpdatedById: string
-  }
-  project: {
-    id: string
-    name: string
-    slug: string
-    workspaceId: string
-  }
-  environments: Array<{
-    id: string
-    name: string
-    slug: string
-  }>
-  lastUpdatedBy: {
-    id: string
-    name: string
-    profilePictureUrl: string | null
-  }
-  entitlements: {
-    canUpdate: boolean
-    canDelete: boolean
-  }
   totalTriggers: number
 }
 
