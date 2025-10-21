@@ -28,10 +28,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
+  validate-node-build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    name: Validate CLI
+    name: Validate CLI (Node)
 
     steps:
       - name: Checkout
@@ -47,11 +47,6 @@ jobs:
         with:
           version: 9.2.0
           run_install: false
-
-      - name: Enable corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@9.2.0 --activate
 
       - name: Get pnpm store directory
         shell: bash
@@ -77,6 +72,27 @@ jobs:
       - name: Build
         run: |
           pnpm run build:cli
+
+  validate-docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    name: Validate CLI (Docker)
+    needs: validate-node-build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.2.0
+          run_install: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
