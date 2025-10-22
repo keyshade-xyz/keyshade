@@ -29,7 +29,7 @@ export async function showError(message: string): Promise<void> {
  * @param message - The message to display on cancellation
  */
 export function handleSIGINT(
-  clackResponse: symbol | string | boolean,
+  clackResponse: symbol | string | boolean | string[],
   message: string
 ): void {
   if (isCancel(clackResponse)) {

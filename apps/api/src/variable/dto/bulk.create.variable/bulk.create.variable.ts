@@ -1,10 +1,20 @@
+import { ArrayMinSize, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { ValidateNested, ArrayMinSize } from 'class-validator'
-import { CreateVariable } from '../create.variable/create.variable'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
+import { OmitType } from '@nestjs/swagger'
+import { CreateVariable } from '@/variable/dto/create.variable/create.variable'
 
-export class BulkCreateVariableDto {
+export class BulkCreateVariable {
   @ValidateNested({ each: true })
-  @Type(() => CreateVariable)
+  @Type(() => BulkVariableEntry)
   @ArrayMinSize(1)
-  variables: CreateVariable[]
+  variables: BulkVariableEntry[]
+}
+
+class BulkVariableEntry extends OmitType(CreateVariable, ['entries']) {
+  @NonEmptyTrimmedString()
+  value: string
+
+  @NonEmptyTrimmedString()
+  environmentSlug: string
 }
