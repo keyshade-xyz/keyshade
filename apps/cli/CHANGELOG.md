@@ -368,6 +368,14 @@
 
 # 3.6.0-stage.2
 
+## Minor Changes
+
 - Added `keyshade import` command
 - Improved efficiency of bulk import
 - Removed `keyshade project import` command
+
+## 3.6.0-stage.3
+
+## Minor Changes
+
+- Added `keyshade reset` to wipe local profile configuration files.

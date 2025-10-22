@@ -15,6 +15,7 @@
 
 - [Introduction](cli/introduction.md)
 - [Profile](cli/profile.md)
+- [Reset](cli/reset.md)
 - [Init](cli/init.md)
 - [Workspace](cli/workspace.md)
 - [Project](cli/project.md)
