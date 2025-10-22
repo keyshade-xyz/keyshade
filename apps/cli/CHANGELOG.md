@@ -357,7 +357,7 @@
 
 # 3.6.0-stage.1
 
-### Minor Changes
+## Minor Changes
 
 - Added `keyshade pat` base command
 - Added `keyshade pat create` command
@@ -365,3 +365,9 @@
 - Added `keyshade pat delete` command
 - Added `keyshade pat update` command
 - Added `keyshade pat regenerate` command
+
+# 3.6.0-stage.2
+
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command

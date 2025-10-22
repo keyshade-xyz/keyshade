@@ -15,20 +15,19 @@ import ConfigCommand from './commands/config.command'
 import IntegrationCommand from './commands/integration.command'
 import LoginCommand from './commands/login.command'
 import PatCommand from '@/commands/pat.command'
+import ImportCommand from '@/commands/import.command'
 
 const program = new Command()
 
 program.version(version, '-V, --version', 'Output the current version')
-program.option('-p, --profile <string>', 'The profile to use')
-program.option(
-  '-k, --token <string>',
-  'Token used to authenticate your requests'
-)
+program.option('--profile <string>', 'The profile to use')
+program.option('--token <string>', 'Token used to authenticate your requests')
 program.option('-u, --base-url <string>', 'The base URL to use')
 
 const COMMANDS: BaseCommand[] = [
   new LoginCommand(),
   new InitCommand(),
+  new ImportCommand(),
   new RunCommand(),
   new ProfileCommand(),
   new WorkspaceCommand(),
