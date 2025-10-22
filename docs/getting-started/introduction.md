@@ -4,12 +4,14 @@ description: A walkthrough of how to get started with Keyshade
 
 # Introduction
 
-This walkthrough is a mini-blog about how to get started with Keyshade. We would take you through the steps required to install the CLI, add secrets and variables to your project, and finally to use them in your app. We would be using a Next.js project to demonstrate the process.
+In this guide, we will take you through the steps required sto set keyshade up and running on your local device, and start using it to manage your secrets and variables.
 
-Here's the list of contents, feel free to skip to any section you like.
+But before all that, you would first need to create an account in [here](https://app.keyshade.io).
 
-- [Adding your first secret and variable](adding-your-first-secret-and-variable.md)
+Here's the topics this guide will be covering. Feel free to skip to any section you like.
+
 - [Installing the CLI](installing-the-cli.md)
-- [Setting up your profile](setting-up-your-profile.md)
-- [Add Keyshade to your project](add-keyshade-to-your-project.md)
+- [Creating a project](creating-a-project.md)
+- [Importing your environment variables](importing-your-environment-variables.md)
+- [Linking your project to keyshade](add-keyshade-to-your-project.md)
 - [Running your app](running-your-app.md)

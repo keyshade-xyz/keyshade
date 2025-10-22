@@ -1,10 +1,10 @@
 ---
-description: Get to know about our platform
+description: Start imporing your environmen variables into Keyshade
 ---
 
-# Adding your first secret and variable
+# Adding your secrets and 
 
-Our app is the place where you manage all of your secrets and variables. This can also be done using the CLI, but we want to keep it as simple as possible for now. Here's a list of things that we will be doing in this tutorial:
+Our [app](https://app.keyshade.io) is the place where you manage all of your secrets and variables. This can also be done using the CLI, but we want to keep it as simple as possible for now. Here's a list of things that we will be doing in this tutorial:
 
 - Creating a new project
 - Creating a secret in your project
@@ -29,7 +29,9 @@ Now, we can start creating our project.
 > 💡 **Want to learn more about environments?** Check out our comprehensive [Environments documentation](../../internals/environments.md) to understand what environments are, how they work, and all the functionalities available for managing them.
 
 If the creation was successful, you should be greeted with a dialog like this:
+
 ![Success](../../blob/create-project-success.png) 
+
 You can download the private and public key then hit on **Close**.
 
 Your project should now show up in your dashboard:
@@ -40,8 +42,8 @@ Your project should now show up in your dashboard:
 
 Now, let's create our first secret.
 
-- Select the newly created **My App** project.
-- Head over to the **Secrets** tab.
+- Head over to **Dashboard** → **My App**" → **Secrets**.
+- Click on **Add Secret**
 - Enter the name of the secret. We will use `NEXT_PUBLIC_API_KEY`. You can also add a note if you want to.
 - Specify a value for the `dev` environment we created. We would use `ks_1234`.
 - Hit on **Add Secret**.

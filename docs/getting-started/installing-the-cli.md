@@ -2,9 +2,11 @@
 description: A walkthrough of how to install the Keyshade CLI
 ---
 
-# Installing the CLI
+# Setting up the CLI
 
-The Keyshade CLI serves as the entrypoint for your projects and apps to use Keyshade. Currently, our CLI binary is hosted over npm registry, and it can be installed by running the following command:
+The Keyshade CLI serves as the entrypoint for your projects and apps to use Keyshade. Currently, our CLI binary is hosted over the npm registry, and it can be installed by running the following command:
+
+## Installation
 
 ```sh
 npm i -g @keyshade/cli
@@ -19,4 +21,36 @@ keyshade --version
 ```
 
 This should print the version of the Keyshade CLI installed on your system.
-![keyshade-cli](../../blob/keyshade-version.png) _(Version shown here is `3.0.1`, but yours may differ depending on installation time or updates.)_
+
+![keyshade-cli](../../blob/keyshade-version.png) 
+
+_(Version shown here is `3.0.1`, but yours may differ depending on installation time or updates.)_
+
+## Authenticate the CLI
+
+Keyshade allows you to perform a secure login directly from your CLI. Once authenticated successfully, you would have your profile configured locally. To begin, run this command:
+```shell
+keyshade login
+```
+
+<video width="100%" controls>
+  <source src="../../blob/login.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+This will ask you for your email—the one that you used earlier to sign up to keyshade, and a deployment URL. In case you are using a self-hosted deployment, you would need to provide the base URL of your API (example - `https://keyshade-api.mydomain.com`).
+Otherwise, you can skip this step.
+
+Next, enter the sign-in code that you received in your email.
+
+And that's it! You are all set to use the CLI.
+
+## Test your profile
+
+You can run this command to check if your profile is set up correctly:
+
+```shell
+keyshade workspace list
+```
+
+This command should output a list of all the workspaces that you have access to. If you have just started, there should be only one workspace.
