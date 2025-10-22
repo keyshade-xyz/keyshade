@@ -1,3 +1,9 @@
+## [2.41.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.3...v2.41.0-stage.4) (2025-10-22)
+
+### 🚀 Features
+
+* **cli:** add `keyshade reset` command to wipe local profiles ([#1206](https://github.com/keyshade-xyz/keyshade/issues/1206)) ([229557a](https://github.com/keyshade-xyz/keyshade/commit/229557aa6d60819875abff843b0e05a0352cdf95))
+
 ## [2.41.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.2...v2.41.0-stage.3) (2025-10-22)
 
 ### 🚀 Features
