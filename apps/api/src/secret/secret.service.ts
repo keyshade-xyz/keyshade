@@ -270,7 +270,7 @@ export class SecretService {
       })
       this.logger.log(`Existing secrets count: ${existingSecretCount}`)
 
-      if (totalSecretsToCreate + existingSecretCount >= maxAllowedSecrets) {
+      if (totalSecretsToCreate + existingSecretCount > maxAllowedSecrets) {
         this.logger.error(
           `Project ${project.id} has reached the limit of maximum secrets: ${maxAllowedSecrets}`
         )
@@ -397,13 +397,9 @@ export class SecretService {
           metadata: {
             name: hydratedSecret.name,
             description: hydratedSecret.note,
-            values: dto.secrets.reduce(
-              (acc, v) => {
-                acc[v.environmentSlug] = v.value
-                return acc
-              },
-              {} as Record<string, string>
-            ),
+            values: {
+              [environment.slug]: value
+            },
             isSecret: true,
             isPlaintext: true
           } as ConfigurationAddedEventMetadata,

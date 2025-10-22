@@ -263,7 +263,7 @@ export class VariableService {
       this.logger.log(`Existing variables count: ${existingVariableCount}`)
 
       if (
-        totalVariablesToCreate + existingVariableCount >=
+        totalVariablesToCreate + existingVariableCount >
         maxAllowedVariables
       ) {
         this.logger.error(
@@ -271,7 +271,7 @@ export class VariableService {
         )
         throw new BadRequestException(
           constructErrorBody(
-            'Maximum limit of createVariablesDto reached',
+            'Maximum limit of variables reached',
             `You can create a maximum of ${maxAllowedVariables} variables`
           )
         )
@@ -388,13 +388,9 @@ export class VariableService {
           metadata: {
             name: hydratedVariable.name,
             description: hydratedVariable.note,
-            values: dto.variables.reduce(
-              (acc, v) => {
-                acc[v.environmentSlug] = v.value
-                return acc
-              },
-              {} as Record<string, string>
-            ),
+            values: {
+              [environment.slug]: value
+            },
             isSecret: false,
             isPlaintext: true
           } as ConfigurationAddedEventMetadata,
