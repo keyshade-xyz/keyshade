@@ -33,10 +33,13 @@ Keyshade allows you to perform a secure login directly from your CLI. Once authe
 keyshade login
 ```
 
-<video width="100%" controls>
-  <source src="../../blob/login.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<iframe
+src="https://drive.google.com/file/d/1RDhO4nvw26clrQ2NeGAil3wKUWFYWuV0/preview"
+width="640"
+height="360"
+allow="autoplay"
+/>
+
 
 This will ask you for your email—the one that you used earlier to sign up to keyshade, and a deployment URL. In case you are using a self-hosted deployment, you would need to provide the base URL of your API (example - `https://keyshade-api.mydomain.com`).
 Otherwise, you can skip this step.
