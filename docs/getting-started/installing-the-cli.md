@@ -33,7 +33,7 @@ Keyshade allows you to perform a secure login directly from your CLI. Once authe
 keyshade login
 ```
 
-{% video src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FklyYIOuyG5AKyh2FIsOK%2Fuploads%2Fl3JCFYHob9Ojrr6D1rtI%2Flogin.mp4?alt=media&token=78d2fba9-2bc5-4259-973d-0328466fa9d9" %}
+{% embed url="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FklyYIOuyG5AKyh2FIsOK%2Fuploads%2Fl3JCFYHob9Ojrr6D1rtI%2Flogin.mp4?alt=media&token=78d2fba9-2bc5-4259-973d-0328466fa9d9" %}
 
 
 This will ask you for your email—the one that you used earlier to sign up to keyshade, and a deployment URL. In case you are using a self-hosted deployment, you would need to provide the base URL of your API (example - `https://keyshade-api.mydomain.com`).
