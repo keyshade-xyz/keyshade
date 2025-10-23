@@ -221,7 +221,7 @@ export const mapEntriesToEventMetadata = (
           acc[entry.environmentSlug] = entry.value
           return acc
         },
-        {} as Record<string, string>
+        {} as Record<Environment['name'], string>
       )
     : {}
 }

@@ -1,3 +1,19 @@
+## [2.41.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.3...v2.41.0-stage.4) (2025-10-22)
+
+### 🚀 Features
+
+* **cli:** add `keyshade reset` command to wipe local profiles ([#1206](https://github.com/keyshade-xyz/keyshade/issues/1206)) ([229557a](https://github.com/keyshade-xyz/keyshade/commit/229557aa6d60819875abff843b0e05a0352cdf95))
+
+## [2.41.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.2...v2.41.0-stage.3) (2025-10-22)
+
+### 🚀 Features
+
+* **cli:** improved keyshade import flow ([#1219](https://github.com/keyshade-xyz/keyshade/issues/1219)) ([5affb52](https://github.com/keyshade-xyz/keyshade/commit/5affb52a02fef9e89c439fd1c404b87e1fcae6a1))
+
+### 📚 Documentation
+
+* Update image link in README.md ([adf7761](https://github.com/keyshade-xyz/keyshade/commit/adf7761a8098161e7be540d5e2285646d2c2fade))
+
 ## [2.41.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.1...v2.41.0-stage.2) (2025-10-20)
 
 ### 🚀 Features

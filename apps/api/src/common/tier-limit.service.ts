@@ -480,7 +480,7 @@ export class TierLimitService {
           environmentId
         },
         orderBy: {
-          version: 'desc'
+          version: 'asc'
         },
         take: 1
       })
@@ -503,7 +503,7 @@ export class TierLimitService {
           environmentId
         },
         orderBy: {
-          version: 'desc'
+          version: 'asc'
         },
         take: 1
       })
