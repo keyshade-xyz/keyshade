@@ -6,7 +6,7 @@ description: A walkthrough of how to get started with Keyshade
 
 In this guide, we will take you through the steps required sto set keyshade up and running on your local device, and start using it to manage your secrets and variables.
 
-But before all that, you would first need to create an account in [here](https://app.keyshade.io).
+**But before all that, you would first need to create an account in [here](https://app.keyshade.io).**
 
 Here's the topics this guide will be covering. Feel free to skip to any section you like.
 

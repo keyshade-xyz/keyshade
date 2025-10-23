@@ -8,9 +8,27 @@ The Keyshade CLI serves as the entrypoint for your projects and apps to use Keys
 
 ## Installation
 
-```sh
+{% tabs %}
+
+{% tab title="npm" %} 
+```shell
 npm i -g @keyshade/cli
 ```
+{% endtab %}
+
+{% tab title="pnpm" %}
+```shell
+pnpm i -g @keyshade/cli
+```
+{% endtab %}
+
+{% tab title="bun" %} Here are the instructions for Linux {% endtab %}
+```shell
+bun i -g @keyshade/cli
+```
+{% endtabs %}
+
+
 
 That's it! You now have Keyshade installed on your system.
 
