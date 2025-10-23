@@ -23,8 +23,6 @@ Now, we can start creating our project.
 
 {% embed url="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FklyYIOuyG5AKyh2FIsOK%2Fuploads%2Fr1lRLKQ0QgwoeUqmw7dy%2Fcreate%20project.mp4?alt=media&token=fc736e8f-9db5-451c-817d-ce7c619baf09" %}
 
-> 💡 **Want to learn more about environments?** Check out our comprehensive [Environments documentation](../internals/environments.md) to understand what environments are, how they work, and all the functionalities available for managing them.
-
 Your project should now show up in your dashboard:
 
 ![Dashboard](../../blob/dashboard-with-project.png)

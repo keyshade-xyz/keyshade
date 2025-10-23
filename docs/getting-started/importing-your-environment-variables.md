@@ -1,74 +1,42 @@
 ---
-description: Start imporing your environmen variables into Keyshade
+description: Start importing your environment variables into Keyshade
 ---
 
-# Adding your secrets and 
+# Importing your environment variables
 
-Our [app](https://app.keyshade.io) is the place where you manage all of your secrets and variables. This can also be done using the CLI, but we want to keep it as simple as possible for now. Here's a list of things that we will be doing in this tutorial:
+Once your project is set up, the next step is to move your environment variables from `.env` file to Keyshade.
+There are two ways to do this:
 
-- Creating a new project
-- Creating a secret in your project
-- Creating a variable in your project
+1. Manually creating them one by one
+2. Importing the entire `.env` file
 
-So, let's get started!
+We would be sticking with the second option as it is the most convenient way to import your environment variables.
 
-## Creating a new project
+## Import using CLI
 
-Head over to [https://app.keyshade.io](https://app.keyshade.io). This is where you get to access our platform. Log in with your email, or your favourite OAuth provider. Once inside, you should be greeted with a similar page like this:
+1. Head over to your project directory
+2. Run the following command:
+    ```bash
+    keyshade import
+    ```
+3. Specify the path of the `.env` file
+4. Select your default workspace (eg. **My Workspace**)
+5. Select the project we created in the previous step 
+6. Select the environment you want to import the environment variables to (eg. **Development**)
+7. Confirm the secret and variable classification
+8. Confirm the import
 
-![Dashboard](../../blob/dashboard.png)
+{% embed url="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FklyYIOuyG5AKyh2FIsOK%2Fuploads%2FjafRHirceDhGpaewKmQR%2Fimport%20using%20cli.mp4?alt=media&token=844e42f2-0708-4c5a-a397-d03eeda71ac5" %}
 
-Now, we can start creating our project.
+## Import using the app
 
-- Click on **Create Project**
-- Enter your project name
-- Optionally, you can store the private key in the project **(not recommended in production projects)**
-- Edit or add environments if you want to
-- Finally, click on **Create Project**
+1. Head into the project
+2. Click on **Import**
+3. Select the `.env` file
+4. Select the environment you want to import the environment variables to (eg. **Development**)
+5. Confirm the secret and variable classification
+6. Confirm the import
 
-> 💡 **Want to learn more about environments?** Check out our comprehensive [Environments documentation](../../internals/environments.md) to understand what environments are, how they work, and all the functionalities available for managing them.
+{% embed url="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FklyYIOuyG5AKyh2FIsOK%2Fuploads%2F0UZn6ujnCQAIJJJNW1lp%2Fimport%20using%20platform.mp4?alt=media&token=20261603-452a-40f1-b2d7-77032bb3153c" %}
 
-If the creation was successful, you should be greeted with a dialog like this:
-
-![Success](../../blob/create-project-success.png) 
-
-You can download the private and public key then hit on **Close**.
-
-Your project should now show up in your dashboard:
-
-![Dashboard](../../blob/dashboard-with-project.png)
-
-## Creating a secret
-
-Now, let's create our first secret.
-
-- Head over to **Dashboard** → **My App**" → **Secrets**.
-- Click on **Add Secret**
-- Enter the name of the secret. We will use `NEXT_PUBLIC_API_KEY`. You can also add a note if you want to.
-- Specify a value for the `dev` environment we created. We would use `ks_1234`.
-- Hit on **Add Secret**.
-
-If created successfully, your secret should look like this:
-
-![Success](../../blob/secret.png)
-
-> 💡 **Want to learn more about secrets?** Check out our comprehensive [Secrets documentation](../../internals/secrets.md) to understand what secrets are, why they're used, and all the functionalities available for managing them.
-
-## Creating a variable
-
-Lastly, let's create our first variable.
-
-- Head over to the **Variables** tab.
-- Enter the name of the variable. We will use `NEXT_PUBLIC_PORT`. You can also add a note if you want to.
-- Specify a value for the `dev` environment we created. We would use `3000`.
-- Hit on **Add Variable**.
-
-If created successfully, your variable should look like this:
-
-![Success](../../blob/variable.png)
-
-> 💡 **Want to learn more about variables?** Check out our comprehensive [Variables documentation](../../internals/variables.md) to understand what variables are, how they differ from secrets, and all the functionalities available for managing them.
-
-## That's it!
-
-We are now in a pretty good shape. We have added our first secret and variable. Now, let's get the CLI installed and set up locally.
+Now, you have your environment variables imported into Keyshade.
