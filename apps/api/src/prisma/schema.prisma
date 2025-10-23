@@ -308,7 +308,6 @@ model User {
   isActive                   Boolean            @default(true)
   isOnboardingFinished       Boolean            @default(false)
   isAdmin                    Boolean            @default(false)
-  authProvider               AuthProvider?
   authProviders              AuthProvider[]     @default([])
   joinedOn                   DateTime           @default(now())
   timesRemindedForOnboarding Int                @default(0)

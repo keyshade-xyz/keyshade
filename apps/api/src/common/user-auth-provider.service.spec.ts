@@ -216,44 +216,6 @@ describe('UserAuthProviderService', () => {
     })
   })
 
-  describe('migrateUserAuthProvider', () => {
-    it('should migrate legacy authProvider to authProviders array', async () => {
-      const userWithLegacyAuth = {
-        ...mockUser,
-        authProvider: AuthProvider.GITHUB,
-        authProviders: []
-      }
-      const userQueryResult = [userWithLegacyAuth]
-      const updatedUserResult = [
-        {
-          ...userWithLegacyAuth,
-          authProviders: [AuthProvider.GITHUB]
-        }
-      ]
-
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce(userQueryResult)
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValueOnce(undefined)
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce(updatedUserResult)
-
-      const result = await service.migrateUserAuthProvider('user-1')
-
-      expect((result as any).authProviders).toEqual([AuthProvider.GITHUB])
-    })
-
-    it('should not migrate if authProviders already has values', async () => {
-      const userWithAuthProviders = {
-        ...mockUser,
-        authProvider: AuthProvider.GITHUB,
-        authProviders: [AuthProvider.EMAIL_OTP]
-      }
-      const userQueryResult = [userWithAuthProviders]
-
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce(userQueryResult)
-
-      const result = await service.migrateUserAuthProvider('user-1')
-
-      expect(result).toEqual(userWithAuthProviders)
-      expect(prisma.$executeRaw).not.toHaveBeenCalled()
-    })
-  })
+  // Note: migrateUserAuthProvider tests removed as migration is now handled by SQL script
+  // See: /apps/api/src/prisma/migrations/20250122000000_migrate_auth_provider_to_auth_providers_array/migration.sql
 })

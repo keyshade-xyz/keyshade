@@ -10,7 +10,6 @@ export const UserSchema = z.object({
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
   isAdmin: z.boolean(),
-  authProvider: authProviderEnum.nullable(), // Keep for backward compatibility
   authProviders: z.array(authProviderEnum).default([]), // New array field
   joinedOn: z.coerce.date(),
   referralCode: z.string(),

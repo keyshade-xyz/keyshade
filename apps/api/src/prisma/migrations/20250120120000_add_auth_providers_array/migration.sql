@@ -7,3 +7,6 @@ SET "authProviders" = CASE
   WHEN "authProvider" IS NOT NULL THEN ARRAY["authProvider"] 
   ELSE '{}' 
 END;
+
+-- Drop the old authProvider column
+ALTER TABLE "User" DROP COLUMN "authProvider";

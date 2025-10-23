@@ -94,6 +94,44 @@ export function migrateAuthProvider(user: any): AuthProvider[] {
 }
 
 /**
+ * Creates a default workspace for a user if needed
+ * @param user - The user to create a workspace for
+ * @param prisma - The prisma service
+ * @param slugGenerator
+ * @param hydrationService
+ * @param workspaceCacheService
+ * @returns The created workspace or null for admin users
+ */
+async function createDefaultWorkspaceIfNeeded(
+  user: User,
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService
+) {
+  const logger = new Logger('createDefaultWorkspaceIfNeeded')
+
+  if (user.isAdmin) {
+    logger.log(`User ${user.id} is an admin. No default workspace needed.`)
+    return null
+  }
+
+  logger.log(`Creating default workspace for user ${user.id}`)
+  const workspace = await createWorkspace(
+    user as AuthenticatedUser,
+    { name: 'My Workspace' },
+    prisma,
+    slugGenerator,
+    hydrationService,
+    workspaceCacheService,
+    true
+  )
+  logger.log(`Created default workspace ${workspace.id} for user ${user.id}`)
+
+  return workspace
+}
+
+/**
  * Creates a new user and optionally creates a default workspace for them.
  * @param dto - The user data to create a user with.
  * @param prisma - The prisma service to use for database operations.
@@ -126,7 +164,6 @@ export async function createUser(
         isActive: dto.isActive ?? true,
         isAdmin: dto.isAdmin ?? false,
         isOnboardingFinished: dto.isOnboardingFinished ?? false,
-        authProvider: dto.authProvider, // Keep for backward compatibility
         authProviders: [dto.authProvider], // New array field
         emailPreference: {
           create: {
@@ -139,32 +176,17 @@ export async function createUser(
     })
     logger.log(`Created user ${user.id}`)
 
-    // If the user is an admin, return the user without a default workspace
-    logger.log(`Checking if user is an admin: ${user.id}`)
-    if (user.isAdmin) {
-      logger.log(`Created admin user ${user.id}. No default workspace needed.`)
-      return {
-        ...user,
-        defaultWorkspace: null
-      }
-    }
-
-    // Create the user's default workspace
-    logger.log(`User ${user.id} is not an admin. Creating default workspace.`)
-    const workspace = await createWorkspace(
-      user as AuthenticatedUser, // Doesn't harm us
-      { name: 'My Workspace' },
+    const defaultWorkspace = await createDefaultWorkspaceIfNeeded(
+      user,
       prisma,
       slugGenerator,
       hydrationService,
-      workspaceCacheService,
-      true
+      workspaceCacheService
     )
-    logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
 
     return {
       ...user,
-      defaultWorkspace: workspace
+      defaultWorkspace
     }
   } catch (error) {
     logger.error(`Error creating user: ${error}`)
@@ -175,6 +197,62 @@ export async function createUser(
       )
     )
   }
+}
+
+/**
+ * Gets or creates a default workspace for a user
+ * @param user - The user to get/create a workspace for
+ * @param prisma - The prisma service
+ * @param slugGenerator
+ * @param hydrationService
+ * @param workspaceCacheService
+ * @returns The workspace or null for admin users
+ */
+async function getOrCreateDefaultWorkspace(
+  user: User,
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService
+) {
+  const logger = new Logger('getOrCreateDefaultWorkspace')
+
+  if (user.isAdmin) {
+    logger.log(`User ${user.id} is an admin. No default workspace needed.`)
+    return null
+  }
+
+  logger.log(`Getting default workspace for user ${user.id}`)
+  let defaultWorkspace = await prisma.workspace.findFirst({
+    where: {
+      ownerId: user.id,
+      isDefault: true
+    }
+  })
+
+  if (!defaultWorkspace) {
+    logger.warn(`Default workspace not found for user ${user.id}`)
+    logger.log(`Creating default workspace for user ${user.id}`)
+
+    defaultWorkspace = await createWorkspace(
+      user as AuthenticatedUser,
+      { name: 'My Workspace' },
+      prisma,
+      slugGenerator,
+      hydrationService,
+      workspaceCacheService,
+      true
+    )
+    logger.log(
+      `Created default workspace ${defaultWorkspace.id} for user ${user.id}`
+    )
+  } else {
+    logger.log(
+      `Got default workspace ${defaultWorkspace.id} for user ${user.id}`
+    )
+  }
+
+  return defaultWorkspace
 }
 
 /**
@@ -231,51 +309,16 @@ export async function getUserByEmailOrId(
 
   logger.log(`Got user ${user.id}`)
 
-  if (user.isAdmin) {
-    logger.log(`User ${user.id} is an admin. No default workspace needed.`)
-    return {
-      ...user,
-      defaultWorkspace: null
-    }
-  } else {
-    logger.log(
-      `User ${user.id} is a regular user. Getting default workspace for user ${user.id}`
-    )
-    let defaultWorkspace = await prisma.workspace.findFirst({
-      where: {
-        ownerId: user.id,
-        isDefault: true
-      }
-    })
+  const defaultWorkspace = await getOrCreateDefaultWorkspace(
+    user,
+    prisma,
+    slugGenerator,
+    hydrationService,
+    workspaceCacheService
+  )
 
-    if (!defaultWorkspace) {
-      logger.warn(`Default workspace not found for user ${user.id}`)
-
-      // Create the user's default workspace
-      logger.log(
-        `User ${user.id} has no default workspace. Creating default workspace.`
-      )
-      defaultWorkspace = await createWorkspace(
-        user as AuthenticatedUser, // Doesn't harm us
-        { name: 'My Workspace' },
-        prisma,
-        slugGenerator,
-        hydrationService,
-        workspaceCacheService,
-        true
-      )
-      logger.log(
-        `Created user ${user.id} with default workspace ${defaultWorkspace.id}`
-      )
-    }
-
-    logger.log(
-      `Got default workspace ${defaultWorkspace.id} for user ${user.id}`
-    )
-
-    return {
-      ...user,
-      defaultWorkspace
-    }
+  return {
+    ...user,
+    defaultWorkspace
   }
 }

@@ -21,15 +21,15 @@ export class UserAuthProviderService {
     this.logger.log(`Adding auth provider ${authProvider} to user ${userId}`)
 
     // Get the user with raw query to access authProviders field
-    const userResult = await this.prisma.$queryRaw<User[]>`
-      SELECT * FROM "User" WHERE id = ${userId}
-    `
+    const userResult = await this.prisma.user.findUnique({
+      where: { id: userId }
+    })
 
-    if (!userResult || userResult.length === 0) {
+    if (!userResult) {
       throw new Error(`User with ID ${userId} not found`)
     }
 
-    const user = userResult[0]
+    const user = userResult
 
     // Get current auth providers, fallback to legacy field if new field is empty
     let currentProviders: AuthProvider[] = []
@@ -40,11 +40,6 @@ export class UserAuthProviderService {
     } catch {
       // If it doesn't exist yet, use empty array
       currentProviders = []
-    }
-
-    // Migrate from legacy field if needed
-    if (currentProviders.length === 0 && user.authProvider) {
-      currentProviders = [user.authProvider]
     }
 
     // Check if provider already exists
@@ -63,18 +58,18 @@ export class UserAuthProviderService {
     )
 
     try {
-      // Use raw SQL to update the authProviders field
-      await this.prisma.$executeRaw`
-        UPDATE "User" 
-        SET "authProviders" = ${updatedProviders}::"AuthProvider"[]
-        WHERE id = ${userId}
-      `
+      // Use ORM to update the authProviders field
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { authProviders: updatedProviders }
+      })
 
       // Return the updated user
-      const updatedUserResult = await this.prisma.$queryRaw<User[]>`
-        SELECT * FROM "User" WHERE id = ${userId}
-      `
-      return updatedUserResult[0]
+      const updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: { authProviders: updatedProviders }
+      })
+      return updatedUser
     } catch (error) {
       // If new field doesn't exist yet, just log and return the user
       this.logger.warn(
@@ -145,59 +140,8 @@ export class UserAuthProviderService {
   }
 
   /**
-   * Migrates legacy authProvider to authProviders array for a specific user
-   * @param userId - The ID of the user to migrate
-   * @returns The updated user
+   * Note: Migration from legacy authProvider to authProviders array
+   * is now handled by SQL migration script instead of this function.
+   * See: /apps/api/src/prisma/migrations/20250122000000_migrate_auth_provider_to_auth_providers_array/migration.sql
    */
-  async migrateUserAuthProvider(userId: string): Promise<User> {
-    this.logger.log(`Migrating auth provider for user ${userId}`)
-
-    // Get user with raw query to access authProviders field
-    const userResult = await this.prisma.$queryRaw<User[]>`
-      SELECT * FROM "User" WHERE id = ${userId}
-    `
-
-    if (!userResult || userResult.length === 0) {
-      throw new Error(`User with ID ${userId} not found`)
-    }
-
-    const user = userResult[0]
-
-    // Check if user has legacy authProvider but no authProviders
-    let currentProviders: AuthProvider[] = []
-
-    try {
-      currentProviders = (user as any).authProviders || []
-    } catch {
-      currentProviders = []
-    }
-
-    if (currentProviders.length === 0 && user.authProvider) {
-      this.logger.log(
-        `Migrating user ${userId} from legacy authProvider ${user.authProvider} to authProviders array`
-      )
-
-      try {
-        // Use raw SQL to update the authProviders field
-        await this.prisma.$executeRaw`
-          UPDATE "User" 
-          SET "authProviders" = ${[user.authProvider]}::"AuthProvider"[]
-          WHERE id = ${userId}
-        `
-
-        // Return the updated user
-        const updatedUserResult = await this.prisma.$queryRaw<User[]>`
-          SELECT * FROM "User" WHERE id = ${userId}
-        `
-        return updatedUserResult[0]
-      } catch (error) {
-        this.logger.warn(
-          `Could not migrate user ${userId} auth provider, likely because migration hasn't run yet: ${error.message}`
-        )
-        return user
-      }
-    }
-
-    return user
-  }
 }
