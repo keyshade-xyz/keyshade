@@ -93,7 +93,7 @@ export default function ProjectCard({
                 <div className="w-[199px] truncate text-base font-semibold">
                   {name}
                 </div>
-                <span className="line-clamp-2 w-[199px] truncate break-words text-sm text-white/60">
+                <span className="wrap-break-word line-clamp-2 w-[199px] truncate text-sm text-white/60">
                   {description}
                 </span>
               </div>

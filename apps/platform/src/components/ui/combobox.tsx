@@ -158,7 +158,7 @@ export function Combobox(): React.JSX.Element {
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="bg-night-d border-white/8 flex w-full cursor-pointer items-center justify-between rounded-xl border p-3"
+          className="bg-eerie-black border-white/8 flex w-full cursor-pointer items-center justify-between rounded-xl border p-3"
           role="combobox"
           type="button"
         >

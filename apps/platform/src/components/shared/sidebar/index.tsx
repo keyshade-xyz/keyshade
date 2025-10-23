@@ -24,7 +24,7 @@ function Sidebar(): JSX.Element {
 
   const sidebarTabData = [
     {
-      name: 'Dashboard',
+      name: 'Projects',
       icon: <DashboardSVG />,
       link: '/',
       matchTo: '/'
@@ -96,6 +96,7 @@ function Sidebar(): JSX.Element {
 
         <div className="flex flex-col gap-y-8 text-neutral-500 [&_a]:flex [&_a]:gap-x-2.5 [&_a]:transition-colors [&_a]:hover:text-white">
           <a
+            className="pl-5"
             href="https://docs.keyshade.xyz/"
             rel="noopener noreferrer"
             target="_blank"
@@ -104,6 +105,7 @@ function Sidebar(): JSX.Element {
             <LinkArrowSVG className="-translate-x-1 translate-y-1.5" />
           </a>
           <a
+            className="pl-5"
             href="mailto:support@keyshade.xyz?subject=Feedback%20for%20Keyshade%20Platform"
             rel="noopener noreferrer"
             target="_blank"

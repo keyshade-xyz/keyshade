@@ -63,7 +63,7 @@ export default function Index(): React.JSX.Element {
         {isAuthorizedToViewProject ? (
           <ProjectEmpty isEmpty={isProjectsEmpty}>
             <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-              className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
+              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
               fetchFunction={fetchProjects}
               itemComponent={ProjectItemComponent}
               itemKey={(item) => item.id}

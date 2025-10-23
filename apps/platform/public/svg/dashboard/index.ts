@@ -5,7 +5,6 @@ import VariableSVG from './variable.svg'
 import PrivateSVG from './private.svg'
 import GlobalSVG from './global.svg'
 import InternalSVG from './internal.svg'
-import FolderIconSVG from './folderIcon.svg'
 import LogoSVG from './logo.svg'
 import TickCircleFillSVG from './tick-circle-fill.svg'
 
@@ -17,7 +16,6 @@ export {
   PrivateSVG,
   GlobalSVG,
   InternalSVG,
-  FolderIconSVG,
   LogoSVG,
   TickCircleFillSVG
 }

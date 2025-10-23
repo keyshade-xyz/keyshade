@@ -7,7 +7,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Workspace } from '@keyshade/schema'
 import { ArrowDownSVG, ArrowUpSVG, SelectSVG } from '@public/svg/shared'
-import { EnvironmentSVG, FolderSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
+import {
+  EnvironmentSVG,
+  FolderSVG,
+  SecretSVG,
+  VariableSVG
+} from '@public/svg/dashboard'
+import ShortcutKeyBox from './shortcut-key-box'
+import WorkspaceSearchSection from './workspace-search-section'
 import type { CommandDialogProps } from '@/components/ui/command'
 import {
   CommandDialog,
@@ -19,10 +26,15 @@ import {
   CommandSeparator,
   CommandShortcut
 } from '@/components/ui/command'
-import { globalSearchDataAtom, selectedProjectAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  globalSearchDataAtom,
+  selectedProjectAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { useDebounce } from '@/hooks/use-debounce'
+import Visible from '@/components/common/visible'
 
 interface SearchModelProps extends CommandDialogProps {
   isOpen: boolean
@@ -159,30 +171,13 @@ function SearchModel({
           <CommandEmpty>No results found.</CommandEmpty>
         ) : (
           <>
-            {searchResults.workspaces.length > 0 && (
-              <>
-                <CommandGroup heading="WORKSPACES">
-                  {searchResults.workspaces.map((workspace) => (
-                    <CommandItem
-                      key={workspace.id}
-                      onClick={() => {
-                        handleChangeWorkspace(workspace)
-                        setIsOpen(false)
-                      }}
-                    >
-                      <span className="mr-2">{workspace.icon}</span>
-                      <span>{workspace.name}</span>
-                      {workspace.slug ? (
-                        <span className="ml-2 text-sm text-gray-200">
-                          ({workspace.slug})
-                        </span>
-                      ) : null}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-                <CommandSeparator />
-              </>
-            )}
+            <Visible if={searchResults.workspaces.length > 0}>
+              <WorkspaceSearchSection
+                handleChangeWorkspace={handleChangeWorkspace}
+                setIsOpen={setIsOpen}
+                workspaces={searchResults.workspaces}
+              />
+            </Visible>
 
             {searchResults.projects.length > 0 && (
               <>
@@ -283,28 +278,30 @@ function SearchModel({
           </>
         )}
       </CommandList>
-      <CommandShortcut className="flex w-full items-center justify-between p-4  text-gray-500">
-        <div className="flex gap-4">
+      <CommandShortcut className="bg-black/36! flex w-full items-center justify-between  p-4 text-neutral-500 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-xs">
             <div className="flex gap-1">
-              <span className="rounded-md bg-neutral-800 p-1">
+              <ShortcutKeyBox>
                 <ArrowUpSVG />
-              </span>
-              <span className="rounded-md bg-neutral-800 p-1">
+              </ShortcutKeyBox>
+              <ShortcutKeyBox>
                 <ArrowDownSVG />
-              </span>
+              </ShortcutKeyBox>
             </div>
-            <p className="text-sm">to navigate</p>
+            <p className="text-sm">navigate</p>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <div className="rounded-md bg-neutral-800 p-1">
+            {/* <div className="rounded-md bg-neutral-800 p-1"> */}
+            <ShortcutKeyBox>
               <SelectSVG />
-            </div>
-            <p className="text-sm">to select</p>
+            </ShortcutKeyBox>
+            {/* </div> */}
+            <p className="text-sm">select</p>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <div className="rounded-md bg-neutral-800 p-1">ESC</div>
+          <ShortcutKeyBox>esc</ShortcutKeyBox>
           <p className="text-sm">to close</p>
         </div>
       </CommandShortcut>
