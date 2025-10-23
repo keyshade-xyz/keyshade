@@ -7,7 +7,7 @@
 - [Introduction](getting-started/introduction.md)
 - [Installing the CLI](getting-started/installing-the-cli.md)
 - [Creating a project](getting-started/creating-a-project.md)
-- [Importing your environment variables](getting-started/adding-secrets-and-variables.md)
+- [Importing your environment variables](getting-started/importing-your-environment-variables.md)
 - [Add Keyshade to your project](getting-started/add-keyshade-to-your-project.md)
 - [Running your app](getting-started/running-your-app.md)
 
