@@ -103,29 +103,35 @@ export function AddWorkspaceDialog({
           )}
         </div>
       </DialogTrigger>
-      <DialogContent className="bg-[#1E1E1F]">
+      <DialogContent className="max-w-[783px]">
         <DialogHeader>
-          <DialogTitle>Make a new workspace</DialogTitle>
+          <DialogTitle>Create New Workspace</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-y-5">
           <DialogDescription>
             Create a new workspace to organize your projects.
           </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-y-8">
-          <div className="flex items-center gap-4">
-            <Label htmlFor="workspace-name">Name</Label>
+
+          <div className="flex flex-col gap-4">
+            <Label htmlFor="workspace-name">
+              Workspace Name <span className="font-medium text-red-500">*</span>
+            </Label>
             <Input
               id="workspace-name"
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter the name"
+              placeholder="Enter your workspace name"
               value={name}
             />
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-x-3">
             <Button
               disabled={isLoading}
-              onClick={handleCreate}
-              variant="secondary"
+              onClick={() => setOpen(false)}
+              variant="outline"
             >
+              Close
+            </Button>
+            <Button disabled={isLoading} onClick={handleCreate}>
               Add workspace
             </Button>
           </div>
