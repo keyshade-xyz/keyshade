@@ -31,7 +31,7 @@ export class WorkspaceCacheService {
     private readonly prisma: PrismaService
   ) {}
 
-  async addWorkspaceKey(workspaceId: Workspace['slug'], newKey: string) {
+  async addWorkspaceKey(workspaceId: Workspace['id'], newKey: string) {
     this.logger.log(
       `Adding workspace key ${newKey} to cache for workspace ${workspaceId}`
     )
@@ -170,23 +170,22 @@ export class WorkspaceCacheService {
   }
 
   async getWorkspaceAdmin(
-    workspaceId: Workspace['id']
+    workspaceSlug: Workspace['slug']
   ): Promise<User['id'] | null> {
     this.logger.log(
-      `Attempting to fetch workspace admin for workspace ${workspaceId} from cache`
+      `Attempting to fetch workspace ${workspaceSlug} admin from cache`
     )
 
-    const key = this.getWorkspaceAdminKey(workspaceId)
-    const userId = await this.redisClient.publisher.get(key)
+    const key = this.getWorkspaceAdminKey(workspaceSlug)
+    const userId = this.redisClient.publisher.get(key)
 
-    if (!userId) {
+    if (userId === null) {
       this.logger.log('Workspace admin not found in cache')
-      return null
+    } else {
+      this.logger.log(
+        `Workspace admin found in cache for workspace ${workspaceSlug}`
+      )
     }
-
-    this.logger.log(
-      `Workspace admin found in cache for workspace ${workspaceId}`
-    )
 
     return userId
   }
@@ -363,8 +362,8 @@ export class WorkspaceCacheService {
     return `${WorkspaceCacheService.RAW_WORKSPACE_PREFIX}${workspaceSlug}`
   }
 
-  private getWorkspaceAdminKey(workspaceId: Workspace['id']): string {
-    return `${WorkspaceCacheService.WORKSPACE_ADMIN_PREFIX}${workspaceId}`
+  private getWorkspaceAdminKey(workspaceSlug: Workspace['slug']): string {
+    return `${WorkspaceCacheService.WORKSPACE_ADMIN_PREFIX}${workspaceSlug}`
   }
 
   private getWorkspaceKeysKey(workspaceId: Workspace['id']): string {
