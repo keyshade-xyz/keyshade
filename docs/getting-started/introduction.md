@@ -8,7 +8,7 @@ In this guide, we will take you through the steps required sto set keyshade up a
 
 **But before all that, you would first need to create an account in [here](https://app.keyshade.io).**
 
-Here's the topics this guide will be covering. Feel free to skip to any section you like.
+Here are the topics this guide will be covering. Feel free to skip to any section you like.
 
 - [Installing the CLI](installing-the-cli.md)
 - [Creating a project](creating-a-project.md)

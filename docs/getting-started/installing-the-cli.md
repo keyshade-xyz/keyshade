@@ -22,10 +22,12 @@ pnpm i -g @keyshade/cli
 ```
 {% endtab %}
 
-{% tab title="bun" %} Here are the instructions for Linux {% endtab %}
+{% tab title="bun" %}
 ```shell
 bun i -g @keyshade/cli
 ```
+{% endtab %}
+
 {% endtabs %}
 
 
