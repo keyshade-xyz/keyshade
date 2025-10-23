@@ -97,7 +97,7 @@ function Sidebar(): JSX.Element {
         <div className="flex flex-col gap-y-8 text-neutral-500 [&_a]:flex [&_a]:gap-x-2.5 [&_a]:transition-colors [&_a]:hover:text-white">
           <a
             className="pl-5"
-            href="https://docs.keyshade.xyz/"
+            href="https://docs.keyshade.io/"
             rel="noopener noreferrer"
             target="_blank"
           >
