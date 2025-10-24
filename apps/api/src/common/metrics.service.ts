@@ -1,11 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { RedisClientType } from 'redis'
 
 @Injectable()
 export class MetricService {
   private readonly logger = new Logger(MetricService.name)
 
-  constructor() {}
+  constructor(
+    @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
+  ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async UploadMetrics() {
@@ -28,12 +32,30 @@ export class MetricService {
   }
 
   async incrementMetric(key: string, value: number): Promise<void> {
-    this.logger.log(`Incrementing metric ${key} by ${value}`)
+    // change the name
+    const redisKey = `metrics`
+    const TTL_SECONDS = 60 * 60 * 24
 
-    //get current value from db
+    try {
+      const newValue = await this.redisClient.publisher.hIncrBy(
+        redisKey,
+        key,
+        value
+      )
 
-    //increment by value
+      // Ensure the key has a TTL so stale data doesn't persist forever
+      const ttl = await this.redisClient.publisher.ttl(redisKey)
+      // ttl < 0 means no expire (-1) or key does not exist (-2). Set expire when absent
+      if (ttl < 0) {
+        await this.redisClient.publisher.expire(redisKey, TTL_SECONDS)
+      }
 
-    //save back to db
+      this.logger.log(
+        `Metric ${key} incremented by ${value} on ${redisKey} (new=${newValue})`
+      )
+    } catch (err) {
+      this.logger.error(`Failed to increment metric ${key}`, err as any)
+      throw err
+    }
   }
 }
