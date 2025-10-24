@@ -20,7 +20,7 @@ We tend to use docker for doing the heavy lifting on our behalf. Currently, we u
 
 ## Node Version
 
-Keyshade works with LTS NodeJS versions. At the time of writing this document, v22.20.0 is the LTS version. In order to install it, head over [here](https://nodejs.org/en/download) and get Node installed.
+Keyshade works with any active Long-Term Support (LTS) version of Node.js. You can download the current LTS version from the [official Node.js website](https://nodejs.org/en/download).
 
 ## Setting up `pnpm`
 
