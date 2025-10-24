@@ -14,19 +14,22 @@ import { RedisClientType } from 'redis'
 @Injectable()
 export default class SlugGenerator {
   /**
-   * Demo method to show example slug combinations for a given name.
-   * Prints several possible slugs to the console.
-   * Not used in production; for review/testing only.
+   * Temporary debug method to demonstrate slug generation with console output.
+   * This method shows the generateUniqueSlug function in action with detailed logging.
+   * Remove this method before production deployment.
    */
-  static demoSlugCombinations(name: string) {
-    const baseSlug = slugify(name, { lower: true, strict: true })
-    const max = 0
-    for (let i = 0; i < 5; i++) {
-      const randomSuffix = Math.random().toString(36).substring(2, 6)
-      const slug = `${baseSlug}-${max + i}-${randomSuffix}`
-      console.log(slug)
-    }
+  async debugSlugGeneration(name: string, model: keyof PrismaClient): Promise<string> {
+    console.log('\n=== SLUG GENERATION DEBUG START ===')
+    console.log(`Input: name="${name}", model="${model.toString()}"`)
+    
+    const result = await this.generateUniqueSlug(name, model)
+    
+    console.log(`Final result: "${result}"`)
+    console.log('=== SLUG GENERATION DEBUG END ===\n')
+    
+    return result
   }
+
   private readonly logger: Logger = new Logger(SlugGenerator.name)
   private static readonly MAX_ITERATIONS: number = 10
 
@@ -141,9 +144,11 @@ export default class SlugGenerator {
     this.logger.log(
       `Generating unique slug for ${name} in ${model.toString()}...`
     )
+    console.log(`🔄 Generating unique slug for "${name}" in model "${model.toString()}" (iteration: ${iterationCount})`)
 
     const baseSlug = slugify(name, { lower: true, strict: true })
     this.logger.log(`Generated base slug for ${name}: ${baseSlug}`)
+    console.log(`📝 Base slug generated: "${baseSlug}"`)
 
     let max: number = 0
     let newSlug: string
@@ -157,8 +162,10 @@ export default class SlugGenerator {
       this.logger.log(
         `Found cached slug's numeric part: ${cachedSlugNumericPart}`
       )
+      console.log(`💾 Cache hit! Found numeric part: ${cachedSlugNumericPart}`)
       max = cachedSlugNumericPart
     } else {
+      console.log(`🔍 No cache found, querying database for existing slugs...`)
       // Get all slugs that match baseSlug-N
       const prismaModel = this.prisma[model as string] as any
       const existingSlugs = await prismaModel.findMany({
@@ -172,16 +179,22 @@ export default class SlugGenerator {
         }
       })
       this.logger.log(`Existing slugs for ${name}: ${existingSlugs.length}`)
+      console.log(`📊 Found ${existingSlugs.length} existing slugs starting with "${baseSlug}"`)
 
       if (existingSlugs.length === 0) {
         newSlug = `${baseSlug}-0`
+        console.log(`✨ No existing slugs found, using: "${newSlug}"`)
       } else {
+        console.log(`🔢 Analyzing existing slugs to find max numeric part...`)
         for (const existingSlug of existingSlugs) {
           const numericPart = existingSlug.slug.split('-').pop()
           if (numericPart && !isNaN(parseInt(numericPart, 10))) {
-            max = Math.max(max, parseInt(numericPart, 10))
+            const currentMax = parseInt(numericPart, 10)
+            console.log(`  📋 Slug "${existingSlug.slug}" has numeric part: ${currentMax}`)
+            max = Math.max(max, currentMax)
           }
         }
+        console.log(`🏆 Maximum numeric part found: ${max}`)
       }
     }
 
@@ -194,6 +207,7 @@ export default class SlugGenerator {
       const randomSuffix = Math.random().toString(36).substring(2, 6)
       newSlug = `${baseSlug}-${max}-${randomSuffix}`
       this.logger.log(`Generated new slug for ${name}: ${newSlug}`)
+      console.log(`🎲 Generated new slug: "${newSlug}" (max: ${max}, random: ${randomSuffix})`)
 
       // Check if the new slug already exists
       this.logger.log(
@@ -210,6 +224,7 @@ export default class SlugGenerator {
         this.logger.log(
           `Slug ${newSlug} already exists in ${model.toString()}. Retrying with incremented iteration.`
         )
+        console.log(`❌ Collision detected! Slug "${newSlug}" already exists. Retrying...`)
         return await this.generateUniqueSlug(name, model, iterationCount + 1)
       }
     }
@@ -217,9 +232,11 @@ export default class SlugGenerator {
     this.logger.log(
       `Slug ${newSlug} is unique in ${model.toString()}. Iteration count: ${iterationCount}`
     )
+    console.log(`✅ Success! Final unique slug: "${newSlug}" (iterations: ${iterationCount})`)
 
     // Store the new slug in the cache
     await this.cacheSlug(baseSlug, model, max)
+    console.log(`💾 Cached slug data for future use`)
 
     return newSlug!
   }
@@ -264,15 +281,3 @@ export default class SlugGenerator {
     }
   }
 }
-
-// Demo: Print example slug combinations for 'Example Name'
-// Output will look like (randomized):
-// example-name-0-4k2a
-// example-name-1-9bqz
-// example-name-2-7x1c
-// example-name-3-2j8d
-// example-name-4-0wqf
-// (Each run will have different random suffixes)
-//
-// To test, uncomment the line below and run this file directly with ts-node or node (after transpile):
-// SlugGenerator.demoSlugCombinations('Example Name');
