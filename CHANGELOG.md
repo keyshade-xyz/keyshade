@@ -1,3 +1,48 @@
+## [2.41.0](https://github.com/keyshade-xyz/keyshade/compare/v2.40.0...v2.41.0) (2025-10-23)
+
+### 🚀 Features
+
+* **cli:** ability to manage pat ([#1213](https://github.com/keyshade-xyz/keyshade/issues/1213)) ([0473463](https://github.com/keyshade-xyz/keyshade/commit/0473463c5af3bc09d108dea97e46b078cabd0d6f))
+* **cli:** add `keyshade reset` command to wipe local profiles ([#1206](https://github.com/keyshade-xyz/keyshade/issues/1206)) ([229557a](https://github.com/keyshade-xyz/keyshade/commit/229557aa6d60819875abff843b0e05a0352cdf95))
+* **cli:** improved keyshade import flow ([#1219](https://github.com/keyshade-xyz/keyshade/issues/1219)) ([5affb52](https://github.com/keyshade-xyz/keyshade/commit/5affb52a02fef9e89c439fd1c404b87e1fcae6a1))
+* **platform:** add search functionality to integrations page ([#1184](https://github.com/keyshade-xyz/keyshade/issues/1184)) ([83b0374](https://github.com/keyshade-xyz/keyshade/commit/83b0374fc2c3dd0a309b65476b5e58ab9a28140f))
+
+### 🐛 Bug Fixes
+
+* resolve hero image overlap with [secure] section text ([#1161](https://github.com/keyshade-xyz/keyshade/issues/1161)) ([3b1d4b6](https://github.com/keyshade-xyz/keyshade/commit/3b1d4b6dc9a49e0359f2fdbeeb29bb0c865b84fb))
+
+### 📚 Documentation
+
+* add new internals pages for [secure], variable and env creation + cli docs for [secure] and variables ([#1208](https://github.com/keyshade-xyz/keyshade/issues/1208)) ([2bd595d](https://github.com/keyshade-xyz/keyshade/commit/2bd595d706c53c606f19d1adf8b94bb9668b5414))
+* revamp getting started ([#1221](https://github.com/keyshade-xyz/keyshade/issues/1221)) ([e683fd6](https://github.com/keyshade-xyz/keyshade/commit/e683fd66cef7602c7c2b57f1ba410e9f288a9542))
+* Update image link in README.md ([adf7761](https://github.com/keyshade-xyz/keyshade/commit/adf7761a8098161e7be540d5e2285646d2c2fade))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** bump CLI to v3.6.0 ([267469a](https://github.com/keyshade-xyz/keyshade/commit/267469a4fdab03f700d03ccc8b152c52ff9eaee8))
+* **release:** 2.36.0-stage.2 [skip ci] ([14aedf9](https://github.com/keyshade-xyz/keyshade/commit/14aedf95590e3fc8ce61ce6a5e51c9e0b6b5552e))
+* **release:** 2.40.1-stage.1 [skip ci] ([f0c296d](https://github.com/keyshade-xyz/keyshade/commit/f0c296d0fc3984b322e9f010f12e7ac98e5ea9c4))
+* **release:** 2.41.0-stage.1 [skip ci] ([59fdbe3](https://github.com/keyshade-xyz/keyshade/commit/59fdbe37cc5b2bb390b50bd1b3e0030a801eaa27))
+* **release:** 2.41.0-stage.2 [skip ci] ([4d5ee50](https://github.com/keyshade-xyz/keyshade/commit/4d5ee50569d3a691efa9b80682b0736a1074d69c))
+* **release:** 2.41.0-stage.3 [skip ci] ([f2ca012](https://github.com/keyshade-xyz/keyshade/commit/f2ca01251407e2ffc26e147d74a4227c87f60572))
+* **release:** 2.41.0-stage.4 [skip ci] ([7a4e1fb](https://github.com/keyshade-xyz/keyshade/commit/7a4e1fba1c835836a7b6245195f907faad4cb496))
+
+## [2.41.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.3...v2.41.0-stage.4) (2025-10-22)
+
+### 🚀 Features
+
+* **cli:** add `keyshade reset` command to wipe local profiles ([#1206](https://github.com/keyshade-xyz/keyshade/issues/1206)) ([229557a](https://github.com/keyshade-xyz/keyshade/commit/229557aa6d60819875abff843b0e05a0352cdf95))
+
+## [2.41.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.2...v2.41.0-stage.3) (2025-10-22)
+
+### 🚀 Features
+
+* **cli:** improved keyshade import flow ([#1219](https://github.com/keyshade-xyz/keyshade/issues/1219)) ([5affb52](https://github.com/keyshade-xyz/keyshade/commit/5affb52a02fef9e89c439fd1c404b87e1fcae6a1))
+
+### 📚 Documentation
+
+* Update image link in README.md ([adf7761](https://github.com/keyshade-xyz/keyshade/commit/adf7761a8098161e7be540d5e2285646d2c2fade))
+
 ## [2.41.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.1...v2.41.0-stage.2) (2025-10-20)
 
 ### 🚀 Features

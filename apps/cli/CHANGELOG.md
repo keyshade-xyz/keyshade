@@ -357,6 +357,31 @@
 
 # 3.6.0-stage.1
 
+## Minor Changes
+
+- Added `keyshade pat` base command
+- Added `keyshade pat create` command
+- Added `keyshade pat list` command
+- Added `keyshade pat delete` command
+- Added `keyshade pat update` command
+- Added `keyshade pat regenerate` command
+
+# 3.6.0-stage.2
+
+## Minor Changes
+
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command
+
+## 3.6.0-stage.3
+
+## Minor Changes
+
+- Added `keyshade reset` to wipe local profile configuration files.
+
+## 3.6.0
+
 ### Minor Changes
 
 - Added `keyshade pat` base command
@@ -365,3 +390,7 @@
 - Added `keyshade pat delete` command
 - Added `keyshade pat update` command
 - Added `keyshade pat regenerate` command
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command
+- Added `keyshade reset` to wipe local profile configuration files.

@@ -15,7 +15,7 @@ import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateVariable } from './dto/create.variable/create.variable'
 import { UpdateVariable } from './dto/update.variable/update.variable'
 import { AuthenticatedUser } from '@/user/user.types'
-import { BulkCreateVariableDto } from './dto/bulk.create.variable/bulk.create.variable'
+import { BulkCreateVariable } from './dto/bulk.create.variable/bulk.create.variable'
 
 @Controller('variable')
 export class VariableController {
@@ -36,12 +36,12 @@ export class VariableController {
   async bulkCreateVariables(
     @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: string,
-    @Body() dto: BulkCreateVariableDto
+    @Body() dto: BulkCreateVariable
   ) {
     return await this.variableService.bulkCreateVariables(
       user,
       projectSlug,
-      dto.variables
+      dto
     )
   }
 
