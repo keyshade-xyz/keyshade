@@ -42,4 +42,4 @@ This flag is used to specify the API key to use. Won't work if the [`--profile`]
 
 ### `--base-url <url>`
 
-This flag is used to specify the base URL of the API to use. Won't work if the [`--profile`](#--profile-profile) flag is specified. The default is `https://api.keyshade.xyz`.
+This flag is used to specify the base URL of the API to use. Won't work if the [`--profile`](#--profile-profile) flag is specified. The default is `https://api.keyshade.io`.

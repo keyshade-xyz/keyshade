@@ -70,7 +70,7 @@ describe('Workspace Role Controller Tests', () => {
 
   beforeEach(async () => {
     const createAlice = await userService.createUser({
-      email: 'alice@keyshade.xyz',
+      email: 'alice@keyshade.io',
       name: 'Alice',
       isActive: true,
       isAdmin: false,
@@ -78,7 +78,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     const createBob = await userService.createUser({
-      email: 'bob@keyshade.xyz',
+      email: 'bob@keyshade.io',
       name: 'Bob',
       isActive: true,
       isAdmin: false,
@@ -86,7 +86,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     const createCharlie = await userService.createUser({
-      email: 'charlie@keyshade.xyz',
+      email: 'charlie@keyshade.io',
       name: 'Charlie',
       isActive: true,
       isAdmin: false,

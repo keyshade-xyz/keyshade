@@ -70,54 +70,9 @@ export abstract class BaseIntegration {
   abstract getRequiredMetadataParameters(): Set<string>
 
   /**
-   * Use this function to test the condfiguration of the integration.
+   * Use this function to test the configuration of the integration.
    */
   abstract validateConfiguration(metadata: IntegrationMetadata): Promise<void>
-
-  // WARNING: DO NOT OVERRIDE
-  protected async registerIntegrationRun({
-    eventId,
-    integrationId,
-    title
-  }: IntegrationRunData): Promise<IntegrationRun> {
-    this.logger.log(
-      `Registering integration run for event ${eventId} with title ${title}`
-    )
-
-    const integrationRun = await this.prisma.integrationRun.create({
-      data: {
-        title,
-        duration: 0,
-        triggeredAt: new Date(),
-        status: IntegrationRunStatus.RUNNING,
-        eventId: eventId,
-        integrationId: integrationId
-      }
-    })
-    this.logger.log(
-      `Registered integration run ${integrationRun.id} for event ${eventId} with title ${title}`
-    )
-
-    return integrationRun
-  }
-
-  protected async markIntegrationRunAsFinished(
-    integrationRunId: IntegrationRun['id'],
-    status: IntegrationRunStatus,
-    duration: IntegrationRun['duration'],
-    logs: IntegrationRun['logs']
-  ): Promise<void> {
-    this.logger.log(`Marking integration run ${integrationRunId} as ${status}`)
-    await this.prisma.integrationRun.update({
-      where: { id: integrationRunId },
-      data: {
-        status,
-        duration,
-        logs
-      }
-    })
-    this.logger.log(`Marked integration run ${integrationRunId} as ${status}`)
-  }
 
   public setIntegration<T extends IntegrationMetadata>(
     integration:
@@ -195,5 +150,50 @@ export abstract class BaseIntegration {
         }
       })
     }
+  }
+
+  // WARNING: DO NOT OVERRIDE
+  protected async registerIntegrationRun({
+    eventId,
+    integrationId,
+    title
+  }: IntegrationRunData): Promise<IntegrationRun> {
+    this.logger.log(
+      `Registering integration run for event ${eventId} with title ${title}`
+    )
+
+    const integrationRun = await this.prisma.integrationRun.create({
+      data: {
+        title,
+        duration: 0,
+        triggeredAt: new Date(),
+        status: IntegrationRunStatus.RUNNING,
+        eventId: eventId,
+        integrationId: integrationId
+      }
+    })
+    this.logger.log(
+      `Registered integration run ${integrationRun.id} for event ${eventId} with title ${title}`
+    )
+
+    return integrationRun
+  }
+
+  protected async markIntegrationRunAsFinished(
+    integrationRunId: IntegrationRun['id'],
+    status: IntegrationRunStatus,
+    duration: IntegrationRun['duration'],
+    logs: IntegrationRun['logs']
+  ): Promise<void> {
+    this.logger.log(`Marking integration run ${integrationRunId} as ${status}`)
+    await this.prisma.integrationRun.update({
+      where: { id: integrationRunId },
+      data: {
+        status,
+        duration,
+        logs
+      }
+    })
+    this.logger.log(`Marked integration run ${integrationRunId} as ${status}`)
   }
 }

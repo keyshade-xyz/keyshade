@@ -61,7 +61,7 @@ describe('Auth Controller Tests', () => {
   it('should send otp if email is valid', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/auth/send-otp/johndoe@keyshade.xyz'
+      url: '/auth/send-otp/johndoe@keyshade.io'
     })
 
     expect(response.statusCode).toBe(201)
@@ -70,13 +70,13 @@ describe('Auth Controller Tests', () => {
   it('should have generated an otp', async () => {
     await app.inject({
       method: 'POST',
-      url: '/auth/send-otp/johndoe@keyshade.xyz'
+      url: '/auth/send-otp/johndoe@keyshade.io'
     })
 
     const otp = await prisma.otp.findFirst({
       where: {
         user: {
-          email: 'johndoe@keyshade.xyz'
+          email: 'johndoe@keyshade.io'
         }
       }
     })
@@ -90,26 +90,26 @@ describe('Auth Controller Tests', () => {
   it('should upsert otp if regenerated', async () => {
     await app.inject({
       method: 'POST',
-      url: '/auth/send-otp/johndoe@keyshade.xyz'
+      url: '/auth/send-otp/johndoe@keyshade.io'
     })
 
     const otp = await prisma.otp.findFirst({
       where: {
         user: {
-          email: 'johndoe@keyshade.xyz'
+          email: 'johndoe@keyshade.io'
         }
       }
     })
 
     await app.inject({
       method: 'POST',
-      url: '/auth/send-otp/johndoe@keyshade.xyz'
+      url: '/auth/send-otp/johndoe@keyshade.io'
     })
 
     const regenerated = await prisma.otp.findFirst({
       where: {
         user: {
-          email: 'johndoe@keyshade.xyz'
+          email: 'johndoe@keyshade.io'
         }
       }
     })
@@ -133,12 +133,12 @@ describe('Auth Controller Tests', () => {
   it('should not be able to validate otp with invalid otp', async () => {
     await app.inject({
       method: 'POST',
-      url: '/auth/send-otp/johndoe@keyshade.xyz'
+      url: '/auth/send-otp/johndoe@keyshade.io'
     })
 
     const response = await app.inject({
       method: 'POST',
-      url: '/auth/validate-otp?email=johndoe@keyshade.xyz&otp=123456'
+      url: '/auth/validate-otp?email=johndoe@keyshade.io&otp=123456'
     })
 
     expect(response.statusCode).toBe(401)

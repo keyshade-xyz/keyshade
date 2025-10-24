@@ -24,7 +24,7 @@ const DISCORD_INIT_MESSAGE = {
       color: 0x00ff00,
       author: {
         name: 'Keyshade',
-        url: 'https://keyshade.xyz'
+        url: 'https://keyshade.io'
       },
       fields: [
         {
@@ -184,7 +184,7 @@ export class DiscordIntegration extends BaseIntegration {
               description: data.description ?? 'No description provided',
               author: {
                 name: 'keyshade',
-                url: 'https://keyshade.xyz'
+                url: 'https://keyshade.io'
               },
               fields: [
                 {

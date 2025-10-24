@@ -335,3 +335,62 @@
 
 - Removed API key validation from `keyshade run`
 - Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.1
+
+## Patches
+
+- Update domain to keyshade.io
+
+# 3.5.2
+
+## Patches
+
+- Update URL retrival in login command
+
+# 3.5.3
+
+## Patches
+
+- Updated `keyshade run` command to use POSIX
+- `keyshade run` command now compatible with both Windows and Unix/Linux
+
+# 3.6.0-stage.1
+
+## Minor Changes
+
+- Added `keyshade pat` base command
+- Added `keyshade pat create` command
+- Added `keyshade pat list` command
+- Added `keyshade pat delete` command
+- Added `keyshade pat update` command
+- Added `keyshade pat regenerate` command
+
+# 3.6.0-stage.2
+
+## Minor Changes
+
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command
+
+## 3.6.0-stage.3
+
+## Minor Changes
+
+- Added `keyshade reset` to wipe local profile configuration files.
+
+## 3.6.0
+
+### Minor Changes
+
+- Added `keyshade pat` base command
+- Added `keyshade pat create` command
+- Added `keyshade pat list` command
+- Added `keyshade pat delete` command
+- Added `keyshade pat update` command
+- Added `keyshade pat regenerate` command
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command
+- Added `keyshade reset` to wipe local profile configuration files.

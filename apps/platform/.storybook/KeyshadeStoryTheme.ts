@@ -1,8 +1,9 @@
 import { create } from 'storybook/theming'
+
 export default create({
   base: 'dark',
   brandTitle: 'Keyshade',
-  brandUrl: 'https://keyshade.xyz',
+  brandUrl: 'https://keyshade.io',
   brandImage: 'https://i.postimg.cc/kXjnph6P/logo-6.png',
   brandTarget: '_blank',
 
