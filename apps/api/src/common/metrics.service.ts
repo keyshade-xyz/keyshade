@@ -1,32 +1,34 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 
 @Injectable()
 export class MetricService {
+  private readonly logger = new Logger(MetricService.name)
+
   constructor() {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  public async UploadMetrics() {
+  async UploadMetrics() {
     //get metrics from db
     //place JSON in to metrics/ directory
     //upload to Azura
     //flush cache
   }
 
-  public async incrementSecretPull(numberOfSecrets: number): Promise<void> {
-    this.incrementMetric('totalSecretPulls', numberOfSecrets)
+  async incrementSecretPull(numberOfSecrets: number): Promise<void> {
+    await this.incrementMetric('totalSecretPulls', numberOfSecrets)
   }
-  public async incrementVariablePull(numberOfVariables: number): Promise<void> {
-    this.incrementMetric('totalVariablePulls', numberOfVariables)
+  async incrementVariablePull(numberOfVariables: number): Promise<void> {
+    await this.incrementMetric('totalVariablePulls', numberOfVariables)
   }
-  public async incrementRunCommandExecution(
+  async incrementRunCommandExecution(
     numberOfRunCommands: number
   ): Promise<void> {
-    this.incrementMetric('totalRunCommandExecutions', numberOfRunCommands)
+    await this.incrementMetric('totalRunCommandExecutions', numberOfRunCommands)
   }
 
-  public async incrementMetric(key: string, value: number): Promise<void> {
-    console.log(`Incrementing metric ${key} by ${value}`)
+  async incrementMetric(key: string, value: number): Promise<void> {
+    this.logger.log(`Incrementing metric ${key} by ${value}`)
 
     //get current value from db
 
