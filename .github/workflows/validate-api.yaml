@@ -157,6 +157,11 @@ jobs:
           done
 
       - name: Run API container
+        env:
+          NODE_ENV: e2e
+          DATABASE_URL: postgresql://postgres:postgres@keyshade-ci-postgres:5432/postgres
+          REDIS_URL: redis://keyshade-ci-redis:6379
+          JWT_SECRET: ci-secret
         run: pnpm docker:run:api
 
       - name: API health check

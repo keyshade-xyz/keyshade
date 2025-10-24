@@ -104,6 +104,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Platform image
+        env:
+          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4200
+          NEXT_PUBLIC_SENTRY_ENVIRONMENT: ci
+          NEXT_PUBLIC_POSTHOG_KEY: test-key
+          NEXT_PUBLIC_POSTHOG_HOST: https://app.posthog.com
         run: pnpm docker:build:platform
 
       - name: Verify Platform image

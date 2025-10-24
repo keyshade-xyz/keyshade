@@ -142,13 +142,11 @@
     "format": "prettier apps/**/*.{ts,tsx} packages/**/*.ts --write",
     "prepare": "husky",
     "docker:build:api": "docker build -t keyshade/api:ci-${GITHUB_SHA:-local} -f apps/api/Dockerfile .",
-    "docker:run:api": "docker run -d --rm --name api-ci --network keyshade-ci -p 4200:4200 -e NODE_ENV=e2e -e DATABASE_URL=postgresql://postgres:postgres@keyshade-ci-postgres:5432/postgres -e REDIS_URL=redis://keyshade-ci-redis:6379 -e JWT_SECRET=ci-secret keyshade/api:ci-${GITHUB_SHA:-local}",
-    "docker:build:platform": "docker build -t keyshade/platform:ci-${GITHUB_SHA:-local} -f apps/platform/Dockerfile --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:4200 --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=ci --build-arg NEXT_PUBLIC_POSTHOG_KEY=test-key --build-arg NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com .",
-    "docker:run:platform": "docker run -d --rm --name platform-ci -p 3025:3000 -e NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:4200 -e NEXT_PUBLIC_SENTRY_ENVIRONMENT=ci -e NEXT_PUBLIC_POSTHOG_KEY=test-key -e NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com keyshade/platform:ci-${GITHUB_SHA:-local}",
+    "docker:run:api": "docker run -d --rm --name api-ci --network keyshade-ci -p 4200:4200 keyshade/api:ci-${GITHUB_SHA:-local}",
+    "docker:build:platform": "docker build -t keyshade/platform:ci-${GITHUB_SHA:-local} -f apps/platform/Dockerfile --build-arg NEXT_PUBLIC_BACKEND_URL --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT --build-arg NEXT_PUBLIC_POSTHOG_KEY --build-arg NEXT_PUBLIC_POSTHOG_HOST .",
+    "docker:run:platform": "docker run -d --rm --name platform-ci -p 3025:3000 keyshade/platform:ci-${GITHUB_SHA:-local}",
     "docker:build:web": "docker build -t keyshade/web:ci-${GITHUB_SHA:-local} -f apps/web/Dockerfile --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:4200 --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=https://analytics.example.com --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=ci --build-arg NEXT_PUBLIC_POSTHOG_KEY=test-key --build-arg NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com .",
-    "docker:run:web": "docker run -d --rm --name web-ci -p 3000:3000 -e NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:4200 -e NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=https://analytics.example.com -e NEXT_PUBLIC_SENTRY_ENVIRONMENT=ci -e NEXT_PUBLIC_POSTHOG_KEY=test-key -e NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com keyshade/web:ci-${GITHUB_SHA:-local}",
-    "docker:build:cli": "docker build -t keyshade/cli:ci-${GITHUB_SHA:-local} -f apps/cli/Dockerfile .",
-    "docker:run:cli": "docker run --rm --name cli-ci keyshade/cli:ci-${GITHUB_SHA:-local} --version"
+    "docker:run:web": "docker run -d --rm --name web-ci -p 3000:3000 keyshade/web:ci-${GITHUB_SHA:-local}"
   },
   "devDependencies": {
     "@sentry/cli": "^2.28.6",
