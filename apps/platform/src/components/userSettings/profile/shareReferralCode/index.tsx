@@ -41,7 +41,7 @@ function ReferralCodeShare() {
       </div>
 
       {/* Referral Code Section */}
-      <div className="rounded-xl border border-white/10  p-6 backdrop-blur-sm">
+      <div className="rounded-xl border border-white/10  p-6 backdrop-blur-xs">
         <h3 className="mb-3 text-lg font-semibold text-white">
           Your Referral Code
         </h3>
@@ -58,7 +58,7 @@ function ReferralCodeShare() {
           </div>
 
           <button
-            className="ml-3 flex-shrink-0"
+            className="ml-3 shrink-0"
             onClick={copyReferralCode}
             type="button"
           >

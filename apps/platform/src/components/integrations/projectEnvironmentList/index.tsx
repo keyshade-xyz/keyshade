@@ -12,7 +12,7 @@ function ProjectEnvironmentList({
   currentWorkspace
 }: ProjectEnvironmentListProps): React.JSX.Element {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
       <div className="mr-4 flex flex-col gap-2 pb-4">
         <h2 className="text-xl font-semibold text-white">
           Project & environments details
@@ -27,7 +27,7 @@ function ProjectEnvironmentList({
           <div>
             <p className="text-sm text-white/60">Project and Environment</p>
             <p className="text-lg font-medium text-white">
-              Watching events for all environments from all projects
+              Listening for events from the entire workspace (no specific project or environment selected)
             </p>
           </div>
         ) : (

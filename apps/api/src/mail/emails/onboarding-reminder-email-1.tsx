@@ -6,7 +6,7 @@ export const OnboardingReminder1Email = (p0: { name: string }) => {
       previewText="Welcome to Keyshade! Let’s get your setup started"
       heading="Ready to Secure Your Secrets?"
     >
-      <p>Hey {p0.name} 👋</p>
+      <p>Hey {p0.name ?? 'User'} 👋</p>
       <p>You joined Keyshade a few days ago, and we’re excited to have you.</p>
       <p>
         Take a minute to complete your onboarding and start managing your

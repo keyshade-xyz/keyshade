@@ -64,7 +64,9 @@ import {
   sendinblue,
   shippo,
   shopify,
-  sidekiq
+  sidekiq,
+  jwt,
+  cloudflare
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -72,8 +74,8 @@ import secretDetector from '@/index'
 const testcaseTitleTemplate = (title: string): string =>
   `should detect ${title}`
 
-function testSecret(testcases: TestCase[]): void {
-  testcases.forEach(({ input, expected }, index) => {
+function testSecret(jwtTestcases: TestCase[]): void {
+  jwtTestcases.forEach(({ input, expected }, index) => {
     const result = secretDetector.detect(input)
     expect(result.found).toBe(expected)
   })
@@ -120,9 +122,13 @@ describe('Detect Secrets from string', () => {
     testSecret(mailchimp.testcases)
   })
 
-  // it(testcaseTitleTemplate("JWT Key"), () => {
-  //     testSecret(jwt.testcases);
-  // });
+  it(testcaseTitleTemplate('JWT Key'), () => {
+    testSecret(jwt.testcases)
+  })
+
+  it(testcaseTitleTemplate('Cloudflare Key'), () => {
+    testSecret(cloudflare.testcases)
+  })
 
   it(testcaseTitleTemplate('Public IP'), () => {
     testSecret(ip_public.testcases)

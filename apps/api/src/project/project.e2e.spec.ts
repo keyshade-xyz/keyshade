@@ -24,7 +24,7 @@ import { EventModule } from '@/event/event.module'
 import { ProjectService } from './project.service'
 import { WorkspaceService } from '@/workspace/workspace.service'
 import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { UserModule } from '@/user/user.module'
@@ -104,7 +104,7 @@ describe('Project Controller Tests', () => {
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
       name: 'John Doe',
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       isOnboardingFinished: true,
       isActive: true,
       isAdmin: false
@@ -112,7 +112,7 @@ describe('Project Controller Tests', () => {
 
     const createUser2 = await userService.createUser({
       name: 'Jane Doe',
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       isOnboardingFinished: true,
       isActive: true,
       isAdmin: false
@@ -955,7 +955,7 @@ describe('Project Controller Tests', () => {
       // Create a user
       const user = await userService.createUser({
         name: 'Johnny Doe',
-        email: 'johhny@keyshade.xyz',
+        email: 'johhny@keyshade.io',
         isOnboardingFinished: true,
         isActive: true,
         isAdmin: false

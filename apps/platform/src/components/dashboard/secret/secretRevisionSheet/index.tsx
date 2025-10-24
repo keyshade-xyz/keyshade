@@ -34,7 +34,7 @@ import { Button } from '@/components/ui/button'
 
 function Loader() {
   return (
-    <div className="flex h-[4rem] animate-pulse items-center gap-x-3 rounded-xl bg-white/5 p-5">
+    <div className="flex h-16 animate-pulse items-center gap-x-3 rounded-xl bg-white/5 p-5">
       <div className="h-5 w-[80%] rounded-full bg-white/5" />
       <div className="h-5 w-[20%] rounded-full bg-white/5" />
     </div>
@@ -180,7 +180,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                   versions
                 }) => (
                   <AccordionItem
-                    className="rounded-xl bg-white/[3%] px-5 transition-all duration-150 ease-in hover:bg-white/[5%]"
+                    className="rounded-xl bg-white/3 px-5 transition-all duration-150 ease-in hover:bg-white/5"
                     key={environmentName}
                     value={environmentName}
                   >
@@ -198,7 +198,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                       ) : (
                         versions.map((revision, index) => (
                           <div
-                            className={`group flex w-full flex-col gap-y-2 border-white/15 py-5 ${revision.version !== 1 ? 'border-b-[1px] border-white/15' : ''}`}
+                            className={`group flex w-full flex-col gap-y-2 border-white/15 py-5 ${revision.version !== 1 ? 'border-b border-white/15' : ''}`}
                             key={revision.version}
                           >
                             <div className="flex w-full flex-row justify-between">

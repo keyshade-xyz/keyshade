@@ -156,7 +156,7 @@ These are the arguments supported by the `list` command:
 
 #### `<workspace-slug>`
 
-The slug of the project whose projects you want.
+The slug of the workspace whose projects you want.
 
 ## `sync`
 

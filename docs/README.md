@@ -2,12 +2,12 @@
 description: Simple and secure secret management tool for modern developers
 ---
 
-# 👋 Welcome to keyshade
+# 👋 Welcome to Keyshade
 
 ## What is Keyshade ?
-Keyshade is a secret and environment variable manager designed for developers and teams. It helps you avoid hardcoded secrets, eliminate manual `.env` sharing, and keep environment configs in sync—across local setups, CI/CD pipelines, and production. Whether you're solo or working with a team, Keyshade fits into your workflow with minimal setup and maximum security.
+Keyshade is a secret and configuration manager designed for developers teams and infra. It helps you avoid hardcoding secrets, eliminate sharing your `.env` manually, and keep environment variables in sync—across local setups, CI/CD pipelines, and production. Whether you're solo or working with a team, Keyshade fits into your workflow with minimal setup and maximum security.
 
-# What Can Keyshade Help With ?
+## What Can Keyshade Help With ?
 
 Managing secrets sounds simple—until you're juggling .env files, onboarding teammates, and patching leaked tokens. Keyshade helps you solve these problems with a developer-first workflow that’s secure by design.
 ### Keeping teams and environments in sync
@@ -35,5 +35,6 @@ Managing secrets sounds simple—until you're juggling .env files, onboarding te
 Whether you're building solo or deploying with a team, Keyshade takes the pain out of managing secrets.
 - **Solo Developers** – Stop copying .env files between machines. Keep everything in sync, securely.
 - **Teams** – Share secrets without leaking them. Everyone gets access to what they need—and nothing more.
+- **Enterprises** — In a multi-team environment, Keyshade helps you manage secrets and environment variables across teams and projects.
 - **CI/CD Pipelines** – Inject secrets at runtime without storing them in plaintext or restarting your app.
 - **Security-Minded Projects** – Secrets are encrypted end-to-end and only decrypted on your machine. Even we can't see them.

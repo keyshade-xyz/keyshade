@@ -5,30 +5,24 @@ export interface ProjectRootConfig {
   quitOnDecryptionFailure: boolean
 }
 
-export interface ProfileConfig {
-  default: string
-  [name: string]: {
-    apiKey: string
-    baseUrl: string
-    metrics_enabled: boolean
-  }
-}
-
-export interface Page<T> {
-  items: T[]
-  metadata: {
-    page: number
-    perPage: number
-    pageCount: number
-    totalCount: number
-    links: {
-      self: string
-      first: string
-      previous: string | null
-      next: string | null
-      last: string
+export interface ProfileConfig
+  extends Record<
+    string,
+    {
+      user: {
+        id: string
+        name: string | null
+        email: string
+      }
+      token: string
+      sessionId: string
+      baseUrl: string
+      metricsEnabled: boolean
     }
-  }
-}
+  > {}
 
-export type PrivateKeyConfig = Record<string, string>
+export interface PrivateKeyConfig extends Record<string, string> {}
+
+export interface DefaultProfileConfig {
+  userId: string
+}

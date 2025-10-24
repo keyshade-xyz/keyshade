@@ -3,20 +3,23 @@ import type {
   CommandArgument,
   CommandOption
 } from '@/types/command/command.types'
-import { fetchProfileConfig } from '@/util/configuration'
+import {
+  fetchDefaultProfileConfig,
+  fetchProfileConfig
+} from '@/util/configuration'
 import { Logger } from '@/util/logger'
-import { getDefaultProfile } from '@/util/profile'
-import { Option, type Command } from 'commander'
+import { type Command, Option } from 'commander'
 import ControllerInstance from '@/util/controller-instance'
 import { SentryInstance } from '@/util/sentry'
+import { showError } from '@/util/prompt'
 
 /**
  * The base class for all commands. All commands should extend this class.
  */
 export default abstract class BaseCommand {
-  // apiKey and baseUrl are protected fields that can be accessed by subclasses
+  // token and baseUrl are protected fields that subclasses can access
   // Use these fields from the subclasses to make API requests if needed
-  protected apiKey: string | null = null
+  protected token: string | null = null
   protected baseUrl: string | null = null
   protected metricsEnabled: boolean | null = null
 
@@ -48,9 +51,9 @@ export default abstract class BaseCommand {
           }
 
           if (this.canMakeHttpRequests()) {
-            if (!this.apiKey) {
+            if (!this.token) {
               throw new Error(
-                'API key is missing. This command requires an API key. Either specify it using --api-key, or send in a profile using --profile, or set a default profile'
+                'Token is missing. This command requires a token. Either specify it using --token, or send in a profile using --profile, or set a default profile'
               )
             }
 
@@ -70,7 +73,7 @@ export default abstract class BaseCommand {
           await this.action({ args, options: commandOptions })
         } catch (error) {
           const errorInfo = error as string
-          Logger.error(errorInfo)
+          await showError(errorInfo)
           if (this.metricsEnabled) Logger.report(errorInfo)
         }
       })
@@ -204,43 +207,44 @@ export default abstract class BaseCommand {
     // We will either fetch the profile configuration if the --profile flag is provided
     // and the profile exists.
 
-    // Or, we will use the API key and base URL provided in the global options, if provided.
+    // Or, we will use the token and base URL provided in the global options, if provided.
 
     // If none is specified, we try to fetch the default profile configuration.
 
-    // In case none of the above works, and/or `apiKey` and `baseUrl` are still null,
+    // In case none of the above works, and/or `token` and `baseUrl` are still null,
     // any of the subclasses that will need to make API requests will throw an error.
     if (globalOptions.profile) {
       if (profiles[globalOptions.profile]) {
         const profile = profiles[globalOptions.profile]
 
-        this.apiKey = profile.apiKey
+        this.token = profile.token
         this.baseUrl = profile.baseUrl
-        this.metricsEnabled = profile.metrics_enabled
+        this.metricsEnabled = profile.metricsEnabled
       } else {
         throw new Error('Profile not found')
       }
-    } else if (globalOptions.apiKey || globalOptions.baseUrl) {
-      if (globalOptions.apiKey) {
-        this.apiKey = globalOptions.apiKey
+    } else if (globalOptions.token || globalOptions.baseUrl) {
+      if (globalOptions.token) {
+        this.token = globalOptions.token
       }
       if (globalOptions.baseUrl) {
         this.baseUrl = globalOptions.baseUrl
       }
     } else {
-      const defaultProfileName = getDefaultProfile(profiles)
-      const defaultProfile = profiles[defaultProfileName]
+      const profiles = await fetchProfileConfig()
+      const { userId } = await fetchDefaultProfileConfig()
+      const defaultProfile = profiles[userId]
 
       if (defaultProfile) {
-        this.apiKey = defaultProfile.apiKey
+        this.token = defaultProfile.token
         this.baseUrl = defaultProfile.baseUrl
-        this.metricsEnabled = defaultProfile.metrics_enabled
+        this.metricsEnabled = defaultProfile.metricsEnabled
       }
     }
 
     // Initialize the header
     this.headers = {
-      'x-keyshade-token': this.apiKey
+      'x-keyshade-token': this.token
     }
 
     // Initialize Controller Instance

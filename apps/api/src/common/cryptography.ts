@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import {
+import crypto, {
   createCipheriv,
   createDecipheriv,
   createHash,
@@ -30,13 +30,20 @@ export const createKeyPair = (): {
   }
 }
 
-/**
- * Generates a new API key.
- *
- * @returns A new API key as a string in the format 'ks_<24 bytes of random data>'.
- */
-export const generateApiKey = (): string =>
-  'ks_' + randomBytes(24).toString('hex')
+export const generateRandomBytes = (
+  length: number
+): {
+  plaintext: string
+  hash: string
+} => {
+  const plaintext = crypto.randomBytes(length).toString('hex')
+  const hash = toSHA256(plaintext)
+
+  return {
+    plaintext,
+    hash
+  }
+}
 
 /**
  * Returns the SHA256 hash of the given string as a hexadecimal string.

@@ -21,7 +21,7 @@ import {
 import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { WorkspaceService } from './workspace.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { ProjectModule } from '@/project/project.module'
@@ -124,19 +124,19 @@ describe('Workspace Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
 
     const createUser3 = await userService.createUser({
-      email: 'sadie@keyshade.xyz',
+      email: 'sadie@keyshade.io',
       name: 'Sadie',
       isOnboardingFinished: true
     })

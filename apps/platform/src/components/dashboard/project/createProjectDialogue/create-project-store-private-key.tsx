@@ -14,17 +14,17 @@ export default function CreateProjectStorePrivateKey({
 }: CreateProjectNameProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-y-4">
-                <div className="flex h-[4.875rem] w-full items-center justify-between gap-[1rem]">
-                  <div className="flex h-[2.875rem] w-[22.563rem] flex-col items-start justify-center">
-                    <h1 className="font-geist h-[1.5rem] w-[18.688rem] text-[1rem] font-[500]">
+                <div className="flex h-19.5 w-full items-center justify-between gap-4">
+                  <div className="flex h-11.5 w-[22.563rem] flex-col items-start justify-center">
+                    <h1 className="font-geist h-6 w-[18.688rem] text-[1rem] font-medium">
                       Should the private key be saved or not?
                     </h1>
-                    <p className="h-[1.25rem] text-sm text-[#A1A1AA] ">
+                    <p className="h-5 text-sm text-[#A1A1AA] ">
                       Choose if you want to save your private key
                     </p>
                   </div>
 
-                  <div className="p-[0.125rem]">
+                  <div className="p-0.5">
                     <Switch
                       checked={switchChecked}
                       onCheckedChange={(checked) => {

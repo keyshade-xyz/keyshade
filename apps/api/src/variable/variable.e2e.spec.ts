@@ -32,7 +32,7 @@ import { EventService } from '@/event/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
@@ -109,13 +109,13 @@ describe('Variable Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })

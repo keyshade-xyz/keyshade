@@ -91,7 +91,7 @@ export default function RoleCard({
 
   return (
     <TableRow className="group h-fit w-full hover:bg-white/5" key={role.id}>
-      <TableCell className="flex w-[10.25rem] flex-row items-center gap-x-2 text-base">
+      <TableCell className="flex w-41 flex-row items-center gap-x-2 text-base">
         <div
           className="h-2 w-2 rounded-full"
           style={{ background: role.colorCode ? role.colorCode : 'blue' }}

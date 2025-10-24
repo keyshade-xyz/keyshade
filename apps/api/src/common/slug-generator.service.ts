@@ -18,16 +18,13 @@ export default class SlugGenerator {
    * This method shows the generateUniqueSlug function in action with detailed logging.
    * Remove this method before production deployment.
    */
-  async debugSlugGeneration(name: string, model: keyof PrismaClient): Promise<string> {
-    console.log('\n=== SLUG GENERATION DEBUG START ===')
-    console.log(`Input: name="${name}", model="${model.toString()}"`)
-    
-    const result = await this.generateUniqueSlug(name, model)
-    
-    console.log(`Final result: "${result}"`)
-    console.log('=== SLUG GENERATION DEBUG END ===\n')
-    
-    return result
+  async debugSlugGeneration(
+    name: string,
+    model: keyof PrismaClient
+  ): Promise<string> {
+@Injectable()
+export default class SlugGenerator {
+  private readonly logger: Logger = new Logger(SlugGenerator.name)    return result
   }
 
   private readonly logger: Logger = new Logger(SlugGenerator.name)
@@ -144,7 +141,9 @@ export default class SlugGenerator {
     this.logger.log(
       `Generating unique slug for ${name} in ${model.toString()}...`
     )
-    console.log(`🔄 Generating unique slug for "${name}" in model "${model.toString()}" (iteration: ${iterationCount})`)
+    console.log(
+      `🔄 Generating unique slug for "${name}" in model "${model.toString()}" (iteration: ${iterationCount})`
+    )
 
     const baseSlug = slugify(name, { lower: true, strict: true })
     this.logger.log(`Generated base slug for ${name}: ${baseSlug}`)
@@ -179,7 +178,9 @@ export default class SlugGenerator {
         }
       })
       this.logger.log(`Existing slugs for ${name}: ${existingSlugs.length}`)
-      console.log(`📊 Found ${existingSlugs.length} existing slugs starting with "${baseSlug}"`)
+      console.log(
+        `📊 Found ${existingSlugs.length} existing slugs starting with "${baseSlug}"`
+      )
 
       if (existingSlugs.length === 0) {
         newSlug = `${baseSlug}-0`
@@ -190,7 +191,9 @@ export default class SlugGenerator {
           const numericPart = existingSlug.slug.split('-').pop()
           if (numericPart && !isNaN(parseInt(numericPart, 10))) {
             const currentMax = parseInt(numericPart, 10)
-            console.log(`  📋 Slug "${existingSlug.slug}" has numeric part: ${currentMax}`)
+            console.log(
+              `  📋 Slug "${existingSlug.slug}" has numeric part: ${currentMax}`
+            )
             max = Math.max(max, currentMax)
           }
         }
@@ -207,7 +210,9 @@ export default class SlugGenerator {
       const randomSuffix = Math.random().toString(36).substring(2, 6)
       newSlug = `${baseSlug}-${max}-${randomSuffix}`
       this.logger.log(`Generated new slug for ${name}: ${newSlug}`)
-      console.log(`🎲 Generated new slug: "${newSlug}" (max: ${max}, random: ${randomSuffix})`)
+      console.log(
+        `🎲 Generated new slug: "${newSlug}" (max: ${max}, random: ${randomSuffix})`
+      )
 
       // Check if the new slug already exists
       this.logger.log(
@@ -224,7 +229,9 @@ export default class SlugGenerator {
         this.logger.log(
           `Slug ${newSlug} already exists in ${model.toString()}. Retrying with incremented iteration.`
         )
-        console.log(`❌ Collision detected! Slug "${newSlug}" already exists. Retrying...`)
+        console.log(
+          `❌ Collision detected! Slug "${newSlug}" already exists. Retrying...`
+        )
         return await this.generateUniqueSlug(name, model, iterationCount + 1)
       }
     }
@@ -232,7 +239,9 @@ export default class SlugGenerator {
     this.logger.log(
       `Slug ${newSlug} is unique in ${model.toString()}. Iteration count: ${iterationCount}`
     )
-    console.log(`✅ Success! Final unique slug: "${newSlug}" (iterations: ${iterationCount})`)
+    console.log(
+      `✅ Success! Final unique slug: "${newSlug}" (iterations: ${iterationCount})`
+    )
 
     // Store the new slug in the cache
     await this.cacheSlug(baseSlug, model, max)

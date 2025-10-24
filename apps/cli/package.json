@@ -1,11 +1,11 @@
 {
   "name": "@keyshade/cli",
-  "version": "3.3.0-stage.3",
+  "version": "3.6.0",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
   "private": false,
-  "homepage": "https://docs.keyshade.xyz/getting-started/introduction",
+  "homepage": "https://docs.keyshade.io/getting-started/introduction",
   "repository": {
     "url": "https://github.com/keyshade-xyz/keyshade",
     "type": "git"
