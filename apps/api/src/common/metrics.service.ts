@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
+//import { writeFile } from 'fs/promises'
 
 @Injectable()
 export class MetricService {
@@ -14,8 +15,25 @@ export class MetricService {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async UploadMetrics() {
     //get metrics from db
-    //place JSON in to metrics/ directory
-    //upload to Azura
+    // try {
+    //   const redisKey = `metrics`
+    //   const metrics = await this.redisClient.publisher.hGetAll(redisKey)
+    //   this.logger.log(`Fetched metrics: ${JSON.stringify(metrics)}`)
+    //   //place JSON in to metrics/ directory
+    //   await writeFile(`metrics/${Date.now()}.json`, JSON.stringify(metrics))
+    //   this.logger.log(`Placing metrics into metrics/ directory`)
+    //   await this.redisClient.publisher.del('metrics')
+    //   // upload to Azure
+    //   // create a file object
+    //   const filename = `${Date.now()}.json`
+    //   const jsonContent = JSON.stringify(metrics, null, 2)
+    //   const file = new File([jsonContent], filename, {
+    //     type: 'application/json'
+    //   })
+    //   this.logger.log(`Created metrics file ${filename}`)
+    // } catch (error) {
+    //   this.logger.error(`Failed to fetch metrics`, error as any)
+    // }
     //flush cache
   }
 
