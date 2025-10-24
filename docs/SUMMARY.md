@@ -5,9 +5,9 @@
 ## Getting Started
 
 - [Introduction](getting-started/introduction.md)
-- [Adding your first secret and variable](getting-started/adding-your-first-secret-and-variable.md)
 - [Installing the CLI](getting-started/installing-the-cli.md)
-- [Setting up your profile](getting-started/setting-up-your-profile.md)
+- [Creating a project](getting-started/creating-a-project.md)
+- [Importing your environment variables](getting-started/importing-your-environment-variables.md)
 - [Add Keyshade to your project](getting-started/add-keyshade-to-your-project.md)
 - [Running your app](getting-started/running-your-app.md)
 
