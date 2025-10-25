@@ -606,13 +606,12 @@ jobs:
       # New: compile CLI with Bun
       # Adjust the entry path if your CLI lives elsewhere.
       - name: Compile CLI with Bun
-        working-directory: apps/cli
         shell: bash
         run: |
           bun build --compile \
             --target=${{ matrix.bun_target }} \
-            ./src/index.ts \
-            --outfile ${{ github.workspace }}/${{ matrix.output }} 
+            ./apps/cli/src/index.ts \
+            --outfile ${{ matrix.output }} 
 
       - name: Upload Executable to GitHub Release
         shell: bash
