@@ -612,9 +612,10 @@ jobs:
           bun build --compile \
             --target=${{ matrix.bun_target }} \
             ./src/index.ts \
-            --outfile ${{ github.workspace }}/${{ matrix.output }}
+            --outfile ${{ github.workspace }}/${{ matrix.output }} 
 
       - name: Upload Executable to GitHub Release
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.release.outputs.version }}
