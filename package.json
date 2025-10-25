@@ -183,7 +183,6 @@
     "@semantic-release/github": "^10.0.3",
     "@semantic-release/release-notes-generator": "^14.0.0",
     "@sentry/node": "^7.102.0",
-    "@sentry/profiling-node": "^7.102.0",
     "@types/node": "^20.14.10",
     "chalk": "^4.1.2",
     "class-validator": "^0.14.1",
@@ -200,5 +199,8 @@
     "typescript": "^5.5.2",
     "typescript-transform-paths": "^3.5.0",
     "zod": "^3.23.6"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": ["@sentry/profiling-node"]
   }
 }

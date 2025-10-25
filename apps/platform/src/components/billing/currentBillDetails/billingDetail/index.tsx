@@ -58,12 +58,10 @@ export default function BillingDetail({
   }
 
   const calculateCompoundedPrice = () => {
-  const isAnnual = currentSubscription?.isAnnual
-  const monthsPaid = isAnnual ? 12 : 1
-  // Calculate compounded price
-  const compoundedPrice = calculateTotalSeatPrice() * monthsPaid
-  // Round to 2 decimal places
-  return Number(compoundedPrice.toFixed(2))
+    const isAnnual = currentSubscription?.isAnnual
+    const monthsPaid = isAnnual ? 12 : 1
+    const compoundedPrice = calculateTotalSeatPrice() * monthsPaid
+    return Number(compoundedPrice.toFixed(2))
   }
 
   const planPrice = (): `$${number}` => {
