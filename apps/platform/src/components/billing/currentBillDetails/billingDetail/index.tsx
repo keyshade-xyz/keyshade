@@ -60,19 +60,22 @@ export default function BillingDetail({
   const calculateCompoundedPrice = () => {
     const isAnnual = currentSubscription?.isAnnual
     const monthsPaid = isAnnual ? 12 : 1
-    return calculateTotalSeatPrice() * monthsPaid
+    const compoundedPrice = calculateTotalSeatPrice() * monthsPaid
+    return Number(compoundedPrice.toFixed(2))
   }
 
   const planPrice = (): `$${number}` => {
     const isAnnual = currentWorkspace?.subscription.isAnnual
 
     if (!PricingTiers[formatPlan()]) {
-      // eslint-disable-next-line no-console -- this is a fallback in case the plan is not found
+      // eslint-disable-next-line no-console -- fallback if plan not found
       console.warn(`Plan "${formatPlan()}" not found in PricingTiers`)
       return '$0' as `$${number}`
     }
 
-    return PricingTiers[formatPlan()][isAnnual ? 'annually' : 'monthly']
+    const price = PricingTiers[formatPlan()][isAnnual ? 'annually' : 'monthly']
+    // Ensure formatted to 2 decimals for display consistency
+    return `$${Number(price).toFixed(2)}` as `$${number}`
   }
 
   const renderSubscriptionStatusBadge = (
