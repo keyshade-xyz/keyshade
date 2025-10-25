@@ -607,6 +607,7 @@ jobs:
       # Adjust the entry path if your CLI lives elsewhere.
       - name: Compile CLI with Bun
         working-directory: apps/cli
+        shell: bash
         run: |
           bun build --compile \
             --target=${{ matrix.bun_target }} \
