@@ -394,3 +394,10 @@
 - Improved efficiency of bulk import
 - Removed `keyshade project import` command
 - Added `keyshade reset` to wipe local profile configuration files.
+
+## 3.6.1-stage.0
+
+### Bug Fixes
+
+- Remove sentry dependency
+- Remove error reporting
