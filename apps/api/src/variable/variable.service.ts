@@ -47,6 +47,7 @@ import { InclusionQuery } from '@/common/inclusion-query'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { ProjectCacheService } from '@/cache/project-cache.service'
 import { BulkCreateVariable } from '@/variable/dto/bulk.create.variable/bulk.create.variable'
+import { MetricService } from '@/common/metrics.service'
 
 @Injectable()
 export class VariableService {
@@ -59,6 +60,7 @@ export class VariableService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
+    private readonly metricsService: MetricService,
     @Inject(forwardRef(() => SecretService))
     private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
@@ -1316,6 +1318,12 @@ export class VariableService {
     this.logger.log(
       `Fetched ${variables.length} variables for project ${projectSlug} and environment ${environmentSlug}`
     )
+
+    try {
+      await this.metricsService.incrementVariablePull(variables.length)
+    } catch (err) {
+      this.logger.error(`Error incrementing variable pull metric: ${err}`)
+    }
 
     return variables.map((variable) => ({
       name: variable.name,
