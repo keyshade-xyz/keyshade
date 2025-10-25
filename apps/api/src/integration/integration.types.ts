@@ -96,6 +96,26 @@ export type IntegrationWithEnvironmentsAndMetadata<
 }
 
 export interface HydratedIntegration extends Integration {
+  lastUpdatedBy: {
+    id: string
+    name: string
+    profilePictureUrl: string
+  }
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
+  workspace: Workspace
+  project: {
+    id: string
+    name: string
+    slug: string
+  } | null
+  environments: {
+    id: string
+    name: string
+    slug: string
+  }[]
   totalTriggers: number
 }
 
