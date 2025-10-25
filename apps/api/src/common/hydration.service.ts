@@ -143,9 +143,16 @@ export class HydrationService {
       )}`
     )
 
+    // Use the correct integration identifier and PrismaService usage
+    const totalTriggers = await this.prisma.integrationRun.count({
+      where: { integrationId: integration.id }
+    })
+
+    // Add entitlements to the return type if missing
     return {
       ...integration,
-      entitlements
+      entitlements,
+      totalTriggers
     }
   }
 

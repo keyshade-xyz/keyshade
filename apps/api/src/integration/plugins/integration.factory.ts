@@ -8,6 +8,7 @@ import {
   AWSLambdaIntegrationMetadata,
   DiscordIntegrationMetadata,
   HydratedIntegration,
+  RawIntegration,
   SlackIntegrationMetadata,
   VercelIntegrationMetadata
 } from '../integration.types'
@@ -53,7 +54,8 @@ export default class IntegrationFactory {
   public static createIntegration(
     integration:
       | HydratedIntegration
-      | Omit<HydratedIntegration, 'entitlements'>,
+      | Omit<HydratedIntegration, 'entitlements'>
+      | RawIntegration,
     prisma: PrismaService
   ): BaseIntegration {
     const baseIntegration = IntegrationFactory.createIntegrationWithType(
