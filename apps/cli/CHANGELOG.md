@@ -401,3 +401,10 @@
 
 - Remove sentry dependency
 - Remove error reporting
+
+## 3.6.1
+
+### Bug Fixes
+
+- Remove sentry dependency
+- Remove error reporting
