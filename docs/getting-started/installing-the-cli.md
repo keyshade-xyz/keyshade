@@ -28,6 +28,13 @@ bun i -g @keyshade/cli
 ```
 {% endtab %}
 
+{% tab title="Windows" %}
+```shell
+scoop bucket add keyshade https://github.com/keyshade-xyz/keyshade.git
+scoop install keyshade
+```
+{% endtab %}
+
 {% endtabs %}
 
 
