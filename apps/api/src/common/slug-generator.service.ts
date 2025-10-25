@@ -13,20 +13,6 @@ import { RedisClientType } from 'redis'
 
 @Injectable()
 export default class SlugGenerator {
-  /**
-   * Temporary debug method to demonstrate slug generation with console output.
-   * This method shows the generateUniqueSlug function in action with detailed logging.
-   * Remove this method before production deployment.
-   */
-  async debugSlugGeneration(
-    name: string,
-    model: keyof PrismaClient
-  ): Promise<string> {
-@Injectable()
-export default class SlugGenerator {
-  private readonly logger: Logger = new Logger(SlugGenerator.name)    return result
-  }
-
   private readonly logger: Logger = new Logger(SlugGenerator.name)
   private static readonly MAX_ITERATIONS: number = 10
 
@@ -188,31 +174,39 @@ export default class SlugGenerator {
       } else {
         console.log(`🔢 Analyzing existing slugs to find max numeric part...`)
         for (const existingSlug of existingSlugs) {
-          const numericPart = existingSlug.slug.split('-').pop()
-          if (numericPart && !isNaN(parseInt(numericPart, 10))) {
-            const currentMax = parseInt(numericPart, 10)
+          // Only consider slugs that match the expected pattern: baseSlug-number
+          const expectedPattern = new RegExp(`^${baseSlug}-(\\d+)$`)
+          const match = existingSlug.slug.match(expectedPattern)
+
+          if (match) {
+            const currentMax = parseInt(match[1], 10)
             console.log(
               `  📋 Slug "${existingSlug.slug}" has numeric part: ${currentMax}`
             )
             max = Math.max(max, currentMax)
+          } else {
+            console.log(
+              `  ⚠️  Skipping slug "${existingSlug.slug}" - doesn't match expected pattern`
+            )
           }
         }
         console.log(`🏆 Maximum numeric part found: ${max}`)
+
+        // Update cache with the found maximum to maintain consistency
+        if (max >= 0) {
+          await this.cacheSlug(baseSlug, model, max)
+          console.log(`💾 Updated cache with database max: ${max}`)
+        }
       }
     }
 
-    // Add randomization to reduce collision probability
+    // Generate new slug if not already set
     if (!newSlug) {
       // Increment the max value by 1
       max += 1
       newSlug = `${baseSlug}-${max}`
-      // Add a short random string to the slug for extra uniqueness
-      const randomSuffix = Math.random().toString(36).substring(2, 6)
-      newSlug = `${baseSlug}-${max}-${randomSuffix}`
       this.logger.log(`Generated new slug for ${name}: ${newSlug}`)
-      console.log(
-        `🎲 Generated new slug: "${newSlug}" (max: ${max}, random: ${randomSuffix})`
-      )
+      console.log(`✨ Generated new slug: "${newSlug}" (max: ${max})`)
 
       // Check if the new slug already exists
       this.logger.log(
@@ -243,9 +237,11 @@ export default class SlugGenerator {
       `✅ Success! Final unique slug: "${newSlug}" (iterations: ${iterationCount})`
     )
 
-    // Store the new slug in the cache
-    await this.cacheSlug(baseSlug, model, max)
-    console.log(`💾 Cached slug data for future use`)
+    // Store the new slug in the cache only if we actually generated a new one
+    if (newSlug && newSlug.endsWith(`-${max}`)) {
+      await this.cacheSlug(baseSlug, model, max)
+      console.log(`💾 Cached new slug data: ${baseSlug} -> ${max}`)
+    }
 
     return newSlug!
   }
@@ -286,7 +282,7 @@ export default class SlugGenerator {
       case 'ENVIRONMENT':
         return this.generateUniqueSlug(name, 'environment')
       case 'API_KEY':
-        return this.generateUniqueSlug(name, 'apiKey')
+        return this.generateUniqueSlug(name, 'personalAccessToken')
     }
   }
 }
