@@ -127,13 +127,9 @@ export default class SlugGenerator {
     this.logger.log(
       `Generating unique slug for ${name} in ${model.toString()}...`
     )
-    console.log(
-      `🔄 Generating unique slug for "${name}" in model "${model.toString()}" (iteration: ${iterationCount})`
-    )
 
     const baseSlug = slugify(name, { lower: true, strict: true })
     this.logger.log(`Generated base slug for ${name}: ${baseSlug}`)
-    console.log(`📝 Base slug generated: "${baseSlug}"`)
 
     let max: number = 0
     let newSlug: string
@@ -147,10 +143,8 @@ export default class SlugGenerator {
       this.logger.log(
         `Found cached slug's numeric part: ${cachedSlugNumericPart}`
       )
-      console.log(`💾 Cache hit! Found numeric part: ${cachedSlugNumericPart}`)
       max = cachedSlugNumericPart
     } else {
-      console.log(`🔍 No cache found, querying database for existing slugs...`)
       // Get all slugs that match baseSlug-N
       const prismaModel = this.prisma[model as string] as any
       const existingSlugs = await prismaModel.findMany({
@@ -164,15 +158,10 @@ export default class SlugGenerator {
         }
       })
       this.logger.log(`Existing slugs for ${name}: ${existingSlugs.length}`)
-      console.log(
-        `📊 Found ${existingSlugs.length} existing slugs starting with "${baseSlug}"`
-      )
 
       if (existingSlugs.length === 0) {
         newSlug = `${baseSlug}-0`
-        console.log(`✨ No existing slugs found, using: "${newSlug}"`)
       } else {
-        console.log(`🔢 Analyzing existing slugs to find max numeric part...`)
         for (const existingSlug of existingSlugs) {
           // Only consider slugs that match the expected pattern: baseSlug-number
           const expectedPattern = new RegExp(`^${baseSlug}-(\\d+)$`)
@@ -180,22 +169,13 @@ export default class SlugGenerator {
 
           if (match) {
             const currentMax = parseInt(match[1], 10)
-            console.log(
-              `  📋 Slug "${existingSlug.slug}" has numeric part: ${currentMax}`
-            )
             max = Math.max(max, currentMax)
-          } else {
-            console.log(
-              `  ⚠️  Skipping slug "${existingSlug.slug}" - doesn't match expected pattern`
-            )
           }
         }
-        console.log(`🏆 Maximum numeric part found: ${max}`)
 
         // Update cache with the found maximum to maintain consistency
         if (max >= 0) {
           await this.cacheSlug(baseSlug, model, max)
-          console.log(`💾 Updated cache with database max: ${max}`)
         }
       }
     }
@@ -206,7 +186,6 @@ export default class SlugGenerator {
       max += 1
       newSlug = `${baseSlug}-${max}`
       this.logger.log(`Generated new slug for ${name}: ${newSlug}`)
-      console.log(`✨ Generated new slug: "${newSlug}" (max: ${max})`)
 
       // Check if the new slug already exists
       this.logger.log(
@@ -223,9 +202,6 @@ export default class SlugGenerator {
         this.logger.log(
           `Slug ${newSlug} already exists in ${model.toString()}. Retrying with incremented iteration.`
         )
-        console.log(
-          `❌ Collision detected! Slug "${newSlug}" already exists. Retrying...`
-        )
         return await this.generateUniqueSlug(name, model, iterationCount + 1)
       }
     }
@@ -233,14 +209,10 @@ export default class SlugGenerator {
     this.logger.log(
       `Slug ${newSlug} is unique in ${model.toString()}. Iteration count: ${iterationCount}`
     )
-    console.log(
-      `✅ Success! Final unique slug: "${newSlug}" (iterations: ${iterationCount})`
-    )
 
     // Store the new slug in the cache only if we actually generated a new one
     if (newSlug && newSlug.endsWith(`-${max}`)) {
       await this.cacheSlug(baseSlug, model, max)
-      console.log(`💾 Cached new slug data: ${baseSlug} -> ${max}`)
     }
 
     return newSlug!
