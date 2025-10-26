@@ -12,6 +12,7 @@ The Keyshade CLI serves as the entrypoint for your projects and apps to use Keys
 
 {% tab title="MacOS" %}
 ```shell
+brew tap keyshade-xyz/keyshade https://github.com/keyshade-xyz/keyshade
 brew install keyshade
 ```
 {% endtab %}

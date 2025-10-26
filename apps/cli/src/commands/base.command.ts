@@ -37,6 +37,7 @@ export default abstract class BaseCommand {
     const argsCount = this.getArguments().length
 
     const command = program
+      .name('keyshade')
       .command(this.getName())
       .description(this.getDescription())
       .usage(this.getUsage())
