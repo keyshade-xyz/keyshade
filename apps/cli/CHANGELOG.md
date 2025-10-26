@@ -408,3 +408,9 @@
 
 - Remove sentry dependency
 - Remove error reporting
+
+## 3.6.2-stage.1
+
+### Patches
+
+- Update the name of the command to always display `keyshade`
