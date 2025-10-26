@@ -1,3 +1,9 @@
+## [2.43.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.1...v2.43.0-stage.2) (2025-10-26)
+
+### 🚀 Features
+
+* **cli:** update base name of the command ([121306f](https://github.com/keyshade-xyz/keyshade/commit/121306f57658690399f7195b139706394e772045))
+
 ## [2.43.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.42.0...v2.43.0-stage.1) (2025-10-26)
 
 ### 🚀 Features
