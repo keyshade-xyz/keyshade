@@ -10,7 +10,6 @@ import {
 import { Logger } from '@/util/logger'
 import { type Command, Option } from 'commander'
 import ControllerInstance from '@/util/controller-instance'
-import { SentryInstance } from '@/util/sentry'
 import { showError } from '@/util/prompt'
 
 /**
@@ -46,10 +45,6 @@ export default abstract class BaseCommand {
           const globalOptions = program.optsWithGlobals()
           await this.setGlobalContextFields(globalOptions)
 
-          if (this.metricsEnabled) {
-            SentryInstance.getInstance()
-          }
-
           if (this.canMakeHttpRequests()) {
             if (!this.token) {
               throw new Error(
@@ -74,7 +69,6 @@ export default abstract class BaseCommand {
         } catch (error) {
           const errorInfo = error as string
           await showError(errorInfo)
-          if (this.metricsEnabled) Logger.report(errorInfo)
         }
       })
 
@@ -175,9 +169,6 @@ export default abstract class BaseCommand {
     const { header, body } = this.extractError(error)
 
     Logger.error(`${header}: ${body}`)
-    if (this.metricsEnabled && error?.statusCode === 500) {
-      Logger.report(`${header}.\n` + JSON.stringify(error))
-    }
   }
 
   private extractError(error: {
