@@ -116,9 +116,9 @@ export interface HydratedIntegration extends Integration {
     name: string
     slug: string
   }[]
+  totalTriggers: number
 }
 
 export interface RawIntegration
-  extends Omit<HydratedIntegration, 'entitlements'> {}
-
+  extends Omit<HydratedIntegration, 'entitlements' | 'totalTriggers'> {}
 export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'
