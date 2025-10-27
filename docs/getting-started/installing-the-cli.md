@@ -10,6 +10,20 @@ The Keyshade CLI serves as the entrypoint for your projects and apps to use Keys
 
 {% tabs %}
 
+{% tab title="MacOS" %}
+```shell
+brew tap keyshade-xyz/keyshade https://github.com/keyshade-xyz/keyshade
+brew install keyshade
+```
+{% endtab %}
+
+{% tab title="Windows" %}
+```shell
+scoop bucket add keyshade https://github.com/keyshade-xyz/keyshade.git
+scoop install keyshade
+```
+{% endtab %}
+
 {% tab title="npm" %} 
 ```shell
 npm i -g @keyshade/cli
@@ -29,7 +43,6 @@ bun i -g @keyshade/cli
 {% endtab %}
 
 {% endtabs %}
-
 
 
 That's it! You now have Keyshade installed on your system.
