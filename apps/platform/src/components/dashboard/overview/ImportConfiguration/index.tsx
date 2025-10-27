@@ -252,11 +252,13 @@ function ImportConfiguration({
         errors: [...errorMessages]
       }))
 
-      if (onImport) {
-        await onImport({ selectedSecrets, selectedVariables })
-      }
+      if (collectedErrors.length === 0) {
+        if (onImport) {
+          await onImport({ selectedSecrets, selectedVariables })
+        }
 
-      setStep('complete')
+        setStep('complete')
+      }
     } catch (error) {
       setImportStatus((prev) => ({
         ...prev,
