@@ -104,13 +104,27 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Web image
-        run: pnpm docker:build:web
+        env:
+          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4200
+          NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: https://analytics.example.com
+          NEXT_PUBLIC_SENTRY_ENVIRONMENT: ci
+          NEXT_PUBLIC_POSTHOG_KEY: test-key
+          NEXT_PUBLIC_POSTHOG_HOST: https://app.posthog.com
+        run: |
+          docker build -t keyshade/web:ci-${{ github.sha }} -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=$NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID \
+            --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
+            --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
+            --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
+            .
 
       - name: Verify Web image
         run: docker image inspect keyshade/web:ci-${{ github.sha }}
 
       - name: Run Web container
-        run: pnpm docker:run:web
+        run: |
+          docker run -d --rm --name web-ci -p 3000:3000 keyshade/web:ci-${{ github.sha }}
 
       - name: Web health check
         run: |

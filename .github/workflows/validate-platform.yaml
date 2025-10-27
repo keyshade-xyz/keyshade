@@ -109,13 +109,20 @@ jobs:
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ci
           NEXT_PUBLIC_POSTHOG_KEY: test-key
           NEXT_PUBLIC_POSTHOG_HOST: https://app.posthog.com
-        run: pnpm docker:build:platform
+        run: |
+          docker build -t keyshade/platform:ci-${{ github.sha }} -f apps/platform/Dockerfile \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+            --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
+            --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
+            --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
+            .
 
       - name: Verify Platform image
         run: docker image inspect keyshade/platform:ci-${{ github.sha }}
 
       - name: Run Platform container
-        run: pnpm docker:run:platform
+        run: |
+          docker run -d --rm --name platform-ci -p 3025:3000 keyshade/platform:ci-${{ github.sha }}
 
       - name: Platform health check
         run: |

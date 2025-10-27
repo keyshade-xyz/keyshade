@@ -111,7 +111,8 @@ jobs:
         run: docker network inspect keyshade-ci >/dev/null 2>&1 || docker network create keyshade-ci
 
       - name: Build API image
-        run: pnpm docker:build:api
+        run: |
+          docker build -t keyshade/api:ci-${{ github.sha }} -f apps/api/Dockerfile .
 
       - name: Verify API image
         run: docker image inspect keyshade/api:ci-${{ github.sha }}
@@ -162,7 +163,13 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@keyshade-ci-postgres:5432/postgres
           REDIS_URL: redis://keyshade-ci-redis:6379
           JWT_SECRET: ci-secret
-        run: pnpm docker:run:api
+        run: |
+          docker run -d --rm --name api-ci --network keyshade-ci -p 4200:4200 \
+            -e NODE_ENV \
+            -e DATABASE_URL \
+            -e REDIS_URL \
+            -e JWT_SECRET \
+            keyshade/api:ci-${{ github.sha }}
 
       - name: API health check
         run: |
