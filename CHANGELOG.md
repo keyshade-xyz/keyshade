@@ -1,3 +1,42 @@
+## [2.43.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.1...v2.43.0-stage.2) (2025-10-26)
+
+### 🚀 Features
+
+* **cli:** update base name of the command ([121306f](https://github.com/keyshade-xyz/keyshade/commit/121306f57658690399f7195b139706394e772045))
+
+## [2.43.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.42.0...v2.43.0-stage.1) (2025-10-26)
+
+### 🚀 Features
+
+* **api:** add totalTriggers to integration response and schema ([#1171](https://github.com/keyshade-xyz/keyshade/issues/1171)) ([fc57d34](https://github.com/keyshade-xyz/keyshade/commit/fc57d342e0a64a9d6e4f9e731e4213b2954cf8c5))
+
+### 📚 Documentation
+
+* add macos install command [skip ci] ([802a12b](https://github.com/keyshade-xyz/keyshade/commit/802a12b4f4203cea274d70a741f1b866b0096523))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.1 [skip ci] ([f4eec17](https://github.com/keyshade-xyz/keyshade/commit/f4eec17672ad8f71dcf528e1470becf06ba9041d))
+
+## [2.42.0](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0...v2.42.0) (2025-10-25)
+
+### 🚀 Features
+
+* **cli:** bump version to 3.6.1 ([2de78bc](https://github.com/keyshade-xyz/keyshade/commit/2de78bcacf4024c88c10594b56d2eb4ac3f038dd))
+
+### 📚 Documentation
+
+* cli installation on windows ([1fa12be](https://github.com/keyshade-xyz/keyshade/commit/1fa12be066adc5409ff0709d12a4427483257631))
+* fix website link in README.md ([#1225](https://github.com/keyshade-xyz/keyshade/issues/1225)) ([7838fef](https://github.com/keyshade-xyz/keyshade/commit/7838fef37fae3b47977d5c2ecced84a23d79ac40))
+* specify LTS Node version in setup guide ([#1214](https://github.com/keyshade-xyz/keyshade/issues/1214)) ([1cb83c8](https://github.com/keyshade-xyz/keyshade/commit/1cb83c8edb78783ef04c0e81df6b087a70779b0d))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** replace pkg with bun for building CLI executables ([9131d4c](https://github.com/keyshade-xyz/keyshade/commit/9131d4c914543749380cfbc93e239c1a50a36ff1))
+* **cli:** remove sentry dep ([6eaad5c](https://github.com/keyshade-xyz/keyshade/commit/6eaad5c8aac11fca30ad327c74919fa7c2b0cc72))
+* **cli:** update package managers to use v3.6.0 [skip ci] ([ebef418](https://github.com/keyshade-xyz/keyshade/commit/ebef4189dd54afb6a7cc30c86a992d088b4ca63a))
+* **platform:** disable logger configuration in production environment ([#1220](https://github.com/keyshade-xyz/keyshade/issues/1220)) ([e547599](https://github.com/keyshade-xyz/keyshade/commit/e547599e09dbbaa4de3aed1373c4b0004e5ba357))
+
 ## [2.41.0](https://github.com/keyshade-xyz/keyshade/compare/v2.40.0...v2.41.0) (2025-10-23)
 
 ### 🚀 Features
