@@ -152,28 +152,16 @@ function ImportConfiguration({
             }
           )
 
-        if (secretResponse.success && secretResponse.data) {
-          successfulSecrets = secretResponse.data.successful.length
-          failedSecrets = secretResponse.data.failed.length
-
-          if (successfulSecrets > 0) {
-            setProjectSecretCount((prev) => prev + successfulSecrets)
-          }
-
-          if (failedSecrets > 0) {
-            errorMessages.push(
-              ...secretResponse.data.failed.map(
-                ({ name, error }) =>
-                  `Failed to import secret "${name}": ${error}`
-              )
-            )
-          }
+        if (secretResponse.success) {
+          successfulSecrets = secretEntries.length
+          setProjectSecretCount((prev) => prev + successfulSecrets)
         } else {
           failedSecrets = secretEntries.length
+          const message = secretResponse.error?.message
           errorMessages.push(
-            `Failed to import secrets: ${
-              secretResponse.error?.message ?? 'Unknown error occurred'
-            }`
+            message
+              ? `Failed to import secrets: ${message}`
+              : 'Failed to import secrets'
           )
         }
 
@@ -183,7 +171,7 @@ function ImportConfiguration({
           ...prev,
           secretsImported: successfulSecrets,
           secretsFailed: failedSecrets,
-          currentStep: `Importing ${processedCount} of ${totalEntries}`,
+          currentStep: `Processed ${processedCount} of ${totalEntries}`,
           errors: [...errorMessages]
         }))
       }
@@ -202,28 +190,16 @@ function ImportConfiguration({
             }
           )
 
-        if (variableResponse.success && variableResponse.data) {
-          successfulVariables = variableResponse.data.successful.length
-          failedVariables = variableResponse.data.failed.length
-
-          if (successfulVariables > 0) {
-            setProjectVariableCount((prev) => prev + successfulVariables)
-          }
-
-          if (failedVariables > 0) {
-            errorMessages.push(
-              ...variableResponse.data.failed.map(
-                ({ name, error }) =>
-                  `Failed to import variable "${name}": ${error}`
-              )
-            )
-          }
+        if (variableResponse.success) {
+          successfulVariables = variableEntries.length
+          setProjectVariableCount((prev) => prev + successfulVariables)
         } else {
           failedVariables = variableEntries.length
+          const message = variableResponse.error?.message
           errorMessages.push(
-            `Failed to import variables: ${
-              variableResponse.error?.message ?? 'Unknown error occurred'
-            }`
+            message
+              ? `Failed to import variables: ${message}`
+              : 'Failed to import variables'
           )
         }
 
@@ -233,7 +209,7 @@ function ImportConfiguration({
           ...prev,
           variablesImported: successfulVariables,
           variablesFailed: failedVariables,
-          currentStep: `Importing ${processedCount} of ${totalEntries}`,
+          currentStep: `Processed ${processedCount} of ${totalEntries}`,
           errors: [...errorMessages]
         }))
       }
@@ -252,7 +228,7 @@ function ImportConfiguration({
         errors: [...errorMessages]
       }))
 
-      if (collectedErrors.length === 0) {
+      if (errorMessages.length === 0) {
         if (onImport) {
           await onImport({ selectedSecrets, selectedVariables })
         }
@@ -329,10 +305,7 @@ function ImportConfiguration({
         return <CheckCircle className="h-5 w-5 text-green-400" />
       }
 
-      if (
-        totalProcessed === totalEntriesCount &&
-        !importStatus.isImporting
-      ) {
+      if (totalProcessed === totalEntriesCount && !importStatus.isImporting) {
         return hasFailures ? (
           <X className="h-5 w-5 text-red-400" />
         ) : (
@@ -393,7 +366,9 @@ function ImportConfiguration({
             </div>
             <div className="text-gray-400">
               Total entries:{' '}
-              <span className="font-medium text-white">{totalEntriesCount}</span>
+              <span className="font-medium text-white">
+                {totalEntriesCount}
+              </span>
             </div>
           </div>
         </div>
