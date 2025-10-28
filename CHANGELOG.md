@@ -1,3 +1,9 @@
+## [2.43.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.2...v2.43.0-stage.3) (2025-10-28)
+
+### 🐛 Bug Fixes
+
+* **api:** generateSlug infinite loop causing Auth and Feedback Controller test failures ([#1162](https://github.com/keyshade-xyz/keyshade/issues/1162)) ([7183ee5](https://github.com/keyshade-xyz/keyshade/commit/7183ee5a579092d2e1780326b52540ad73680761))
+
 ## [2.43.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.1...v2.43.0-stage.2) (2025-10-26)
 
 ### 🚀 Features

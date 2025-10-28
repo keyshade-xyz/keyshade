@@ -125,14 +125,17 @@ export class SecretService {
       `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
+    let environmentSlugToIdMap: Map<string, string>
+    if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+    }
 
     // Create the secret
     this.logger.log(`Creating secret ${dto.name} in project ${projectSlug}`)
@@ -453,20 +456,10 @@ export class SecretService {
     // Check if a variable with the same name already exists in the project
     await this.variableService.variableExists(dto.name, secret.projectId)
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      secret.project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
-
     const op = []
+    let environmentSlugToIdMap: Map<string, string>
 
     // Update the secret
-
-    // Update the other fields
     op.push(
       this.prisma.secret.update({
         where: {
@@ -490,6 +483,15 @@ export class SecretService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        secret.project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+
       await checkForDisabledWorkspace(
         secret.project.workspaceId,
         this.prisma,
@@ -553,7 +555,7 @@ export class SecretService {
     })
 
     // Notify the new secret version through Redis
-    if (dto.entries && dto.entries.length > 0) {
+    if (shouldCreateRevisions) {
       for (const entry of dto.entries) {
         try {
           this.logger.log(
