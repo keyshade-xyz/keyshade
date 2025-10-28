@@ -13,51 +13,13 @@ import { RedisClientType } from 'redis'
 
 @Injectable()
 export default class SlugGenerator {
-  private static readonly MAX_ITERATIONS: number = 10
   private readonly logger: Logger = new Logger(SlugGenerator.name)
+  private static readonly MAX_ITERATIONS: number = 10
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
   ) {}
-
-  /**
-   * Generates a unique slug for the given entity type.
-   * @param name The name of the entity to generate a slug for
-   * @param entityType The type of the entity to generate a slug for
-   * @returns The generated slug
-   */
-  async generateEntitySlug(
-    name: string | null | undefined,
-    entityType:
-      | 'WORKSPACE_ROLE'
-      | 'WORKSPACE'
-      | 'PROJECT'
-      | 'VARIABLE'
-      | 'SECRET'
-      | 'INTEGRATION'
-      | 'ENVIRONMENT'
-      | 'API_KEY'
-  ): Promise<string> {
-    if (!name) return undefined
-
-    switch (entityType) {
-      case 'WORKSPACE_ROLE':
-        return this.generateUniqueSlug(name, 'workspaceRole')
-      case 'WORKSPACE':
-        return this.generateUniqueSlug(name, 'workspace')
-      case 'PROJECT':
-        return this.generateUniqueSlug(name, 'project')
-      case 'VARIABLE':
-        return this.generateUniqueSlug(name, 'variable')
-      case 'SECRET':
-        return this.generateUniqueSlug(name, 'secret')
-      case 'INTEGRATION':
-        return this.generateUniqueSlug(name, 'integration')
-      case 'ENVIRONMENT':
-        return this.generateUniqueSlug(name, 'environment')
-    }
-  }
 
   /**
    * Constructs a cache key for storing or retrieving a slug.
@@ -157,7 +119,7 @@ export default class SlugGenerator {
       throw new InternalServerErrorException(
         constructErrorBody(
           'Too many iterations while generating slug',
-          `Failed to generate unique slug for ${name} in ${model.toString()} after 10 attempts.`
+          `Failed to generate unique slug for ${name} in ${model.toString()} after ${SlugGenerator.MAX_ITERATIONS} attempts.`
         )
       )
     }
@@ -184,7 +146,8 @@ export default class SlugGenerator {
       max = cachedSlugNumericPart
     } else {
       // Get all slugs that match baseSlug-N
-      const existingSlugs = await (this.prisma[model] as any).findMany({
+      const prismaModel = this.prisma[model as string] as any
+      const existingSlugs = await prismaModel.findMany({
         where: {
           slug: {
             startsWith: baseSlug
@@ -200,14 +163,24 @@ export default class SlugGenerator {
         newSlug = `${baseSlug}-0`
       } else {
         for (const existingSlug of existingSlugs) {
-          const numericPart = existingSlug.slug.split('-').pop()
-          if (numericPart && !isNaN(parseInt(numericPart, 10))) {
-            max = Math.max(max, parseInt(numericPart, 10))
+          // Only consider slugs that match the expected pattern: baseSlug-number
+          const expectedPattern = new RegExp(`^${baseSlug}-(\\d+)$`)
+          const match = existingSlug.slug.match(expectedPattern)
+
+          if (match) {
+            const currentMax = parseInt(match[1], 10)
+            max = Math.max(max, currentMax)
           }
+        }
+
+        // Update cache with the found maximum to maintain consistency
+        if (max >= 0) {
+          await this.cacheSlug(baseSlug, model, max)
         }
       }
     }
 
+    // Generate new slug if not already set
     if (!newSlug) {
       // Increment the max value by 1
       max += 1
@@ -218,16 +191,16 @@ export default class SlugGenerator {
       this.logger.log(
         `Checking if slug already exists in ${model.toString()}...`
       )
-      const slugExists = await (this.prisma[model] as any).findFirst({
+      const prismaModel = this.prisma[model as string] as any
+      const slugExists = await prismaModel.findFirst({
         where: {
           slug: newSlug
         }
       })
 
       if (slugExists) {
-        // If it exists, call the function recursively to generate a new slug
         this.logger.log(
-          `Slug ${newSlug} already exists in ${model.toString()}.`
+          `Slug ${newSlug} already exists in ${model.toString()}. Retrying with incremented iteration.`
         )
         return await this.generateUniqueSlug(name, model, iterationCount + 1)
       }
@@ -237,9 +210,51 @@ export default class SlugGenerator {
       `Slug ${newSlug} is unique in ${model.toString()}. Iteration count: ${iterationCount}`
     )
 
-    // Store the new slug in the cache
-    await this.cacheSlug(baseSlug, model, max)
+    // Store the new slug in the cache only if we actually generated a new one
+    if (newSlug && newSlug.endsWith(`-${max}`)) {
+      await this.cacheSlug(baseSlug, model, max)
+    }
 
-    return newSlug
+    return newSlug!
+  }
+
+  /**
+   * Generates a unique slug for the given entity type.
+   * @param name The name of the entity to generate a slug for
+   * @param entityType The type of the entity to generate a slug for
+   * @returns The generated slug
+   */
+  async generateEntitySlug(
+    name: string | null | undefined,
+    entityType:
+      | 'WORKSPACE_ROLE'
+      | 'WORKSPACE'
+      | 'PROJECT'
+      | 'VARIABLE'
+      | 'SECRET'
+      | 'INTEGRATION'
+      | 'ENVIRONMENT'
+      | 'API_KEY'
+  ): Promise<string> {
+    if (!name) return undefined
+
+    switch (entityType) {
+      case 'WORKSPACE_ROLE':
+        return this.generateUniqueSlug(name, 'workspaceRole')
+      case 'WORKSPACE':
+        return this.generateUniqueSlug(name, 'workspace')
+      case 'PROJECT':
+        return this.generateUniqueSlug(name, 'project')
+      case 'VARIABLE':
+        return this.generateUniqueSlug(name, 'variable')
+      case 'SECRET':
+        return this.generateUniqueSlug(name, 'secret')
+      case 'INTEGRATION':
+        return this.generateUniqueSlug(name, 'integration')
+      case 'ENVIRONMENT':
+        return this.generateUniqueSlug(name, 'environment')
+      case 'API_KEY':
+        return this.generateUniqueSlug(name, 'personalAccessToken')
+    }
   }
 }
