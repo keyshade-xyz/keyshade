@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { CheckCircle, Loader2, X } from 'lucide-react'
 import { useSetAtom } from 'jotai'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import ControllerInstance from '@/lib/controller-instance'
 import { projectSecretCountAtom, projectVariableCountAtom } from '@/store'
@@ -22,18 +23,11 @@ interface ImportConfig {
   selectedVariables: Record<string, string>
 }
 
-type ImportStep = 'importing' | 'complete'
-
 interface ImportStatus {
-  secretsImported: number
-  variablesImported: number
-  secretsFailed: number
-  variablesFailed: number
-  totalSecrets: number
-  totalVariables: number
   currentStep: string
-  errors: string[]
   isImporting: boolean
+  secretsDone: boolean
+  variablesDone: boolean
 }
 
 function ImportConfiguration({
@@ -46,22 +40,16 @@ function ImportConfiguration({
 }: ImportConfigurationProps): React.JSX.Element {
   const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
   const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
-  const [step, setStep] = useState<ImportStep>('importing')
   const [selectedItems, setSelectedItems] = useState<
     Record<string, 'secret' | 'variable'>
   >({})
   const totalSecrets = Object.keys(secretsAndVariables.secrets).length
   const totalVariables = Object.keys(secretsAndVariables.variables).length
   const [importStatus, setImportStatus] = useState<ImportStatus>({
-    secretsImported: 0,
-    variablesImported: 0,
-    secretsFailed: 0,
-    variablesFailed: 0,
-    totalSecrets,
-    totalVariables,
-    currentStep: `Importing 0 of ${totalSecrets + totalVariables}`,
-    errors: [],
-    isImporting: true
+    currentStep: 'Preparing import',
+    isImporting: true,
+    secretsDone: false,
+    variablesDone: false
   })
 
   // Memoize allItems to prevent recreation on every render
@@ -89,7 +77,13 @@ function ImportConfiguration({
   }, [secretsAndVariables])
 
   const handleImport = useCallback(async () => {
-    setImportStatus((prev) => ({ ...prev, isImporting: true }))
+    setImportStatus((prev) => ({
+      ...prev,
+      isImporting: true,
+      currentStep: 'Preparing import',
+      secretsDone: false,
+      variablesDone: false
+    }))
 
     const selectedSecrets: Record<string, string> = {}
     const selectedVariables: Record<string, string> = {}
@@ -100,18 +94,6 @@ function ImportConfiguration({
       } else {
         selectedVariables[key] = allItems[key]
       }
-    })
-
-    setImportStatus({
-      secretsImported: 0,
-      variablesImported: 0,
-      secretsFailed: 0,
-      variablesFailed: 0,
-      totalSecrets,
-      totalVariables,
-      currentStep: `Importing 0 of ${totalSecrets + totalVariables}`,
-      errors: [],
-      isImporting: true
     })
 
     try {
@@ -129,16 +111,10 @@ function ImportConfiguration({
           environmentSlug
         })
       )
-      const totalEntries = secretEntries.length + variableEntries.length
+      const hasSecrets = secretEntries.length > 0
+      const hasVariables = variableEntries.length > 0
 
-      const errorMessages: string[] = []
-      let processedCount = 0
-      let successfulSecrets = 0
-      let failedSecrets = 0
-      let successfulVariables = 0
-      let failedVariables = 0
-
-      if (secretEntries.length > 0) {
+      if (hasSecrets) {
         setImportStatus((prev) => ({
           ...prev,
           currentStep: 'Importing secrets'
@@ -152,48 +128,27 @@ function ImportConfiguration({
             }
           )
 
-        if (secretResponse.success && secretResponse.data) {
-          successfulSecrets = secretResponse.data.successful.length
-          failedSecrets = secretResponse.data.failed.length
-
-          if (successfulSecrets > 0) {
-            setProjectSecretCount((prev) => prev + successfulSecrets)
-          }
-
-          if (failedSecrets > 0) {
-            errorMessages.push(
-              ...secretResponse.data.failed.map(
-                ({ name, error }) =>
-                  `Failed to import secret "${name}": ${error}`
-              )
-            )
-          }
-        } else {
-          failedSecrets = secretEntries.length
-          errorMessages.push(
-            `Failed to import secrets: ${
-              secretResponse.error?.message ?? 'Unknown error occurred'
-            }`
-          )
+        if (!secretResponse.success) {
+          const message =
+            secretResponse.error?.message ?? 'Failed to import secrets'
+          toast.error(message)
+          setImportStatus((prev) => ({
+            ...prev,
+            isImporting: false,
+            currentStep: 'Import failed'
+          }))
+          return
         }
 
-        processedCount += secretEntries.length
-
+        setProjectSecretCount((prev) => prev + secretEntries.length)
         setImportStatus((prev) => ({
           ...prev,
-          secretsImported: successfulSecrets,
-          secretsFailed: failedSecrets,
-          currentStep: `Importing ${processedCount} of ${totalEntries}`,
-          errors: [...errorMessages]
+          secretsDone: true,
+          currentStep: hasVariables ? 'Importing variables' : 'Import complete'
         }))
       }
 
-      if (variableEntries.length > 0) {
-        setImportStatus((prev) => ({
-          ...prev,
-          currentStep: 'Importing variables'
-        }))
-
+      if (hasVariables) {
         const variableResponse =
           await ControllerInstance.getInstance().variableController.bulkCreateVariables(
             {
@@ -202,72 +157,41 @@ function ImportConfiguration({
             }
           )
 
-        if (variableResponse.success && variableResponse.data) {
-          successfulVariables = variableResponse.data.successful.length
-          failedVariables = variableResponse.data.failed.length
-
-          if (successfulVariables > 0) {
-            setProjectVariableCount((prev) => prev + successfulVariables)
-          }
-
-          if (failedVariables > 0) {
-            errorMessages.push(
-              ...variableResponse.data.failed.map(
-                ({ name, error }) =>
-                  `Failed to import variable "${name}": ${error}`
-              )
-            )
-          }
-        } else {
-          failedVariables = variableEntries.length
-          errorMessages.push(
-            `Failed to import variables: ${
-              variableResponse.error?.message ?? 'Unknown error occurred'
-            }`
-          )
+        if (!variableResponse.success) {
+          const message =
+            variableResponse.error?.message ?? 'Failed to import variables'
+          toast.error(message)
+          setImportStatus((prev) => ({
+            ...prev,
+            isImporting: false,
+            currentStep: 'Import failed'
+          }))
+          return
         }
 
-        processedCount += variableEntries.length
-
+        setProjectVariableCount((prev) => prev + variableEntries.length)
         setImportStatus((prev) => ({
           ...prev,
-          variablesImported: successfulVariables,
-          variablesFailed: failedVariables,
-          currentStep: `Importing ${processedCount} of ${totalEntries}`,
-          errors: [...errorMessages]
+          variablesDone: true,
+          currentStep: 'Import complete'
         }))
       }
 
-      const totalSucceeded = successfulSecrets + successfulVariables
-      const totalFailed = failedSecrets + failedVariables
-      const finalStepMessage =
-        totalFailed > 0
-          ? `Imported ${totalSucceeded} of ${totalEntries} (${totalFailed} failed)`
-          : `Imported all ${totalEntries}`
-
       setImportStatus((prev) => ({
         ...prev,
         isImporting: false,
-        currentStep: finalStepMessage,
-        errors: [...errorMessages]
+        currentStep: 'Import complete'
       }))
 
-      if (collectedErrors.length === 0) {
-        if (onImport) {
-          await onImport({ selectedSecrets, selectedVariables })
-        }
-
-        setStep('complete')
+      if (onImport) {
+        await onImport({ selectedSecrets, selectedVariables })
       }
     } catch (error) {
+      toast.error('Failed to import configurations')
       setImportStatus((prev) => ({
         ...prev,
         currentStep: 'Import failed',
-        isImporting: false,
-        errors: [
-          ...prev.errors,
-          error instanceof Error ? error.message : 'Unknown error occurred'
-        ]
+        isImporting: false
       }))
     }
   }, [
@@ -276,8 +200,6 @@ function ImportConfiguration({
     environmentSlug,
     selectedItems,
     allItems,
-    totalSecrets,
-    totalVariables,
     setProjectSecretCount,
     setProjectVariableCount
   ])
@@ -289,77 +211,23 @@ function ImportConfiguration({
   }, [isOpen, handleImport])
 
   const handleClose = () => {
-    setStep('importing')
     setImportStatus({
-      secretsImported: 0,
-      variablesImported: 0,
-      secretsFailed: 0,
-      variablesFailed: 0,
-      totalSecrets,
-      totalVariables,
-      currentStep: `Importing 0 of ${totalSecrets + totalVariables}`,
-      errors: [],
-      isImporting: true
+      currentStep: 'Preparing import',
+      isImporting: true,
+      secretsDone: false,
+      variablesDone: false
     })
     onClose()
   }
 
-  const getProgressPercentage = () => {
-    const total = totalSecrets + totalVariables
-    const processed =
-      importStatus.secretsImported +
-      importStatus.variablesImported +
-      importStatus.secretsFailed +
-      importStatus.variablesFailed
-    return total > 0 ? (processed / total) * 100 : 0
-  }
-
   const renderImportingStep = () => {
-    const secretsProcessed =
-      importStatus.secretsImported + importStatus.secretsFailed
-    const variablesProcessed =
-      importStatus.variablesImported + importStatus.variablesFailed
-    const totalEntriesCount = totalSecrets + totalVariables
-    const totalProcessed = secretsProcessed + variablesProcessed
-    const hasFailures =
-      importStatus.secretsFailed > 0 || importStatus.variablesFailed > 0
-
-    const overallIcon = (() => {
-      if (totalEntriesCount === 0) {
-        return <CheckCircle className="h-5 w-5 text-green-400" />
-      }
-
-      if (
-        totalProcessed === totalEntriesCount &&
-        !importStatus.isImporting
-      ) {
-        return hasFailures ? (
-          <X className="h-5 w-5 text-red-400" />
-        ) : (
-          <CheckCircle className="h-5 w-5 text-green-400" />
-        )
-      }
-
-      return <div className="h-5 w-5 rounded-full border-2 border-gray-600" />
-    })()
-
-    const secretsStatusText =
-      secretsProcessed < totalSecrets
-        ? `Importing secrets (${secretsProcessed} of ${totalSecrets})`
-        : `${importStatus.secretsImported} secrets imported${
-            importStatus.secretsFailed
-              ? ` (${importStatus.secretsFailed} failed)`
-              : ''
-          }`
-
-    const variablesStatusText =
-      variablesProcessed < totalVariables
-        ? `Importing variables (${variablesProcessed} of ${totalVariables})`
-        : `${importStatus.variablesImported} variables imported${
-            importStatus.variablesFailed
-              ? ` (${importStatus.variablesFailed} failed)`
-              : ''
-          }`
+    const overallIcon = importStatus.isImporting ? (
+      <Loader2 className="h-5 w-5 animate-spin text-white" />
+    ) : importStatus.currentStep === 'Import complete' ? (
+      <CheckCircle className="h-5 w-5 text-green-400" />
+    ) : (
+      <X className="h-5 w-5 text-red-400" />
+    )
 
     return (
       <div className="relative mx-auto w-[450px] rounded-lg bg-[#1a1a1a] p-6">
@@ -393,65 +261,46 @@ function ImportConfiguration({
             </div>
             <div className="text-gray-400">
               Total entries:{' '}
-              <span className="font-medium text-white">{totalEntriesCount}</span>
+              <span className="font-medium text-white">
+                {totalEntriesCount}
+              </span>
             </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="mb-4 font-medium text-white">Import progress</h3>
-          <div className="mb-6 h-2 w-full rounded-full bg-gray-700">
-            <div
-              className="h-2 rounded-full bg-white transition-all duration-300"
-              style={{ width: `${getProgressPercentage()}%` }}
-            />
           </div>
         </div>
 
         <div className="mb-6">
           <h3 className="mb-4 font-medium text-white">Status</h3>
           <div className="space-y-3">
-            {/* Secrets Row */}
             <div className="flex items-center space-x-3">
               <div className="flex h-5 w-5 items-center justify-center">
-                {importStatus.isImporting && secretsProcessed < totalSecrets ? (
-                  <div className="h-3 w-3 rounded-full bg-white" />
-                ) : secretsProcessed === totalSecrets ? (
-                  importStatus.secretsFailed > 0 ? (
-                    <X className="h-5 w-5 text-red-400" />
-                  ) : (
-                    <CheckCircle className="h-5 w-5 text-green-400" />
-                  )
+                {importStatus.secretsDone ? (
+                  <CheckCircle className="h-5 w-5 text-green-400" />
                 ) : (
-                  <div className="h-5 w-5 rounded-full border-2 border-gray-600" />
-                )}
-              </div>
-              <span className="text-sm text-gray-300">{secretsStatusText}</span>
-            </div>
-
-            {/* Variables Row */}
-            <div className="flex items-center space-x-3">
-              <div className="flex h-5 w-5 items-center justify-center">
-                {importStatus.isImporting &&
-                secretsProcessed === totalSecrets &&
-                variablesProcessed < totalVariables ? (
                   <div className="h-3 w-3 rounded-full bg-white" />
-                ) : variablesProcessed === totalVariables ? (
-                  importStatus.variablesFailed > 0 ? (
-                    <X className="h-5 w-5 text-red-400" />
-                  ) : (
-                    <CheckCircle className="h-5 w-5 text-green-400" />
-                  )
-                ) : (
-                  <div className="h-5 w-5 rounded-full border-2 border-gray-600" />
                 )}
               </div>
               <span className="text-sm text-gray-300">
-                {variablesStatusText}
+                {importStatus.secretsDone ? 'Secrets imported' : 'Importing secrets'}
               </span>
             </div>
 
-            {/* Overall Row */}
+            <div className="flex items-center space-x-3">
+              <div className="flex h-5 w-5 items-center justify-center">
+                {importStatus.variablesDone ? (
+                  <CheckCircle className="h-5 w-5 text-green-400" />
+                ) : (
+                  <div className="h-3 w-3 rounded-full bg-white" />
+                )}
+              </div>
+              <span className="text-sm text-gray-300">
+                {importStatus.variablesDone
+                  ? 'Variables imported'
+                  : importStatus.secretsDone
+                    ? 'Importing variables'
+                    : 'Waiting to import variables'}
+              </span>
+            </div>
+
             <div className="flex items-center space-x-3">
               <div className="flex h-5 w-5 items-center justify-center">
                 {overallIcon}
@@ -461,18 +310,6 @@ function ImportConfiguration({
               </span>
             </div>
           </div>
-          {importStatus.errors.length > 0 && (
-            <div className="mt-4 rounded-md bg-red-500/10 p-3">
-              <p className="mb-2 text-sm font-medium text-red-300">
-                Issues detected
-              </p>
-              <ul className="space-y-1 text-xs text-red-400">
-                {importStatus.errors.map((message) => (
-                  <li key={message}>{message}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
 
         <div className="flex space-x-3">
@@ -486,11 +323,6 @@ function ImportConfiguration({
   }
 
   const renderCompleteStep = () => {
-    const totalImported =
-      importStatus.secretsImported + importStatus.variablesImported
-    const totalFailed =
-      importStatus.secretsFailed + importStatus.variablesFailed
-
     return (
       <div className="relative mx-auto w-[450px] rounded-lg bg-[#1a1a1a] p-6 text-center">
         <button
@@ -515,36 +347,15 @@ function ImportConfiguration({
         <div className="mb-6 text-sm text-gray-400">
           <div>
             Secrets imported:{' '}
-            <span className="font-medium text-white">
-              {importStatus.secretsImported}
-            </span>
+            <span className="font-medium text-white">{totalSecrets}</span>
             , Variables imported:{' '}
-            <span className="font-medium text-white">
-              {importStatus.variablesImported}
-            </span>
+            <span className="font-medium text-white">{totalVariables}</span>
             , Total imported:{' '}
-            <span className="font-medium text-white">{totalImported}</span>
+            <span className="font-medium text-white">
+              {totalSecrets + totalVariables}
+            </span>
           </div>
-          {totalFailed > 0 && (
-            <div className="mt-2 text-red-400">
-              Failed imports:{' '}
-              <span className="font-medium text-red-300">{totalFailed}</span>
-            </div>
-          )}
         </div>
-
-        {importStatus.errors.length > 0 && (
-          <div className="mx-auto mb-6 max-h-32 overflow-y-auto rounded-md bg-red-500/10 p-3 text-left">
-            <p className="mb-2 text-sm font-medium text-red-300">
-              Issues detected
-            </p>
-            <ul className="space-y-1 text-xs text-red-400">
-              {importStatus.errors.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         <Button onClick={handleClose} variant="secondary">
           Go to project overview
