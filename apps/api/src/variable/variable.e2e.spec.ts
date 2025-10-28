@@ -246,12 +246,14 @@ describe('Variable Controller Tests', () => {
             {
               name: 'Bulk Variable 1',
               note: 'Bulk Var 1 note',
-              entries: [{ value: 'v1', environmentSlug: environment1.slug }]
+              value: 'v1',
+              environmentSlug: environment1.slug
             },
             {
               name: 'Bulk Variable 2',
               note: 'Bulk Var 2 note',
-              entries: [{ value: 'v2', environmentSlug: environment1.slug }]
+              value: 'v2',
+              environmentSlug: environment1.slug
             }
           ]
         },
@@ -263,52 +265,10 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(201)
       const body = response.json()
 
-      expect(body.successful).toHaveLength(2)
-      expect(body.failed).toHaveLength(0)
+      expect(body).toHaveLength(2)
     })
 
-    it('should handle partial failure in bulk variable creation', async () => {
-      await variableService.createVariable(
-        user1,
-        {
-          name: 'Bulk Conflicting Variable',
-          note: 'Existing Var',
-          entries: [{ value: 'x', environmentSlug: environment1.slug }]
-        },
-        project1.slug
-      )
-      const response = await app.inject({
-        method: 'POST',
-        url: `/variable/${project1.slug}/bulk`,
-        payload: {
-          variables: [
-            {
-              name: 'Bulk Conflicting Variable',
-              note: 'duplicate note',
-              entries: [{ value: 'v', environmentSlug: environment1.slug }]
-            },
-            {
-              name: 'Bulk Unique Variable',
-              note: 'unique note',
-              entries: [{ value: 'unique', environmentSlug: environment1.slug }]
-            }
-          ]
-        },
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-      expect(response.statusCode).toBe(201)
-      const body = response.json()
-
-      expect(body.successful.length).toBe(1)
-      expect(body.failed.length).toBe(1)
-
-      expect(body.failed[0].name).toBe('Bulk Conflicting Variable')
-      expect(body.successful[0].name).toBe('Bulk Unique Variable')
-    })
-
-    it('should reject bulk create if all variables are invalid', async () => {
+    it('should reject bulk create if any variable is are invalid', async () => {
       const response = await app.inject({
         method: 'POST',
         url: `/variable/${project1.slug}/bulk`,
@@ -316,11 +276,137 @@ describe('Variable Controller Tests', () => {
           variables: [
             {
               name: '',
-              entries: [{ value: 'v', environmentSlug: environment1.slug }]
+              value: 'v',
+              environmentSlug: environment1.slug
             },
             {
-              name: '   ',
-              entries: [{ value: 'v', environmentSlug: environment1.slug }]
+              name: 'Variable',
+              value: 'v',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should reject bulk create if any variable already exists', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Variable 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if any secret already exists', async () => {
+      // Create a variable named Bulk Variable 1
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'Bulk Variable 1',
+          note: 'Bulk 1 note',
+          entries: [
+            {
+              value: 'v1',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        project1.slug
+      )
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Variable 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if tier limit will be hit', async () => {
+      // Create 13 variables
+      for (let i = 2; i < 15; i++) {
+        await variableService.createVariable(
+          user1,
+          {
+            name: `Variable ${i}`,
+            note: `Variable ${i} note`,
+            entries: [
+              {
+                value: `v${i}`,
+                environmentSlug: environment1.slug
+              }
+            ]
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Bulk Variable 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
             }
           ]
         },
@@ -532,7 +618,7 @@ describe('Variable Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Secret already exists')
       expect(msg.body).toBe(
-        `A secret with this name already exists in this project. Please choose a different name.`
+        `A secret named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -740,7 +826,7 @@ describe('Variable Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Secret already exists')
       expect(msg.body).toBe(
-        'A secret with this name already exists in this project. Please choose a different name.'
+        'A secret named COLLIDE already exists in this project. Please choose a different name.'
       )
     })
   })

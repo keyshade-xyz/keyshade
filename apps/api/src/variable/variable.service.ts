@@ -118,14 +118,17 @@ export class VariableService {
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
+    let environmentSlugToIdMap: Map<string, string>
+    if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+    }
 
     // Create the variable
     this.logger.log(`Creating variable ${dto.name} in project ${project.slug}`)
@@ -445,16 +448,8 @@ export class VariableService {
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      variable.project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
-
     const op = []
+    let environmentSlugToIdMap: Map<string, string>
 
     // Update the variable
 
@@ -479,6 +474,15 @@ export class VariableService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        variable.project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+
       await checkForDisabledWorkspace(
         variable.project.workspaceId,
         this.prisma,
