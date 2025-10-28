@@ -80,7 +80,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     name: Validate Web (Docker)
-    needs: validate-node-build
 
     steps:
       - name: Checkout
