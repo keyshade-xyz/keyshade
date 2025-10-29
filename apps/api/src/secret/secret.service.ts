@@ -690,7 +690,10 @@ export class SecretService {
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: SecretVersion['version']
-  ) {
+  ): Promise<{
+    count: number
+    currentRevision: RawSecretRevision
+  }> {
     this.logger.log(
       `User ${user.id} attempted to rollback secret ${secretSlug} to version ${rollbackVersion}`
     )
@@ -719,18 +722,17 @@ export class SecretService {
 
     const project = secret.project
 
-    // Filter the secret versions by the environment
-    this.logger.log(
-      `Fetching secret versions for secret ${secretSlug} in environment ${environmentSlug}`
-    )
-    secret.versions = secret.versions.filter(
-      (version) => version.environment.id === environmentId
-    )
-    this.logger.log(
-      `Found ${secret.versions.length} versions for secret ${secretSlug} in environment ${environmentSlug}`
-    )
+    // TODO: remove this after implementing secret cache with secretCache.getRawSecret call
+    // Get all the secret versions
+    const secretVersions = await this.prisma.secretVersion.findMany({
+      where: {
+        secretId: secret.id,
+        environmentId
+      },
+      select: InclusionQuery.Secret['versions']['select']
+    })
 
-    if (secret.versions.length === 0) {
+    if (secretVersions.length === 0) {
       const errorMessage = `Secret ${secretSlug} has no versions for environment ${environmentSlug}`
       this.logger.error(errorMessage)
       throw new NotFoundException(
@@ -739,7 +741,7 @@ export class SecretService {
     }
 
     let maxVersion = 0
-    for (const element of secret.versions) {
+    for (const element of secretVersions) {
       if (element.version > maxVersion) {
         maxVersion = element.version
       }
@@ -769,11 +771,10 @@ export class SecretService {
         }
       }
     })
-    this.logger.log(
-      `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
+    const currentRevision = secretVersions.find(
+      (version) => version.version === rollbackVersion
     )
-
-    const secretValue = secret.versions[rollbackVersion - 1].value
+    const secretValue = currentRevision.value
     const canBeDecrypted =
       project.storePrivateKey &&
       project.privateKey !== null &&
@@ -782,6 +783,9 @@ export class SecretService {
       ? await decrypt(sDecrypt(project.privateKey), secretValue)
       : null
     const ultimateSecretValue = canBeDecrypted ? plainTextValue : secretValue
+    this.logger.log(
+      `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
+    )
 
     try {
       this.logger.log(
@@ -823,10 +827,6 @@ export class SecretService {
         workspaceId: secret.project.workspaceId
       },
       this.prisma
-    )
-
-    const currentRevision = secret.versions.find(
-      (version) => version.version === rollbackVersion
     )
 
     return {

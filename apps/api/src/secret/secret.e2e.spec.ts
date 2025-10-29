@@ -973,7 +973,7 @@ describe('Secret Controller Tests', () => {
       await secretService.updateSecret(user1, secret1.slug, {
         entries: [
           {
-            value: 'Updated Secret 1 value',
+            value: 'Updated Secret 1 value 2',
             environmentSlug: environment1.slug
           }
         ]
@@ -982,7 +982,16 @@ describe('Secret Controller Tests', () => {
       await secretService.updateSecret(user1, secret1.slug, {
         entries: [
           {
-            value: 'Updated Secret 1 value 2',
+            value: 'Updated Secret 1 value 3',
+            environmentSlug: environment1.slug
+          }
+        ]
+      })
+
+      await secretService.updateSecret(user1, secret1.slug, {
+        entries: [
+          {
+            value: 'Updated Secret 1 value 4',
             environmentSlug: environment1.slug
           }
         ]
@@ -997,12 +1006,12 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(3)
+      expect(versions.length).toBe(4)
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await app.inject({
         method: 'PUT',
-        url: `/secret/${secret1.slug}/rollback/1?environmentSlug=${environment1.slug}`,
+        url: `/secret/${secret1.slug}/rollback/2?environmentSlug=${environment1.slug}`,
         headers: {
           'x-e2e-user-email': user1.email
         }
@@ -1016,7 +1025,7 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(1)
+      expect(versions.length).toBe(2)
     })
   })
 

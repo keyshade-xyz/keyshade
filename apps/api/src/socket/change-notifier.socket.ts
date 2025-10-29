@@ -201,12 +201,9 @@ export default class ChangeNotifier
       // User friendly feedback on error
       let errorMessage = 'An unknown error occurred.'
 
-      this.logger.error({
-        message: 'Error during client registration',
-        body: error,
-        errorType: typeof error,
-        errorConstructor: error?.constructor?.name
-      })
+      this.logger.error(
+        `Error during client registration: ${typeof error === 'string' ? error : JSON.stringify(error)}`
+      )
 
       if (error instanceof Error) {
         // If the error is an instance of Error, we can get the message directly
