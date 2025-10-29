@@ -1,3 +1,13 @@
+## [2.43.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.3...v2.43.0-stage.4) (2025-10-29)
+
+### 🐛 Bug Fixes
+
+* **api:** rolling back crashed the flow ([a2bdc61](https://github.com/keyshade-xyz/keyshade/commit/a2bdc61856832806d165ea7aa8141a946c2fe243))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** fix broken tests ([1aa7ea4](https://github.com/keyshade-xyz/keyshade/commit/1aa7ea4d9e3bc352fc317c5e5eacb286380a2966))
+
 ## [2.43.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.2...v2.43.0-stage.3) (2025-10-28)
 
 ### 🐛 Bug Fixes

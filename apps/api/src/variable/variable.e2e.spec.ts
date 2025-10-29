@@ -932,7 +932,7 @@ describe('Variable Controller Tests', () => {
       await variableService.updateVariable(user1, variable1.slug, {
         entries: [
           {
-            value: 'Updated Variable 1 value',
+            value: 'Updated Variable 1 value 2',
             environmentSlug: environment1.slug
           }
         ]
@@ -941,7 +941,16 @@ describe('Variable Controller Tests', () => {
       await variableService.updateVariable(user1, variable1.slug, {
         entries: [
           {
-            value: 'Updated Variable 1 value 2',
+            value: 'Updated Variable 1 value 3',
+            environmentSlug: environment1.slug
+          }
+        ]
+      })
+
+      await variableService.updateVariable(user1, variable1.slug, {
+        entries: [
+          {
+            value: 'Updated Variable 1 value 4',
             environmentSlug: environment1.slug
           }
         ]
@@ -955,11 +964,11 @@ describe('Variable Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(3)
+      expect(versions.length).toBe(4)
 
       const response = await app.inject({
         method: 'PUT',
-        url: `/variable/${variable1.slug}/rollback/1?environmentSlug=${environment1.slug}`,
+        url: `/variable/${variable1.slug}/rollback/2?environmentSlug=${environment1.slug}`,
         headers: {
           'x-e2e-user-email': user1.email
         }
@@ -967,6 +976,9 @@ describe('Variable Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().count).toEqual(2)
+      expect(response.json().currentRevision.value).toEqual(
+        'Updated Variable 1 value 2'
+      )
 
       versions = await prisma.variableVersion.findMany({
         where: {
@@ -974,7 +986,7 @@ describe('Variable Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(1)
+      expect(versions.length).toBe(2)
     })
 
     it('should not be able to roll back if the variable has no versions', async () => {
