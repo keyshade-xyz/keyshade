@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Integrations } from '@keyshade/common'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import type { Integration } from '@keyshade/schema'
@@ -12,9 +12,22 @@ import {
   selectedWorkspaceAtom
 } from '@/store'
 import Visible from '@/components/common/visible'
+import { Input } from '@/components/ui/input'
 
 export default function IntegrationServices(): React.JSX.Element {
+  const [searchTerm, setSearchTerm] = useState('')
   const integrations = useMemo(() => Object.values(Integrations), [])
+
+  const filteredIntegrations = useMemo(() => {
+      if (!searchTerm.trim()) {
+          return integrations
+      }
+      return integrations.filter((integration) =>
+                                 integration.name.toLowerCase().includes(searchTerm.toLowerCase())
+                                )
+  }, [integrations, searchTerm])
+
+
   const [createIntegrationModelOpen, setCreateIntegrationModelOpen] = useAtom(
     createIntegrationOpenAtom
   )
@@ -30,13 +43,24 @@ export default function IntegrationServices(): React.JSX.Element {
     },
     [setCreateIntegrationModelOpen, setCreateIntegrationType]
   )
-  const hasIntegrations = integrations.length > 0
+
+  const hasIntegrations = filteredIntegrations.length > 0
+
 
   return (
     <div>
+    {/* Search Input */}
+      <div className="mb-6">
+        <Input
+          className="w-full max-w-md"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search integrations by type (e.g., disc for Discord)..."
+          value={searchTerm}
+        />
+      </div>
       <Visible if={hasIntegrations}>
         <div className="grid grid-cols-3 gap-5">
-          {integrations.map((integration) => {
+        {filteredIntegrations.map((integration) => {
             const isActive = integration.isActive
             return (
               <div
@@ -66,6 +90,13 @@ export default function IntegrationServices(): React.JSX.Element {
               </div>
             )
           })}
+        </div>
+      </Visible>
+      <Visible if={!hasIntegrations && searchTerm.trim()}>
+        <div className="py-8 text-center">
+          <p className="text-white/60">
+            No integrations found matching &quot;{searchTerm}&quot;
+          </p>
         </div>
       </Visible>
 
