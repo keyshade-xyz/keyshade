@@ -63,7 +63,15 @@ export const CreateSecretResponseSchema = SecretSchema
 
 export const BulkCreateSecretRequestSchema = z.object({
   projectSlug: z.string(),
-  secrets: z.array(CreateSecretRequestSchema.omit({ projectSlug: true }))
+  secrets: z.array(
+    CreateSecretRequestSchema.omit({
+      projectSlug: true,
+      entries: true
+    }).extend({
+      value: z.string(),
+      environmentSlug: EnvironmentSchema.shape.slug
+    })
+  )
 })
 
 export const BulkCreateSecretResponseSchema = z.object({

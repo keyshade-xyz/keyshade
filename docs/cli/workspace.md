@@ -4,7 +4,7 @@ description: The `workspace` command
 
 # `workspace`
 
-The `workspace` command is used to manage workspaces on keyshade. A workspace is a collection of projects, environments, secrets, variables, and roles. It has a set of subcommands:
+The `workspace` command is used to manage workspaces on Keyshade. A workspace is a collection of projects, environments, secrets, variables, and roles. It has a set of subcommands:
 
 - [`create`](#create): This command is used to create a new workspace.
 - [`delete`](#delete): This command is used to delete an existing workspace.
@@ -151,7 +151,7 @@ The search term you want to use for searching.
 
 ## `update`
 
-### `Usage`
+### Usage
 
 ```bash
 keyshade workspace update <workspace slug> [options]

@@ -26,7 +26,7 @@ import { EventModule } from '@/event/event.module'
 import { EventService } from '@/event/event.service'
 import { EnvironmentService } from './environment.service'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { ValidationPipe } from '@nestjs/common'
@@ -101,13 +101,13 @@ describe('Environment Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })

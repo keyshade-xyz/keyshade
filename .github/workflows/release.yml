@@ -544,40 +544,41 @@ jobs:
         include:
           # Ubuntu
           - os: ubuntu-latest
-            target: node18-linux-x64
+            bun_target: bun-linux-x64
             output: keyshade-cli-linux-x64
           - os: ubuntu-latest
-            target: node18-linux-arm64
+            bun_target: bun-linux-arm64
             output: keyshade-cli-linux-arm64
 
-          # RHEL / CentOS
+          # RHEL / CentOS  (same Bun target, different filename)
           - os: ubuntu-latest
-            target: node18-linux-x64
+            bun_target: bun-linux-x64
             output: keyshade-cli-rhel-x64
           - os: ubuntu-latest
-            target: node18-linux-arm64
+            bun_target: bun-linux-arm64
             output: keyshade-cli-rhel-arm64
 
-          # Amazon Linux
+          # Amazon Linux   (same Bun target, different filename)
           - os: ubuntu-latest
-            target: node18-linux-x64
+            bun_target: bun-linux-x64
             output: keyshade-cli-amazonlinux-x64
           - os: ubuntu-latest
-            target: node18-linux-arm64
+            bun_target: bun-linux-arm64
             output: keyshade-cli-amazonlinux-arm64
 
           # macOS
           - os: macos-latest
-            target: node18-macos-x64
+            bun_target: bun-darwin-x64
             output: keyshade-cli-macos-x64
           - os: macos-latest
-            target: node18-macos-arm64
+            bun_target: bun-darwin-arm64
             output: keyshade-cli-macos-arm64
 
           # Windows
           - os: windows-latest
-            target: node18-win-x64
+            bun_target: bun-windows-x64
             output: keyshade-cli.exe
+
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -593,16 +594,24 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Build CLI
+      - name: Build (TypeScript/monorepo)
         run: pnpm build:cli
 
-      - name: Package CLI into Executable
+      # New: install Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # New: compile CLI with Bun
+      # Adjust the entry path if your CLI lives elsewhere.
+      - name: Compile CLI with Bun
         shell: bash
         run: |
-          npm i -g pkg
-          pkg apps/cli/dist/index.cjs \
-            --targets ${{ matrix.target }} \
-            --output ${{ matrix.output }}
+          bun build --compile \
+            --target=${{ matrix.bun_target }} \
+            ./apps/cli/src/index.ts \
+            --outfile ${{ matrix.output }} 
 
       - name: Upload Executable to GitHub Release
         shell: bash
@@ -611,7 +620,6 @@ jobs:
           VERSION: ${{ needs.release.outputs.version }}
         run: |
           echo "Checking if asset '${{ matrix.output }}' already exists for release v${VERSION}..."
-          
           if gh release view "v${VERSION}" --json assets -q ".assets[].name" | grep -q "^${{ matrix.output }}$"; then
             echo "Asset '${{ matrix.output }}' already exists, skipping upload."
           else

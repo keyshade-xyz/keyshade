@@ -11,10 +11,8 @@ import { AuthGuard } from '@/auth/guard/auth/auth.guard'
 import { UserModule } from '@/user/user.module'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
-import { ApiKeyModule } from '@/api-key/api-key.module'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
-import { ApiKeyGuard } from '@/auth/guard/api-key/api-key.guard'
 import { EventModule } from '@/event/event.module'
 import { VariableModule } from '@/variable/variable.module'
 import { SocketModule } from '@/socket/socket.module'
@@ -30,6 +28,7 @@ import { ShareSecretModule } from '@/share-secret/share-secret.module'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { FileUploadModule } from '@/file-upload/file-upload.module'
+import { SessionModule } from '@/session/session.module'
 
 @Module({
   controllers: [AppController],
@@ -43,14 +42,12 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
         abortEarly: true
       }
     }),
-
     ScheduleModule.forRoot(),
     PassportModule,
     AuthModule,
     PrismaModule,
     CommonModule,
     MailModule,
-    ApiKeyModule,
     UserModule,
     ProjectModule,
     EnvironmentModule,
@@ -66,16 +63,13 @@ import { FileUploadModule } from '@/file-upload/file-upload.module'
     WorkspaceMembershipModule,
     PaymentGatewayModule,
     ShareSecretModule,
-    FileUploadModule
+    FileUploadModule,
+    SessionModule
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: AuthGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard
     }
   ]
 })

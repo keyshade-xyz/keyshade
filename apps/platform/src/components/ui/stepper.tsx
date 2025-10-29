@@ -168,7 +168,7 @@ function StepperTrigger({
   return (
     <button
       className={cn(
-        'inline-flex items-center gap-3 rounded-full outline-none focus-visible:z-10 focus-visible:border-zinc-950 focus-visible:ring-[3px] focus-visible:ring-zinc-950/50 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:border-zinc-300 dark:focus-visible:ring-zinc-300/50',
+        'inline-flex items-center gap-3 rounded-full outline-hidden focus-visible:z-10 focus-visible:border-zinc-950 focus-visible:ring-[3px] focus-visible:ring-zinc-950/50 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:border-zinc-300 dark:focus-visible:ring-zinc-300/50',
         className
       )}
       data-slot="stepper-trigger"

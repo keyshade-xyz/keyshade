@@ -63,14 +63,14 @@ export default function RoleList(): React.JSX.Element {
 
   return loading ? (
     <div className="flex animate-pulse flex-col gap-y-4">
-      <div className="mb-3 h-[3.125rem] w-full rounded-lg bg-white/5" />
+      <div className="mb-3 h-12.5 w-full rounded-lg bg-white/5" />
       <RoleListItemSkeleton />
       <RoleListItemSkeleton />
       <RoleListItemSkeleton />
     </div>
   ) : (
     <Table className="h-full w-full">
-      <TableHeader className="h-[3.125rem] w-full">
+      <TableHeader className="h-12.5 w-full">
         <TableRow className="h-full w-full bg-white/10 ">
           <TableHead className="h-full w-2/12 rounded-tl-xl text-base font-normal text-white/50">
             Name

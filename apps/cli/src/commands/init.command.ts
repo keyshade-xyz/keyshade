@@ -3,7 +3,7 @@ import type {
   CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from './base.command'
-import { intro, text, confirm, outro, select, note } from '@clack/prompts'
+import { confirm, intro, note, outro, select, text } from '@clack/prompts'
 import { existsSync } from 'fs'
 import {
   writePrivateKeyConfig,
@@ -109,14 +109,13 @@ export default class InitCommand extends BaseCommand {
       if (success) {
         const projects = data.items
         if (projects.length > 0) {
-          const selectedProjectSlug = await select({
+          project = await select({
             message: 'Select a project',
             options: projects.map((p: any) => ({
               value: p.slug,
               label: `${p.name} (${p.slug})`
             }))
           })
-          project = selectedProjectSlug
 
           if (!privateKey) {
             const {

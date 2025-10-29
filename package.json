@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.34.0-stage.21",
+  "version": "2.43.0-stage.4",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -93,6 +93,7 @@
     "dev:api": "turbo run dev --filter=@keyshade/api",
     "dev:web": "turbo run dev --filter=@keyshade/web",
     "dev:platform": "turbo run dev --filter=@keyshade/platform",
+    "dev:platfrom:storybook": "pnpm --filter @keyshade/platform run storybook",
     "dev:cli": "turbo run dev --filter=@keyshade/cli",
     "add:global": "pnpm add -w",
     "add:api": "pnpm add --filter=@keyshade/api",
@@ -149,7 +150,6 @@
   },
   "devDependencies": {
     "@sentry/cli": "^2.28.6",
-    "@sentry/webpack-plugin": "^2.14.2",
     "@types/jest": "^29.5.2",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -181,8 +181,6 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^10.0.3",
     "@semantic-release/release-notes-generator": "^14.0.0",
-    "@sentry/node": "^7.102.0",
-    "@sentry/profiling-node": "^7.102.0",
     "@types/node": "^20.14.10",
     "chalk": "^4.1.2",
     "class-validator": "^0.14.1",

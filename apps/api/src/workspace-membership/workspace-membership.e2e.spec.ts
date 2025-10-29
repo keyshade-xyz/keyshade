@@ -12,7 +12,7 @@ import { ProjectModule } from '@/project/project.module'
 import { ProjectService } from '@/project/project.service'
 import { SecretModule } from '@/secret/secret.module'
 import { SecretService } from '@/secret/secret.service'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { VariableService } from '@/variable/variable.service'
 import { VariableModule } from '@/variable/variable.module'
@@ -127,19 +127,19 @@ describe('Workspace Membership Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
 
     const createUser3 = await userService.createUser({
-      email: 'sadie@keyshade.xyz',
+      email: 'sadie@keyshade.io',
       name: 'Sadie',
       isOnboardingFinished: true
     })
@@ -540,7 +540,7 @@ describe('Workspace Membership Controller Tests', () => {
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
         payload: [
           {
-            email: 'joy@keyshade.xyz',
+            email: 'joy@keyshade.io',
             roleSlugs: [memberRole.slug]
           }
         ]
@@ -551,12 +551,12 @@ describe('Workspace Membership Controller Tests', () => {
       // Expect the user to have been created
       const user = await prisma.user.findUnique({
         where: {
-          email: 'joy@keyshade.xyz'
+          email: 'joy@keyshade.io'
         }
       })
 
       expect(user).toBeDefined()
-      expect(user.email).toBe('joy@keyshade.xyz')
+      expect(user.email).toBe('joy@keyshade.io')
       expect(user.authProvider).toBe(AuthProvider.EMAIL_OTP)
     })
   })

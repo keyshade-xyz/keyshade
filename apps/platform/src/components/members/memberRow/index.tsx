@@ -75,7 +75,7 @@ function MemberRow({
         {dayjs(member.user.joinedOn).format('MMM D, YYYY')}
       </TableCell>
       <TableCell className="w-[40%] text-left">
-        <div className="flex w-[8rem] items-center justify-center rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-purple-200">
+        <div className="flex w-32 items-center justify-center rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-purple-200">
           {member.roles[0].role.name}
         </div>
       </TableCell>

@@ -145,7 +145,7 @@ export function Combobox(): React.JSX.Element {
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="flex w-[16rem] items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
+          className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-2.75 py-3.25"
           role="combobox"
           type="button"
         >
@@ -176,9 +176,9 @@ export function Combobox(): React.JSX.Element {
         <div>
           <Command>
             <CommandInput placeholder="Type a command or search..." />
-            <CommandList className="max-h-[10rem]">
+            <CommandList className="max-h-40">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              <div className="max-h-[10rem] overflow-auto">
+              <div className="max-h-40 overflow-auto">
                 <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
                   fetchFunction={fetchWorkspaces}
                   itemComponent={renderWorkspaceListItem}

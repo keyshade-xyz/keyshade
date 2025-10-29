@@ -89,10 +89,10 @@ export default class ListSecret extends BaseCommand {
             '🗓️ Created On',
             '👤 Created By'
           ]
-          for (const { secret, values } of secrets) {
+          for (const secret of secrets) {
             Logger.info(` - ${chalk.bold(secret.name)}(${secret.slug})`)
             const rows = await Promise.all(
-              values.map(
+              secret.versions.map(
                 async ({
                   environment,
                   value,
@@ -120,10 +120,10 @@ export default class ListSecret extends BaseCommand {
             '📊 Version',
             '💾 Value'
           ]
-          for (const { secret, values } of secrets) {
+          for (const secret of secrets) {
             Logger.info(` - ${chalk.bold(secret.name)}(${secret.slug})`)
             const rows = await Promise.all(
-              values.map(async ({ environment, value, version }) => [
+              secret.versions.map(async ({ environment, value, version }) => [
                 `${secret.name}(${secret.slug})`,
                 environment.name,
                 String(version),

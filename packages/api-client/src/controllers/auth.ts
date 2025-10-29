@@ -1,22 +1,37 @@
 import {
-  ResendOTPResponse,
+  ClientResponse,
+  LogOutRequest,
+  LogOutResponse,
   ResendOTPRequest,
-  ValidateOTPResponse,
-  ValidateOTPRequest,
+  ResendOTPResponse,
   SendOTPRequest,
   SendOTPResponse,
-  LogOutRequest,
-  LogOutResponse
+  ValidateOTPRequest,
+  ValidateOTPResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@keyshade/schema'
 
 export default class AuthController {
   private apiClient: APIClient
 
   constructor(private readonly backendURL: string) {
     this.apiClient = new APIClient(this.backendURL)
+  }
+
+  private buildQueryParams(params: {
+    mode?: string
+    os?: string
+    agent?: string
+    email?: string
+    otp?: string
+  }): string {
+    const query = new URLSearchParams()
+    for (const [key, value] of Object.entries(params)) {
+      if (value != undefined) query.append(key, value)
+    }
+    const result = query.toString()
+    return result ? `?${result}` : ''
   }
 
   async resendOTP(
@@ -35,8 +50,16 @@ export default class AuthController {
     request: ValidateOTPRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<ValidateOTPResponse>> {
+    const queryParams = this.buildQueryParams({
+      email: request.email,
+      otp: request.otp,
+      mode: request.mode,
+      os: request.os,
+      agent: request.agent
+    })
+
     const response = await this.apiClient.post(
-      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}`,
+      `/api/auth/validate-otp${queryParams}`,
       request,
       headers
     )
@@ -47,8 +70,14 @@ export default class AuthController {
     request: SendOTPRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<SendOTPResponse>> {
+    const queryParams = this.buildQueryParams({
+      mode: request.mode,
+      os: request.os,
+      agent: request.agent
+    })
+
     const response = await this.apiClient.post(
-      `/api/auth/send-otp/${encodeURIComponent(request.email)}`,
+      `/api/auth/send-otp/${encodeURIComponent(request.email)}${queryParams}`,
       request,
       headers
     )

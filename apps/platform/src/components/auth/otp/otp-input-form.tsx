@@ -118,7 +118,7 @@ export default function OtpInputForm({
   }
 
   return (
-    <form className="flex w-[17rem] flex-col gap-3" onSubmit={handleVerifyOTP}>
+    <form className="flex w-68 flex-col gap-3" onSubmit={handleVerifyOTP}>
       <div>
         <InputOTP
           maxLength={6}

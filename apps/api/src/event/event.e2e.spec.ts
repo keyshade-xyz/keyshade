@@ -71,7 +71,7 @@ describe('Event Controller Tests', () => {
 
   // beforeEach(async () => {
   //   const createUser = await userService.createUser({
-  //     email: 'johndoe@keyshade.xyz',
+  //     email: 'johndoe@keyshade.io',
   //     name: 'John Doe',
   //     isOnboardingFinished: true
   //   })

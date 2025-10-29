@@ -5,7 +5,11 @@ import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react'
 import { Suspense, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+export function PostHogProvider({
+  children
+}: {
+  children: React.ReactNode
+}): React.JSX.Element {
   useEffect(() => {
     if (
       process.env.NEXT_PUBLIC_POSTHOG_KEY &&

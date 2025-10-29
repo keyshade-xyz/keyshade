@@ -16,7 +16,7 @@ const BadgeVarient = cva(
       },
       variant: {
         solid: '',
-        subtle: '!bg-[#FFFFFF1A] border !border-[#FFFFFF33] !text-white'
+        subtle: 'bg-[#FFFFFF1A]! border border-[#FFFFFF33]! text-white!'
       }
     }
   }

@@ -206,9 +206,9 @@ export default function VariableCard({
         <AccordionContent>
           {versions.length > 0 ? (
             <Table className="h-full w-full">
-              <TableHeader className="h-[3.125rem] w-full ">
+              <TableHeader className="h-12.5 w-full ">
                 <TableRow className="h-full w-full bg-white/10 ">
-                  <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
+                  <TableHead className="h-full w-41 rounded-tl-xl text-base font-normal text-white/50">
                     Environment
                   </TableHead>
                   <TableHead className="h-full text-base font-normal text-white/50">
@@ -227,10 +227,10 @@ export default function VariableCard({
                   )
                   return (
                     <TableRow
-                      className="group h-[3.125rem] w-full hover:bg-white/5"
+                      className="group h-12.5 w-full hover:bg-white/5"
                       key={value.environment.id}
                     >
-                      <TableCell className="h-full w-[10.25rem] text-base">
+                      <TableCell className="h-full w-41 text-base">
                         {value.environment.name}
                       </TableCell>
                       <TableCell className="h-full text-base">

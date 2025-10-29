@@ -145,7 +145,7 @@ export default function UpdateKeyMapping({
       <div className="flex flex-col gap-y-2">
         <p className="font-medium text-white">Project</p>
         <Select disabled value={initialProject.slug}>
-          <SelectTrigger className="h-[2.25rem] rounded border bg-white/5 opacity-50">
+          <SelectTrigger className="h-9 rounded-sm border bg-white/5 opacity-50">
             <SelectValue>{initialProject.name}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -173,13 +173,13 @@ export default function UpdateKeyMapping({
               const selected = envSlugs.includes(env.slug)
               return (
                 <div
-                  className="mb-3 flex flex-col gap-1 rounded border border-white/10 bg-white/5 p-2"
+                  className="mb-3 flex flex-col gap-1 rounded-sm border border-white/10 bg-white/5 p-2"
                   key={env.id}
                 >
                   <div className="flex items-center gap-2">
                     <input
                       checked={selected}
-                      className="rounded border-white/20 bg-white/10"
+                      className="rounded-sm border-white/20 bg-white/10"
                       disabled={disabled}
                       id={`env-${env.id}`}
                       onChange={() => toggleEnvironment(env.slug)}
