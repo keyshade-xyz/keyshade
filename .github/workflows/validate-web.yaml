@@ -85,16 +85,69 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.2.0
-          run_install: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Web image
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4200
+          NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: https://analytics.example.com
+          NEXT_PUBLIC_SENTRY_ENVIRONMENT: ci
+        run: |
+          docker build -t keyshade/web:ci-${GITHUB_SHA} -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=$NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID \
+            --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
+            .
+
+      - name: Verify Web image
+        run: docker image inspect keyshade/web:ci-${{ github.sha }}
+
+      - name: Start Web
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          docker-compose -f docker-compose-test.yml --profile ci up -d web
+          
+          echo "Waiting for Web to be healthy..."
+          timeout 60s bash -c 'until docker inspect --format="{{.State.Health.Status}}" web-ci | grep -q "healthy"; do sleep 2; echo "Waiting..."; done'
+          
+          echo "Web is healthy"
+
+      - name: Web health check
+        run: |
+          curl -fsS "http://127.0.0.1:3000/api/health" || {
+            echo "Health check failed"
+            docker-compose -f docker-compose-test.yml logs web
+            exit 1
+          }
+          echo "Health check passed"
+
+      - name: Cleanup
+        if: always()
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          
+          if [ "${{ job.status }}" != 'success' ]; then
+            echo "=== Docker Compose Logs ==="
+            docker-compose -f docker-compose-test.yml --profile ci logs
+          fi
+          
+          docker-compose -f docker-compose-test.yml --profile ci down -v --remove-orphans || true
+          docker image rm -f keyshade/web:ci-${GITHUB_SHA} || true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Validate Web (Docker)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -104,49 +157,51 @@ jobs:
 
       - name: Build Web image
         env:
+          GITHUB_SHA: ${{ github.sha }}
           NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4200
           NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: https://analytics.example.com
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ci
-          NEXT_PUBLIC_POSTHOG_KEY: test-key
-          NEXT_PUBLIC_POSTHOG_HOST: https://app.posthog.com
         run: |
-          docker build -t keyshade/web:ci-${{ github.sha }} -f apps/web/Dockerfile \
+          docker build -t keyshade/web:ci-${GITHUB_SHA} -f apps/web/Dockerfile \
             --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=$NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID \
             --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
-            --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
-            --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
             .
 
       - name: Verify Web image
         run: docker image inspect keyshade/web:ci-${{ github.sha }}
 
-      - name: Run Web container
+      - name: Start Web with Docker Compose
+        env:
+          GITHUB_SHA: ${{ github.sha }}
         run: |
-          docker run -d --rm --name web-ci -p 3000:3000 keyshade/web:ci-${{ github.sha }}
+          docker-compose -f docker-compose.web.ci.yml up -d
+          
+          echo "Waiting for Web to be healthy..."
+          timeout 60s bash -c 'until docker inspect --format="{{.State.Health.Status}}" web-ci | grep -q "healthy"; do sleep 2; echo "Waiting..."; done'
+          
+          echo "Web is healthy"
 
       - name: Web health check
         run: |
-          set -euo pipefail
-          for i in {1..30}; do
-            if curl -fsS "http://127.0.0.1:3000/api/health" >/dev/null; then
-              echo "Health check passed"
-              exit 0
-            fi
-            echo "Waiting for service... ($i/30)"
-            sleep 2
-          done
-          echo "Service failed to become healthy in time"
-          docker logs web-ci || true
-          exit 1
+          curl -fsS "http://127.0.0.1:3000/api/health" || {
+            echo "Health check failed"
+            docker-compose -f docker-compose.web.ci.yml logs
+            exit 1
+          }
+          echo "Health check passed"
 
       - name: Cleanup
         if: always()
+        env:
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          docker ps -a || true
+          
           if [ "${{ job.status }}" != 'success' ]; then
-            docker logs web-ci || true
+            echo "=== Docker Compose Logs ==="
+            docker-compose -f docker-compose.web.ci.yml logs
           fi
-          docker rm -f web-ci || true
-          docker image rm -f keyshade/web:ci-${{ github.sha }} || true
+          
+          docker-compose -f docker-compose.web.ci.yml down -v --remove-orphans || true
+          docker image rm -f keyshade/web:ci-${GITHUB_SHA} || true
