@@ -113,18 +113,18 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          docker-compose -f docker-compose-test.yml --profile ci up -d platform
+          docker compose -f docker-compose-test.yml --profile ci-platform up -d
           
           echo "Waiting for Platform to be healthy..."
-          timeout 60s bash -c 'until docker inspect --format="{{.State.Health.Status}}" platform-ci | grep -q "healthy"; do sleep 2; echo "Waiting..."; done'
+          timeout 60s bash -c 'until docker inspect --format="{{.State.Health.Status}}" platform-ci 2>/dev/null | grep -q "healthy"; do sleep 2; echo "Waiting..."; done'
           
           echo "Platform is healthy"
 
       - name: Platform health check
         run: |
-          curl -fsS "http://127.0.0.1:3025/api/health" || {
+          curl -fsSL "http://127.0.0.1:3025/api/health" || {
             echo "Health check failed"
-            docker-compose -f docker-compose-test.yml logs platform
+            docker compose -f docker-compose-test.yml logs platform-ci
             exit 1
           }
           echo "Health check passed"
@@ -138,74 +138,8 @@ jobs:
           
           if [ "${{ job.status }}" != 'success' ]; then
             echo "=== Docker Compose Logs ==="
-            docker-compose -f docker-compose-test.yml --profile ci logs
+            docker compose -f docker-compose-test.yml --profile ci-platform logs
           fi
           
-          docker-compose -f docker-compose-test.yml --profile ci down -v --remove-orphans || true
-          docker image rm -f keyshade/platform:ci-${GITHUB_SHA} || true
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    name: Validate Platform (Docker)
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Platform image
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4200
-          NEXT_PUBLIC_SENTRY_ENVIRONMENT: ci
-          NEXT_PUBLIC_POSTHOG_KEY: test-key
-          NEXT_PUBLIC_POSTHOG_HOST: https://app.posthog.com
-        run: |
-          docker build -t keyshade/platform:ci-${GITHUB_SHA} -f apps/platform/Dockerfile \
-            --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
-            --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
-            --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
-            --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
-            .
-
-      - name: Verify Platform image
-        run: docker image inspect keyshade/platform:ci-${{ github.sha }}
-
-      - name: Start Platform with Docker Compose
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-        run: |
-          docker-compose -f docker-compose.platform.ci.yml up -d
-          
-          echo "Waiting for Platform to be healthy..."
-          timeout 60s bash -c 'until docker inspect --format="{{.State.Health.Status}}" platform-ci | grep -q "healthy"; do sleep 2; echo "Waiting..."; done'
-          
-          echo "Platform is healthy"
-
-      - name: Platform health check
-        run: |
-          curl -fsS "http://127.0.0.1:3025/api/health" || {
-            echo "Health check failed"
-            docker-compose -f docker-compose.platform.ci.yml logs
-            exit 1
-          }
-          echo "Health check passed"
-
-      - name: Cleanup
-        if: always()
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          
-          if [ "${{ job.status }}" != 'success' ]; then
-            echo "=== Docker Compose Logs ==="
-            docker-compose -f docker-compose.platform.ci.yml logs
-          fi
-          
-          docker-compose -f docker-compose.platform.ci.yml down -v --remove-orphans || true
+          docker compose -f docker-compose-test.yml --profile ci-platform down -v --remove-orphans || true
           docker image rm -f keyshade/platform:ci-${GITHUB_SHA} || true
