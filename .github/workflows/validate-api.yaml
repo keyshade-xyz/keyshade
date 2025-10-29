@@ -119,7 +119,7 @@ jobs:
 
       - name: API health check
         run: |
-          curl -fsSL "http://127.0.0.1:4200/health" || {
+          curl -fsSL "http://127.0.0.1:4200/api/health" || {
             echo "Health check failed"
             docker compose -f docker-compose-test.yml logs api-ci
             exit 1
