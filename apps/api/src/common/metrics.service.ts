@@ -2,39 +2,55 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
-//import { writeFile } from 'fs/promises'
+import {
+  FILE_UPLOAD_SERVICE,
+  FileUploadService
+} from '@/file-upload/file-upload.service'
 
 @Injectable()
 export class MetricService {
   private readonly logger = new Logger(MetricService.name)
 
   constructor(
-    @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
+    @Inject(REDIS_CLIENT)
+    private readonly redisClient: { publisher: RedisClientType },
+    @Inject(FILE_UPLOAD_SERVICE)
+    private readonly fileUploadService: FileUploadService
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async UploadMetrics() {
-    //get metrics from db
-    // try {
-    //   const redisKey = `metrics`
-    //   const metrics = await this.redisClient.publisher.hGetAll(redisKey)
-    //   this.logger.log(`Fetched metrics: ${JSON.stringify(metrics)}`)
-    //   //place JSON in to metrics/ directory
-    //   await writeFile(`metrics/${Date.now()}.json`, JSON.stringify(metrics))
-    //   this.logger.log(`Placing metrics into metrics/ directory`)
-    //   await this.redisClient.publisher.del('metrics')
-    //   // upload to Azure
-    //   // create a file object
-    //   const filename = `${Date.now()}.json`
-    //   const jsonContent = JSON.stringify(metrics, null, 2)
-    //   const file = new File([jsonContent], filename, {
-    //     type: 'application/json'
-    //   })
-    //   this.logger.log(`Created metrics file ${filename}`)
-    // } catch (error) {
-    //   this.logger.error(`Failed to fetch metrics`, error as any)
-    // }
-    //flush cache
+    try {
+      // get yesterday's date and redis key
+      const yesterdayDate = new Date()
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+      const yesterday: string = yesterdayDate.toISOString().split('T')[0]
+      const redisKey = `metrics:${yesterday}`
+
+      // fetch metrics from redis
+      const metrics = await this.redisClient.publisher.hGetAll(redisKey)
+      this.logger.log(
+        `Fetched metrics for ${yesterday}: ${JSON.stringify(metrics)}`
+      )
+
+      // create JSON file
+      const filename = `metrics-${yesterday}.json`
+      const jsonContent = JSON.stringify({ date: yesterday, metrics }, null, 2)
+      const file = new File([jsonContent], filename, {
+        type: 'application/json'
+      })
+      this.logger.log(`Created metrics file ${filename}`)
+
+      // Upload file to storage
+      await this.fileUploadService.uploadFiles([file], 'metrics/', 0)
+      this.logger.log(`Uploaded metrics file ${filename} to storage`)
+
+      //delete local file after upload
+      await this.redisClient.publisher.del(redisKey)
+      this.logger.log(`Deleted Redis key ${redisKey} after uploading metrics`)
+    } catch (error) {
+      this.logger.error(`Failed to fetch metrics`, error as any)
+    }
   }
 
   async incrementSecretPull(numberOfSecrets: number): Promise<void> {
@@ -50,10 +66,9 @@ export class MetricService {
   }
 
   async incrementMetric(key: string, value: number): Promise<void> {
-    // change the name
-    const today: string = new Date().toISOString().split('T')[0];
+    const today: string = new Date().toISOString().split('T')[0]
     const redisKey: string = `metrics:${today}`
-    const TTL_SECONDS: number = 60 * 60 * 24 * 2  // 2 days
+    const TTL_SECONDS: number = 60 * 60 * 24 * 2 // 2 days
 
     try {
       const newValue: number = await this.redisClient.publisher.hIncrBy(
@@ -73,7 +88,10 @@ export class MetricService {
         `Metric ${key} incremented by ${value} on ${redisKey} (new=${newValue})`
       )
     } catch (err) {
-      this.logger.error(`Failed to increment metric ${key} on ${today} by the value ${value}`, err as any)
+      this.logger.error(
+        `Failed to increment metric ${key} on ${today} by the value ${value}`,
+        err as any
+      )
     }
   }
 }
