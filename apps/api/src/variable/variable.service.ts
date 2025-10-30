@@ -696,7 +696,10 @@ export class VariableService {
     variableSlug: Variable['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: VariableVersion['version']
-  ) {
+  ): Promise<{
+    count: number
+    currentRevision: RawVariableRevision
+  }> {
     this.logger.log(
       `User ${user.id} attempted to rollback variable ${variableSlug} to version ${rollbackVersion}`
     )
@@ -724,18 +727,17 @@ export class VariableService {
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
-    // Filter the variable versions by the environment
-    this.logger.log(
-      `Filtering variable versions of variable ${variableSlug} in environment ${environmentSlug}`
-    )
-    variable.versions = variable.versions.filter(
-      (version) => version.environment.id === environmentId
-    )
-    this.logger.log(
-      `Found ${variable.versions.length} versions for variable ${variableSlug} in environment ${environmentSlug}`
-    )
+    // TODO: remove this after implementing variable cache with variableCache.getRawVariable call
+    // Get all the variable versions
+    const variableVersions = await this.prisma.variableVersion.findMany({
+      where: {
+        variableId: variable.id,
+        environmentId
+      },
+      select: InclusionQuery.Variable['versions']['select']
+    })
 
-    if (variable.versions.length === 0) {
+    if (variableVersions.length === 0) {
       const errorMessage = `Variable ${variable} has no versions for environment ${environmentSlug}`
       this.logger.error(errorMessage)
       throw new NotFoundException(
@@ -744,7 +746,7 @@ export class VariableService {
     }
 
     let maxVersion = 0
-    for (const element of variable.versions) {
+    for (const element of variableVersions) {
       if (element.version > maxVersion) {
         maxVersion = element.version
       }
@@ -774,11 +776,13 @@ export class VariableService {
         }
       }
     })
+    const currentRevision = variableVersions.find(
+      (revision) => revision.version === rollbackVersion
+    )!
+    const variableValue = currentRevision.value
     this.logger.log(
       `Rolled back variable ${variableSlug} to version ${rollbackVersion}`
     )
-
-    const variableValue = variable.versions[rollbackVersion - 1].value
 
     try {
       // Notify the new variable version through Redis
@@ -821,10 +825,6 @@ export class VariableService {
       },
       this.prisma
     )
-
-    const currentRevision = variable.versions.find(
-      (version) => version.version === rollbackVersion
-    )!
 
     return {
       ...result,
