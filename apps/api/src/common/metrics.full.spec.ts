@@ -335,14 +335,13 @@ describe('MetricService E2E Tests', () => {
       await expect(service['UploadMetrics']()).resolves.not.toThrow()
     })
 
-    it('should throw if increment fails', async () => {
+    it('should not throw if increment fails', async () => {
       mockRedisClient.publisher.hIncrBy.mockRejectedValue(
         new Error('Redis error')
       )
 
-      await expect(service.incrementSecretPull(10)).rejects.toThrow(
-        'Redis error'
-      )
+      // incrementMetric catches errors and logs them, does not throw
+      await expect(service.incrementSecretPull(10)).resolves.not.toThrow()
     })
   })
 })
