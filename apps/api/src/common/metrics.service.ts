@@ -64,6 +64,19 @@ export class MetricService {
   ): Promise<void> {
     await this.incrementMetric('totalRunCommandExecutions', numberOfRunCommands)
   }
+  async incrementGetAllSecretsOfProject(
+    numberOfProjects: number
+  ): Promise<void> {
+    await this.incrementMetric('totalGetAllSecretsOfProject', numberOfProjects)
+  }
+  async incrementGetAllVariablesOfProject(
+    numberOfProjects: number
+  ): Promise<void> {
+    await this.incrementMetric(
+      'totalGetAllVariablesOfProject',
+      numberOfProjects
+    )
+  }
 
   async incrementMetric(key: string, value: number): Promise<void> {
     const today: string = new Date().toISOString().split('T')[0]
