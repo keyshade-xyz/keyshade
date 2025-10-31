@@ -1185,6 +1185,13 @@ export class SecretService {
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
 
+
+    try {
+      await this.metricsService.incrementSecretPull(secrets.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment secret pull metric: ${err}`)
+    }
+
     const hydratedSecrets: HydratedSecret[] = []
 
     for (const secret of secrets) {

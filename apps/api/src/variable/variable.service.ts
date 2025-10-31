@@ -1111,6 +1111,12 @@ export class VariableService {
       `Fetched ${variables.length} variables of project ${projectSlug}`
     )
 
+    try {
+      await this.metricsService.incrementVariablePull(variables.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment variable pull metric: ${err}`)
+    }
+
     const hydratedVariables: HydratedVariable[] = []
 
     for (const variable of variables) {
