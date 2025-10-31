@@ -95,32 +95,6 @@ describe('MetricService E2E Tests', () => {
       )
     })
 
-    it('should track number of getAllSecretsOfProject calls', async () => {
-      const numberOfProjects = 15
-
-      await service.incrementGetAllSecretsOfProject(numberOfProjects)
-
-      const today = new Date().toISOString().split('T')[0]
-      expect(mockRedisClient.publisher.hIncrBy).toHaveBeenCalledWith(
-        `metrics:${today}`,
-        'totalGetAllSecretsOfProject',
-        numberOfProjects
-      )
-    })
-
-    it('should track number of getAllVariablesOfProject calls', async () => {
-      const numberOfProjects = 25
-
-      await service.incrementGetAllVariablesOfProject(numberOfProjects)
-
-      const today = new Date().toISOString().split('T')[0]
-      expect(mockRedisClient.publisher.hIncrBy).toHaveBeenCalledWith(
-        `metrics:${today}`,
-        'totalGetAllVariablesOfProject',
-        numberOfProjects
-      )
-    })
-
     it('should store metrics in per-day basis with date-based keys', async () => {
       await service.incrementSecretPull(10)
       await service.incrementVariablePull(20)
@@ -305,16 +279,6 @@ describe('MetricService E2E Tests', () => {
     it('should expose incrementRunCommandExecution as public function', () => {
       expect(service.incrementRunCommandExecution).toBeDefined()
       expect(typeof service.incrementRunCommandExecution).toBe('function')
-    })
-
-    it('should expose incrementGetAllSecretsOfProject as public function', () => {
-      expect(service.incrementGetAllSecretsOfProject).toBeDefined()
-      expect(typeof service.incrementGetAllSecretsOfProject).toBe('function')
-    })
-
-    it('should expose incrementGetAllVariablesOfProject as public function', () => {
-      expect(service.incrementGetAllVariablesOfProject).toBeDefined()
-      expect(typeof service.incrementGetAllVariablesOfProject).toBe('function')
     })
   })
 
