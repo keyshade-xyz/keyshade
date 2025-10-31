@@ -7,7 +7,7 @@ import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 function Navbar(): React.JSX.Element {
   return (
     <nav
-      className="mx-10 mt-5 flex w-full items-center justify-between rounded-full border border-[#728689]/60 px-2 py-1 md:w-[79.625rem] md:px-[2.94rem]"
+      className="mx-10 mt-5 flex w-full items-center justify-between rounded-full border border-[#728689]/60 px-2 py-1 lg:w-[79.625rem] lg:px-[2.94rem]"
       style={{
         background:
           'linear-gradient(180deg, rgba(226, 232, 255, 0.15) 0%, rgba(226, 232, 255, 0.03) 100%)'
@@ -17,7 +17,7 @@ function Navbar(): React.JSX.Element {
         <Logo className="hidden md:flex" />
         <LogoM className="flex md:hidden" />
       </Link>
-      <ul className="hidden gap-x-4 text-white/60 md:flex">
+      <ul className="hidden gap-x-4 text-white/60 lg:flex">
         <li>
           <a
             href="https://docs.keyshade.io/"
@@ -58,7 +58,7 @@ function Navbar(): React.JSX.Element {
       <div className="flex items-center gap-x-4">
         <a href="https://git.new/keyshade">
           <button
-            className="hidden rounded-full border border-white/50 px-4 py-2 text-white/80 md:flex"
+            className="hidden rounded-full border border-white/50 px-4 py-2 text-white/80 lg:flex"
             type="button"
           >
             View GitHub

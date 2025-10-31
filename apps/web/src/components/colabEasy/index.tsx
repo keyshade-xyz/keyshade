@@ -10,7 +10,7 @@ import { FollowerPointerCard } from '../ui/following-pointer'
 
 function ColabEasy(): React.JSX.Element {
   return (
-    <section className="mt-[10vw] flex flex-col items-center gap-y-[5rem] md:gap-y-[9.69rem]">
+    <section className="mt-[10vw] flex flex-col items-center gap-y-[5rem] px-4 md:gap-y-[9.69rem]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
         <h2
           className={`${GeistSans.className}  text-center text-4xl md:text-5xl`}
@@ -44,7 +44,7 @@ function ColabEasy(): React.JSX.Element {
                 Fine-tune Permissions, for allocated Team Members
               </span>
             </div>
-            <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[21rem] md:translate-x-[4rem] md:py-0 md:pt-10" />
+            <CustomrollSVG className="w-full p-4" />
           </Card>
         </article>
         <article className="row-span-1">
