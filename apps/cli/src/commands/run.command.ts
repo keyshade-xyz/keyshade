@@ -7,7 +7,12 @@ import type {
   CommandArgument,
   CommandOption
 } from '@/types/command/command.types'
-import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
+import {
+  fetchPrivateKey,
+  fetchProjectRootConfig,
+  fetchProjectRootConfigFromPath
+} from '@/util/configuration'
+import type { ProjectRootConfig } from '@/types/index.types'
 import type {
   ClientRegisteredResponse,
   Configuration,
@@ -34,7 +39,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'Run a command'
+    return 'Run a command with live configuration updates from keyshade'
   }
 
   getArguments(): CommandArgument[] {
@@ -51,6 +56,21 @@ export default class RunCommand extends BaseCommand {
         short: '-e',
         long: '--environment <slug>',
         description: 'Environment to configure'
+      },
+      {
+        short: '-w',
+        long: '--workspace <slug>',
+        description: 'Workspace to configure'
+      },
+      {
+        short: '-p',
+        long: '--project <slug>',
+        description: 'Project to configure'
+      },
+      {
+        short: '-f',
+        long: '--config-file <path>',
+        description: 'Path to config file (default: keyshade.json)'
       }
     ]
   }
@@ -65,12 +85,13 @@ export default class RunCommand extends BaseCommand {
     // args return string[][] instead of string[]
     this.command = args[0].join(' ')
 
-    const configurations = await this.fetchConfigurations()
-
-    // If the user passed in an environment, override the one in our configurations object
-    if (options.environment) {
-      configurations.environment = options.environment
-    }
+    // Pass all relevant options to fetchConfigurations for proper precedence handling
+    const configurations = await this.fetchConfigurations({
+      workspace: options.workspace,
+      project: options.project,
+      environment: options.environment,
+      configFile: options.configFile
+    })
 
     await this.connectToSocket(configurations)
     await this.sleep(3000)
@@ -83,23 +104,45 @@ export default class RunCommand extends BaseCommand {
     })
   }
 
-  private async fetchConfigurations(): Promise<RunData> {
-    const { environment, project, workspace, quitOnDecryptionFailure } =
-      await fetchProjectRootConfig()
-    const privateKey = await fetchPrivateKey(project)
+  private async fetchConfigurations(
+    options: {
+      workspace?: string
+      project?: string
+      environment?: string
+      configFile?: string
+    } = {}
+  ): Promise<RunData> {
+    // Step 1: Load base configuration from file
+    let baseConfig: ProjectRootConfig
+
+    if (options.configFile) {
+      // Use custom config file if specified
+      baseConfig = await fetchProjectRootConfigFromPath(options.configFile)
+    } else {
+      // Use default keyshade.json
+      baseConfig = await fetchProjectRootConfig()
+    }
+
+    // Step 2: Override with flags (highest precedence)
+    const finalConfig = {
+      workspace: options.workspace || baseConfig.workspace,
+      project: options.project || baseConfig.project,
+      environment: options.environment || baseConfig.environment,
+      quitOnDecryptionFailure: baseConfig.quitOnDecryptionFailure
+    }
+
+    // Step 3: Fetch private key for the project
+    const privateKey = await fetchPrivateKey(finalConfig.project)
 
     if (!privateKey) {
       throw new Error(
-        'Private key not found for this project. Please run `keyshade init` or `keyshade config private-key add` to add a private key.'
+        `Private key not found for project '${finalConfig.project}'. Please run \`keyshade init\` or \`keyshade config private-key add\` to add a private key.`
       )
     }
 
     return {
-      environment,
-      project,
-      workspace,
-      privateKey,
-      quitOnDecryptionFailure
+      ...finalConfig,
+      privateKey
     }
   }
 
@@ -333,12 +376,16 @@ export default class RunCommand extends BaseCommand {
     // POSIX: create a new process group so -PID signals the entire tree
     const isWin = process.platform === 'win32'
 
-    this.childProcess = spawn(this.command, {
+    this.childProcess = spawn(this.command, [], {
       shell: true,
       stdio: 'inherit',
       env: {
         ...process.env,
-        ...this.processEnvironmentalVariables
+        ...Object.fromEntries(
+          Object.entries(this.processEnvironmentalVariables).map(
+            ([key, value]) => [key, String(value)]
+          )
+        )
       },
       detached: !isWin // only on POSIX
     })
