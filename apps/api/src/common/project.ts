@@ -1,6 +1,5 @@
 import { ProjectAccessLevel, Workspace } from '@prisma/client'
 import { createKeyPair, sEncrypt } from '@/common/cryptography'
-import { AuthorizationService } from '@/auth/service/authorization.service'
 import { CreateProject } from '@/project/dto/create.project/create.project'
 import { PrismaService } from '@/prisma/prisma.service'
 import { Logger } from '@nestjs/common'
@@ -27,8 +26,7 @@ export const createProject = async (
   dto: CreateProject,
   prisma: PrismaService,
   slugGenerator: SlugGenerator,
-  hydrationService: HydrationService,
-  authorizationService: AuthorizationService
+  hydrationService: HydrationService
 ): Promise<HydratedProject> => {
   const logger = new Logger('createProject')
 
@@ -117,7 +115,6 @@ export const createProject = async (
 
   return await hydrationService.hydrateProject({
     project: newProject,
-    user,
-    authorizationService: authorizationService
+    user
   })
 }

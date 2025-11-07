@@ -7,6 +7,7 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { createWorkspace } from './workspace'
+import { createProject } from './project'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import { constructErrorBody, generateReferralCode } from './util'
 import SlugGenerator from './slug-generator.service'
@@ -80,6 +81,19 @@ export async function createUser(
       true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
+
+    // Create the user's default project
+    logger.log(
+      `Creating default project for user ${user.id} on workspace ${workspace.id}`
+    )
+    await createProject(
+      user as AuthenticatedUser,
+      workspace.slug,
+      { name: 'Example Project' },
+      prisma,
+      slugGenerator,
+      hydrationService
+    )
 
     return {
       ...user,
