@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 export default function EmptyProjectsState() {
   const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   return (
-    <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
+    <div className="flex h-full flex-col items-center justify-center gap-y-4">
       <FolderIconSVG width="100" />
       <div className="text-4xl">Start your First Project</div>
       <div>
