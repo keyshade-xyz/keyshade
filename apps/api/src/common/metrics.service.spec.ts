@@ -210,15 +210,9 @@ describe('MetricService E2E Tests', () => {
 
       await service['UploadMetrics']()
 
-      const uploadCall = mockFileUploadService.uploadFiles.mock.calls[0]
-      const file = uploadCall[0][0]
-      const fileContent = await file.text()
-      const parsedContent = JSON.parse(fileContent)
-
-      expect(parsedContent).toEqual({
-        date: expect.any(String),
-        metrics: {}
-      })
+      // When metrics are empty, upload should be skipped
+      expect(mockFileUploadService.uploadFiles).not.toHaveBeenCalled()
+      expect(mockRedisClient.publisher.del).not.toHaveBeenCalled()
     })
 
     it('should handle partial metrics data', async () => {

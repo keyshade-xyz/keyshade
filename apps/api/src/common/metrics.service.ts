@@ -33,6 +33,12 @@ export class MetricService {
         `Fetched metrics for ${yesterday}: ${JSON.stringify(metrics)}`
       )
 
+      // If no metrics were found for yesterday, do nothing.
+      if (Object.keys(metrics).length === 0) {
+        this.logger.log(`No metrics found for ${yesterday}. Skipping upload.`)
+        return
+      }
+
       // create JSON file
       const filename = `metrics-${yesterday}.json`
       const jsonContent = JSON.stringify({ date: yesterday, metrics }, null, 2)
@@ -45,53 +51,66 @@ export class MetricService {
       await this.fileUploadService.uploadFiles([file], 'metrics/', 0)
       this.logger.log(`Uploaded metrics file ${filename} to storage`)
 
-      //delete local file after upload
+      // On successful upload, delete the Redis key.
       await this.redisClient.publisher.del(redisKey)
       this.logger.log(`Deleted Redis key ${redisKey} after uploading metrics`)
     } catch (error) {
-      this.logger.error(`Failed to fetch metrics`, error as any)
+      this.logger.error(`Failed to upload metrics`, error as any)
     }
   }
 
   async incrementSecretPull(numberOfSecrets: number): Promise<void> {
-    await this.incrementMetric('totalSecretPulls', numberOfSecrets)
+    try {
+      await this.incrementMetric('totalSecretPulls', numberOfSecrets)
+    } catch (err) {
+      this.logger.error(`Failed to increment secret pull metric`, err as any)
+    }
   }
+
   async incrementVariablePull(numberOfVariables: number): Promise<void> {
-    await this.incrementMetric('totalVariablePulls', numberOfVariables)
+    try {
+      await this.incrementMetric('totalVariablePulls', numberOfVariables)
+    } catch (err) {
+      this.logger.error(`Failed to increment variable pull metric`, err as any)
+    }
   }
+
   async incrementRunCommandExecution(
     numberOfRunCommands: number
   ): Promise<void> {
-    await this.incrementMetric('totalRunCommandExecutions', numberOfRunCommands)
+    try {
+      await this.incrementMetric(
+        'totalRunCommandExecutions',
+        numberOfRunCommands
+      )
+    } catch (err) {
+      this.logger.error(
+        `Failed to increment run command execution metric`,
+        err as any
+      )
+    }
   }
 
-  async incrementMetric(key: string, value: number): Promise<void> {
+  private async incrementMetric(key: string, value: number): Promise<void> {
     const today: string = new Date().toISOString().split('T')[0]
     const redisKey: string = `metrics:${today}`
     const TTL_SECONDS: number = 60 * 60 * 24 * 2 // 2 days
 
-    try {
-      const newValue: number = await this.redisClient.publisher.hIncrBy(
-        redisKey,
-        key,
-        value
-      )
+    const newValue: number = await this.redisClient.publisher.hIncrBy(
+      redisKey,
+      key,
+      value
+    )
 
-      // Ensure the key has a TTL so stale data doesn't persist forever
-      const ttl: number = await this.redisClient.publisher.ttl(redisKey)
-      // ttl < 0 means no expire (-1) or key does not exist (-2). Set expire when absent
-      if (ttl < 0) {
-        await this.redisClient.publisher.expire(redisKey, TTL_SECONDS)
-      }
-
-      this.logger.log(
-        `Metric ${key} incremented by ${value} on ${redisKey} (new=${newValue})`
-      )
-    } catch (err) {
-      this.logger.error(
-        `Failed to increment metric ${key} on ${today} by the value ${value}`,
-        err as any
-      )
+    // Ensure the key has a TTL so stale data doesn't persist forever
+    const ttl: number = await this.redisClient.publisher.ttl(redisKey)
+    // ttl < 0 means no expire (-1) or key does not exist (-2). Set expire when absent
+    if (ttl < 0) {
+      await this.redisClient.publisher.expire(redisKey, TTL_SECONDS)
     }
+
+    this.logger.log(
+      `Metric ${key} incremented by ${value} on ${redisKey} (new=${newValue})`
+    )
   }
 }

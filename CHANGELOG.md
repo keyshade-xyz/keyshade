@@ -110,7 +110,7 @@
 
 ## [2.41.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.41.0-stage.1...v2.41.0-stage.2) (2025-10-20)
 
-### 🚀 Featureså
+### 🚀 Features
 
 * **platform:** add search functionality to integrations page ([#1184](https://github.com/keyshade-xyz/keyshade/issues/1184)) ([83b0374](https://github.com/keyshade-xyz/keyshade/commit/83b0374fc2c3dd0a309b65476b5e58ab9a28140f))
 
