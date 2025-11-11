@@ -2,10 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
-import {
-  FILE_UPLOAD_SERVICE,
-  FileUploadService
-} from '@/file-upload/file-upload.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
 @Injectable()
 export class MetricService {
@@ -14,12 +11,11 @@ export class MetricService {
   constructor(
     @Inject(REDIS_CLIENT)
     private readonly redisClient: { publisher: RedisClientType },
-    @Inject(FILE_UPLOAD_SERVICE)
-    private readonly fileUploadService: FileUploadService
+    private readonly prisma: PrismaService
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async UploadMetrics() {
+  async persistMetrics() {
     try {
       // get yesterday's date and redis key
       const yesterdayDate = new Date()
@@ -35,27 +31,40 @@ export class MetricService {
 
       // If no metrics were found for yesterday, do nothing.
       if (Object.keys(metrics).length === 0) {
-        this.logger.log(`No metrics found for ${yesterday}. Skipping upload.`)
+        this.logger.log(`No metrics found for ${yesterday}. Skipping save.`)
         return
       }
 
-      // create JSON file
-      const filename = `metrics-${yesterday}.json`
-      const jsonContent = JSON.stringify({ date: yesterday, metrics }, null, 2)
-      const file = new File([jsonContent], filename, {
-        type: 'application/json'
-      })
-      this.logger.log(`Created metrics file ${filename}`)
+      // parse the JSON object to extract the fields
+      const date = yesterday
+      const totalSecretPulls = parseInt(metrics.totalSecretPulls || '0')
+      const totalVariablePulls = parseInt(metrics.totalVariablePulls || '0')
+      const totalRunCommandExecutions = parseInt(
+        metrics.totalRunCommandExecutions || '0'
+      )
 
-      // Upload file to storage
-      await this.fileUploadService.uploadFiles([file], 'metrics/', 0)
-      this.logger.log(`Uploaded metrics file ${filename} to storage`)
+      // save the item in the database
+      this.logger.log('Saving metrics to database')
+      try {
+        await this.prisma.metric.create({
+          data: {
+            date,
+            totalSecretPulls,
+            totalVariablePulls,
+            totalRunCommandExecutions
+          }
+        })
+      } catch (error) {
+        this.logger.error(`Failed to save metrics to database: ${error}`)
+        return
+      }
+      this.logger.log('Saved metrics to database')
 
-      // On successful upload, delete the Redis key.
+      // On successful save, delete the Redis key.
       await this.redisClient.publisher.del(redisKey)
-      this.logger.log(`Deleted Redis key ${redisKey} after uploading metrics`)
+      this.logger.log(`Deleted Redis key ${redisKey} after saving metrics`)
     } catch (error) {
-      this.logger.error(`Failed to upload metrics`, error as any)
+      this.logger.error(`Failed to save metrics`, error as any)
     }
   }
 
