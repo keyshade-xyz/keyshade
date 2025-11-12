@@ -20,6 +20,7 @@ import ImportCommand from '@/commands/import.command'
 
 const program = new Command()
 
+program.name('keyshade')
 program.version(version, '-V, --version', 'Output the current version')
 program.option('--profile <string>', 'The profile to use')
 program.option('--token <string>', 'Token used to authenticate your requests')
