@@ -1,10 +1,10 @@
 {
-  "version": "3.6.1",
+  "version": "3.6.3",
   "description": "Keyshade CLI - Secure, real-time secret and configuration management",
   "homepage": "https://keyshade.io",
   "license": "MPL-2.0",
-  "url": "https://github.com/keyshade-xyz/keyshade/releases/download/v2.42.0/keyshade-cli.exe",
-  "hash": "2e3a9ec93fa1380be6b6cf44b22d30114dd1f8fbba66835116304706fdff360c",
+  "url": "https://github.com/keyshade-xyz/keyshade/releases/download/v2.43.0/keyshade-cli.exe",
+  "hash": "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5",
   "bin": "keyshade.exe",
   "pre_install": "Rename-Item \"$dir\\keyshade-cli.exe\" -NewName \"keyshade.exe\" -Force",
   "autoupdate": {
