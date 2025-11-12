@@ -8,7 +8,7 @@
     <a href="https://keyshade.io?ref=github" target="_blank"><b>Website</b></a> •
     <a href="https://docs.keyshade.io/" target="_blank"><b>Documentation</b></a> •
     <a href="https://discord.gg/dh8F3Dzt" target="_blank"><b>Join our Community</b></a> • 
-    <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a>
+    <a href="https://twitter.com/keyshade_io" target="_blank"><b>Twitter</b></a>
     <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
 </p>
 

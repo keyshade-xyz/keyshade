@@ -1185,7 +1185,6 @@ export class SecretService {
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
 
-
     try {
       await this.metricsService.incrementSecretPull(secrets.length)
     } catch (err) {
