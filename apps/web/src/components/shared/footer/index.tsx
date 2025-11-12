@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { FooterLogoSVG } from '@public/shared'
 import { SparklesCore } from '@/components/ui/sparkles'
 import EncryptText from '@/components/ui/encrypt-text'
+
 // import EncryptButton from '@/components/ui/encrypt-btn'
 
 function Footer(): React.JSX.Element {
@@ -39,7 +40,7 @@ function Footer(): React.JSX.Element {
               </span>
               <ul className="mt-3 flex flex-col gap-y-3">
                 <a
-                  href="https://docs.keyshade.xyz/"
+                  href="https://docs.keyshade.io/"
                   rel="noreferrer"
                   target="_blank"
                 >
@@ -47,7 +48,7 @@ function Footer(): React.JSX.Element {
                 </a>
                 <a
                   className="text-white/60 transition-colors hover:text-white"
-                  href="https://blog.keyshade.xyz/"
+                  href="https://blog.keyshade.io/"
                   rel="noreferrer"
                   target="_blank"
                 >
@@ -87,7 +88,7 @@ function Footer(): React.JSX.Element {
                   </Link>
                 </li>
                 <li className="text-white/60 transition-colors hover:text-white">
-                  <Link href="mailto:support@keyshade.xyz">
+                  <Link href="mailto:support@keyshade.io">
                     <EncryptText TARGET_TEXT="Contact" />
                   </Link>
                 </li>
@@ -119,7 +120,7 @@ function Footer(): React.JSX.Element {
               <ul className="mt-3 flex flex-col gap-y-3">
                 <a
                   className="text-white/60 transition-colors hover:text-white"
-                  href="https://twitter.com/keyshade_xyz"
+                  href="https://twitter.com/keyshade_io"
                   rel="noreferrer"
                   target="_blank"
                 >

@@ -24,7 +24,7 @@ Here's what this guide covers:
 > 💡 If you're not familiar with how Keyshade works, we recommend starting with [What is Keyshade?](/docs/getting-started/introduction.md)
 
 ## Create or Use an Existing Lambda Function
-You can either create a new Lambda function or use and existing one. Based on your preference follow the below steps:
+You can either create a new Lambda function or use an existing one. Based on your preference follow the below steps:
 
 ### Creating a New Lambda Function
 
@@ -169,7 +169,7 @@ You can either create a new IAM user specifically for Keyshade or use an existin
 ## Create a Keyshade Project and Add Secrets
 
 1. **Access Keyshade Dashboard**
-    - Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+    - Go to the [Keyshade Dashboard](https://app.keyshade.io/)
     - Sign in to your account
 
 2. **Create or Select Project**

@@ -3,6 +3,10 @@
   "compilerOptions": {
     "jsx": "preserve",
     "target": "ESNext",
+    "sourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "declarationMap": true,
     "plugins": [
       {
         "name": "next"
@@ -22,7 +26,8 @@
     "tailwind.config.ts",
     ".next/types/**/*.ts",
     "sentry.*.ts",
-    "next.config.ts"
+    "next.config.ts",
+    ".storybook/**/*"
   ],
   "exclude": ["node_modules"]
 }

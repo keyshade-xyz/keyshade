@@ -4,7 +4,7 @@ description: Design of our CLI
 
 # CLI
 
-The CLI is what you use to connect your applications to keyshade to utilize the configurations. Apart from that, you can also use the CLI to manage your configurations, workspace, and other things. In this document, we will cover how we have developed our CLI, talk about the infrastructure, and how you can start contributing to it.
+The CLI is what you use to connect your applications to Keyshade to utilize the configurations. Apart from that, you can also use the CLI to manage your configurations, workspace, and other things. In this document, we will cover how we have developed our CLI, talk about the infrastructure, and how you can start contributing to it.
 
 ## Stack
 

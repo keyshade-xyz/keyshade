@@ -75,7 +75,7 @@ export default function UpdateEnvironment({
       <div className="flex flex-col gap-y-2">
         <p className="font-medium text-white">Project</p>
         <Select disabled value={initialProject.slug}>
-          <SelectTrigger className="h-[2.25rem] w-[35rem] rounded border bg-white/5 opacity-50">
+          <SelectTrigger className="h-9 w-140 rounded-sm border bg-white/5 opacity-50">
             <SelectValue>{initialProject.name}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -93,7 +93,7 @@ export default function UpdateEnvironment({
           onValueChange={handleEnvironmentSelection}
           value={getSelectValue()}
         >
-          <SelectTrigger className="h-[2.25rem] w-[35rem] rounded border bg-white/5">
+          <SelectTrigger className="h-9 w-140 rounded-sm border bg-white/5">
             <SelectValue placeholder="Select an environment">
               {getSelectDisplayValue()}
             </SelectValue>

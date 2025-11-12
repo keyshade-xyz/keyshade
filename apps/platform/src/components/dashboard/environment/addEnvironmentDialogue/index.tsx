@@ -125,7 +125,7 @@ export default function AddEnvironmentDialogue() {
           <AddSVG /> Add Environment
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[25rem] w-[31.625rem] bg-[#18181B] text-white ">
+      <DialogContent className="h-100 w-126.5 bg-[#18181B] text-white ">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new environment
@@ -138,15 +138,15 @@ export default function AddEnvironmentDialogue() {
 
         <div className=" text-white">
           <div className="space-y-4">
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="h-5 w-28.5 text-base font-semibold"
                 htmlFor="environment-name"
               >
                 Environment Name
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                 id="environment-name"
                 onChange={(e) =>
                   setNewEnvironmentData({
@@ -159,15 +159,15 @@ export default function AddEnvironmentDialogue() {
               />
             </div>
 
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="h-5 w-28.5 text-base font-semibold"
                 htmlFor="environmente-note"
               >
                 Environment Description
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                 id="environment-note"
                 onChange={(e) =>
                   setNewEnvironmentData({
@@ -182,7 +182,7 @@ export default function AddEnvironmentDialogue() {
 
             <div className="flex justify-end pt-4">
               <Button
-                className="h-[2.625rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                className="h-10.5 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 disabled={isLoading}
                 onClick={handleAddEnvironment}
               >

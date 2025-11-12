@@ -14,14 +14,14 @@ export interface HydratedVariableRevision {
     maxAllowedRevisions: number
     totalRevisions: number
   }
-  value: VariableVersion['value']
-  version: VariableVersion['version']
-  createdOn: VariableVersion['createdOn']
   createdBy: {
     id: User['id']
     name: User['name']
     profilePictureUrl: User['profilePictureUrl']
   }
+  value: VariableVersion['value']
+  version: VariableVersion['version']
+  createdOn: VariableVersion['createdOn']
 }
 
 export interface RawVariableRevision

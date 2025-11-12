@@ -15,7 +15,7 @@ function Navbar(): React.JSX.Element {
   const navContent: { name: string; href: string }[] = [
     {
       name: 'Docs',
-      href: 'https://docs.keyshade.xyz/'
+      href: 'https://docs.keyshade.io/'
     },
     {
       name: 'About',
@@ -27,7 +27,7 @@ function Navbar(): React.JSX.Element {
     },
     {
       name: 'Blog',
-      href: 'https://blog.keyshade.xyz/'
+      href: 'https://blog.keyshade.io/'
     }
   ]
 
@@ -56,7 +56,7 @@ function Navbar(): React.JSX.Element {
           </TertiaryButton>
         </a>
         <a
-          href="https://app.keyshade.xyz"
+          href="https://app.keyshade.io"
           rel="noopener noreferrer"
           target="_blank"
         >

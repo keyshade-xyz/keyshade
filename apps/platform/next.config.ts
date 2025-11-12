@@ -6,6 +6,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
+  productionBrowserSourceMaps: true,
   webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -89,7 +90,7 @@ const sentryBuildOptions: SentryBuildOptions = {
   // tunnelRoute: "/monitoring",
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
+  disableLogger: process.env.NODE_ENV === 'production',
 
   // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
   // See the following for more information:

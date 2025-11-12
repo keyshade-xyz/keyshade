@@ -128,7 +128,7 @@ export default function MembersHeader(): React.JSX.Element {
                 </Label>
                 <div className="flex flex-row gap-1">
                   <Input
-                    className="w-3/4 bg-white/5 text-white outline-none"
+                    className="w-3/4 bg-white/5 text-white outline-hidden"
                     onChange={(e) => setEmail(e.target.value)}
                     type="email"
                     value={email}
@@ -175,7 +175,7 @@ export default function MembersHeader(): React.JSX.Element {
                     )}
                   </div>
                   <ChevronDown
-                    className={`flex-shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    className={`shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                     size={16}
                   />
                 </Button>
@@ -191,7 +191,7 @@ export default function MembersHeader(): React.JSX.Element {
                           checked={selectedRoles.some(
                             (r) => r.roleSlug === role.slug
                           )}
-                          className="mr-2 rounded-sm border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
+                          className="mr-2 rounded-xs border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
                           onCheckedChange={() =>
                             toggleRole({
                               name: role.name,

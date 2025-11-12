@@ -4,11 +4,11 @@ description: How we develop our integrations
 
 # Integrations
 
-keyshade uses integrations to allow users tie up their existing infrastructure with our platform. This document covers how we have developed our integrations, allowing you to understand the architecture and develop your own integrations.
+Keyshade uses integrations to allow users to tie up their existing infrastructure with our platform. This document covers how we have developed our integrations, allowing you to understand the architecture and develop your own integrations.
 
 ## Classification of integrations
 
-keyshade broadly classifies integrations into two types:
+Keyshade broadly classifies integrations into two types:
 
 - **Communication-oriented integrations**: These integrations are used to send notifications to the user. For example, sending a Discord notification to the user when a new project is created.
 
@@ -36,13 +36,13 @@ Here's a brief overview of the classes used in our integrations:
 
 Apart from the classes, we also use a couple of types to manage the integrations. You can find these in [integration.types.ts](../../../apps/api/src/integration/integration.types.ts). The types are:
 
-- **[IntegrationMetadata](../../../apps/api/src/integration/integration.types.ts#L38)**: The purpose of this interface is to ensure an uniform type for the data that will be stored in the integration's metadata. Ideally, every integration will be using a particular set of metadata that it will use to make API calls on behalf of keyshade. This interface is to be extended by every integration's metadata, and define the keys that the metadata will have. This will then be validated by the `validateMetadata` method in the `BaseIntegration` class.
+- **[IntegrationMetadata](../../../apps/api/src/integration/integration.types.ts#L38)**: The purpose of this interface is to ensure an uniform type for the data that will be stored in the integration's metadata. Ideally, every integration will be using a particular set of metadata that it will use to make API calls on behalf of Keyshade. This interface is to be extended by every integration's metadata, and define the keys that the metadata will have. This will then be validated by the `validateMetadata` method in the `BaseIntegration` class.
 
 - **[IntegrationEventData](../../../apps/api/src/integration/integration.types.ts#L17)**: This interface is used to define the data that will be passed to the integrations when an event is triggered.
 
 ## How the flow works
 
-- An event occurs in keyshade
+- An event occurs in Keyshade
 - The [createEvent](../../../apps/api/src/common/create-event.ts), which is called whenever an event occurs, tries to gather the integrations that are registered for this particular event. You can refer [this](../../../apps/api/src/common/create-event.ts#L77) to see how it does that.
 - After all the registered integrations for this event are retrieved from the database, we run a for loop to create instances of the integrations and call the `emitEvent` method on them.
 - The `emitEvent` function retrieves the authentication and other necessary integration details from the `metadata` parameter. It then crafts a request to the integration's API and sends the `data` parameter to the integration's API.

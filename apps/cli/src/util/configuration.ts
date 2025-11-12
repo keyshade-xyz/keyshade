@@ -1,4 +1,5 @@
 import type {
+  DefaultProfileConfig,
   PrivateKeyConfig,
   ProfileConfig,
   ProjectRootConfig
@@ -26,6 +27,11 @@ export const getPrivateKeyConfigurationFilePath = () => {
   return `${process.env[home]}/.keyshade/private-keys.json`
 }
 
+export const getDefaultProfileConfigurationFilePath = () => {
+  const home = getHomeDirectory()
+  return `${process.env[home]}/.keyshade/default-profile.json`
+}
+
 export const fetchProfileConfig = async (): Promise<ProfileConfig> => {
   const path = getProfileConfigurationFilePath()
 
@@ -48,6 +54,18 @@ export const fetchPrivateKeyConfig = async (): Promise<PrivateKeyConfig> => {
 
   return JSON.parse(await readFile(path, 'utf8'))
 }
+
+export const fetchDefaultProfileConfig =
+  async (): Promise<DefaultProfileConfig> => {
+    const path = getDefaultProfileConfigurationFilePath()
+
+    if (!existsSync(path)) {
+      await writeFile(path, '{}', 'utf8')
+      Logger.info('~/.keyshade/default-profile.json file was created.')
+    }
+
+    return JSON.parse(await readFile(path, 'utf8'))
+  }
 
 export const fetchProjectRootConfig = async (): Promise<ProjectRootConfig> => {
   const path = './keyshade.json'
@@ -83,6 +101,14 @@ export const writeProjectRootConfig = async (
   config: ProjectRootConfig
 ): Promise<void> => {
   await writeFile('./keyshade.json', JSON.stringify(config, null, 2), 'utf8')
+}
+
+export const writeDefaultProfileConfig = async (
+  config: DefaultProfileConfig
+): Promise<void> => {
+  const path = getDefaultProfileConfigurationFilePath()
+  await ensureDirectoryExists(path)
+  await writeFile(path, JSON.stringify(config, null, 2), 'utf8')
 }
 
 const ensureDirectoryExists = async (path: string) => {

@@ -87,6 +87,11 @@ export const generateOtp = async (
       `Generated OTP for user ${userId}. OTP ${otp.id} is valid until ${otp.expiresAt}`
     )
 
+    // @ts-expect-error -- false positive
+    if (process.env.NODE_ENV !== 'production') {
+      logger.log(`Use this OTP: ${otp.code}`)
+    }
+
     return otp
   } catch (error) {
     logger.error(`Error generating OTP for user ${userId}`)
@@ -216,7 +221,7 @@ export const mapEntriesToEventMetadata = (
           acc[entry.environmentSlug] = entry.value
           return acc
         },
-        {} as Record<string, string>
+        {} as Record<Environment['name'], string>
       )
     : {}
 }

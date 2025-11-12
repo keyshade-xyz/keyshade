@@ -3,11 +3,11 @@ import { useAtom, useAtomValue } from 'jotai'
 import { Plus } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
-import CreateProjectName from './create-project-name'
-import CreateProjectDescription from './create-project-description'
-import CreateProjectAccessLevel from './create-project-access-level'
-import CreateProjectStorePrivateKey from './create-project-store-private-key'
 import CreateProjectEnvironmentList from './create-project-environment-list'
+import CreateProjectStorePrivateKey from './create-project-store-private-key'
+import CreateProjectAccessLevel from './create-project-access-level'
+import CreateProjectDescription from './create-project-description'
+import CreateProjectName from './create-project-name'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -108,18 +108,18 @@ export default function CreateProjectDialogue(): JSX.Element {
             </Button>
           )}
         </DialogTrigger>
-        <DialogContent className="h-[39.5rem] w-[47rem] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
-          <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
-            <DialogTitle className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
+        <DialogContent className="h-158 w-188 max-w-full rounded-[12px] border bg-[#1E1E1F] ">
+          <div className="flex h-12.5 w-full flex-col items-start justify-center">
+            <DialogTitle className=" font-geist h-7.5 w-34 text-[1.125rem] font-semibold text-white ">
               Create Project
             </DialogTitle>
 
-            <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
+            <DialogDescription className=" font-inter h-5 w-full text-[0.875rem] font-normal text-[#D4D4D4]">
               Create your new project
             </DialogDescription>
           </div>
           <div className="flex flex-col gap-y-8 overflow-y-scroll px-2">
-            <div className="flex h-[29.125rem] w-full flex-col gap-4 py-4">
+            <div className="flex h-116.5 w-full flex-col gap-4 py-4">
               {/* NAME */}
               <CreateProjectName
                 onChange={(value) => {
@@ -181,9 +181,9 @@ export default function CreateProjectDialogue(): JSX.Element {
               </div>
             </div>
           </div>
-          <div className="flex h-[2rem] w-full justify-end">
+          <div className="flex h-8 w-full justify-end">
             <Button
-              className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
+              className="font-inter h-9 w-32 rounded-md text-[0.875rem] font-medium"
               disabled={isLoading}
               onClick={createNewProject}
               variant="secondary"

@@ -55,7 +55,7 @@ function Hero(): React.JSX.Element {
             </CtaButton>
           </a>
           <a
-            href="https://app.keyshade.xyz"
+            href="https://app.keyshade.io"
             rel="noopener noreferrer"
             target="_blank"
           >

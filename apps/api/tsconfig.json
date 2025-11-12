@@ -10,6 +10,8 @@
     "esModuleInterop": true,
     "target": "ES2022",
     "sourceMap": true,
+    "inlineSources": true,
+    "declarationMap": true,
     "outDir": "./dist",
     "baseUrl": ".",
     "incremental": true,

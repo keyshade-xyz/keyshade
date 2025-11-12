@@ -151,7 +151,7 @@ export default function DownloadInvoice({
       case 'partially_refunded':
         return (
           <Badge
-            className="!border-[#F9773D3D] !bg-[#F9773D33] !text-[#F9773D]"
+            className="border-[#F9773D3D]! bg-[#F9773D33]! text-[#F9773D]!"
             color="yellow"
             icon={<MoneySend />}
             type="icon"

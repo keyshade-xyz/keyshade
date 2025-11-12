@@ -85,13 +85,13 @@ Keyshade sends notifications to Slack using a Slack App with bot permissions. Yo
 
 ### Step 1: Access Integration Settings
 
-- Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+- Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 
 ## Create a Keyshade Project
 
 Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
 
-1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+1. Go to the [Keyshade Dashboard](https://app.keyshade.io/)
 2. Click **"Create Project"**
 3. Name your project (e.g., `my-slack-app`)
 4. **Note:** You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
@@ -111,7 +111,7 @@ Before setting up the integration, you need a Keyshade project with your secrets
 
 ### Select Project and Environments (optional)
 
-- If you don’t select a project: Keyshade will listen for events from all projects in the workspace
+- If you don’t select a project: Keyshade will listen for events from the entire workspace
 - If you select a project but no environment(s): it will listen for all environments in that project
 - If you select a project and one or more environments: it will listen only to those environments of that project
 

@@ -1,11 +1,11 @@
 {
   "name": "@keyshade/cli",
-  "version": "3.3.0-stage.2",
+  "version": "3.6.4",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
   "private": false,
-  "homepage": "https://docs.keyshade.xyz/getting-started/introduction",
+  "homepage": "https://docs.keyshade.io/getting-started/introduction",
   "repository": {
     "url": "https://github.com/keyshade-xyz/keyshade",
     "type": "git"
@@ -40,9 +40,6 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@clack/core": "^0.3.4",
-    "@clack/prompts": "^0.7.0",
-    "@sentry/node": "^7.102.0",
-    "@sentry/profiling-node": "^7.102.0",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
@@ -51,7 +48,6 @@
     "dotenv": "^16.4.7",
     "eccrypto": "^1.1.6",
     "figlet": "^1.7.0",
-    "fs": "0.0.1-security",
     "glob": "^11.0.0",
     "nodemon": "^3.1.4",
     "socket.io-client": "^4.7.5",
