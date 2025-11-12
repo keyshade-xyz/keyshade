@@ -1,3 +1,13 @@
+## [2.44.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.1...v2.44.0-stage.1) (2025-11-12)
+
+### 🚀 Features
+
+* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([f131344](https://github.com/keyshade-xyz/keyshade/commit/f13134410ae49f4363e8de13478c964220b9c0f5))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.4 [skip ci] ([0b0720d](https://github.com/keyshade-xyz/keyshade/commit/0b0720d4279b6c841079c8efc2a1cd549b8c53d7))
+
 ## [2.43.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0...v2.43.1) (2025-11-12)
 
 ### 🐛 Bug Fixes
