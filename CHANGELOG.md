@@ -1,3 +1,14 @@
+## [2.43.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0...v2.43.1) (2025-11-12)
+
+### 🐛 Bug Fixes
+
+* **cli:** command name issue ([46441ca](https://github.com/keyshade-xyz/keyshade/commit/46441ca3793159f455556abf20373dbd6e5fb754))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.3 [skip ci] ([ef5b1aa](https://github.com/keyshade-xyz/keyshade/commit/ef5b1aa2d0f122a80203272c35c17e8eb5a66b2d))
+* **cli:** update package managers to use v3.6.3 [skip ci] ([706379d](https://github.com/keyshade-xyz/keyshade/commit/706379d199edefad71db82ea22e2482e1e0f5886))
+
 ## [2.43.0](https://github.com/keyshade-xyz/keyshade/compare/v2.42.0...v2.43.0) (2025-11-12)
 
 ### 🚀 Features
