@@ -30,6 +30,11 @@ export const createProject = async (
 ): Promise<HydratedProject> => {
   const logger = new Logger('createProject')
 
+  logger.log(
+    `Attempting to create project ${dto.name} for workspace ${workspaceSlug}`
+  )
+
+  logger.log(`Checking if workspace ${workspaceSlug} exists`)
   const workspace = await prisma.workspace.findUnique({
     where: {
       slug: workspaceSlug
@@ -66,6 +71,7 @@ export const createProject = async (
 
   const newProjectId = v4()
 
+  logger.log(`Creating project ${dto.name} under workspace ${workspaceSlug}`)
   const createNewProject = prisma.project.create({
     data: {
       id: newProjectId,
@@ -112,6 +118,8 @@ export const createProject = async (
   ])
 
   const newProject = result[0]
+
+  logger.debug(`Created project ${newProject.name} (${newProject.slug})`)
 
   return await hydrationService.hydrateProject({
     project: newProject,
