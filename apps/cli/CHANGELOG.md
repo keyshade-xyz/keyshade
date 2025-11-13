@@ -414,3 +414,15 @@
 ### Patches
 
 - Update the name of the command to always display `keyshade`
+
+## 3.6.3
+
+### Patches
+
+- Update the name of the command to always display `keyshade`
+
+## 3.6.4
+
+### Patches
+
+- Fix a bug where all command names were switched to `keyshade` 

@@ -52,6 +52,7 @@ import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { ProjectCacheService } from '@/cache/project-cache.service'
 import { BulkCreateSecret } from '@/secret/dto/bulk.create.secret/bulk.create.secret'
+import { MetricService } from '@/common/metrics.service'
 
 @Injectable()
 export class SecretService {
@@ -64,6 +65,7 @@ export class SecretService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
+    private readonly metricsService: MetricService,
     @Inject(forwardRef(() => VariableService))
     private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
@@ -1183,6 +1185,12 @@ export class SecretService {
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
 
+    try {
+      await this.metricsService.incrementSecretPull(secrets.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment secret pull metric: ${err}`)
+    }
+
     const hydratedSecrets: HydratedSecret[] = []
 
     for (const secret of secrets) {
@@ -1316,6 +1324,12 @@ export class SecretService {
         name: secret.name,
         value: secret.versions[0].value
       })
+    }
+
+    try {
+      await this.metricsService.incrementSecretPull(response.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment secret pull metric: ${err}`)
     }
 
     return response
