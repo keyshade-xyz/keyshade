@@ -13,7 +13,7 @@ export class CreatePatDto {
   name: string
 
   @IsNumber()
-  @Min(1)
+  @Min(0) // No expiry
   @Max(365)
   @IsOptional()
   expiresAfterDays?: number

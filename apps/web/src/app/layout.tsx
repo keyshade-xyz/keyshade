@@ -2,14 +2,14 @@ import './global.css'
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Toaster } from 'sonner'
-import { PostHogProvider } from '../components/post-hog-provider'
+import { PostHogProvider } from '@/components/post-hog-provider'
 
 const description =
   'Manage all your secrets securely with public key encryption and realtime based tools, that seamlessly fits into your codebase'
-const name = 'keyshade'
+const name = 'Keyshade'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://keyshade.xyz/'),
+  metadataBase: new URL('https://keyshade.io/'),
 
   title: {
     default: name,
@@ -60,14 +60,14 @@ export const metadata: Metadata = {
     description,
     type: 'website',
     locale: 'en_US',
-    images: 'https://keyshade.xyz/thumbnail.png'
+    images: 'https://keyshade.io/thumbnail.png'
   },
 
   twitter: {
     card: 'summary_large_image',
     title: name,
     description,
-    creator: '@keyshade_xyz',
+    creator: '@keyshade_io',
     creatorId: '1738929014016966656'
   },
 

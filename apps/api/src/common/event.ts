@@ -64,6 +64,11 @@ export const createEvent = async (
     )
   }
 
+  const metadataToPersist = data.metadata
+  if (data.source === EventSource.SECRET) {
+    delete metadataToPersist.values
+  }
+
   const event = await prisma.event.create({
     data: {
       triggerer: data.triggerer ?? EventTriggerer.USER,
@@ -72,7 +77,7 @@ export const createEvent = async (
       source: data.source,
       title: data.title,
       description: data.description ?? '',
-      metadata: encryptMetadata(data.metadata),
+      metadata: encryptMetadata(metadataToPersist),
       userId: data.triggeredBy?.id,
       itemId: data.entity?.id,
       workspaceId: data.workspaceId

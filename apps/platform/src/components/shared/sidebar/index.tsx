@@ -14,12 +14,12 @@ import {
   TeamSVG
 } from '@public/svg/shared'
 import SidebarTab from './sidebarTab'
-import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { VERSION_BADGE } from '@/constants/sidebar'
 import { GeistSansFont } from '@/fonts'
+import { Combobox } from '@/components/ui/combobox'
 
-function Sidebar(): JSX.Element {
+function Sidebar(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const sidebarTabData = [
@@ -97,16 +97,17 @@ function Sidebar(): JSX.Element {
         <div className="flex flex-col gap-y-8 text-neutral-500 [&_a]:flex [&_a]:gap-x-2.5 [&_a]:transition-colors [&_a]:hover:text-white">
           <a
             className="pl-5"
-            href="https://docs.keyshade.xyz/"
+            href="https://docs.keyshade.io/"
             rel="noopener noreferrer"
             target="_blank"
           >
             <DocumentSVG /> Docs{' '}
             <LinkArrowSVG className="-translate-x-1 translate-y-1.5" />
           </a>
+
           <a
             className="pl-5"
-            href="mailto:support@keyshade.xyz?subject=Feedback%20for%20Keyshade%20Platform"
+            href="mailto:support@keyshade.io?subject=Feedback%20for%20Keyshade%20Platform"
             rel="noopener noreferrer"
             target="_blank"
           >

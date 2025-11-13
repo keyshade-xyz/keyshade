@@ -9,10 +9,15 @@ on:
   pull_request:
     paths: ['apps/api/**', '.github/workflows/validate-api.yaml']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate:
+  validate-node-build:
     runs-on: ubuntu-latest
-    name: Validate API
+    timeout-minutes: 15
+    name: Validate API (Node)
 
     steps:
       - name: Checkout
@@ -38,7 +43,7 @@ jobs:
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
@@ -74,3 +79,64 @@ jobs:
         with:
           flags: api-e2e-tests
           files: /coverage/apps/api/coverage-final.json
+
+  validate-docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Validate API (Docker)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          docker build -t keyshade/api:ci-${GITHUB_SHA} -f apps/api/Dockerfile .
+
+      - name: Verify API image
+        run: docker image inspect keyshade/api:ci-${{ github.sha }}
+
+      - name: Start API and dependencies
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          # Start db, redis, and api-ci services
+          docker compose -f docker-compose-test.yml --profile ci-api up -d
+          
+          # Wait for API to be healthy (Docker Compose will wait for dependencies)
+          echo "Waiting for API to be healthy..."
+          timeout 60s bash -c 'until docker inspect --format="{{.State.Health.Status}}" api-ci 2>/dev/null | grep -q "healthy"; do sleep 2; echo "Waiting..."; done'
+          
+          echo "API is healthy"
+
+      - name: API health check
+        run: |
+          curl -fsSL "http://127.0.0.1:4200/api/health" || {
+            echo "Health check failed"
+            docker compose -f docker-compose-test.yml logs api-ci
+            exit 1
+          }
+          echo "Health check passed"
+
+      - name: Cleanup
+        if: always()
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          
+          if [ "${{ job.status }}" != 'success' ]; then
+            echo "=== Docker Compose Logs ==="
+            docker compose -f docker-compose-test.yml --profile ci-api logs
+          fi
+          
+          docker compose -f docker-compose-test.yml --profile ci-api down -v --remove-orphans || true
+          docker image rm -f keyshade/api:ci-${GITHUB_SHA} || true

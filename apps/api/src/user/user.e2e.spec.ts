@@ -38,7 +38,7 @@ describe('User Controller Tests', () => {
 
   beforeEach(async () => {
     adminUser = await userService.createUser({
-      email: 'admin@keyshade.xyz',
+      email: 'admin@keyshade.io',
       name: 'Admin',
       isActive: true,
       isAdmin: true,
@@ -46,7 +46,7 @@ describe('User Controller Tests', () => {
     })
 
     regularUser = await userService.createUser({
-      email: 'John@keyshade.xyz',
+      email: 'John@keyshade.io',
       name: 'John',
       isActive: true,
       isAdmin: false,
@@ -109,7 +109,7 @@ describe('User Controller Tests', () => {
 
   it('should have created a default workspace', async () => {
     const createUserResponse = await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane',
       isAdmin: false,
       isActive: true,
@@ -400,7 +400,7 @@ describe('User Controller Tests', () => {
 
   test('admin should be able to create new users', async () => {
     const payload = {
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       name: 'Jane Doe',
       isAdmin: false,
       isActive: true,
@@ -437,7 +437,7 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': regularUser.email
       },
       payload: {
-        email: 'newEmail@keyshade.xyz'
+        email: 'newEmail@keyshade.io'
       }
     })
 
@@ -448,7 +448,7 @@ describe('User Controller Tests', () => {
         userId: regularUser.id,
         AND: {
           emailChange: {
-            newEmail: 'newemail@keyshade.xyz'
+            newEmail: 'newemail@keyshade.io'
           }
         }
       }
@@ -465,12 +465,12 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': adminUser.email
       },
       payload: {
-        email: 'newEmail@keyshade.xyz'
+        email: 'newEmail@keyshade.io'
       }
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body).email).toEqual('newemail@keyshade.xyz')
+    expect(JSON.parse(result.body).email).toEqual('newemail@keyshade.io')
 
     const updatedUser = await prisma.user.findUnique({
       where: {
@@ -478,7 +478,7 @@ describe('User Controller Tests', () => {
       }
     })
 
-    expect(updatedUser.email).toEqual('newemail@keyshade.xyz')
+    expect(updatedUser.email).toEqual('newemail@keyshade.io')
   })
 
   it('should give error when new email is used by an existing user', async () => {
@@ -489,7 +489,7 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': regularUser.email
       },
       payload: {
-        email: 'john@keyshade.xyz'
+        email: 'john@keyshade.io'
       }
     })
 
@@ -504,7 +504,7 @@ describe('User Controller Tests', () => {
         expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000),
         emailChange: {
           create: {
-            newEmail: 'newjohn@keyshade.xyz'
+            newEmail: 'newjohn@keyshade.io'
           }
         }
       }
@@ -522,7 +522,7 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(201)
-    expect(JSON.parse(result.body).email).toEqual('newjohn@keyshade.xyz')
+    expect(JSON.parse(result.body).email).toEqual('newjohn@keyshade.io')
 
     const updatedUser = await prisma.user.findUnique({
       where: {
@@ -530,7 +530,7 @@ describe('User Controller Tests', () => {
       }
     })
 
-    expect(updatedUser.email).toEqual('newjohn@keyshade.xyz')
+    expect(updatedUser.email).toEqual('newjohn@keyshade.io')
   })
 
   it('should fail to validate expired or invalid OTP', async () => {
@@ -541,7 +541,7 @@ describe('User Controller Tests', () => {
         expiresAt: new Date(new Date().getTime() - 1),
         emailChange: {
           create: {
-            newEmail: 'newjohn@keyshade.xyz'
+            newEmail: 'newjohn@keyshade.io'
           }
         }
       }
@@ -566,7 +566,7 @@ describe('User Controller Tests', () => {
       }
     })
 
-    expect(nonUpdatedUser.email).toEqual('john@keyshade.xyz')
+    expect(nonUpdatedUser.email).toEqual('john@keyshade.io')
   })
 
   it('should resend OTP successfully', async () => {
@@ -577,7 +577,7 @@ describe('User Controller Tests', () => {
         expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000),
         emailChange: {
           create: {
-            newEmail: 'newjohn@keyshade.xyz'
+            newEmail: 'newjohn@keyshade.io'
           }
         }
       }
@@ -597,7 +597,7 @@ describe('User Controller Tests', () => {
       where: {
         userId: regularUser.id,
         emailChange: {
-          newEmail: 'newjohn@keyshade.xyz'
+          newEmail: 'newjohn@keyshade.io'
         }
       }
     })

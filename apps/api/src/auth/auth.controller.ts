@@ -84,7 +84,7 @@ export class AuthController {
   async githubOAuthLogin(@Res() res: Response) {
     if (!this.githubOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
-        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
@@ -123,7 +123,7 @@ export class AuthController {
   async gitlabOAuthLogin(@Res() res: Response) {
     if (!this.gitlabOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
-        'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
@@ -161,7 +161,7 @@ export class AuthController {
   async googleOAuthLogin(@Res() res: Response) {
     if (!this.googleOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
-        'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
