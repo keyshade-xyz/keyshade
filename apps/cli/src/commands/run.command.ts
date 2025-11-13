@@ -125,9 +125,9 @@ export default class RunCommand extends BaseCommand {
 
     // Step 2: Override with flags (highest precedence)
     const finalConfig = {
-      workspace: options.workspace || baseConfig.workspace,
-      project: options.project || baseConfig.project,
-      environment: options.environment || baseConfig.environment,
+      workspace: options.workspace ?? baseConfig.workspace,
+      project: options.project ?? baseConfig.project,
+      environment: options.environment ?? baseConfig.environment,
       quitOnDecryptionFailure: baseConfig.quitOnDecryptionFailure
     }
 
@@ -136,7 +136,7 @@ export default class RunCommand extends BaseCommand {
 
     if (!privateKey) {
       throw new Error(
-        `Private key not found for project '${finalConfig.project}'. Please run \`keyshade init\` or \`keyshade config private-key add\` to add a private key.`
+        `Private key not found for project '${finalConfig.project}'. Please run 'keyshade init' or 'keyshade config private-key add' to add a private key.`
       )
     }
 

@@ -414,3 +414,8 @@
 ### Patches
 
 - Update the name of the command to always display `keyshade`
+
+## 3.6.2-stage.2
+
+### Minor Changes
+Added runtime flags to keyshade run command so you would not have to update keyshade.json everytime a new project is connected to an environment
