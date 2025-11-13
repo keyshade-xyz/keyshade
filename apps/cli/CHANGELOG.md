@@ -425,7 +425,13 @@
 
 ### Patches
 
-- Fix a bug where all command names were switched to `keyshade` 
+- Fix a bug where all command names were switched to `keyshade`
+
+## 3.7.0-stage.1
+
+### Minor Changes
+
+- `keyshade run` now accepts all configurations via flags
 
 ## 3.7.0
 

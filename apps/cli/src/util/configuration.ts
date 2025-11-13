@@ -79,6 +79,18 @@ export const fetchProjectRootConfig = async (): Promise<ProjectRootConfig> => {
   return JSON.parse(await readFile(path, 'utf8'))
 }
 
+export const fetchProjectRootConfigFromPath = async (
+  configPath: string
+): Promise<ProjectRootConfig> => {
+  if (!existsSync(configPath)) {
+    throw new Error(
+      `Project root configuration not found at ${configPath}. Please check if the file exists.`
+    )
+  }
+
+  return JSON.parse(await readFile(configPath, 'utf8'))
+}
+
 export const writeProfileConfig = async (
   config: ProfileConfig
 ): Promise<void> => {
