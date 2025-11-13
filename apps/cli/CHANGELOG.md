@@ -438,3 +438,9 @@
 ### Minor Changes
 
 - `keyshade run` now accepts all configurations via flags
+
+## 3.7.0-stage.1
+
+### Minor Changes
+
+- `keyshade run` now accepts all configurations via flags
