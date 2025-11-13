@@ -3,6 +3,13 @@ import { Authority, Environment, Project } from '@prisma/client'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from './util'
+import { CreateEnvironment } from '@/environment/dto/create.environment/create.environment'
+import { PrismaService } from '@/prisma/prisma.service'
+import { HydrationService } from './hydration.service'
+import { HydratedEnvironment } from '@/environment/environment.types'
+import { Logger } from '@nestjs/common'
+import SlugGenerator from './slug-generator.service'
+import { InclusionQuery } from './inclusion-query'
 
 /**
  * Given a list of environment slugs in a CreateSecret, UpdateSecret, CreateVariable, or UpdateVariable DTO,
@@ -59,4 +66,68 @@ export const getEnvironmentIdToSlugMap = async (
   }
 
   return environmentSlugToIdMap
+}
+
+export const createEnvironment = async (
+  user: AuthenticatedUser,
+  dto: CreateEnvironment,
+  projectSlug: Project['slug'],
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService
+): Promise<HydratedEnvironment> => {
+  const logger = new Logger('createEnvironment')
+
+  logger.log(
+    `Attempting to create new environment ${dto.name} for project ${projectSlug}`
+  )
+
+  const project = await prisma.project.findUnique({
+    where: {
+      slug: projectSlug
+    }
+  })
+  const projectId = project.id
+
+  logger.log(`Creating environment ${dto.name} in project ${project.name}`)
+
+  const environmentSlug = await slugGenerator.generateEntitySlug(
+    dto.name,
+    'ENVIRONMENT'
+  )
+
+  const environment = await prisma.environment.create({
+    data: {
+      name: dto.name,
+      slug: environmentSlug,
+      description: dto.description,
+      project: {
+        connect: {
+          id: projectId
+        }
+      },
+      lastUpdatedBy: {
+        connect: {
+          id: user.id
+        }
+      }
+    },
+    include: InclusionQuery.Environment
+  })
+
+  logger.log(
+    `Environment ${environment.name} (${environment.slug}) created in project ${project.name}`
+  )
+
+  // await projectCacheService.addEnvironmentToProjectCache(
+  //   environment.project.slug,
+  //   environment
+  // )
+
+  const hydratedEnvironment = await hydrationService.hydrateEnvironment({
+    environment,
+    user
+  })
+  delete hydratedEnvironment.project
+  return hydratedEnvironment
 }
