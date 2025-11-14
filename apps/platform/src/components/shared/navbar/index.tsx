@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import SearchModel from './searchModel'
 import ProfileMenu from './profile-menu'
-import LineTabController from './line-tab-controller'
 import CommandSearch from './command-search'
 import { GeistSansFont } from '@/fonts'
 
@@ -19,7 +18,6 @@ function Navbar(): React.JSX.Element {
           <CommandSearch setIsOpen={setIsOpen} />
           <ProfileMenu />
         </div>
-        <LineTabController />
       </nav>
       <SearchModel isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
