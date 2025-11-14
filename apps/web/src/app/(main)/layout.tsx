@@ -13,12 +13,12 @@ export default function MainLayout({
   const currentPath = usePathname()
   const isSharePage = currentPath.includes('/share')
   return (
-    <main lang="en">
+    <main className="overflow-x-hidden" lang="en">
       {isSharePage ? (
         children
       ) : (
         <>
-          <div className="relative flex w-full justify-center">
+          <div className="relative flex w-full justify-center ">
             <Navbar />
             <TopGradientSVG className="absolute -z-10" />
           </div>
