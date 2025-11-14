@@ -5,7 +5,7 @@ export const CliSessionSchema = z.object({
   id: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  lastUsedOn: z.string().datetime(),
+  lastUsedOn: z.string().datetime().nullable(),
   deviceDetail: DeviceDetailSchema
 })
 
@@ -13,7 +13,7 @@ export const BrowserSessionSchema = z.object({
   id: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  lastUsedOn: z.string().datetime(),
+  lastUsedOn: z.string().datetime().nullable(),
   deviceDetail: DeviceDetailSchema
 })
 

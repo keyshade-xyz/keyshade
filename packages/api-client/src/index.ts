@@ -14,6 +14,7 @@ import PaymentController from './controllers/payment'
 import ShareSecretController from './controllers/share-secret'
 import CliSessionController from './controllers/cli-session'
 import BrowserSessionController from './controllers/browser-session'
+import PersonalAccessTokenController from './controllers/personal-access-token'
 export {
   AppController,
   EnvironmentController,
@@ -30,5 +31,6 @@ export {
   PaymentController,
   ShareSecretController,
   CliSessionController,
-  BrowserSessionController
+  BrowserSessionController,
+  PersonalAccessTokenController
 }

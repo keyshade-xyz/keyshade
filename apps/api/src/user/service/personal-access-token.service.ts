@@ -65,6 +65,15 @@ export class PersonalAccessTokenService {
       await this.checkForDuplicatePAT(dto.name, user.id)
     }
 
+    let expiresOn: Date | undefined
+    if (dto.expiresAfterDays !== undefined) {
+      if (dto.expiresAfterDays === 0) {
+        expiresOn = null // Never expires
+      } else {
+        expiresOn = dayjs().add(dto.expiresAfterDays, 'days').toDate()
+      }
+    }
+
     // Update the token
     this.logger.log(`Updating PAT ${tokenId}`)
     const updatedPersonalAccessToken =
@@ -74,9 +83,7 @@ export class PersonalAccessTokenService {
         },
         data: {
           name: dto.name,
-          expiresOn: dto.expiresAfterDays
-            ? dayjs().add(dto.expiresAfterDays, 'days').toDate()
-            : undefined
+          expiresOn
         }
       })
     this.logger.log(`Updated PAT ${tokenId}`)

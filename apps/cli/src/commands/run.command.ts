@@ -7,7 +7,12 @@ import type {
   CommandArgument,
   CommandOption
 } from '@/types/command/command.types'
-import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
+import {
+  fetchPrivateKey,
+  fetchProjectRootConfig,
+  fetchProjectRootConfigFromPath
+} from '@/util/configuration'
+import type { ProjectRootConfig } from '@/types/index.types'
 import type {
   ClientRegisteredResponse,
   Configuration,
@@ -34,7 +39,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'Run a command'
+    return 'Run a command with live configuration updates from keyshade'
   }
 
   getArguments(): CommandArgument[] {
@@ -51,6 +56,21 @@ export default class RunCommand extends BaseCommand {
         short: '-e',
         long: '--environment <slug>',
         description: 'Environment to configure'
+      },
+      {
+        short: '-w',
+        long: '--workspace <slug>',
+        description: 'Workspace to configure'
+      },
+      {
+        short: '-p',
+        long: '--project <slug>',
+        description: 'Project to configure'
+      },
+      {
+        short: '-f',
+        long: '--config-file <path>',
+        description: 'Path to config file (default: keyshade.json)'
       }
     ]
   }
@@ -65,12 +85,13 @@ export default class RunCommand extends BaseCommand {
     // args return string[][] instead of string[]
     this.command = args[0].join(' ')
 
-    const configurations = await this.fetchConfigurations()
-
-    // If the user passed in an environment, override the one in our configurations object
-    if (options.environment) {
-      configurations.environment = options.environment
-    }
+    // Pass all relevant options to fetchConfigurations for proper precedence handling
+    const configurations = await this.fetchConfigurations({
+      workspace: options.workspace,
+      project: options.project,
+      environment: options.environment,
+      configFile: options.configFile
+    })
 
     await this.connectToSocket(configurations)
     await this.sleep(3000)
@@ -78,28 +99,50 @@ export default class RunCommand extends BaseCommand {
     this.spawnCommand()
 
     process.on('SIGINT', () => {
-      this.killCommand()
+      void this.killCommand()
       process.exit(0)
     })
   }
 
-  private async fetchConfigurations(): Promise<RunData> {
-    const { environment, project, workspace, quitOnDecryptionFailure } =
-      await fetchProjectRootConfig()
-    const privateKey = await fetchPrivateKey(project)
+  private async fetchConfigurations(
+    options: {
+      workspace?: string
+      project?: string
+      environment?: string
+      configFile?: string
+    } = {}
+  ): Promise<RunData> {
+    // Step 1: Load base configuration from file
+    let baseConfig: ProjectRootConfig
+
+    if (options.configFile) {
+      // Use custom config file if specified
+      baseConfig = await fetchProjectRootConfigFromPath(options.configFile)
+    } else {
+      // Use default keyshade.json
+      baseConfig = await fetchProjectRootConfig()
+    }
+
+    // Step 2: Override with flags (highest precedence)
+    const finalConfig = {
+      workspace: options.workspace ?? baseConfig.workspace,
+      project: options.project ?? baseConfig.project,
+      environment: options.environment ?? baseConfig.environment,
+      quitOnDecryptionFailure: baseConfig.quitOnDecryptionFailure
+    }
+
+    // Step 3: Fetch private key for the project
+    const privateKey = await fetchPrivateKey(finalConfig.project)
 
     if (!privateKey) {
       throw new Error(
-        'Private key not found for this project. Please run `keyshade init` or `keyshade config private-key add` to add a private key.'
+        `Private key not found for project '${finalConfig.project}'. Please run 'keyshade init' or 'keyshade config private-key add' to add a private key.`
       )
     }
 
     return {
-      environment,
-      project,
-      workspace,
-      privateKey,
-      quitOnDecryptionFailure
+      ...finalConfig,
+      privateKey
     }
   }
 
@@ -159,7 +202,7 @@ export default class RunCommand extends BaseCommand {
         }
 
         this.processEnvironmentalVariables[data.name] = data.value
-        this.restartCommand()
+        await this.restartCommand()
       })
       // Set a timeout for registration response
       const registrationTimeout = setTimeout(() => {
@@ -294,40 +337,159 @@ export default class RunCommand extends BaseCommand {
     })
   }
 
+  private async waitForExit(
+    child: ReturnType<typeof spawn>,
+    timeoutMs = 15000
+  ): Promise<void> {
+    if (!child) return
+
+    await new Promise<void>((resolve, reject) => {
+      let settled = false
+
+      const onExit = () => {
+        if (!settled) {
+          settled = true
+          resolve()
+        }
+      }
+
+      child.once('exit', onExit)
+      child.once('close', onExit)
+
+      const t = setTimeout(() => {
+        if (!settled) {
+          settled = true
+          reject(new Error('Child did not exit before timeout'))
+        }
+      }, timeoutMs)
+
+      // Cleanup if promise resolves early
+      const cleanup = () => {
+        clearTimeout(t)
+      }
+      child.once('exit', cleanup)
+      child.once('close', cleanup)
+    })
+  }
+
   private spawnCommand() {
-    this.childProcess = spawn(this.command, {
-      // @ts-expect-error this just works
-      stdio: 'inherit',
+    // POSIX: create a new process group so -PID signals the entire tree
+    const isWin = process.platform === 'win32'
+
+    this.childProcess = spawn(this.command, [], {
       shell: true,
+      stdio: 'inherit',
       env: {
         ...process.env,
-        ...this.processEnvironmentalVariables
-      }
+        ...Object.fromEntries(
+          Object.entries(this.processEnvironmentalVariables).map(
+            ([key, value]) => [key, String(value)]
+          )
+        )
+      },
+      detached: !isWin // only on POSIX
     })
 
-    this.childProcess.on('exit', (code: number | null) => {
-      // Code is 0 only if the command exits on its own
-      if (code === 0) {
-        log.info('Stopped all processes. See you later!')
-        process.exit(1)
+    // Allow parent to exit independently of child on POSIX process groups
+    if (!isWin && this.childProcess?.pid) {
+      this.childProcess.unref()
+    }
+
+    this.childProcess.on(
+      'exit',
+      (code: number | null, signal: NodeJS.Signals | null) => {
+        // Do NOT exit the CLI on child exit; we want to keep listening & restart on updates.
+        if (code === 0) {
+          log.info(
+            `Command exited successfully${signal ? ` (signal ${signal})` : ''}.`
+          )
+        } else {
+          log.info(
+            `Command exited${code !== null ? ` with code ${code}` : ''}${signal ? ` (signal ${signal})` : ''}.`
+          )
+        }
       }
-    })
+    )
   }
 
-  private restartCommand() {
-    this.killCommand()
-    this.spawnCommand()
+  private async restartCommand() {
+    try {
+      await this.killCommand() // now truly awaits exit
+      this.spawnCommand()
+    } catch (e) {
+      console.error('Failed to restart command:', e)
+      // As a last resort, try to spawn anyway
+      this.spawnCommand()
+    }
   }
 
-  private killCommand() {
-    if (this.childProcess) {
+  private async killCommand() {
+    const child = this.childProcess
+    if (!child?.pid) return
+
+    const isWin = process.platform === 'win32'
+    const pid = child.pid
+
+    try {
+      // 1) Try graceful termination
+      if (isWin) {
+        // /T kills the whole tree; /F is force; first attempt without /F
+        await new Promise<void>((resolve) => {
+          const killer = spawn('taskkill', ['/PID', String(pid), '/T'], {
+            stdio: 'ignore'
+          })
+          killer.on('exit', () => {
+            resolve()
+          })
+          killer.on('error', () => {
+            resolve()
+          }) // ignore errors, we’ll force kill below if needed
+        })
+      } else {
+        // Negative PID targets the process group (requires detached: true at spawn)
+        try {
+          process.kill(-pid, 'SIGTERM')
+        } catch {
+          // Fallback to direct child if not in its own group
+          try {
+            process.kill(pid, 'SIGTERM')
+          } catch {}
+        }
+      }
+
+      // 2) Wait up to 5s for clean exit
       try {
-        process.kill(-this.childProcess.pid, 'SIGKILL')
-      } catch (error: any) {
-        if (error.code !== 'ESRCH') throw error
+        await this.waitForExit(child, 5000)
+      } catch {
+        // 3) Force kill if it didn’t exit
+        if (isWin) {
+          await new Promise<void>((resolve) => {
+            const killer = spawn(
+              'taskkill',
+              ['/PID', String(pid), '/T', '/F'],
+              { stdio: 'ignore' }
+            )
+            killer.on('exit', () => {
+              resolve()
+            })
+            killer.on('error', () => {
+              resolve()
+            })
+          })
+        } else {
+          try {
+            process.kill(-pid, 'SIGKILL')
+          } catch {
+            try {
+              process.kill(pid, 'SIGKILL')
+            } catch {}
+          }
+          // Give the OS a moment to reap and free the port
+          await this.sleep(200)
+        }
       }
+    } finally {
       this.childProcess = null
-      log.success('Stopped all processes. See you later!')
     }
   }
 }

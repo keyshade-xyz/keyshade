@@ -85,6 +85,7 @@ export default function AuthEmailForm() {
         className="w-full"
         disabled={isButtonDisabled}
         type="submit"
+        variant="outline"
       >
         {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
       </Button>

@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { OTPInput, OTPInputContext } from 'input-otp'
 import type { OTPInputProps } from 'input-otp'
+import { OTPInput, OTPInputContext } from 'input-otp'
 import { Dot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -24,7 +24,11 @@ const InputOTPGroup = React.forwardRef<
   React.ElementRef<'div'>,
   React.ComponentPropsWithoutRef<'div'>
 >(({ className, ...props }, ref) => (
-  <div className={cn('flex items-center', className)} ref={ref} {...props} />
+  <div
+    className={cn('flex items-center gap-x-2', className)}
+    ref={ref}
+    {...props}
+  />
 ))
 InputOTPGroup.displayName = 'InputOTPGroup'
 
@@ -38,9 +42,7 @@ const InputOTPSlot = React.forwardRef<
   return (
     <div
       className={cn(
-        'relative flex h-10 w-10 items-center justify-center border-y border-r border-white/20 bg-neutral-800 text-sm  transition-all first:rounded-l-md first:border-l last:rounded-r-md dark:border-zinc-800',
-        isActive &&
-          'z-10 ring-2 ring-white/40 ring-offset-white dark:ring-zinc-300 dark:ring-offset-zinc-950',
+        `bg-night-c focus-visible:outline-hidden  ${isActive ? 'border-white/20' : 'border-white/16'} flex h-10 w-10 items-center justify-center rounded-md border px-3 py-2 text-sm ring-offset-white/20 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`,
         className
       )}
       ref={ref}

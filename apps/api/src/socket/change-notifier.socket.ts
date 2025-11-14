@@ -29,7 +29,8 @@ import { RedisClientType } from 'redis'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { constructErrorBody } from '@/common/util'
 import { ActorType, AuthenticatedUserContext } from '@/auth/auth.types'
-import { TokenService } from '@/common/token.service' // The redis subscription channel for configuration updates
+import { TokenService } from '@/common/token.service'
+import { MetricService } from '@/common/metrics.service'
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
@@ -58,7 +59,8 @@ export default class ChangeNotifier
     },
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly metricsService: MetricService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -185,6 +187,15 @@ export default class ChangeNotifier
       // Add the client to the environment
       await this.addClientToEnvironment(client, environment.id, user.id)
 
+      // Increment run command execution metric
+      try {
+        await this.metricsService.incrementRunCommandExecution(1)
+      } catch (err) {
+        this.logger.error(
+          `Failed to increment run command execution metric: ${err}`
+        )
+      }
+
       // Send ACK to client
       this.logger.log('Sending ACK to client')
       client.emit('client-registered', {
@@ -201,12 +212,9 @@ export default class ChangeNotifier
       // User friendly feedback on error
       let errorMessage = 'An unknown error occurred.'
 
-      this.logger.error({
-        message: 'Error during client registration',
-        body: error,
-        errorType: typeof error,
-        errorConstructor: error?.constructor?.name
-      })
+      this.logger.error(
+        `Error during client registration: ${typeof error === 'string' ? error : JSON.stringify(error)}`
+      )
 
       if (error instanceof Error) {
         // If the error is an instance of Error, we can get the message directly

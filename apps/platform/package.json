@@ -65,7 +65,9 @@
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@sentry/node": "^7.102.0",
+    "@sentry/profiling-node": "^7.102.0"
   },
   "devDependencies": {
     "@newhighsco/storybook-addon-svgr": "^3.0.3",

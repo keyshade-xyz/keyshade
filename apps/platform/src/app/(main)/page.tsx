@@ -6,9 +6,9 @@ import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import CreateProjectDialogue from '@/components/dashboard/project/createProjectDialogue'
 import {
-  selectedWorkspaceAtom,
   deleteProjectOpenAtom,
   selectedProjectAtom,
+  selectedWorkspaceAtom,
   userAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
@@ -52,9 +52,9 @@ export default function Index(): React.JSX.Element {
   return (
     <div className="flex flex-col gap-4">
       <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between py-2">
         <Visible if={!isProjectsEmpty}>
-          <h1 className="text-[1.75rem] font-medium">All Projects</h1>
+          <h1 className="text-[1.75rem]">All Projects</h1>
         </Visible>
         <CreateProjectDialogue />
       </div>
@@ -63,7 +63,7 @@ export default function Index(): React.JSX.Element {
         {isAuthorizedToViewProject ? (
           <ProjectEmpty isEmpty={isProjectsEmpty}>
             <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 p-2 md:grid-cols-2 lg:grid-cols-4"
               fetchFunction={fetchProjects}
               itemComponent={ProjectItemComponent}
               itemKey={(item) => item.id}
@@ -71,7 +71,9 @@ export default function Index(): React.JSX.Element {
             />
           </ProjectEmpty>
         ) : (
-          <div>you don&apos;t have permission to view these projects</div>
+          <div>
+            You don&apos;t have permission to view projects in this workspace
+          </div>
         )}
       </ProjectLoader>
 

@@ -1,10 +1,20 @@
 import { Type } from 'class-transformer'
-import { ValidateNested, ArrayMinSize } from 'class-validator'
+import { ArrayMinSize, ValidateNested } from 'class-validator'
 import { CreateSecret } from '../create.secret/create.secret'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
+import { OmitType } from '@nestjs/swagger'
 
-export class BulkCreateSecretDto {
+export class BulkCreateSecret {
   @ValidateNested({ each: true })
-  @Type(() => CreateSecret)
+  @Type(() => BulkSecretEntry)
   @ArrayMinSize(1)
-  secrets: CreateSecret[]
+  secrets: BulkSecretEntry[]
+}
+
+class BulkSecretEntry extends OmitType(CreateSecret, ['entries']) {
+  @NonEmptyTrimmedString()
+  value: string
+
+  @NonEmptyTrimmedString()
+  environmentSlug: string
 }
