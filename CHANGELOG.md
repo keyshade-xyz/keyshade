@@ -1,3 +1,9 @@
+## [2.44.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0-stage.1...v2.44.0-stage.2) (2025-11-13)
+
+### 🚀 Features
+
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([2548288](https://github.com/keyshade-xyz/keyshade/commit/25482884f8973025a8629e36b24a425ec3253eec))
+
 ## [2.44.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.1...v2.44.0-stage.1) (2025-11-12)
 
 ### 🚀 Features
