@@ -8,6 +8,12 @@
 
 * **cli:** update package managers to use v3.6.4 [skip ci] ([0b0720d](https://github.com/keyshade-xyz/keyshade/commit/0b0720d4279b6c841079c8efc2a1cd549b8c53d7))
 
+## [2.44.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0-stage.2...v2.44.0-stage.3) (2025-11-14)
+
+### 🚀 Features
+
+* responsive landing page ([#1239](https://github.com/keyshade-xyz/keyshade/issues/1239)) ([f2b65d2](https://github.com/keyshade-xyz/keyshade/commit/f2b65d2d83012ddf0d24458e733810e23d218f51))
+
 ## [2.44.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0-stage.1...v2.44.0-stage.2) (2025-11-13)
 
 ### 🚀 Features
