@@ -18,7 +18,8 @@ import {
   removeMemberOpenAtom,
   selectedMemberAtom,
   selectedWorkspaceAtom,
-  transferOwnershipOpenAtom
+  transferOwnershipOpenAtom,
+  membersRefreshKeyAtom
 } from '@/store'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
@@ -32,6 +33,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
     transferOwnershipOpenAtom
   )
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const membersRefreshKey = useAtomValue(membersRefreshKeyAtom)
   const [isEditMemberOpen, setIsEditMemberOpen] = useAtom(editMemberOpenAtom)
 
   const fetchMembers = useCallback(
@@ -130,6 +132,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
               itemComponent={renderMemberRow}
               itemKey={(member) => member.id}
               itemsPerPage={10}
+              refreshKey={membersRefreshKey} // For remounting of list
             />
           </TableBody>
         </Table>

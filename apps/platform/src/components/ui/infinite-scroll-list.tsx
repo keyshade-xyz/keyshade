@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,17 +22,22 @@ interface InfiniteScrollListProps<T> {
   className?: string
   inTable?: boolean
   emptyComponent?: React.ReactNode
+  refreshKey?: number // trigger to refresh list without remount
 }
 
-export function InfiniteScrollList<T>({
-  itemKey,
-  itemComponent,
-  itemsPerPage,
-  fetchFunction,
-  className = '',
-  inTable = false,
-  emptyComponent
-}: InfiniteScrollListProps<T>) {
+export const InfiniteScrollList = forwardRef(function InfiniteScrollListInner<T>(
+  {
+    itemKey,
+    itemComponent,
+    itemsPerPage,
+    fetchFunction,
+    className = '',
+    inTable = false,
+    emptyComponent,
+    refreshKey
+  }: InfiniteScrollListProps<T>,
+  ref: React.Ref<{ reload: () => void }>
+) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -83,6 +88,32 @@ export function InfiniteScrollList<T>({
       setIsLoading(false)
     }
   }, [fetchFunction, itemsPerPage, itemKey])
+
+  // expose a reload method to parent refs
+  useImperativeHandle(
+    ref,
+    () => ({
+      reload: () => {
+        setItems([])
+        pageRef.current = 0
+        hasMoreRef.current = true
+        loadingRef.current = false
+        loadData()
+      }
+    }),
+    [loadData]
+  )
+
+  // react to refreshKey changes without remounting
+  useEffect(() => {
+    if (typeof refreshKey !== 'undefined') {
+      setItems([])
+      pageRef.current = 0
+      hasMoreRef.current = true
+      loadingRef.current = false
+      loadData()
+    }
+  }, [refreshKey, loadData])
 
   useEffect(() => {
     setItems([])
@@ -193,4 +224,10 @@ export function InfiniteScrollList<T>({
       ) : null}
     </div>
   )
-}
+})
+
+InfiniteScrollList.displayName = 'InfiniteScrollList'
+
+export default InfiniteScrollList as <T>(
+  props: InfiniteScrollListProps<T> & { ref?: React.Ref<{ reload: () => void }> }
+) => JSX.Element
