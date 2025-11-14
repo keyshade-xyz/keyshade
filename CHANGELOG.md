@@ -1,3 +1,13 @@
+## [2.44.0](https://github.com/keyshade-xyz/keyshade/compare/v2.43.1...v2.44.0) (2025-11-14)
+
+### 🚀 Features
+
+* **cli:** bump version to 3.7.0 ([829cfa1](https://github.com/keyshade-xyz/keyshade/commit/829cfa129e774d63d66c7693922cfc3e550bc910))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.4 [skip ci] ([0b0720d](https://github.com/keyshade-xyz/keyshade/commit/0b0720d4279b6c841079c8efc2a1cd549b8c53d7))
+
 ## [2.43.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0...v2.43.1) (2025-11-12)
 
 ### 🐛 Bug Fixes
