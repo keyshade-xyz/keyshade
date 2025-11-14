@@ -23,7 +23,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import KeyshadeDocs from '@/components/dashboard/overview/AboutKeyshade'
 import ProjectDetails from '@/components/dashboard/overview/ProjectDetails'
 
-function OverviewPage(): React.JSX.Element {
+function SettingsPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const [
     isViewAndDownloadProjectKeysDialogOpen,
@@ -59,7 +59,7 @@ function OverviewPage(): React.JSX.Element {
 
   if (!selectedProject) {
     return (
-      <div className="flex items-center justify-center h-full w-full">
+      <div className="flex h-full w-full items-center justify-center">
         <span className="text-white/60">No project selected.</span>
       </div>
     )
@@ -150,4 +150,4 @@ function OverviewPage(): React.JSX.Element {
   )
 }
 
-export default OverviewPage
+export default SettingsPage

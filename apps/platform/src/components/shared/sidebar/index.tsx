@@ -64,7 +64,7 @@ function Sidebar(): React.JSX.Element {
 
   return (
     <aside
-      className={`${GeistSansFont.className}  m-6 w-[18rem] min-w-[16rem] shrink-0 `}
+      className={`${GeistSansFont.className}  m-6 w-40 min-w-[16rem] shrink-0 `}
     >
       <div className=" flex h-full flex-col gap-2">
         {/* Sticky Header */}

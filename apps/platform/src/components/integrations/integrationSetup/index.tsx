@@ -171,7 +171,7 @@ export default function SetupIntegration({
         </div>
 
         <div className="flex w-full justify-between border-t border-white/20 pt-4">
-          <Button variant="secondary">Need Help?</Button>
+          <Button variant="outline">Need Help?</Button>
 
           <Visible if={currentStep === Step.IntegrationSetupStep}>
             <Button onClick={handleNext} type="button" variant="secondary">

@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import OverviewPage from './@overview/page'
+import SettingsPage from './@overview/page'
 import EnvironmentPage from './@environment/page'
 import SecretPage from './@secret/page'
 import VariablePage from './@variable/page'
@@ -20,6 +20,7 @@ import {
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
+import LineTabController from '@/components/shared/navbar/line-tab-controller'
 
 function DetailedProjectPage(): JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
@@ -102,19 +103,20 @@ function DetailedProjectPage(): JSX.Element {
 
   return (
     <main className="flex h-full flex-col gap-4">
+      <h1 className="text-[28px] font-medium">{selectedProject?.name}</h1>
       {tab !== 'overview' && (
-        <div className="flex h-14.5 w-full justify-between p-3 ">
-          <div className="text-3xl">{selectedProject?.name}</div>
-          {tab === 'secret' && <AddSecretDialog />}
-          {tab === 'variable' && <AddVariableDialogue />}
+        <div className="h-14.5 flex w-full justify-between py-3 ">
+          <LineTabController />
+
+          {tab === 'secrets' && <AddSecretDialog />}
+          {tab === 'variables' && <AddVariableDialogue />}
           {tab === 'environment' && <AddEnvironmentDialogue />}
         </div>
       )}
-
       <div className="h-full w-full overflow-y-scroll">
-        {tab === 'overview' && <OverviewPage />}
-        {tab === 'secret' && <SecretPage />}
-        {tab === 'variable' && <VariablePage />}
+        {tab === 'settings' && <SettingsPage />}
+        {tab === 'secrets' && <SecretPage />}
+        {tab === 'variables' && <VariablePage />}
         {tab === 'environment' && <EnvironmentPage />}
       </div>
     </main>

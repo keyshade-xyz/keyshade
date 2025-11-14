@@ -109,12 +109,8 @@ export default function AddVariableDialogue() {
       open={isCreateVariableOpen}
     >
       <DialogTrigger asChild>
-        <Button
-          className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
-          disabled={!isAuthorizedToCreateVariable}
-          variant="outline"
-        >
-          <AddSVG /> Add Variable
+        <Button disabled={!isAuthorizedToCreateVariable} variant="primary">
+          <AddSVG /> Create Variables
         </Button>
       </DialogTrigger>
       <DialogContent className="w-126.5 bg-[#18181B] text-white ">
@@ -129,9 +125,9 @@ export default function AddVariableDialogue() {
 
         <div className=" text-white">
           <div className="space-y-4">
-            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-5 w-28.5 text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="variable-name"
               >
                 Variable Name
@@ -150,9 +146,9 @@ export default function AddVariableDialogue() {
               />
             </div>
 
-            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-5 w-28.5 text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="variable-name"
               >
                 Extra Note

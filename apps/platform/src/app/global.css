@@ -119,7 +119,7 @@ body {
 /* For WebKit Browsers such as Chrome, Safari */
 
 ::-webkit-scrollbar {
-  @apply m-20 h-[10px] w-[10px] bg-transparent;
+  @apply m-20 h-2.5 w-2.5 bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -142,7 +142,7 @@ body {
 
 /* For Edge */
 *::-webkit-scrollbar {
-  @apply w-[10px];
+  @apply w-2.5;
 }
 
 *::-webkit-scrollbar-track {

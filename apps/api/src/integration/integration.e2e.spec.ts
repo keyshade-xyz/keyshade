@@ -48,7 +48,7 @@ function createMockResponse(status: number, body: any): Response {
     json: () => Promise.resolve(body)
   } as unknown as Response
 }
-
+// @ts-expect-error -- jest mock
 global.fetch = jest
   .fn()
   .mockImplementation((url: string, options?: RequestInit) => {

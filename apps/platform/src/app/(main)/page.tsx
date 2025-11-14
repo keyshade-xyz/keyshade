@@ -21,6 +21,7 @@ import { useGetAllProjects } from '@/hooks/api/use-get-all-projects'
 import ProjectLoader from '@/components/main/ProjectLoader'
 import ProjectEmpty from '@/components/main/ProjectEmpty'
 import Visible from '@/components/common/visible'
+import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -68,6 +69,11 @@ export default function Index(): React.JSX.Element {
               itemComponent={ProjectItemComponent}
               itemKey={(item) => item.id}
               itemsPerPage={15}
+              loadingComponent={
+                <div className="w-full">
+                  <ProjectScreenLoader />
+                </div>
+              }
             />
           </ProjectEmpty>
         ) : (

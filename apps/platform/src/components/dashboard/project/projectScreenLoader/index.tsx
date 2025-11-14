@@ -6,7 +6,7 @@ export default function ProjectScreenLoader(): React.JSX.Element {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(6)].map((_, i) => (
           <div
-            className="bg-white/4 border-1 flex h-fit flex-col gap-y-6 space-x-4 rounded-lg border-white/10 p-4"
+            className="bg-white/4 flex h-fit flex-col gap-y-6 space-x-4 rounded-lg border border-white/10 p-4"
             // eslint-disable-next-line react/no-array-index-key -- since this is a skeleton, using index as key is acceptable
             key={i}
           >
