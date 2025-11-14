@@ -45,6 +45,7 @@ function Hero(): React.JSX.Element {
         </div>
         <div className="mt-[2rem] flex flex-col items-center gap-3 md:flex-row">
           <a
+            className="w-full md:w-fit"
             href="https://cal.com/keyshade/demo"
             rel="noopener noreferrer"
             target="_blank"
