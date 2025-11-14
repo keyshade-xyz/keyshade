@@ -29,9 +29,9 @@ import {
 } from '@/components/ui/tooltip'
 import {
   EmojiPicker,
-  EmojiPickerSearch,
   EmojiPickerContent,
-  EmojiPickerFooter
+  EmojiPickerFooter,
+  EmojiPickerSearch
 } from '@/components/ui/emoji-picker'
 import {
   Popover,
