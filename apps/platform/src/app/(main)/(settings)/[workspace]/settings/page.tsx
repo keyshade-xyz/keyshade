@@ -29,9 +29,9 @@ import {
 } from '@/components/ui/tooltip'
 import {
   EmojiPicker,
-  EmojiPickerSearch,
   EmojiPickerContent,
-  EmojiPickerFooter
+  EmojiPickerFooter,
+  EmojiPickerSearch
 } from '@/components/ui/emoji-picker'
 import {
   Popover,
@@ -292,21 +292,6 @@ export default function WorkspaceSettingsPage(): JSX.Element {
 
         <Separator className="bg-white/20" />
 
-        {/* Billing Method */}
-        <section className="my-5 flex w-full flex-row items-center">
-          <div className="flex w-3/5 flex-col gap-y-2">
-            <span className="text-lg font-semibold">Billing Method</span>
-            <span className="text-sm text-white/60">
-              Update the billing method of your workspace here
-            </span>
-          </div>
-          <div className="w-2/5 rounded-lg border border-white/50 px-4 py-3 text-center">
-            Coming Soon
-          </div>
-        </section>
-
-        <Separator className="bg-white/20" />
-
         {/* Leave Workspace */}
         <section className="my-5 flex w-full flex-row items-center">
           <div className="flex w-3/5 flex-col gap-y-2">
@@ -338,10 +323,15 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                     <p>This is your default workspace. You can not leave it.</p>
                   ) : user?.id === selectedWorkspace?.ownerId ? (
                     <p>
-                      You are currently the admin of the workspace. Transfer the ownership to someone else if you would like to leave this workspace
+                      You are currently the admin of the workspace. Transfer the
+                      ownership to someone else if you would like to leave this
+                      workspace
                     </p>
                   ) : memberCount === 1 ? (
-                    <p>You are the only member of this workspace. You might want to delete the workspace</p>
+                    <p>
+                      You are the only member of this workspace. You might want
+                      to delete the workspace
+                    </p>
                   ) : null}
                 </TooltipContent>
               ) : null}
