@@ -4,7 +4,8 @@ import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { decrypt } from '@keyshade/common'
 import { NoteIconSVG } from '@public/svg/secret'
-import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
+import { EyeOpenSVG, EyeSlashSVG, TrashWhiteSVG } from '@public/svg/shared'
+import { MoreHorizontalIcon } from 'lucide-react'
 import {
   AccordionContent,
   AccordionItem,
@@ -18,12 +19,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger
-} from '@/components/ui/context-menu'
+import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import {
   Tooltip,
   TooltipContent,
@@ -42,6 +38,12 @@ import {
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 import ControllerInstance from '@/lib/controller-instance'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import SecretContextMenu from '@/components/dashboard/secret/secretCard/secret-context-menu'
+import SecretDropdownMenu from '@/components/dashboard/secret/secretCard/secret-dropdown-menu'
 
 interface SecretCardProps {
   secretData: Secret
@@ -53,7 +55,7 @@ export default function SecretCard({
   secretData,
   privateKey,
   className
-}: SecretCardProps) {
+}: SecretCardProps): React.JSX.Element {
   const { versions } = secretData
 
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
@@ -207,7 +209,7 @@ export default function SecretCard({
   return (
     <ContextMenu>
       <AccordionItem
-        className={`rounded-xl bg-white/5 px-5 ${className}`}
+        className={`bg-night-c hover:bg-night-b border-white/8 rounded-xl border px-4 ${className}`}
         id={`secret-${secretData.slug}`}
         key={secretData.id}
         value={secretData.id}
@@ -216,25 +218,48 @@ export default function SecretCard({
           <AccordionTrigger
             className="overflow-hidden hover:no-underline"
             rightChildren={
-              <div className="flex items-center gap-x-4 text-xs text-white/50">
-                {dayjs(secretData.updatedAt).toNow(true)} ago by{' '}
-                <div className="flex items-center gap-x-2">
-                  <span className="text-white">
-                    {secretData.lastUpdatedBy.name}
-                  </span>
-                  <AvatarComponent
-                    name={secretData.lastUpdatedBy.name}
-                    profilePictureUrl={
-                      secretData.lastUpdatedBy.profilePictureUrl
-                    }
-                  />
+              <>
+                <div className="flex items-center gap-x-4 text-xs text-white/50">
+                  {dayjs(secretData.updatedAt).toNow(true)} ago by{' '}
+                  <div className="flex items-center gap-x-2">
+                    <span className="text-white">
+                      {secretData.lastUpdatedBy.name}
+                    </span>
+                    <AvatarComponent
+                      name={secretData.lastUpdatedBy.name}
+                      profilePictureUrl={
+                        secretData.lastUpdatedBy.profilePictureUrl
+                      }
+                    />
+                  </div>
                 </div>
-              </div>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                      type="button"
+                    >
+                      <MoreHorizontalIcon />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <SecretDropdownMenu
+                    handleCopyToClipboard={handleCopyToClipboard}
+                    handleDeleteClick={handleDeleteClick}
+                    handleEditClick={handleEditClick}
+                    handleRevisionsClick={handleRevisionsClick}
+                    isAuthorizedToDeleteSecrets={isAuthorizedToDeleteSecrets}
+                    isAuthorizedToEditSecrets={isAuthorizedToEditSecrets}
+                  />
+                </DropdownMenu>
+              </>
             }
           >
             <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
               <div className="flex items-center gap-x-4 truncate">
-                {/* <SecretLogoSVG /> */}
                 {secretData.name}
               </div>
               {secretData.note ? (
@@ -257,7 +282,7 @@ export default function SecretCard({
             <Table className="h-full w-full">
               <TableHeader className="h-12.5 w-full">
                 <TableRow className="h-12.5 w-full bg-white/10">
-                  <TableHead className="h-full w-41 rounded-tl-xl text-base font-normal text-white/50">
+                  <TableHead className="w-41 h-full rounded-tl-xl text-base font-normal text-white/50">
                     Environment
                   </TableHead>
                   <TableHead className="h-full text-base font-normal text-white/50">
@@ -279,10 +304,10 @@ export default function SecretCard({
                   )
                   return (
                     <TableRow
-                      className="group h-12.5 w-full hover:bg-white/5"
+                      className="h-12.5 group w-full hover:bg-white/5"
                       key={value.environment.id}
                     >
-                      <TableCell className="h-full w-41 text-base">
+                      <TableCell className="w-41 h-full text-base">
                         {value.environment.name}
                       </TableCell>
                       <TableCell className="h-full text-base">
@@ -344,34 +369,14 @@ export default function SecretCard({
           )}
         </AccordionContent>
       </AccordionItem>
-      <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem
-          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
-          onSelect={handleRevisionsClick}
-        >
-          Show Version History
-        </ContextMenuItem>
-        <ContextMenuItem
-          className="w-[15.938rem] border-b-[0.025rem] border-white/65 py-2 text-xs font-semibold tracking-wide"
-          onSelect={handleCopyToClipboard}
-        >
-          Copy slug
-        </ContextMenuItem>
-        <ContextMenuItem
-          className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-          disabled={!isAuthorizedToEditSecrets}
-          onSelect={handleEditClick}
-        >
-          Edit
-        </ContextMenuItem>
-        <ContextMenuItem
-          className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-          disabled={!isAuthorizedToDeleteSecrets}
-          onSelect={handleDeleteClick}
-        >
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <SecretContextMenu
+        handleCopyToClipboard={handleCopyToClipboard}
+        handleDeleteClick={handleDeleteClick}
+        handleEditClick={handleEditClick}
+        handleRevisionsClick={handleRevisionsClick}
+        isAuthorizedToDeleteSecrets={isAuthorizedToDeleteSecrets}
+        isAuthorizedToEditSecrets={isAuthorizedToEditSecrets}
+      />
     </ContextMenu>
   )
 }

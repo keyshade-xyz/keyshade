@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import React from 'react'
 import type { Workspace } from '@keyshade/schema'
 import {
@@ -29,12 +28,12 @@ export default function ProjectContextMenu({
   handleEditProject,
   handleDeleteProject,
   handleExportConfiguration
-}: ProjectContextMenuProps): JSX.Element {
+}: ProjectContextMenuProps): React.JSX.Element {
   return (
     <ContextMenuContent className="w-64">
-      <Link href={`/${selectedWorkspace.slug}/${slug}?tab=secret`}>
+      <a href={`/${selectedWorkspace.slug}/${slug}?tab=secret`}>
         <ContextMenuItem inset>Open</ContextMenuItem>
-      </Link>
+      </a>
       <a
         href={`/${selectedWorkspace.slug}/${slug}?tab=secret`}
         rel="noopener noreferrer"
@@ -42,7 +41,7 @@ export default function ProjectContextMenu({
       >
         <ContextMenuItem inset>Open in new tab</ContextMenuItem>
       </a>
-      <ContextMenuSeparator className="bg-white/15" />
+      <ContextMenuSeparator />
       <ContextMenuItem
         inset
         onClick={() => {
@@ -54,11 +53,11 @@ export default function ProjectContextMenu({
       <ContextMenuItem inset onClick={handleCopyToClipboard}>
         Copy slug
       </ContextMenuItem>
-      <ContextMenuSeparator className="bg-white/15" />
+      <ContextMenuSeparator />
       <ContextMenuItem inset onClick={handleExportConfiguration}>
         Export configuration
       </ContextMenuItem>
-      <ContextMenuSeparator className="bg-white/15" />
+      <ContextMenuSeparator />
       <ContextMenuItem
         disabled={!isAuthorizedToEditProjects}
         inset

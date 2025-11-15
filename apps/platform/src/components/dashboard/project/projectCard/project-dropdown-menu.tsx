@@ -33,7 +33,7 @@ export default function ProjectDropdownMenu({
   return (
     <DropdownMenuContent align="start" className="w-64">
       <DropdownMenuGroup>
-        <a href={`/${selectedWorkspace.slug}/${slug}?tab=secret`}>
+        <a href={`/${selectedWorkspace.slug}/${slug}?tab=secrets`}>
           <DropdownMenuItem>Open</DropdownMenuItem>
         </a>
         <DropdownMenuItem
