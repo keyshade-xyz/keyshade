@@ -26,7 +26,7 @@ export default function AvatarComponent({
   profilePictureUrl
 }: AvatarProps) {
   return (
-    <Avatar className={className ?? 'h-6 w-6'}>
+    <Avatar className={className ?? 'h-9 w-9'}>
       <AvatarImage
         src={profilePictureUrl === null ? undefined : profilePictureUrl}
       />

@@ -19,14 +19,13 @@ export default function IntegrationServices(): React.JSX.Element {
   const integrations = useMemo(() => Object.values(Integrations), [])
 
   const filteredIntegrations = useMemo(() => {
-      if (!searchTerm.trim()) {
-          return integrations
-      }
-      return integrations.filter((integration) =>
-                                 integration.name.toLowerCase().includes(searchTerm.toLowerCase())
-                                )
+    if (!searchTerm.trim()) {
+      return integrations
+    }
+    return integrations.filter((integration) =>
+      integration.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   }, [integrations, searchTerm])
-
 
   const [createIntegrationModelOpen, setCreateIntegrationModelOpen] = useAtom(
     createIntegrationOpenAtom
@@ -46,10 +45,9 @@ export default function IntegrationServices(): React.JSX.Element {
 
   const hasIntegrations = filteredIntegrations.length > 0
 
-
   return (
     <div>
-    {/* Search Input */}
+      {/* Search Input */}
       <div className="mb-6">
         <Input
           className="w-full max-w-md"
@@ -60,11 +58,11 @@ export default function IntegrationServices(): React.JSX.Element {
       </div>
       <Visible if={hasIntegrations}>
         <div className="grid grid-cols-3 gap-5">
-        {filteredIntegrations.map((integration) => {
+          {filteredIntegrations.map((integration) => {
             const isActive = integration.isActive
             return (
               <div
-                className={`h-full rounded-lg bg-[#222425] p-4 py-2 text-white ${!isActive && 'opacity-50'}`}
+                className={`bg-night-c border-white/8 h-full rounded-lg border p-4 py-2 text-white ${!isActive && 'opacity-50'}`}
                 key={integration.type}
               >
                 <div className="mb-5 mt-3 flex items-start justify-between">

@@ -111,11 +111,7 @@ function ImportEnvModal({
             Upload your .env or .txt file
           </p>
 
-          <Button
-            className="bg-white/80 text-black hover:bg-white/60"
-            onClick={handleChooseFile}
-            variant="secondary"
-          >
+          <Button onClick={handleChooseFile} type="button" variant="secondary">
             Choose file
           </Button>
         </div>
@@ -131,7 +127,7 @@ function ImportEnvModal({
 
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="rounded-md border border-white/60 text-white/60"
+            className="border-white/8 hover:border-white/4 rounded-md border bg-zinc-900 text-white hover:text-white/80"
             onClick={onClose}
           >
             Cancel

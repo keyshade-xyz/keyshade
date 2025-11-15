@@ -6,9 +6,9 @@ import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import CreateProjectDialogue from '@/components/dashboard/project/createProjectDialogue'
 import {
-  selectedWorkspaceAtom,
   deleteProjectOpenAtom,
   selectedProjectAtom,
+  selectedWorkspaceAtom,
   userAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
@@ -21,6 +21,7 @@ import { useGetAllProjects } from '@/hooks/api/use-get-all-projects'
 import ProjectLoader from '@/components/main/ProjectLoader'
 import ProjectEmpty from '@/components/main/ProjectEmpty'
 import Visible from '@/components/common/visible'
+import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -54,7 +55,7 @@ export default function Index(): React.JSX.Element {
       <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
       <div className="flex items-center justify-between">
         <Visible if={!isProjectsEmpty}>
-          <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
+          <h1 className="text-[28px]">All Projects</h1>
         </Visible>
         <CreateProjectDialogue />
       </div>
@@ -63,15 +64,22 @@ export default function Index(): React.JSX.Element {
         {isAuthorizedToViewProject ? (
           <ProjectEmpty isEmpty={isProjectsEmpty}>
             <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-              className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
+              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
               fetchFunction={fetchProjects}
               itemComponent={ProjectItemComponent}
               itemKey={(item) => item.id}
               itemsPerPage={15}
+              loadingComponent={
+                <div className="w-full">
+                  <ProjectScreenLoader />
+                </div>
+              }
             />
           </ProjectEmpty>
         ) : (
-          <div>you don&apos;t have permission to view these projects</div>
+          <div>
+            You don&apos;t have permission to view projects in this workspace
+          </div>
         )}
       </ProjectLoader>
 

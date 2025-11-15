@@ -20,7 +20,7 @@ export default function MainLayout({
         <>
           <div className="relative flex w-full justify-center ">
             <Navbar />
-            <TopGradientSVG className="absolute -z-10 w-[300vw] overflow-hidden md:w-full" />
+            <TopGradientSVG className="absolute -z-10" />
           </div>
           {children}
           <Footer />

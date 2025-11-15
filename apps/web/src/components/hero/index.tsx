@@ -32,7 +32,7 @@ function Hero(): React.JSX.Element {
             </div>
           </div>
           <h1
-            className={`${geist.className} mt-4 bg-gradient-to-b from-[#CFF8FF] to-[#E5EFFE] bg-clip-text text-center text-4xl font-semibold text-transparent md:w-[37.5rem] md:text-7xl`}
+            className={`${geist.className} mt-4 w-[37.5rem] bg-gradient-to-b from-[#CFF8FF] to-[#E5EFFE] bg-clip-text text-center text-7xl font-semibold text-transparent`}
           >
             The smarter .env file replacement
           </h1>
@@ -43,9 +43,8 @@ function Hero(): React.JSX.Element {
             them securely & instantly
           </p>
         </div>
-        <div className="mt-[2rem] flex flex-col items-center gap-3 md:flex-row">
+        <div className="mt-[2rem] flex items-center gap-3">
           <a
-            className="w-full md:w-fit"
             href="https://cal.com/keyshade/demo"
             rel="noopener noreferrer"
             target="_blank"
@@ -73,7 +72,7 @@ function Hero(): React.JSX.Element {
           <BottomGradientSVG />
           <Image
             alt="hero image"
-            className="w-full px-4 md:max-w-[82rem]"
+            className="max-w-[82rem]"
             draggable={false}
             priority
             quality={100}

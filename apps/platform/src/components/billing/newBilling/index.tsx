@@ -41,21 +41,21 @@ export default function NewBilling() {
             }}
             selectedPlan={selectedPlan}
             tierName={tier}
-          />  
+          />
         ))}
       </div>
       <div className="mt-8 flex items-center justify-center gap-4">
         <Button
           className="gap-2 px-9"
           onClick={scrollToBillingFAQ}
-          variant="secondary"
+          variant="outline"
         >
           FAQ&apos;s <ArrowDownSVG />
         </Button>
         <Button
           className="gap-2 px-9"
           onClick={scrollToComparePlan}
-          variant="secondary"
+          variant="outline"
         >
           Compare our plan <ArrowDownSVG />
         </Button>
