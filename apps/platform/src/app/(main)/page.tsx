@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { FolderLock } from 'lucide-react'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import CreateProjectDialogue from '@/components/dashboard/project/createProjectDialogue'
@@ -71,7 +72,15 @@ export default function Index(): React.JSX.Element {
             />
           </ProjectEmpty>
         ) : (
-          <div>you don&apos;t have permission to view these projects</div>
+          <div className='flex justify-center items-center h-full'>
+            <div className='flex flex-col gap-y-4 items-center'>
+              <FolderLock className="size-28 text-[#71717A]" />
+              <p className='text-center max-w-md'>
+                You don&apos;t have permission to view these projects. Contact your
+                workspace admin to request access.
+              </p>
+            </div>
+          </div>
         )}
       </ProjectLoader>
 
