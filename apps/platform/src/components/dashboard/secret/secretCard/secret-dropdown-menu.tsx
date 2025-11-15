@@ -24,7 +24,7 @@ export default function SecretDropdownMenu({
   handleDeleteClick
 }: SecretDropdownMenuProps): React.JSX.Element {
   return (
-    <DropdownMenuContent align="start" className="w-64">
+    <DropdownMenuContent align="start">
       <DropdownMenuGroup>
         <DropdownMenuItem
           onClick={(e) => {

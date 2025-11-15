@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { CodeSVG, ImportSVG } from '@public/svg/dashboard'
 import SettingsPage from './@overview/page'
 import EnvironmentPage from './@environment/page'
 import SecretPage from './@secret/page'
@@ -21,6 +22,7 @@ import AddVariableDialogue from '@/components/dashboard/variable/addVariableDial
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
 import LineTabController from '@/components/shared/navbar/line-tab-controller'
+import { Button } from '@/components/ui/button'
 
 function DetailedProjectPage(): JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
@@ -103,7 +105,18 @@ function DetailedProjectPage(): JSX.Element {
 
   return (
     <main className="flex h-full flex-col gap-4">
-      <h1 className="text-[28px]">{selectedProject?.name}</h1>
+      <div className="flex flex-row items-center justify-between">
+        <h1 className="text-[28px]">{selectedProject?.name}</h1>
+        <div className="flex flex-row items-center gap-x-2">
+          <Button variant="secondary">
+            <ImportSVG />
+            <div className="ml-1">Import</div>
+          </Button>
+          <Button variant="secondary">
+            <CodeSVG />
+          </Button>
+        </div>
+      </div>
 
       <div className="h-14.5 flex w-full justify-between py-3 ">
         <LineTabController />

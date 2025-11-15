@@ -11,13 +11,13 @@ export default function EmptyVariableListContent(): React.JSX.Element {
 
   return (
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
-      <VariableSVG width="100" />
+      <VariableSVG height="100" width="100" />
 
-      <div className="flex h-20 w-121 flex-col items-center justify-center gap-4">
-        <p className="h-10 w-121 text-center text-[32px] font-normal">
+      <div className="w-121 flex h-20 flex-col items-center justify-center gap-4">
+        <p className="w-121 h-10 text-center text-[32px] font-normal">
           Declare your first variable
         </p>
-        <p className="h-6 w-121 text-center text-[16px] font-medium">
+        <p className="w-121 h-6 text-center text-[16px] font-medium">
           Declare and store a variable against different environments
         </p>
       </div>

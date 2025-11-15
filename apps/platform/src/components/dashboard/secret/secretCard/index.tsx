@@ -1,49 +1,18 @@
-import type { Environment, Secret } from '@keyshade/schema'
-import dayjs from 'dayjs'
-import { useAtom, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
-import { decrypt } from '@keyshade/common'
-import { NoteIconSVG } from '@public/svg/secret'
-import { EyeOpenSVG, EyeSlashSVG, TrashWhiteSVG } from '@public/svg/shared'
-import { MoreHorizontalIcon } from 'lucide-react'
+import type { Secret } from '@keyshade/schema'
+import { useSetAtom } from 'jotai'
+import { AccordionItem } from '@/components/ui/accordion'
+import { ContextMenu } from '@/components/ui/context-menu'
 import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
-import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
-import { Switch } from '@/components/ui/switch'
-import {
-  deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
   secretRevisionsOpenAtom,
-  selectedSecretAtom,
-  selectedSecretEnvironmentAtom
+  selectedSecretAtom
 } from '@/store'
-import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
-import ControllerInstance from '@/lib/controller-instance'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
 import SecretContextMenu from '@/components/dashboard/secret/secretCard/secret-context-menu'
-import SecretDropdownMenu from '@/components/dashboard/secret/secretCard/secret-dropdown-menu'
+import SecretCardHeader from '@/components/dashboard/secret/secretCard/secret-card-header'
+import SecretCardContent from '@/components/dashboard/secret/secretCard/secret-card-content'
+import SecretCardFooter from '@/components/dashboard/secret/secretCard/secret-card-footer'
 
 interface SecretCardProps {
   secretData: Secret
@@ -56,79 +25,11 @@ export default function SecretCard({
   privateKey,
   className
 }: SecretCardProps): React.JSX.Element {
-  const { versions } = secretData
-
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
-  const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
-    deleteEnvironmentValueOfSecretOpenAtom
-  )
+
   const setIsSecretRevisionsOpen = useSetAtom(secretRevisionsOpenAtom)
-  const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
-    selectedSecretEnvironmentAtom
-  )
-  const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
-  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
-    new Set()
-  )
-  const [decryptedValues, setDecryptedValues] = useState<
-    Record<Environment['id'], string>
-  >({})
-
-  const isAuthorizedToEditSecrets = secretData.entitlements.canUpdate
-  const isAuthorizedToDeleteSecrets = secretData.entitlements.canDelete
-
-  const handleDecryptValues = useCallback(
-    (environmentSlug: Environment['slug']) => {
-      if (!privateKey) return
-      const targetValue = versions.find(
-        (value) => value.environment.slug === environmentSlug
-      )
-      if (!targetValue) return
-
-      decrypt(privateKey, targetValue.value)
-        .then((decrypted) => {
-          setDecryptedValues((prev) => ({
-            ...prev,
-            [targetValue.environment.id]: decrypted
-          }))
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console -- console.error is used for debugging
-          console.error('Decryption error:', error)
-          setDecryptedValues((prev) => ({
-            ...prev,
-            [targetValue.environment.id]: 'Decryption failed'
-          }))
-        })
-    },
-    [privateKey, versions]
-  )
-
-  useEffect(() => {
-    const fetchDisabled = async () => {
-      try {
-        const res =
-          await ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret(
-            { secretSlug: secretData.slug }
-          )
-
-        if (res.success && res.data) {
-          setDisabledEnvironments(new Set(res.data))
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console -- console.error is used for debugging
-        console.error('Failed to load disabled environments', error)
-      }
-    }
-
-    fetchDisabled()
-  }, [secretData.slug])
-
-  useEffect(() => {
-    handleDecryptValues(secretData.versions[0]?.environment.slug)
-  }, [secretData.versions, handleDecryptValues])
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -139,49 +40,8 @@ export default function SecretCard({
     )
   }
 
-  const handleToggleDisableSecretClick = async (
-    environmentSlug: Environment['slug'],
-    environmentId: Environment['id'],
-    checked: boolean
-  ) => {
-    const controller = ControllerInstance.getInstance().secretController
-
-    if (checked) {
-      // Enable secret
-      await controller.enableSecret({
-        secretSlug: secretData.slug,
-        environmentSlug
-      })
-      setDisabledEnvironments((prev) => {
-        const next = new Set(prev)
-        next.delete(environmentId) // Update local state
-        return next
-      })
-    } else {
-      // Disable secret
-      await controller.disableSecret({
-        secretSlug: secretData.slug,
-        environmentSlug
-      })
-      setDisabledEnvironments((prev) => {
-        const next = new Set(prev)
-        next.add(environmentId) // Update local state
-        return next
-      })
-    }
-  }
-
-  const handleRevealEnvironmentValueOfSecretClick = (
-    environment: Environment['slug']
-  ) => {
-    if (selectedSecretEnvironment === environment && isSecretRevealed) {
-      setIsSecretRevealed(false)
-    } else {
-      setIsSecretRevealed(true)
-      handleDecryptValues(environment)
-    }
-    setSelectedSecretEnvironment(environment)
-  }
+  const isAuthorizedToEditSecrets = secretData.entitlements.canUpdate
+  const isAuthorizedToDeleteSecrets = secretData.entitlements.canDelete
 
   const handleEditClick = () => {
     setSelectedSecret(secretData)
@@ -193,14 +53,6 @@ export default function SecretCard({
     setIsDeleteSecretOpen(true)
   }
 
-  const handleDeleteEnvironmentValueOfSecretClick = (
-    environment: Environment['slug']
-  ) => {
-    setSelectedSecret(secretData)
-    setSelectedSecretEnvironment(environment)
-    setIsDeleteEnvironmentValueOfSecretOpen(true)
-  }
-
   const handleRevisionsClick = () => {
     setSelectedSecret(secretData)
     setIsSecretRevisionsOpen(true)
@@ -209,165 +61,20 @@ export default function SecretCard({
   return (
     <ContextMenu>
       <AccordionItem
-        className={`bg-night-c hover:bg-night-b border-white/8 rounded-xl border px-4 ${className}`}
+        className={`bg-night-c hover:bg-night-b border-white/8 rounded-xl border px-4 pb-4 ${className}`}
         id={`secret-${secretData.slug}`}
         key={secretData.id}
         value={secretData.id}
       >
-        <ContextMenuTrigger>
-          <AccordionTrigger
-            className="overflow-hidden hover:no-underline"
-            rightChildren={
-              <>
-                <div className="flex items-center gap-x-4 text-xs text-white/50">
-                  {dayjs(secretData.updatedAt).toNow(true)} ago by{' '}
-                  <div className="flex items-center gap-x-2">
-                    <span className="text-white">
-                      {secretData.lastUpdatedBy.name}
-                    </span>
-                    <AvatarComponent
-                      name={secretData.lastUpdatedBy.name}
-                      profilePictureUrl={
-                        secretData.lastUpdatedBy.profilePictureUrl
-                      }
-                    />
-                  </div>
-                </div>
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
-                      type="button"
-                    >
-                      <MoreHorizontalIcon />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <SecretDropdownMenu
-                    handleCopyToClipboard={handleCopyToClipboard}
-                    handleDeleteClick={handleDeleteClick}
-                    handleEditClick={handleEditClick}
-                    handleRevisionsClick={handleRevisionsClick}
-                    isAuthorizedToDeleteSecrets={isAuthorizedToDeleteSecrets}
-                    isAuthorizedToEditSecrets={isAuthorizedToEditSecrets}
-                  />
-                </DropdownMenu>
-              </>
-            }
-          >
-            <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
-              <div className="flex items-center gap-x-4 truncate">
-                {secretData.name}
-              </div>
-              {secretData.note ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <NoteIconSVG className="w-7" />
-                    </TooltipTrigger>
-                    <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                      <p>{secretData.note}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : null}
-            </div>
-          </AccordionTrigger>
-        </ContextMenuTrigger>
-        <AccordionContent>
-          {versions.length > 0 ? (
-            <Table className="h-full w-full">
-              <TableHeader className="h-12.5 w-full">
-                <TableRow className="h-12.5 w-full bg-white/10">
-                  <TableHead className="w-41 h-full rounded-tl-xl text-base font-normal text-white/50">
-                    Environment
-                  </TableHead>
-                  <TableHead className="h-full text-base font-normal text-white/50">
-                    Value
-                  </TableHead>
-                  <TableHead className="h-full text-base font-normal text-white/50">
-                    Version
-                  </TableHead>
-                  <TableHead className="h-full w-[100px] rounded-tr-xl text-base font-normal text-white/50" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {versions.map((value) => {
-                  const isRevealed =
-                    isSecretRevealed &&
-                    value.environment.slug === selectedSecretEnvironment
-                  const isDisabled = disabledEnvironments.has(
-                    value.environment.id
-                  )
-                  return (
-                    <TableRow
-                      className="h-12.5 group w-full hover:bg-white/5"
-                      key={value.environment.id}
-                    >
-                      <TableCell className="w-41 h-full text-base">
-                        {value.environment.name}
-                      </TableCell>
-                      <TableCell className="h-full text-base">
-                        {isRevealed
-                          ? decryptedValues[value.environment.id]
-                          : value.value.replace(/./g, '*').substring(0, 20)}
-                      </TableCell>
-                      <TableCell className="h-full px-8 py-4 text-base">
-                        {value.version}
-                      </TableCell>
-                      <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
-                        <div className="flex gap-3">
-                          <Switch
-                            checked={!isDisabled}
-                            onCheckedChange={(checked) => {
-                              handleToggleDisableSecretClick(
-                                value.environment.slug,
-                                value.environment.id,
-                                checked
-                              )
-                            }}
-                          />
-                          {privateKey ? (
-                            <button
-                              className="duration-300 hover:scale-105"
-                              onClick={() =>
-                                handleRevealEnvironmentValueOfSecretClick(
-                                  value.environment.slug
-                                )
-                              }
-                              type="button"
-                            >
-                              {!isRevealed ? <EyeOpenSVG /> : <EyeSlashSVG />}
-                            </button>
-                          ) : null}
-                          <button
-                            className="duration-300 hover:scale-105"
-                            onClick={() =>
-                              handleDeleteEnvironmentValueOfSecretClick(
-                                value.environment.slug
-                              )
-                            }
-                            type="button"
-                          >
-                            <TrashWhiteSVG />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex items-center justify-center py-8 text-sm text-white/50">
-              You have not added any values for any environment to this secret
-              yet. Edit the secret to add values.
-            </div>
-          )}
-        </AccordionContent>
+        <SecretCardHeader
+          handleCopyToClipboard={handleCopyToClipboard}
+          handleDeleteClick={handleDeleteClick}
+          handleEditClick={handleEditClick}
+          handleRevisionsClick={handleRevisionsClick}
+          secretData={secretData}
+        />
+        <SecretCardContent privateKey={privateKey} secretData={secretData} />
+        <SecretCardFooter secretData={secretData} />
       </AccordionItem>
       <SecretContextMenu
         handleCopyToClipboard={handleCopyToClipboard}
