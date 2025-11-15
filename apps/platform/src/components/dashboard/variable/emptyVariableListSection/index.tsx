@@ -1,10 +1,10 @@
+import { EmptyFolderVariablePNG } from '@public/raster/variable'
+import { AddSVG } from '@public/svg/shared'
 import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
-import { AddSVG } from '@public/svg/shared'
-import { EmptyFolderVariablePNG } from '@public/raster/variable'
-import ImportEnvButton from '../../overview/ImportEnvContainer/import-env-button'
 import { createVariableOpenAtom, selectedProjectAtom } from '@/store'
 import { Button } from '@/components/ui/button'
+import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
 
 export default function EmptyVariableListContent(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
