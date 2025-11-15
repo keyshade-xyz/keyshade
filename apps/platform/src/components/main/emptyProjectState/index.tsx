@@ -1,8 +1,8 @@
 import { useSetAtom } from 'jotai'
 import React from 'react'
 import { AddSVG } from '@public/svg/shared'
-import Image from 'next/image'
 import { EmptyFolderPNG } from '@public/raster/dashboard'
+import Image from 'next/image'
 import { createProjectOpenAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 import { GeistSansFont } from '@/fonts'
@@ -19,6 +19,7 @@ export default function EmptyProjectsState() {
         height={150}
         placeholder="blur"
         priority
+        quality={100}
         src={EmptyFolderPNG}
         width={150}
       />
@@ -30,6 +31,7 @@ export default function EmptyProjectsState() {
       </div>
       <Button
         onClick={() => setIsCreateProjectDialogOpen(true)}
+        type="button"
         variant="primary"
       >
         <AddSVG />

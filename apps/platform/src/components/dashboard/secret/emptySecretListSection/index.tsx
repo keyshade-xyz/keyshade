@@ -1,7 +1,10 @@
 import { useAtomValue, useSetAtom } from 'jotai'
-import { SecretSVG } from '@public/svg/dashboard'
-import { Button } from '@/components/ui/button'
+import { EmptySecretPNG } from '@public/raster/secret'
+import { AddSVG } from '@public/svg/shared'
+import Image from 'next/image'
+import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
 import { createSecretOpenAtom, selectedProjectAtom } from '@/store'
+import { Button } from '@/components/ui/button'
 
 export default function EmptySecretListContent(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
@@ -10,25 +13,34 @@ export default function EmptySecretListContent(): React.JSX.Element {
     selectedProject?.entitlements.canCreateSecrets
 
   return (
-    <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
-      <SecretSVG width="100" />
+    <div className="flex h-[65vh] w-full flex-col items-center justify-center gap-y-8">
+      <Image
+        alt="empty secret"
+        draggable={false}
+        placeholder="blur"
+        quality={100}
+        src={EmptySecretPNG}
+      />
 
-      <div className="flex h-20 w-121 flex-col items-center justify-center gap-4">
-        <p className="h-10 w-121 text-center text-[32px] font-normal">
-          Declare your first secret
+      <div className="w-121 flex h-20 flex-col items-center justify-center gap-4">
+        <p className="w-121 h-10 text-center text-[28px] font-medium">
+          Create your first Secret
         </p>
-        <p className="h-6 w-121 text-center text-[16px] font-medium">
-          Declare and store a secret against different environments
+        <p className="w-[300px] text-center text-neutral-500">
+          When you add a secret, it’s encrypted on your side. Even Keyshade
+          can’t peek.{' '}
         </p>
       </div>
-
-      <Button
-        className="h-9 rounded-md bg-white text-black hover:bg-gray-300"
-        disabled={!isAuthorizedToCreateSecrets}
-        onClick={() => setIsCreateSecretOpen(true)}
-      >
-        Create secret
-      </Button>
+      <div className="flex gap-x-2.5">
+        <ImportEnvButton projectSlug={selectedProject?.slug} />
+        <Button
+          disabled={!isAuthorizedToCreateSecrets}
+          onClick={() => setIsCreateSecretOpen(true)}
+        >
+          <AddSVG />
+          Create secret
+        </Button>
+      </div>
     </div>
   )
 }
