@@ -1,5 +1,4 @@
 import type { Workspace } from '@keyshade/schema'
-import Link from 'next/link'
 import React from 'react'
 import {
   DropdownMenuContent,
@@ -30,19 +29,19 @@ export default function ProjectDropdownMenu({
   handleEditProject,
   handleDeleteProject,
   handleExportConfiguration
-}: ProjectDropdownMenuProps): JSX.Element {
+}: ProjectDropdownMenuProps): React.JSX.Element {
   return (
     <DropdownMenuContent align="start" className="w-64">
       <DropdownMenuGroup>
-        <Link href={`/${selectedWorkspace.slug}/${slug}?tab=secret`}>
+        <a href={`/${selectedWorkspace.slug}/${slug}?tab=secret`}>
           <DropdownMenuItem>Open</DropdownMenuItem>
-        </Link>
+        </a>
         <DropdownMenuItem
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
             window.open(
-              `/${selectedWorkspace.slug}/${slug}?tab=secret`,
+              `/${selectedWorkspace.slug}/${slug}?tab=secrets`,
               '_blank',
               'noopener,noreferrer'
             )
@@ -98,7 +97,7 @@ export default function ProjectDropdownMenu({
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            handleDeleteProject
+            handleDeleteProject()
           }}
         >
           Delete

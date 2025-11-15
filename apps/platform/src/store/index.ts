@@ -129,7 +129,9 @@ export const revisionsOfSecretAtom = atom<
 >([])
 
 export const selectedEnvironmentAtom = atom<Environment | null>(null)
-export const environmentsOfProjectAtom = atom<Environment[]>([])
+export const environmentsOfProjectAtom = atom<Omit<Environment, 'project'>[]>(
+  []
+)
 
 export const selectedRoleAtom = atom<WorkspaceRole | null>(null)
 export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])

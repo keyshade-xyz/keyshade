@@ -53,9 +53,9 @@ export default function Index(): React.JSX.Element {
   return (
     <div className="flex flex-col gap-4">
       <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
-      <div className="flex items-center justify-between py-2">
+      <div className="flex items-center justify-between">
         <Visible if={!isProjectsEmpty}>
-          <h1 className="text-[1.75rem]">All Projects</h1>
+          <h1 className="text-[28px]">All Projects</h1>
         </Visible>
         <CreateProjectDialogue />
       </div>
@@ -64,7 +64,7 @@ export default function Index(): React.JSX.Element {
         {isAuthorizedToViewProject ? (
           <ProjectEmpty isEmpty={isProjectsEmpty}>
             <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 p-2 md:grid-cols-2 lg:grid-cols-4"
+              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
               fetchFunction={fetchProjects}
               itemComponent={ProjectItemComponent}
               itemKey={(item) => item.id}

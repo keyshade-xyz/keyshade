@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { SecretSVG, EnvironmentSVG, VariableSVG } from '@public/svg/dashboard'
+import { EnvironmentSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import { MoreHorizontalIcon } from 'lucide-react'
 import ProjectContextMenu from './project-context-menu'
 import ProjectDropdownMenu from './project-dropdown-menu'
@@ -81,7 +81,7 @@ export default function ProjectCard({
       <ContextMenuTrigger className="flex h-28">
         <Link
           className={`${GeistSansFont.className} bg-night-c hover:bg-night-b border-white/8 flex h-fit w-full flex-col justify-between gap-y-10 rounded-lg border p-4 shadow-lg`}
-          href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
+          href={`${selectedWorkspace?.slug}/${slug}?tab=secrets`}
           key={id}
         >
           <div className="flex justify-between">
@@ -128,15 +128,15 @@ export default function ProjectCard({
           <div className="flex h-full items-end justify-between">
             <div className="grid grid-cols-3 gap-x-3">
               <div className="flex items-center gap-x-1">
-                <EnvironmentSVG width={16} />
+                <EnvironmentSVG />
                 {totalEnvironments}
               </div>
               <div className="flex items-center gap-x-1">
-                <VariableSVG width={16} />
+                <VariableSVG />
                 {totalVariables}
               </div>
               <div className="flex items-center gap-x-1">
-                <SecretSVG width={16} />
+                <SecretSVG />
                 {totalSecrets}
               </div>
             </div>

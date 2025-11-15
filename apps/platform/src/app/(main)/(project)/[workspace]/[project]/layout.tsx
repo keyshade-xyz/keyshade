@@ -9,12 +9,12 @@ import VariablePage from './@variable/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
 import {
-  selectedProjectAtom,
   environmentsOfProjectAtom,
   globalSearchDataAtom,
   projectEnvironmentCountAtom,
   projectSecretCountAtom,
   projectVariableCountAtom,
+  selectedProjectAtom,
   selectedWorkspaceAtom
 } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
@@ -103,16 +103,15 @@ function DetailedProjectPage(): JSX.Element {
 
   return (
     <main className="flex h-full flex-col gap-4">
-      <h1 className="text-[28px] font-medium">{selectedProject?.name}</h1>
-      {tab !== 'overview' && (
-        <div className="h-14.5 flex w-full justify-between py-3 ">
-          <LineTabController />
+      <h1 className="text-[28px]">{selectedProject?.name}</h1>
 
-          {tab === 'secrets' && <AddSecretDialog />}
-          {tab === 'variables' && <AddVariableDialogue />}
-          {tab === 'environment' && <AddEnvironmentDialogue />}
-        </div>
-      )}
+      <div className="h-14.5 flex w-full justify-between py-3 ">
+        <LineTabController />
+        {tab === 'secrets' && <AddSecretDialog />}
+        {tab === 'variables' && <AddVariableDialogue />}
+        {tab === 'environment' && <AddEnvironmentDialogue />}
+      </div>
+
       <div className="h-full w-full overflow-y-scroll">
         {tab === 'settings' && <SettingsPage />}
         {tab === 'secrets' && <SecretPage />}
