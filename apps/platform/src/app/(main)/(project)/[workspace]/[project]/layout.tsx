@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { CodeSVG, ImportSVG } from '@public/svg/dashboard'
+import { CodeSVG } from '@public/svg/dashboard'
 import SettingsPage from './@overview/page'
 import EnvironmentPage from './@environment/page'
 import SecretPage from './@secret/page'
@@ -23,6 +23,7 @@ import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnviro
 import { useHttp } from '@/hooks/use-http'
 import LineTabController from '@/components/shared/navbar/line-tab-controller'
 import { Button } from '@/components/ui/button'
+import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
 
 function DetailedProjectPage(): JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
@@ -108,11 +109,8 @@ function DetailedProjectPage(): JSX.Element {
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-[28px]">{selectedProject?.name}</h1>
         <div className="flex flex-row items-center gap-x-2">
-          <Button variant="secondary">
-            <ImportSVG />
-            <div className="ml-1">Import</div>
-          </Button>
-          <Button variant="secondary">
+          <ImportEnvButton projectSlug={projectSlug} />
+          <Button type="button" variant="outline">
             <CodeSVG />
           </Button>
         </div>

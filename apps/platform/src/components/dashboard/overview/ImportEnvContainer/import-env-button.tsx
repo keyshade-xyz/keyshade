@@ -28,7 +28,7 @@ export default function ImportEnvButton({ projectSlug }) {
     <div>
       <Button onClick={handleOpenModal} type="button" variant="outline">
         <ImportSVG />
-        Import .envR
+        Import .env
       </Button>
 
       <ImportEnvModal
