@@ -50,6 +50,42 @@ export default function Index(): React.JSX.Element {
     })
   }, [getSelf, setUser])
 
+  /**
+   * Based on `isAuthorizedToViewProject` decide which component to load
+   */
+  function renderAuthorizedProjectView(): React.JSX.Element {
+    if (isAuthorizedToViewProject === undefined) {
+      return (
+        <div className="w-full">
+          <ProjectScreenLoader />
+        </div>
+      )
+    }
+    if (isAuthorizedToViewProject) {
+      return (
+        <ProjectEmpty isEmpty={isProjectsEmpty}>
+          <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
+            className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
+            fetchFunction={fetchProjects}
+            itemComponent={ProjectItemComponent}
+            itemKey={(item) => item.id}
+            itemsPerPage={15}
+            loadingComponent={
+              <div className="w-full">
+                <ProjectScreenLoader />
+              </div>
+            }
+          />
+        </ProjectEmpty>
+      )
+    }
+    return (
+      <div>
+        You don&apos;t have permission to view projects in this workspace
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
@@ -61,26 +97,7 @@ export default function Index(): React.JSX.Element {
       </div>
 
       <ProjectLoader loading={loading}>
-        {isAuthorizedToViewProject ? (
-          <ProjectEmpty isEmpty={isProjectsEmpty}>
-            <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-              className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
-              fetchFunction={fetchProjects}
-              itemComponent={ProjectItemComponent}
-              itemKey={(item) => item.id}
-              itemsPerPage={15}
-              loadingComponent={
-                <div className="w-full">
-                  <ProjectScreenLoader />
-                </div>
-              }
-            />
-          </ProjectEmpty>
-        ) : (
-          <div>
-            You don&apos;t have permission to view projects in this workspace
-          </div>
-        )}
+        {renderAuthorizedProjectView()}
       </ProjectLoader>
 
       <Visible if={Boolean(isDeleteProjectOpen && selectedProject)}>
