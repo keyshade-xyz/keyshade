@@ -19,7 +19,11 @@ export default function RootLayout({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <html className={GeistSansFont.className} lang="en">
+    <html
+      className={GeistSansFont.className}
+      lang="en"
+      suppressHydrationWarning
+    >
       <body>
         <Suspense>
           <PostHogProvider>
