@@ -21,7 +21,7 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 
-export default function AddEnvironmentDialogue() {
+export default function AddEnvironmentDialogue(): React.JSX.Element {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
     createEnvironmentOpenAtom
   )
@@ -142,7 +142,7 @@ export default function AddEnvironmentDialogue() {
                 Environment Name
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="environment-name"
                 onChange={(e) =>
                   setNewEnvironmentData({
@@ -163,7 +163,7 @@ export default function AddEnvironmentDialogue() {
                 Environment Description
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="environment-note"
                 onChange={(e) =>
                   setNewEnvironmentData({
