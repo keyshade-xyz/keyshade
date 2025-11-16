@@ -2,11 +2,23 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../../../ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '../../../ui/dialog'
 import { Button } from '../../../ui/button'
 import { Input } from '../../../ui/input'
 import ControllerInstance from '@/lib/controller-instance'
-import { createSecretOpenAtom, projectSecretCountAtom, secretsOfProjectAtom, selectedProjectAtom } from '@/store'
+import {
+  createSecretOpenAtom,
+  projectSecretCountAtom,
+  secretsOfProjectAtom,
+  selectedProjectAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import { parseUpdatedEnvironmentValues } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
@@ -118,7 +130,7 @@ export default function AddSecretDialog() {
                 Secret Name
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 disabled={isLoading}
                 id="secret-name"
                 onChange={(e) =>
@@ -140,7 +152,7 @@ export default function AddSecretDialog() {
                 Extra Note
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 disabled={isLoading}
                 id="secret-note"
                 onChange={(e) =>
