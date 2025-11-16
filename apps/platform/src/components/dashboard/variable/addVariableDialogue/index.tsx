@@ -23,7 +23,7 @@ import { useHttp } from '@/hooks/use-http'
 import { parseUpdatedEnvironmentValues } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
-export default function AddVariableDialogue() {
+export default function AddVariableDialogue(): React.JSX.Element {
   const [isCreateVariableOpen, setIsCreateVariableOpen] = useAtom(
     createVariableOpenAtom
   )
@@ -133,7 +133,7 @@ export default function AddVariableDialogue() {
                 Variable Name
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="variable-name"
                 onChange={(e) =>
                   setRequestData({
@@ -154,7 +154,7 @@ export default function AddVariableDialogue() {
                 Extra Note
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="variable-name"
                 onChange={(e) =>
                   setRequestData({
