@@ -1,10 +1,9 @@
 import React from 'react'
 
-function ProjectPage({ params }: { params: { project: string } }) {
+function ProjectPage(): React.JSX.Element {
   return (
     <div>
       <h1>ProjectPage</h1>
-      <p>project: {params.project}</p>
     </div>
   )
 }

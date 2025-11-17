@@ -6,13 +6,13 @@ import type { Secret } from '@keyshade/schema'
 import EmptySecretListContent from '../emptySecretListSection'
 import { Accordion } from '@/components/ui/accordion'
 import {
-  deleteSecretOpenAtom,
-  selectedProjectAtom,
-  editSecretOpenAtom,
-  deleteEnvironmentValueOfSecretOpenAtom,
   createSecretOpenAtom,
+  deleteEnvironmentValueOfSecretOpenAtom,
+  deleteSecretOpenAtom,
+  editSecretOpenAtom,
+  globalSearchDataAtom,
   rollbackSecretOpenAtom,
-  globalSearchDataAtom
+  selectedProjectAtom
 } from '@/store'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
@@ -155,7 +155,7 @@ export default function SecretList({
   return (
     <div
       className={cn(
-        'flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white',
+        'flex h-full w-full flex-col items-center justify-start gap-y-8 py-3 text-white',
         isDeleteSecretOpen && 'inert'
       )}
     >

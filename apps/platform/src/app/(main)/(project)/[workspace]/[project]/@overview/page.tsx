@@ -17,13 +17,13 @@ import ConfirmDeleteKeyDialog from '@/components/dashboard/overview/confirmDelet
 import ViewAndDownloadProjectKeysDialog from '@/components/dashboard/project/viewAndDownloadKeysDialog'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import { PageTitle } from '@/components/common/page-title'
-import ImportEnvButton from '@/components/dashboard/overview/ImportEnv'
+import ImportEnvContainer from '@/components/dashboard/overview/ImportEnvContainer'
 import ConfigAccessLevel from '@/components/dashboard/overview/ConfigAccessLevel'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import KeyshadeDocs from '@/components/dashboard/overview/AboutKeyshade'
 import ProjectDetails from '@/components/dashboard/overview/ProjectDetails'
 
-function OverviewPage(): React.JSX.Element {
+function SettingsPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const [
     isViewAndDownloadProjectKeysDialogOpen,
@@ -59,7 +59,7 @@ function OverviewPage(): React.JSX.Element {
 
   if (!selectedProject) {
     return (
-      <div className="flex items-center justify-center h-full w-full">
+      <div className="flex h-full w-full items-center justify-center">
         <span className="text-white/60">No project selected.</span>
       </div>
     )
@@ -72,7 +72,7 @@ function OverviewPage(): React.JSX.Element {
         {/* Basic project details eg:name , des... */}
         <ProjectDetails project={selectedProject} />
         {/* Import .env feature */}
-        <ImportEnvButton projectSlug={selectedProject.slug} />
+        <ImportEnvContainer projectSlug={selectedProject.slug} />
         {/* update project access level */}
         <ConfigAccessLevel
           accessLevel={selectedProject.accessLevel}
@@ -150,4 +150,4 @@ function OverviewPage(): React.JSX.Element {
   )
 }
 
-export default OverviewPage
+export default SettingsPage

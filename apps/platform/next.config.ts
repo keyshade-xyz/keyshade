@@ -7,11 +7,18 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
   productionBrowserSourceMaps: true,
-  webpack(config, { isServer }) {
+  webpack(config, { isServer, dev }) {
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack']
     })
+    if (dev) {
+      // https://webpack.js.org/configuration/cache/#cache
+      config.cache = {
+        type: 'memory',
+        maxGenerations: 5
+      }
+    }
 
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = dirname(__filename)

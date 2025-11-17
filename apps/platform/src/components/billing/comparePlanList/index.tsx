@@ -24,8 +24,8 @@ export default function ComparePlanList() {
   return (
     <div>
       <div>
-        <h2 className="text-2xl font-bold">Compare our plans</h2>
-        <p className="text-sm font-medium text-white/60">
+        <h2 className="text-xl font-semibold">Compare our plans</h2>
+        <p className="text-sm text-white/60">
           Use the table below to compare the features of each plan.
         </p>
       </div>

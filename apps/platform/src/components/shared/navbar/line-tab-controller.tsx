@@ -54,8 +54,8 @@ export default function LineTabController() {
   }
 
   return (
-    <div className="px-4">
+    <>
       {shouldRenderTab() && <LineTab customID="linetab" tabs={renderTabs()} />}
-    </div>
+    </>
   )
 }

@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 import type { IntegrationTypeEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useSetAtom } from 'jotai'
-import ProjectEnvironmentSelect from '../projectEnvironmentSelect'
 import ProjectEnvironmentInput from '../projectEnvironmentInput'
+import ProjectEnvironmentSelect from '../projectEnvironmentSelect'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import IntegrationMetadata from '@/components/integrations/integrationMetadata'
@@ -171,7 +171,7 @@ export default function SetupIntegration({
         </div>
 
         <div className="flex w-full justify-between border-t border-white/20 pt-4">
-          <Button variant="secondary">Need Help?</Button>
+          <Button variant="outline">Need Help?</Button>
 
           <Visible if={currentStep === Step.IntegrationSetupStep}>
             <Button onClick={handleNext} type="button" variant="secondary">
