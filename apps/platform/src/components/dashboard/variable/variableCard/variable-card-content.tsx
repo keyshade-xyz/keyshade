@@ -1,7 +1,14 @@
 import type { Environment, Variable } from '@keyshade/schema'
 import React, { useEffect, useState } from 'react'
 import { TrashWhiteSVG } from '@public/svg/shared'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
 import { AccordionContent } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
