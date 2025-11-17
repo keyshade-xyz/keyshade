@@ -5,22 +5,21 @@ import { useSearchParams } from 'next/navigation'
 import type { Variable } from '@keyshade/schema'
 import { Accordion } from '@/components/ui/accordion'
 import {
+  createVariableOpenAtom,
+  deleteEnvironmentValueOfVariableOpenAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
-  selectedProjectAtom,
-  deleteEnvironmentValueOfVariableOpenAtom,
-  variableRevisionsOpenAtom,
-  rollbackVariableOpenAtom,
   globalSearchDataAtom,
-  createVariableOpenAtom
+  rollbackVariableOpenAtom,
+  selectedProjectAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
-import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 import { useHighlight } from '@/hooks/use-highlight'
 import ProjectErrorCard from '@/components/shared/project-error-card'
+import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 
 export default function VariableList(): React.JSX.Element {
   const searchParams = useSearchParams()
@@ -31,12 +30,10 @@ export default function VariableList(): React.JSX.Element {
   const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
     deleteEnvironmentValueOfVariableOpenAtom
   )
-  const isVariableRevisionsOpen = useAtomValue(variableRevisionsOpenAtom)
   const isRollbackVariableOpen = useAtomValue(rollbackVariableOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
-
   const isAuthorizedToReadVariables =
     selectedProject?.entitlements.canReadVariables
 
@@ -49,7 +46,6 @@ export default function VariableList(): React.JSX.Element {
       isDeleteVariableOpen ||
       isEditVariableOpen ||
       isDeleteEnvironmentValueOfVariableOpen ||
-      isVariableRevisionsOpen ||
       isRollbackVariableOpen
 
     if (shouldRefetch) {
@@ -60,7 +56,6 @@ export default function VariableList(): React.JSX.Element {
     isDeleteVariableOpen,
     isEditVariableOpen,
     isDeleteEnvironmentValueOfVariableOpen,
-    isVariableRevisionsOpen,
     isRollbackVariableOpen
   ])
 
@@ -78,6 +73,7 @@ export default function VariableList(): React.JSX.Element {
           }
         }
       }
+
       try {
         const response =
           await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
@@ -85,8 +81,7 @@ export default function VariableList(): React.JSX.Element {
               projectSlug: selectedProject.slug,
               page,
               limit
-            },
-            {}
+            }
           )
 
         // Update global search data on successful fetch
@@ -154,7 +149,7 @@ export default function VariableList(): React.JSX.Element {
   return (
     <div
       className={cn(
-        'flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white',
+        'flex h-full w-full flex-col items-center justify-start gap-y-8 py-3 text-white',
         isDeleteVariableOpen && 'inert'
       )}
     >
