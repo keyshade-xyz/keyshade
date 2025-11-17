@@ -1,3 +1,19 @@
+## [2.45.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0...v2.45.0-stage.1) (2025-11-14)
+
+### 🚀 Features
+
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([5a254e6](https://github.com/keyshade-xyz/keyshade/commit/5a254e6208c64c8889913e02754d516ebeef4903))
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([1e2a864](https://github.com/keyshade-xyz/keyshade/commit/1e2a864018fa086beb68a93f414d70014fc78b5e))
+* responsive landing page ([#1239](https://github.com/keyshade-xyz/keyshade/issues/1239)) ([6eb0d3b](https://github.com/keyshade-xyz/keyshade/commit/6eb0d3b9e92d49d7a3a641c4da6e29ee1ee5afdd))
+* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([7212fa4](https://github.com/keyshade-xyz/keyshade/commit/7212fa4a5595d9f0e3c07ea349c725fe20f8eece))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.7.0 [skip ci] ([1b75217](https://github.com/keyshade-xyz/keyshade/commit/1b75217cd9f8495eb21c9c53bb42e59e428c8b21))
+* **release:** 2.44.0-stage.1 [skip ci] ([c6ecbc3](https://github.com/keyshade-xyz/keyshade/commit/c6ecbc33b1d40aef49ff0b8089b6202940107ac6))
+* **release:** 2.44.0-stage.2 [skip ci] ([fd23007](https://github.com/keyshade-xyz/keyshade/commit/fd2300776cc6f512cc60b351e9ed976aeb938801))
+* **release:** 2.44.0-stage.3 [skip ci] ([64ce2da](https://github.com/keyshade-xyz/keyshade/commit/64ce2daa27f7ebc980dad3c53c355d9054223cdd))
+
 ## [2.44.0](https://github.com/keyshade-xyz/keyshade/compare/v2.43.1...v2.44.0) (2025-11-14)
 
 ### 🚀 Features
