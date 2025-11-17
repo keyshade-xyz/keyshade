@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { Badge } from '@/components/ui/badge'
 import { environmentsOfProjectAtom } from '@/store'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 interface SecretCardFooterProps {
   secretData: Secret
@@ -49,15 +55,32 @@ export default function SecretCardFooter({
     <div className="flex items-end justify-between">
       <div className="flex gap-x-2">
         {environmentList.map((el) => (
-          <Badge
-            color={el.isPopulated ? '#2DBE99' : '#DC2626'}
-            icon={el.isPopulated ? 'done' : 'cancel'}
-            key={el.environment}
-            type="icon"
-            variant="solid"
-          >
-            {el.environment}
-          </Badge>
+          <TooltipProvider key={el.environment}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  className="cursor-pointer"
+                  color={el.isPopulated ? '#2DBE99' : '#E26B2D'}
+                  icon={el.isPopulated ? 'done' : 'cancel'}
+                  type="icon"
+                  variant="solid"
+                >
+                  {el.environment}
+                </Badge>
+              </TooltipTrigger>
+              {!el.isPopulated && (
+                <TooltipContent
+                  className="bg-night-c border-white/5 text-neutral-200"
+                >
+                  <p>
+                    <span className="font-semibold">{secretData.name}</span>{' '}
+                    does not have a value for environment{' '}
+                    <span className="font-semibold">{el.environment}</span>
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         ))}
       </div>
       <div className="flex flex-col items-end gap-y-1 text-sm">

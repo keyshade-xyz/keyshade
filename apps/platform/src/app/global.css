@@ -50,6 +50,7 @@
   --color-reisin-black: oklch(0.2167 0.0098 294.74);
   --color-platinum: oklch(0.8884 0 0);
   --color-eerie-black: oklch(0.2175 0.0042 264.48);
+  --color-autumn-leaf: oklch(0.6614 0.1653 44.93);
 
   /* Custom CSS Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
