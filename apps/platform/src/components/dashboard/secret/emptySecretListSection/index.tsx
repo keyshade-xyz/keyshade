@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from 'jotai'
+import Image from 'next/image'
 import { EmptySecretPNG } from '@public/raster/secret'
 import { AddSVG } from '@public/svg/shared'
-import Image from 'next/image'
 import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
 import { createSecretOpenAtom, selectedProjectAtom } from '@/store'
 import { Button } from '@/components/ui/button'

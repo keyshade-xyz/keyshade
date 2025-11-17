@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { GeistSansFont } from '../fonts/index'
+import { GeistSansFont } from '@/fonts'
 import { Toaster } from '@/components/ui/sonner'
 import './global.css'
 import JotaiProvider from '@/components/jotaiProvider'

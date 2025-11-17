@@ -1,7 +1,7 @@
 import type { Environment, Variable } from '@keyshade/schema'
 import React, { useEffect, useState } from 'react'
-import { TrashWhiteSVG } from '@public/svg/shared'
 import { useSetAtom } from 'jotai'
+import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   Table,
   TableBody,

@@ -13,8 +13,8 @@ import {
   SecretSVG,
   VariableSVG
 } from '@public/svg/dashboard'
-import ShortcutKeyBox from './shortcut-key-box'
 import WorkspaceSearchSection from './workspace-search-section'
+import ShortcutKeyBox from './shortcut-key-box'
 import type { CommandDialogProps } from '@/components/ui/command'
 import {
   CommandDialog,

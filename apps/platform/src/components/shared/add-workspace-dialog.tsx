@@ -14,13 +14,13 @@ import {
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
 import {
   allWorkspacesAtom,
   selectedWorkspaceAtom,
   globalSearchDataAtom
 } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export interface AddWorkspaceDialogProps {
   trigger?: React.ReactNode

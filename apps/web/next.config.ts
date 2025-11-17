@@ -85,4 +85,8 @@ const sentryBuildOptions: SentryBuildOptions = {
   automaticVercelMonitors: true
 }
 
-export default withSentryConfig(withMDX(nextConfig), sentryBuildOptions)
+const finalConfig: NextConfig = withSentryConfig(
+  withMDX(nextConfig),
+  sentryBuildOptions
+)
+export default finalConfig
