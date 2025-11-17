@@ -1,19 +1,12 @@
 import type { Environment, Secret } from '@keyshade/schema'
 import React, { useCallback, useEffect, useState } from 'react'
 import { decrypt } from '@keyshade/common'
-import { useAtom } from 'jotai/index'
+import { useAtom , useSetAtom } from 'jotai/index'
 import { EyeOpenSVG, EyeSlashSVG, TrashWhiteSVG } from '@public/svg/shared'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AccordionContent } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
-import { selectedSecretEnvironmentAtom } from '@/store'
+import { deleteEnvironmentValueOfSecretOpenAtom, selectedSecretAtom, selectedSecretEnvironmentAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 
@@ -37,20 +30,20 @@ export default function SecretCardContent({
   const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
     selectedSecretEnvironmentAtom
   )
-  // const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
-  //   deleteEnvironmentValueOfSecretOpenAtom
-  // )
-  // const setSelectedSecret = useSetAtom(selectedSecretAtom)
+  const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
+    deleteEnvironmentValueOfSecretOpenAtom
+  )
+  const setSelectedSecret = useSetAtom(selectedSecretAtom)
 
   const versions = secretData.versions
 
-  // const handleDeleteEnvironmentValueOfSecretClick = (
-  //   environment: Environment['slug']
-  // ) => {
-  //   setSelectedSecret(secretData)
-  //   setSelectedSecretEnvironment(environment)
-  //   setIsDeleteEnvironmentValueOfSecretOpen(true)
-  // }
+  const handleDeleteEnvironmentValueOfSecretClick = (
+    environment: Environment['slug']
+  ) => {
+    setSelectedSecret(secretData)
+    setSelectedSecretEnvironment(environment)
+    setIsDeleteEnvironmentValueOfSecretOpen(true)
+  }
 
   const handleToggleDisableSecretClick = async (
     environmentSlug: Environment['slug'],
@@ -221,7 +214,14 @@ export default function SecretCardContent({
                     />
                   </TableCell>
                   <TableCell className="h-full">
-                    <Button variant="outline">
+                    <Button
+                      onClick={() =>
+                        handleDeleteEnvironmentValueOfSecretClick(
+                          value.environment.slug
+                        )
+                      }
+                      variant="outline"
+                    >
                       <TrashWhiteSVG />
                     </Button>
                   </TableCell>

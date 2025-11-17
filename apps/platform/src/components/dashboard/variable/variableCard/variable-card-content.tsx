@@ -1,6 +1,7 @@
 import type { Environment, Variable } from '@keyshade/schema'
 import React, { useEffect, useState } from 'react'
 import { TrashWhiteSVG } from '@public/svg/shared'
+import { useSetAtom } from 'jotai'
 import {
   Table,
   TableBody,
@@ -13,6 +14,11 @@ import { AccordionContent } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import {
+  deleteEnvironmentValueOfVariableOpenAtom,
+  selectedSecretEnvironmentAtom,
+  selectedVariableAtom
+} from '@/store'
 
 interface VariableCardContentProps {
   variableData: Variable
@@ -25,20 +31,23 @@ export default function VariableCardContent({
     new Set()
   )
 
-  // const setIsDeleteEnvironmentValueOfVariableOpen = useSetAtom(
-  //   deleteEnvironmentValueOfVariableOpenAtom
-  // )
-  // const setSelectedVariable = useSetAtom(selectedVariableAtom)
+  const setSelectedVariableEnvironment = useSetAtom(
+    selectedSecretEnvironmentAtom
+  )
+  const setIsDeleteEnvironmentValueOfVariableOpen = useSetAtom(
+    deleteEnvironmentValueOfVariableOpenAtom
+  )
+  const setSelectedVariable = useSetAtom(selectedVariableAtom)
 
   const versions = variableData.versions
 
-  // const handleDeleteEnvironmentValueOfVariableClick = (
-  //   environment: Environment['slug']
-  // ) => {
-  //   setSelectedVariable(variableData)
-  //   setSelectedVariableEnvironment(environment)
-  //   setIsDeleteEnvironmentValueOfVariableOpen(true)
-  // }
+  const handleDeleteEnvironmentValueOfVariableClick = (
+    environment: Environment['slug']
+  ) => {
+    setSelectedVariable(variableData)
+    setSelectedVariableEnvironment(environment)
+    setIsDeleteEnvironmentValueOfVariableOpen(true)
+  }
 
   const handleToggleDisableVariableClick = async (
     environmentSlug: Environment['slug'],
@@ -144,7 +153,14 @@ export default function VariableCardContent({
                     />
                   </TableCell>
                   <TableCell className="h-full">
-                    <Button variant="outline">
+                    <Button
+                      onClick={() =>
+                        handleDeleteEnvironmentValueOfVariableClick(
+                          value.environment.slug
+                        )
+                      }
+                      variant="outline"
+                    >
                       <TrashWhiteSVG />
                     </Button>
                   </TableCell>
