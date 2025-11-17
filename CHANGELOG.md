@@ -1,3 +1,9 @@
+## [2.45.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.1...v2.45.0-stage.2) (2025-11-17)
+
+### 🚀 Features
+
+* **platform:** revamp platform UI ([#1212](https://github.com/keyshade-xyz/keyshade/issues/1212)) ([f53fd7d](https://github.com/keyshade-xyz/keyshade/commit/f53fd7d15022fda482fb14647aa276650366268f))
+
 ## [2.45.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0...v2.45.0-stage.1) (2025-11-14)
 
 ### 🚀 Features
