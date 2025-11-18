@@ -6,9 +6,9 @@ import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import CreateProjectDialogue from '@/components/dashboard/project/createProjectDialogue'
 import {
-  selectedWorkspaceAtom,
   deleteProjectOpenAtom,
   selectedProjectAtom,
+  selectedWorkspaceAtom,
   userAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
@@ -21,6 +21,7 @@ import { useGetAllProjects } from '@/hooks/api/use-get-all-projects'
 import ProjectLoader from '@/components/main/ProjectLoader'
 import ProjectEmpty from '@/components/main/ProjectEmpty'
 import Visible from '@/components/common/visible'
+import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -49,30 +50,54 @@ export default function Index(): React.JSX.Element {
     })
   }, [getSelf, setUser])
 
+  /**
+   * Based on `isAuthorizedToViewProject` decide which component to load
+   */
+  function renderAuthorizedProjectView(): React.JSX.Element {
+    if (isAuthorizedToViewProject === undefined) {
+      return (
+        <div className="w-full">
+          <ProjectScreenLoader />
+        </div>
+      )
+    }
+    if (isAuthorizedToViewProject) {
+      return (
+        <ProjectEmpty isEmpty={isProjectsEmpty}>
+          <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
+            className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
+            fetchFunction={fetchProjects}
+            itemComponent={ProjectItemComponent}
+            itemKey={(item) => item.id}
+            itemsPerPage={15}
+            loadingComponent={
+              <div className="w-full">
+                <ProjectScreenLoader />
+              </div>
+            }
+          />
+        </ProjectEmpty>
+      )
+    }
+    return (
+      <div>
+        You don&apos;t have permission to view projects in this workspace
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
       <div className="flex items-center justify-between">
         <Visible if={!isProjectsEmpty}>
-          <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
+          <h1 className="text-[28px]">All Projects</h1>
         </Visible>
         <CreateProjectDialogue />
       </div>
 
       <ProjectLoader loading={loading}>
-        {isAuthorizedToViewProject ? (
-          <ProjectEmpty isEmpty={isProjectsEmpty}>
-            <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-              className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
-              fetchFunction={fetchProjects}
-              itemComponent={ProjectItemComponent}
-              itemKey={(item) => item.id}
-              itemsPerPage={15}
-            />
-          </ProjectEmpty>
-        ) : (
-          <div>you don&apos;t have permission to view these projects</div>
-        )}
+        {renderAuthorizedProjectView()}
       </ProjectLoader>
 
       <Visible if={Boolean(isDeleteProjectOpen && selectedProject)}>
