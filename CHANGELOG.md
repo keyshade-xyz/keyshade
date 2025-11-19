@@ -1,3 +1,9 @@
+## [2.45.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.2...v2.45.0-stage.3) (2025-11-18)
+
+### 🐛 Bug Fixes
+
+* **web:** merge conflict ([#1240](https://github.com/keyshade-xyz/keyshade/issues/1240)) ([f57c471](https://github.com/keyshade-xyz/keyshade/commit/f57c471434787e4eb268b7d9640e78817af23d4f))
+
 ## [2.45.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.1...v2.45.0-stage.2) (2025-11-17)
 
 ### 🚀 Features
