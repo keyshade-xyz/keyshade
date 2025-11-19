@@ -25,7 +25,7 @@ import LineTabController from '@/components/shared/navbar/line-tab-controller'
 import { Button } from '@/components/ui/button'
 import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
 
-function DetailedProjectPage(): JSX.Element {
+function DetailedProjectPage(): React.JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
