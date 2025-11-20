@@ -29,9 +29,9 @@ import {
 } from '@/components/ui/tooltip'
 import {
   EmojiPicker,
-  EmojiPickerSearch,
   EmojiPickerContent,
-  EmojiPickerFooter
+  EmojiPickerFooter,
+  EmojiPickerSearch
 } from '@/components/ui/emoji-picker'
 import {
   Popover,
@@ -201,7 +201,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         {/* Header */}
         <section className="mb-5 flex flex-col gap-y-5">
           <div className="flex flex-row items-center gap-x-5">
-            <div className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
+            <div className="border-white/8 flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] border bg-[#0B0D0F] p-[0.62rem] text-xl">
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex grow flex-col gap-y-2 overflow-hidden">
@@ -272,13 +272,13 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           <div className="flex flex-row justify-end gap-x-4">
             <Popover onOpenChange={setShowPicker} open={showPicker}>
               <PopoverTrigger asChild>
-                <div className="flex aspect-square h-[60px] w-[60px] cursor-pointer items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
+                <div className="border-white/8 flex aspect-square h-[60px] w-[60px] cursor-pointer items-center justify-center rounded-[0.3125rem] border bg-[#0B0D0F] p-[0.62rem] text-xl">
                   {workspaceData.icon}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-fit p-0">
                 <EmojiPicker
-                  className="h-[342px]"
+                  className="bg-night-c h-[342px]"
                   onEmojiSelect={({ emoji }) => handleEmojiSelect(emoji)}
                 >
                   <EmojiPickerSearch />
@@ -287,21 +287,6 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </EmojiPicker>
               </PopoverContent>
             </Popover>
-          </div>
-        </section>
-
-        <Separator className="bg-white/20" />
-
-        {/* Billing Method */}
-        <section className="my-5 flex w-full flex-row items-center">
-          <div className="flex w-3/5 flex-col gap-y-2">
-            <span className="text-lg font-semibold">Billing Method</span>
-            <span className="text-sm text-white/60">
-              Update the billing method of your workspace here
-            </span>
-          </div>
-          <div className="w-2/5 rounded-lg border border-white/50 px-4 py-3 text-center">
-            Coming Soon
           </div>
         </section>
 
@@ -338,10 +323,15 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                     <p>This is your default workspace. You can not leave it.</p>
                   ) : user?.id === selectedWorkspace?.ownerId ? (
                     <p>
-                      You are currently the admin of the workspace. Transfer the ownership to someone else if you would like to leave this workspace
+                      You are currently the admin of the workspace. Transfer the
+                      ownership to someone else if you would like to leave this
+                      workspace
                     </p>
                   ) : memberCount === 1 ? (
-                    <p>You are the only member of this workspace. You might want to delete the workspace</p>
+                    <p>
+                      You are the only member of this workspace. You might want
+                      to delete the workspace
+                    </p>
                   ) : null}
                 </TooltipContent>
               ) : null}

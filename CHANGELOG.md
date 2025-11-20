@@ -1,3 +1,148 @@
+## [2.45.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.3...v2.45.0-stage.4) (2025-11-19)
+
+### 🚀 Features
+
+* add mobile responsive ([30fcaf9](https://github.com/keyshade-xyz/keyshade/commit/30fcaf992e8aa2e65ba87be8c0c3db141af0252d))
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([2548288](https://github.com/keyshade-xyz/keyshade/commit/25482884f8973025a8629e36b24a425ec3253eec))
+* enhance layout and button responsiveness ([539d4fa](https://github.com/keyshade-xyz/keyshade/commit/539d4fa66e4811f4223df122b99791f0c088891b))
+* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([f131344](https://github.com/keyshade-xyz/keyshade/commit/f13134410ae49f4363e8de13478c964220b9c0f5))
+
+### 🐛 Bug Fixes
+
+* can not find jsx ([be5319b](https://github.com/keyshade-xyz/keyshade/commit/be5319bba2b78abad886f98f14624676d6c726a8))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.44.0-stage.1 [skip ci] ([2a4834b](https://github.com/keyshade-xyz/keyshade/commit/2a4834b064c8b56568885f02581eb0f78060a6da))
+* **release:** 2.44.0-stage.2 [skip ci] ([877c36e](https://github.com/keyshade-xyz/keyshade/commit/877c36e0d7ccecc326c74c50355455b16633787d))
+
+## [2.45.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.2...v2.45.0-stage.3) (2025-11-18)
+
+### 🐛 Bug Fixes
+
+* **web:** merge conflict ([#1240](https://github.com/keyshade-xyz/keyshade/issues/1240)) ([f57c471](https://github.com/keyshade-xyz/keyshade/commit/f57c471434787e4eb268b7d9640e78817af23d4f))
+
+## [2.45.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.1...v2.45.0-stage.2) (2025-11-17)
+
+### 🚀 Features
+
+* **platform:** revamp platform UI ([#1212](https://github.com/keyshade-xyz/keyshade/issues/1212)) ([f53fd7d](https://github.com/keyshade-xyz/keyshade/commit/f53fd7d15022fda482fb14647aa276650366268f))
+
+## [2.45.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0...v2.45.0-stage.1) (2025-11-14)
+
+### 🚀 Features
+
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([5a254e6](https://github.com/keyshade-xyz/keyshade/commit/5a254e6208c64c8889913e02754d516ebeef4903))
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([1e2a864](https://github.com/keyshade-xyz/keyshade/commit/1e2a864018fa086beb68a93f414d70014fc78b5e))
+* responsive landing page ([#1239](https://github.com/keyshade-xyz/keyshade/issues/1239)) ([6eb0d3b](https://github.com/keyshade-xyz/keyshade/commit/6eb0d3b9e92d49d7a3a641c4da6e29ee1ee5afdd))
+* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([7212fa4](https://github.com/keyshade-xyz/keyshade/commit/7212fa4a5595d9f0e3c07ea349c725fe20f8eece))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.7.0 [skip ci] ([1b75217](https://github.com/keyshade-xyz/keyshade/commit/1b75217cd9f8495eb21c9c53bb42e59e428c8b21))
+* **release:** 2.44.0-stage.1 [skip ci] ([c6ecbc3](https://github.com/keyshade-xyz/keyshade/commit/c6ecbc33b1d40aef49ff0b8089b6202940107ac6))
+* **release:** 2.44.0-stage.2 [skip ci] ([fd23007](https://github.com/keyshade-xyz/keyshade/commit/fd2300776cc6f512cc60b351e9ed976aeb938801))
+* **release:** 2.44.0-stage.3 [skip ci] ([64ce2da](https://github.com/keyshade-xyz/keyshade/commit/64ce2daa27f7ebc980dad3c53c355d9054223cdd))
+
+## [2.44.0](https://github.com/keyshade-xyz/keyshade/compare/v2.43.1...v2.44.0) (2025-11-14)
+
+### 🚀 Features
+
+* **cli:** bump version to 3.7.0 ([829cfa1](https://github.com/keyshade-xyz/keyshade/commit/829cfa129e774d63d66c7693922cfc3e550bc910))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.4 [skip ci] ([0b0720d](https://github.com/keyshade-xyz/keyshade/commit/0b0720d4279b6c841079c8efc2a1cd549b8c53d7))
+
+## [2.44.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0-stage.2...v2.44.0-stage.3) (2025-11-14)
+
+### 🚀 Features
+
+* responsive landing page ([#1239](https://github.com/keyshade-xyz/keyshade/issues/1239)) ([f2b65d2](https://github.com/keyshade-xyz/keyshade/commit/f2b65d2d83012ddf0d24458e733810e23d218f51))
+
+## [2.44.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0-stage.1...v2.44.0-stage.2) (2025-11-13)
+
+### 🚀 Features
+
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([2548288](https://github.com/keyshade-xyz/keyshade/commit/25482884f8973025a8629e36b24a425ec3253eec))
+
+## [2.44.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.1...v2.44.0-stage.1) (2025-11-12)
+
+### 🚀 Features
+
+* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([f131344](https://github.com/keyshade-xyz/keyshade/commit/f13134410ae49f4363e8de13478c964220b9c0f5))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.4 [skip ci] ([0b0720d](https://github.com/keyshade-xyz/keyshade/commit/0b0720d4279b6c841079c8efc2a1cd549b8c53d7))
+
+## [2.43.1](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0...v2.43.1) (2025-11-12)
+
+### 🐛 Bug Fixes
+
+* **cli:** command name issue ([46441ca](https://github.com/keyshade-xyz/keyshade/commit/46441ca3793159f455556abf20373dbd6e5fb754))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.6.3 [skip ci] ([ef5b1aa](https://github.com/keyshade-xyz/keyshade/commit/ef5b1aa2d0f122a80203272c35c17e8eb5a66b2d))
+* **cli:** update package managers to use v3.6.3 [skip ci] ([706379d](https://github.com/keyshade-xyz/keyshade/commit/706379d199edefad71db82ea22e2482e1e0f5886))
+
+## [2.43.0](https://github.com/keyshade-xyz/keyshade/compare/v2.42.0...v2.43.0) (2025-11-12)
+
+### 🚀 Features
+
+* **api:** add totalTriggers to integration response and schema ([#1171](https://github.com/keyshade-xyz/keyshade/issues/1171)) ([fc57d34](https://github.com/keyshade-xyz/keyshade/commit/fc57d342e0a64a9d6e4f9e731e4213b2954cf8c5))
+* **cli:** bump version to 3.6.3 ([ab7f45a](https://github.com/keyshade-xyz/keyshade/commit/ab7f45a325e241f18e088f809f91c72943b5f8b7))
+* **cli:** update base name of the command ([121306f](https://github.com/keyshade-xyz/keyshade/commit/121306f57658690399f7195b139706394e772045))
+
+### 🐛 Bug Fixes
+
+* **api:** generateSlug infinite loop causing Auth and Feedback Controller test failures ([#1162](https://github.com/keyshade-xyz/keyshade/issues/1162)) ([7183ee5](https://github.com/keyshade-xyz/keyshade/commit/7183ee5a579092d2e1780326b52540ad73680761))
+* **api:** rolling back crashed the flow ([a2bdc61](https://github.com/keyshade-xyz/keyshade/commit/a2bdc61856832806d165ea7aa8141a946c2fe243))
+* **platform:** UI/UX bugs on Workspace overview page ([#1114](https://github.com/keyshade-xyz/keyshade/issues/1114)) ([9492630](https://github.com/keyshade-xyz/keyshade/commit/949263028d405d926b41571a031887986105beb3))
+
+### 📚 Documentation
+
+* add macos install command [skip ci] ([802a12b](https://github.com/keyshade-xyz/keyshade/commit/802a12b4f4203cea274d70a741f1b866b0096523))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** add readable metrics ([#1216](https://github.com/keyshade-xyz/keyshade/issues/1216)) ([30dfe90](https://github.com/keyshade-xyz/keyshade/commit/30dfe9025a1bdd0fd73de0d5a5acee6544bae277))
+* **api:** fix broken tests ([1aa7ea4](https://github.com/keyshade-xyz/keyshade/commit/1aa7ea4d9e3bc352fc317c5e5eacb286380a2966))
+* **ci:** added docker validation to validate workflows ([#1217](https://github.com/keyshade-xyz/keyshade/issues/1217)) ([188391e](https://github.com/keyshade-xyz/keyshade/commit/188391eb34184c140ed0b33c85a1e04eda799932))
+* **cli:** update package managers to use v3.6.1 [skip ci] ([f4eec17](https://github.com/keyshade-xyz/keyshade/commit/f4eec17672ad8f71dcf528e1470becf06ba9041d))
+* **release:** 2.43.0-stage.1 [skip ci] ([d751ca6](https://github.com/keyshade-xyz/keyshade/commit/d751ca61feda10217262bef739735a9971cfc405))
+* **release:** 2.43.0-stage.2 [skip ci] ([5c1814a](https://github.com/keyshade-xyz/keyshade/commit/5c1814a64909a50a7424c1445101470606864ffe))
+* **release:** 2.43.0-stage.3 [skip ci] ([d50f139](https://github.com/keyshade-xyz/keyshade/commit/d50f139c7cd579d2ae2db67173a964eb8e64fac2))
+* **release:** 2.43.0-stage.4 [skip ci] ([146f9a4](https://github.com/keyshade-xyz/keyshade/commit/146f9a4da2d4e56603cfc3a802bb348145146439))
+* **release:** 2.43.0-stage.5 [skip ci] ([42aea98](https://github.com/keyshade-xyz/keyshade/commit/42aea98dbf346cb7723b0ae6ca3b10f881b716f4))
+
+## [2.43.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.4...v2.43.0-stage.5) (2025-10-29)
+
+### 🐛 Bug Fixes
+
+* **platform:** UI/UX bugs on Workspace overview page ([#1114](https://github.com/keyshade-xyz/keyshade/issues/1114)) ([9492630](https://github.com/keyshade-xyz/keyshade/commit/949263028d405d926b41571a031887986105beb3))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** added docker validation to validate workflows ([#1217](https://github.com/keyshade-xyz/keyshade/issues/1217)) ([188391e](https://github.com/keyshade-xyz/keyshade/commit/188391eb34184c140ed0b33c85a1e04eda799932))
+
+## [2.43.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.3...v2.43.0-stage.4) (2025-10-29)
+
+### 🐛 Bug Fixes
+
+* **api:** rolling back crashed the flow ([a2bdc61](https://github.com/keyshade-xyz/keyshade/commit/a2bdc61856832806d165ea7aa8141a946c2fe243))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** fix broken tests ([1aa7ea4](https://github.com/keyshade-xyz/keyshade/commit/1aa7ea4d9e3bc352fc317c5e5eacb286380a2966))
+
+## [2.43.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.2...v2.43.0-stage.3) (2025-10-28)
+
+### 🐛 Bug Fixes
+
+* **api:** generateSlug infinite loop causing Auth and Feedback Controller test failures ([#1162](https://github.com/keyshade-xyz/keyshade/issues/1162)) ([7183ee5](https://github.com/keyshade-xyz/keyshade/commit/7183ee5a579092d2e1780326b52540ad73680761))
+
 ## [2.43.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.43.0-stage.1...v2.43.0-stage.2) (2025-10-26)
 
 ### 🚀 Features

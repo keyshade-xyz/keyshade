@@ -1,18 +1,18 @@
 class Keyshade < Formula
   desc "Keyshade CLI - Secure, real-time secret and configuration management"
   homepage "https://keyshade.io"
-  version "3.6.1"
+  version "3.7.0"
   license "MIT"
 
   on_macos do
     on_intel do
-      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.42.0/keyshade-cli-macos-x64"
-      sha256 "f3cf481cfa75ec0a9155a6c4cde1efdbd2d1c12b46d87ae738ac724d1a3e67c4"
+      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.44.0/keyshade-cli-macos-x64"
+      sha256 "c3c80c932cf50ee3ae77c2a618472b59fd71281e51ec1792bd63310546022ac4"
     end
 
     on_arm do
-      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.42.0/keyshade-cli-macos-arm64"
-      sha256 "1192f01a1a0279f51e80a5c6495af26169691ec87282fc3096184b2330250cfb"
+      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.44.0/keyshade-cli-macos-arm64"
+      sha256 "0996cb9595583d57510e81ea04d8ce208727ee8205fcd4c06d6da7a5f0a6409f"
     end
   end
 

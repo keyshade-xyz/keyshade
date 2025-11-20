@@ -52,6 +52,7 @@ import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { ProjectCacheService } from '@/cache/project-cache.service'
 import { BulkCreateSecret } from '@/secret/dto/bulk.create.secret/bulk.create.secret'
+import { MetricService } from '@/common/metrics.service'
 
 @Injectable()
 export class SecretService {
@@ -64,6 +65,7 @@ export class SecretService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
+    private readonly metricsService: MetricService,
     @Inject(forwardRef(() => VariableService))
     private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
@@ -123,14 +125,17 @@ export class SecretService {
       `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
+    let environmentSlugToIdMap: Map<string, string>
+    if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+    }
 
     // Create the secret
     this.logger.log(`Creating secret ${dto.name} in project ${projectSlug}`)
@@ -451,20 +456,10 @@ export class SecretService {
     // Check if a variable with the same name already exists in the project
     await this.variableService.variableExists(dto.name, secret.projectId)
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      secret.project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
-
     const op = []
+    let environmentSlugToIdMap: Map<string, string>
 
     // Update the secret
-
-    // Update the other fields
     op.push(
       this.prisma.secret.update({
         where: {
@@ -488,6 +483,15 @@ export class SecretService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        secret.project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+
       await checkForDisabledWorkspace(
         secret.project.workspaceId,
         this.prisma,
@@ -551,7 +555,7 @@ export class SecretService {
     })
 
     // Notify the new secret version through Redis
-    if (dto.entries && dto.entries.length > 0) {
+    if (shouldCreateRevisions) {
       for (const entry of dto.entries) {
         try {
           this.logger.log(
@@ -688,7 +692,10 @@ export class SecretService {
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: SecretVersion['version']
-  ) {
+  ): Promise<{
+    count: number
+    currentRevision: RawSecretRevision
+  }> {
     this.logger.log(
       `User ${user.id} attempted to rollback secret ${secretSlug} to version ${rollbackVersion}`
     )
@@ -717,18 +724,17 @@ export class SecretService {
 
     const project = secret.project
 
-    // Filter the secret versions by the environment
-    this.logger.log(
-      `Fetching secret versions for secret ${secretSlug} in environment ${environmentSlug}`
-    )
-    secret.versions = secret.versions.filter(
-      (version) => version.environment.id === environmentId
-    )
-    this.logger.log(
-      `Found ${secret.versions.length} versions for secret ${secretSlug} in environment ${environmentSlug}`
-    )
+    // TODO: remove this after implementing secret cache with secretCache.getRawSecret call
+    // Get all the secret versions
+    const secretVersions = await this.prisma.secretVersion.findMany({
+      where: {
+        secretId: secret.id,
+        environmentId
+      },
+      select: InclusionQuery.Secret['versions']['select']
+    })
 
-    if (secret.versions.length === 0) {
+    if (secretVersions.length === 0) {
       const errorMessage = `Secret ${secretSlug} has no versions for environment ${environmentSlug}`
       this.logger.error(errorMessage)
       throw new NotFoundException(
@@ -737,7 +743,7 @@ export class SecretService {
     }
 
     let maxVersion = 0
-    for (const element of secret.versions) {
+    for (const element of secretVersions) {
       if (element.version > maxVersion) {
         maxVersion = element.version
       }
@@ -767,11 +773,10 @@ export class SecretService {
         }
       }
     })
-    this.logger.log(
-      `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
+    const currentRevision = secretVersions.find(
+      (version) => version.version === rollbackVersion
     )
-
-    const secretValue = secret.versions[rollbackVersion - 1].value
+    const secretValue = currentRevision.value
     const canBeDecrypted =
       project.storePrivateKey &&
       project.privateKey !== null &&
@@ -780,6 +785,9 @@ export class SecretService {
       ? await decrypt(sDecrypt(project.privateKey), secretValue)
       : null
     const ultimateSecretValue = canBeDecrypted ? plainTextValue : secretValue
+    this.logger.log(
+      `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
+    )
 
     try {
       this.logger.log(
@@ -821,10 +829,6 @@ export class SecretService {
         workspaceId: secret.project.workspaceId
       },
       this.prisma
-    )
-
-    const currentRevision = secret.versions.find(
-      (version) => version.version === rollbackVersion
     )
 
     return {
@@ -1181,6 +1185,12 @@ export class SecretService {
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
 
+    try {
+      await this.metricsService.incrementSecretPull(secrets.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment secret pull metric: ${err}`)
+    }
+
     const hydratedSecrets: HydratedSecret[] = []
 
     for (const secret of secrets) {
@@ -1314,6 +1324,12 @@ export class SecretService {
         name: secret.name,
         value: secret.versions[0].value
       })
+    }
+
+    try {
+      await this.metricsService.incrementSecretPull(response.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment secret pull metric: ${err}`)
     }
 
     return response

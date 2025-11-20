@@ -744,3 +744,11 @@ model Share {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
+
+model Metric {
+  id                        String @id @default(cuid())
+  totalSecretPulls          Int    @default(0)
+  totalVariablePulls        Int    @default(0)
+  totalRunCommandExecutions Int    @default(0)
+  date                      String
+}
