@@ -60,3 +60,5 @@ Thumbs.db
 
 # ESLint
 .eslintcache
+
+apps/api/uploads

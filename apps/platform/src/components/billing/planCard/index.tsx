@@ -184,7 +184,7 @@ export default function PlanCard({
         </div>
 
         <Button
-          className="mt-5 h-fit bg-white text-[#09090B] shadow-[inset_0_2px_2px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-[#09090B]/80"
+          className="mt-5"
           disabled={NO_SEATS_SELECTED || isLoading}
           onClick={redirectToPayment}
           type="button"

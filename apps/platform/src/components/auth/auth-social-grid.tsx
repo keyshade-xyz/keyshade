@@ -14,6 +14,7 @@ export default function AuthSocialGrid() {
           <Button
             key={provider.name}
             onClick={() => (window.location.href = provider.url)}
+            variant="outline"
           >
             {provider.icon}
           </Button>

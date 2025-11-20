@@ -414,3 +414,27 @@
 ### Patches
 
 - Update the name of the command to always display `keyshade`
+
+## 3.6.3
+
+### Patches
+
+- Update the name of the command to always display `keyshade`
+
+## 3.6.4
+
+### Patches
+
+- Fix a bug where all command names were switched to `keyshade`
+
+## 3.7.0-stage.1
+
+### Minor Changes
+
+- `keyshade run` now accepts all configurations via flags
+
+## 3.7.0
+
+### Minor Changes
+
+- `keyshade run` now accepts all configurations via flags

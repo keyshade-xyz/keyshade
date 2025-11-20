@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background: #04050A;
+  background: #010f13;
   color: white;
   color-scheme: dark;
 }
@@ -11,15 +11,21 @@ body {
 .gradBtnBg {
   background: transparent;
   background-size: 100% 100%;
-  transition: background .6s ease,background-size .6s ease-in-out
+  transition:
+    background 0.6s ease,
+    background-size 0.6s ease-in-out;
 }
 
 .gradBtnBg:hover {
-  background: radial-gradient(84.92% 150% at 50% 138.75%,hsla(0,0%,100%,.24) 0,hsla(0,0%,100%,0) 100%),hsla(0,0%,100%,.01);
-  background-size: 150% 150%
+  background:
+    radial-gradient(
+      84.92% 150% at 50% 138.75%,
+      hsla(0, 0%, 100%, 0.24) 0,
+      hsla(0, 0%, 100%, 0) 100%
+    ),
+    hsla(0, 0%, 100%, 0.01);
+  background-size: 150% 150%;
 }
-
-
 
 @layer base {
   :root {
@@ -76,8 +82,6 @@ body {
     --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {
