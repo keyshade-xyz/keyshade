@@ -47,7 +47,7 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
     },
     {
       alt: 'X',
-      href: 'https://x.com/keyshade_xyz',
+      href: 'https://x.com/keyshade_io',
       src: 'https://keyshadeglobal.blob.core.windows.net/assets/xlogo.png'
     },
     {

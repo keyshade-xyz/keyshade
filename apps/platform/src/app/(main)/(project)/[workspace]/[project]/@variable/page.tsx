@@ -1,27 +1,31 @@
 'use client'
 import React from 'react'
+import { extend } from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtomValue } from 'jotai'
 import {
+  deleteEnvironmentValueOfVariableOpenAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
-  selectedVariableAtom,
-  deleteEnvironmentValueOfVariableOpenAtom,
-  variableRevisionsOpenAtom,
   rollbackVariableOpenAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  selectedVariableAtom,
+  variableRevisionsOpenAtom
 } from '@/store'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
-import EditVariablSheet from '@/components/dashboard/variable/editVariableSheet'
-import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboard/variable/confirmDeleteEnvironmentValueOfVariableDialog'
-import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
+import EditVariableSheet from '@/components/dashboard/variable/editVariableSheet'
 import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
 import { PageTitle } from '@/components/common/page-title'
-import VariableList from '@/components/dashboard/variable/variableList'
+import VariableList from '@/components/dashboard/variable/variableLists'
 import Visible from '@/components/common/visible'
+import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboard/variable/confirmDeleteEnvironmentValueOfVariableDialog'
+import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
+
+extend(relativeTime)
 
 export default function VariablePage(): React.JSX.Element {
-  const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
+  const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
     deleteEnvironmentValueOfVariableOpenAtom
   )
@@ -30,8 +34,8 @@ export default function VariablePage(): React.JSX.Element {
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
-  const isAuthorizedToEditVariable = selectedVariable?.entitlements.canUpdate
-  const isAuthorizedToDeleteVariable = selectedVariable?.entitlements.canDelete
+  const isAuthorizedToEditVariables = selectedVariable?.entitlements.canUpdate
+  const isAuthorizedToDeleteVariables = selectedVariable?.entitlements.canDelete
 
   return (
     <div className="flex h-full w-full justify-center">
@@ -39,16 +43,18 @@ export default function VariablePage(): React.JSX.Element {
       <VariableList />
 
       <Visible
-        if={Boolean(isDeleteVariableOpen && isAuthorizedToDeleteVariable)}
+        if={Boolean(isDeleteVariableOpen && isAuthorizedToDeleteVariables)}
       >
         <ConfirmDeleteVariable />
       </Visible>
-      <Visible if={Boolean(isEditVariableOpen && isAuthorizedToEditVariable)}>
-        <EditVariablSheet />
+
+      <Visible if={Boolean(isEditVariableOpen && isAuthorizedToEditVariables)}>
+        <EditVariableSheet />
       </Visible>
       <Visible
         if={Boolean(
-          isDeleteEnvironmentValueOfVariableOpen && isAuthorizedToDeleteVariable
+          isDeleteEnvironmentValueOfVariableOpen &&
+            isAuthorizedToDeleteVariables
         )}
       >
         <ConfirmDeleteEnvironmentValueOfVariableDialog />
@@ -57,7 +63,7 @@ export default function VariablePage(): React.JSX.Element {
         <VariableRevisionsSheet />
       </Visible>
       <Visible
-        if={Boolean(isRollbackVariableOpen && isAuthorizedToEditVariable)}
+        if={Boolean(isRollbackVariableOpen && isAuthorizedToEditVariables)}
       >
         <ConfirmRollbackVariable />
       </Visible>

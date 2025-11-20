@@ -3,8 +3,8 @@ import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
-import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
@@ -85,6 +85,7 @@ export default function AuthEmailForm() {
         className="w-full"
         disabled={isButtonDisabled}
         type="submit"
+        variant="outline"
       >
         {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
       </Button>

@@ -1,8 +1,9 @@
-import { GeistSans } from 'geist/font/sans'
 // eslint-disable-next-line camelcase -- this is a font import
-import { Nunito_Sans } from 'next/font/google'
+import { Nunito_Sans, Geist } from 'next/font/google'
 
-const GeistSansFont = GeistSans
+const GeistSansFont = Geist({
+  subsets: ['latin']
+})
 
 const NunitoSansFont = Nunito_Sans({
   display: 'swap',

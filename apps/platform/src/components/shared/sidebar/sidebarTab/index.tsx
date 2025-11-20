@@ -34,14 +34,14 @@ function SidebarTab({
 
   return (
     <Link
-      className="relative flex w-full gap-x-3 rounded-md p-2.5 capitalize transition-colors hover:text-white/60"
+      className={`${isCurrentActive(matchTo) ? 'text-primary-200' : 'text-neutral-500 hover:text-white'} relative flex w-full items-center gap-x-3 rounded-xl p-2.5 text-base capitalize transition-colors`}
       href={link}
     >
       {isCurrentActive(matchTo) && (
         <motion.span
-          className="absolute inset-0 z-10 bg-white/10 mix-blend-difference"
+          className="bg-primary-1100 border-primary-200/30 absolute inset-0 -z-10 border"
           layoutId="bubble"
-          style={{ borderRadius: 6 }}
+          style={{ borderRadius: 12 }}
           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}

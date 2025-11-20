@@ -51,6 +51,10 @@ import SuccessTriggerSVG from './successTrigger.svg'
 import ErrorTriggerSVG from './errorTrigger.svg'
 import RefreshTriggerSVG from './refreshTrigger.svg'
 import CardSVG from './card.svg'
+import DocumentSVG from './document.svg'
+import FeedbackSVG from './feedback.svg'
+import LinkArrowSVG from './link-arrow.svg'
+import ImportSVG from './import.svg'
 
 export {
   DropdownSVG,
@@ -105,5 +109,9 @@ export {
   SuccessTriggerSVG,
   ErrorTriggerSVG,
   RefreshTriggerSVG,
-  CardSVG
+  CardSVG,
+  DocumentSVG,
+  FeedbackSVG,
+  LinkArrowSVG,
+  ImportSVG
 }

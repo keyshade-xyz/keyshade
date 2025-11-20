@@ -71,7 +71,7 @@ function CreateIntegration(): React.JSX.Element {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-3 border-y border-white/20 py-4">
+            <div className="space-y-3 py-4">
               <h3 className="text-sm font-medium">Keyshade would do</h3>
               <div className="space-y-2">
                 {integrationPermissions.map((permission) => (
@@ -83,7 +83,7 @@ function CreateIntegration(): React.JSX.Element {
               </div>
             </div>
             <div className="flex justify-between">
-              <Button onClick={handleHowItWorks} variant="secondary">
+              <Button onClick={handleHowItWorks} variant="outline">
                 How it works
               </Button>
               <Button onClick={handleNext} variant="secondary">

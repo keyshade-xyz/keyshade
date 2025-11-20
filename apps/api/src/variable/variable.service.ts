@@ -47,6 +47,7 @@ import { InclusionQuery } from '@/common/inclusion-query'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { ProjectCacheService } from '@/cache/project-cache.service'
 import { BulkCreateVariable } from '@/variable/dto/bulk.create.variable/bulk.create.variable'
+import { MetricService } from '@/common/metrics.service'
 
 @Injectable()
 export class VariableService {
@@ -59,6 +60,7 @@ export class VariableService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
+    private readonly metricsService: MetricService,
     @Inject(forwardRef(() => SecretService))
     private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
@@ -118,14 +120,17 @@ export class VariableService {
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
+    let environmentSlugToIdMap: Map<string, string>
+    if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+    }
 
     // Create the variable
     this.logger.log(`Creating variable ${dto.name} in project ${project.slug}`)
@@ -445,16 +450,8 @@ export class VariableService {
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto.entries.map((e) => e.environmentSlug),
-      user,
-      variable.project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
-
     const op = []
+    let environmentSlugToIdMap: Map<string, string>
 
     // Update the variable
 
@@ -479,6 +476,15 @@ export class VariableService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        variable.project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+
       await checkForDisabledWorkspace(
         variable.project.workspaceId,
         this.prisma,
@@ -690,7 +696,10 @@ export class VariableService {
     variableSlug: Variable['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: VariableVersion['version']
-  ) {
+  ): Promise<{
+    count: number
+    currentRevision: RawVariableRevision
+  }> {
     this.logger.log(
       `User ${user.id} attempted to rollback variable ${variableSlug} to version ${rollbackVersion}`
     )
@@ -718,18 +727,17 @@ export class VariableService {
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
-    // Filter the variable versions by the environment
-    this.logger.log(
-      `Filtering variable versions of variable ${variableSlug} in environment ${environmentSlug}`
-    )
-    variable.versions = variable.versions.filter(
-      (version) => version.environment.id === environmentId
-    )
-    this.logger.log(
-      `Found ${variable.versions.length} versions for variable ${variableSlug} in environment ${environmentSlug}`
-    )
+    // TODO: remove this after implementing variable cache with variableCache.getRawVariable call
+    // Get all the variable versions
+    const variableVersions = await this.prisma.variableVersion.findMany({
+      where: {
+        variableId: variable.id,
+        environmentId
+      },
+      select: InclusionQuery.Variable['versions']['select']
+    })
 
-    if (variable.versions.length === 0) {
+    if (variableVersions.length === 0) {
       const errorMessage = `Variable ${variable} has no versions for environment ${environmentSlug}`
       this.logger.error(errorMessage)
       throw new NotFoundException(
@@ -738,7 +746,7 @@ export class VariableService {
     }
 
     let maxVersion = 0
-    for (const element of variable.versions) {
+    for (const element of variableVersions) {
       if (element.version > maxVersion) {
         maxVersion = element.version
       }
@@ -768,11 +776,13 @@ export class VariableService {
         }
       }
     })
+    const currentRevision = variableVersions.find(
+      (revision) => revision.version === rollbackVersion
+    )!
+    const variableValue = currentRevision.value
     this.logger.log(
       `Rolled back variable ${variableSlug} to version ${rollbackVersion}`
     )
-
-    const variableValue = variable.versions[rollbackVersion - 1].value
 
     try {
       // Notify the new variable version through Redis
@@ -815,10 +825,6 @@ export class VariableService {
       },
       this.prisma
     )
-
-    const currentRevision = variable.versions.find(
-      (version) => version.version === rollbackVersion
-    )!
 
     return {
       ...result,
@@ -1105,6 +1111,12 @@ export class VariableService {
       `Fetched ${variables.length} variables of project ${projectSlug}`
     )
 
+    try {
+      await this.metricsService.incrementVariablePull(variables.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment variable pull metric: ${err}`)
+    }
+
     const hydratedVariables: HydratedVariable[] = []
 
     for (const variable of variables) {
@@ -1316,6 +1328,12 @@ export class VariableService {
     this.logger.log(
       `Fetched ${variables.length} variables for project ${projectSlug} and environment ${environmentSlug}`
     )
+
+    try {
+      await this.metricsService.incrementVariablePull(variables.length)
+    } catch (err) {
+      this.logger.error(`Error incrementing variable pull metric: ${err}`)
+    }
 
     return variables.map((variable) => ({
       name: variable.name,

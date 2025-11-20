@@ -302,13 +302,15 @@ describe('Secret Controller Tests', () => {
             {
               name: 'Bulk Secret 1',
               note: 'Bulk 1 note',
-              entries: [{ value: 'v1', environmentSlug: environment1.slug }],
+              value: 'v1',
+              environmentSlug: environment1.slug,
               rotateAfter: '24'
             },
             {
               name: 'Bulk Secret 2',
               note: 'Bulk 2 note',
-              entries: [{ value: 'v2', environmentSlug: environment1.slug }],
+              value: 'v2',
+              environmentSlug: environment1.slug,
               rotateAfter: '24'
             }
           ]
@@ -321,17 +323,82 @@ describe('Secret Controller Tests', () => {
       expect(response.statusCode).toBe(201)
       const body = response.json()
 
-      expect(body.successful).toHaveLength(2)
-      expect(body.failed).toHaveLength(0)
+      expect(body).toHaveLength(2)
     })
 
-    it('should handle partial failure in bulk secret creation', async () => {
-      await secretService.createSecret(
+    it('should reject bulk create if any secret is invalid', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: '', // Invalid name
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should reject bulk create if any secret already exists', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if any variable already exists', async () => {
+      // Create a secret named Bulk Secret 1
+      await variableService.createVariable(
         user1,
         {
-          name: 'Duplicate Secret',
-          entries: [{ environmentSlug: environment1.slug, value: 'foo' }],
-          rotateAfter: '24'
+          name: 'Bulk Secret 1',
+          note: 'Bulk 1 note',
+          entries: [
+            {
+              value: 'v1',
+              environmentSlug: environment1.slug
+            }
+          ]
         },
         project1.slug
       )
@@ -342,13 +409,17 @@ describe('Secret Controller Tests', () => {
         payload: {
           secrets: [
             {
-              name: 'New Secret',
-              entries: [{ value: 'v1', environmentSlug: environment1.slug }],
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
               rotateAfter: '24'
             },
             {
-              name: 'Duplicate Secret',
-              entries: [{ value: 'v2', environmentSlug: environment1.slug }],
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
               rotateAfter: '24'
             }
           ]
@@ -358,22 +429,46 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(response.statusCode).toBe(201)
-      const body = response.json()
-
-      expect(body.successful).toHaveLength(1)
-      expect(body.failed).toHaveLength(1)
-      expect(body.failed[0].name).toBe('Duplicate Secret')
+      expect(response.statusCode).toBe(409)
     })
 
-    it('should reject bulk create if all secrets are invalid', async () => {
+    it('should reject bulk create if tier limit will be hit', async () => {
+      // Create 13 secrets
+      for (let i = 2; i < 15; i++) {
+        await secretService.createSecret(
+          user1,
+          {
+            name: `Secret ${i}`,
+            note: `Secret ${i} note`,
+            entries: [
+              {
+                value: `v${i}`,
+                environmentSlug: environment1.slug
+              }
+            ],
+            rotateAfter: '24'
+          },
+          project1.slug
+        )
+      }
+
       const response = await app.inject({
         method: 'POST',
         url: `/secret/${project1.slug}/bulk`,
         payload: {
           secrets: [
             {
-              name: ' ',
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
               rotateAfter: '24'
             }
           ]
@@ -570,7 +665,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        `A variable with this name already exists in this project. Please choose a different name.`
+        `A variable named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -793,7 +888,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        `A variable with this name already exists in this project. Please choose a different name.`
+        `A variable named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -878,7 +973,7 @@ describe('Secret Controller Tests', () => {
       await secretService.updateSecret(user1, secret1.slug, {
         entries: [
           {
-            value: 'Updated Secret 1 value',
+            value: 'Updated Secret 1 value 2',
             environmentSlug: environment1.slug
           }
         ]
@@ -887,7 +982,16 @@ describe('Secret Controller Tests', () => {
       await secretService.updateSecret(user1, secret1.slug, {
         entries: [
           {
-            value: 'Updated Secret 1 value 2',
+            value: 'Updated Secret 1 value 3',
+            environmentSlug: environment1.slug
+          }
+        ]
+      })
+
+      await secretService.updateSecret(user1, secret1.slug, {
+        entries: [
+          {
+            value: 'Updated Secret 1 value 4',
             environmentSlug: environment1.slug
           }
         ]
@@ -902,12 +1006,12 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(3)
+      expect(versions.length).toBe(4)
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await app.inject({
         method: 'PUT',
-        url: `/secret/${secret1.slug}/rollback/1?environmentSlug=${environment1.slug}`,
+        url: `/secret/${secret1.slug}/rollback/2?environmentSlug=${environment1.slug}`,
         headers: {
           'x-e2e-user-email': user1.email
         }
@@ -921,7 +1025,7 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(1)
+      expect(versions.length).toBe(2)
     })
   })
 

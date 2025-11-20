@@ -8,12 +8,7 @@ import { useRouter } from 'next/navigation'
 import { posthog } from 'posthog-js'
 import Cookies from 'js-cookie'
 import { LoadingSVG } from '@public/svg/shared'
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot
-} from '@/components/ui/input-otp'
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -118,7 +113,10 @@ export default function OtpInputForm({
   }
 
   return (
-    <form className="flex w-68 flex-col gap-3" onSubmit={handleVerifyOTP}>
+    <form
+      className="w-68 flex flex-col items-center gap-3"
+      onSubmit={handleVerifyOTP}
+    >
       <div>
         <InputOTP
           maxLength={6}
@@ -142,8 +140,13 @@ export default function OtpInputForm({
         </InputOTP>
       </div>
 
-      <Button className="w-full" disabled={isButtonDisabled()} type="submit">
-        {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
+      <Button
+        className="h-fit w-[115%]"
+        disabled={isButtonDisabled()}
+        type="submit"
+        variant="outline"
+      >
+        {isLoading ? <LoadingSVG className="h-fit w-10" /> : 'Verify'}
       </Button>
     </form>
   )

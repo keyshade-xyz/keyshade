@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.43.0-stage.2",
+  "version": "2.45.0-stage.4",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -181,7 +181,7 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^10.0.3",
     "@semantic-release/release-notes-generator": "^14.0.0",
-    "@types/node": "^20.14.10",
+    "@types/node": "^20.19.22",
     "chalk": "^4.1.2",
     "class-validator": "^0.14.1",
     "clsx": "^2.1.0",

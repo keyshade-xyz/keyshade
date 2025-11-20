@@ -1,80 +1,147 @@
 'use client'
 import Link from 'next/link'
-import { Logo, LogoM } from '@public/shared'
-import { Button } from '@/components/ui/moving-border'
+import { ArrowRight, Logo } from '@public/shared'
+import { GithubSVG } from '@public/navbar'
+import { Geist } from 'next/font/google'
+import { useState } from 'react'
 import { isUserLoggedIn } from '@/utils/is-user-logged-in'
+import CtaButton from '@/components/CtaButton'
+import TertiaryButton from '@/components/TertiaryButton'
+
+const geist = Geist({
+  subsets: ['latin']
+})
 
 function Navbar(): React.JSX.Element {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const navContent: { name: string; href: string }[] = [
+    {
+      name: 'Docs',
+      href: 'https://docs.keyshade.io/'
+    },
+    {
+      name: 'About',
+      href: '/about'
+    },
+    {
+      name: 'Pricing',
+      href: '/pricing'
+    },
+    {
+      name: 'Blog',
+      href: 'https://blog.keyshade.io/'
+    }
+  ]
+
   return (
-    <nav
-      className="mx-10 mt-5 flex w-full items-center justify-between rounded-full border border-[#728689]/60 px-2 py-1 md:w-[79.625rem] md:px-[2.94rem]"
-      style={{
-        background:
-          'linear-gradient(180deg, rgba(226, 232, 255, 0.15) 0%, rgba(226, 232, 255, 0.03) 100%)'
-      }}
-    >
-      <Link href="/" tabIndex={-1}>
-        <Logo className="hidden md:flex" />
-        <LogoM className="flex md:hidden" />
-      </Link>
-      <ul className="hidden gap-x-4 text-white/60 md:flex">
-        <li>
+    <>
+      <div className="mx-5 my-4 flex w-full max-w-[82rem] items-center justify-between md:mx-12">
+        <Link href="/">
+          <Logo className="w-[270px]" />
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className={`hidden md:flex ${geist.className}`}>
+          {navContent.map((item) => {
+            return (
+              <Link className="px-4 py-2" href={item.href} key={item.name}>
+                {item.name}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Desktop Buttons */}
+        <div className="hidden items-center gap-4 md:flex">
           <a
-            href="https://docs.keyshade.io/"
+            href="https://github.com/keyshade-xyz/keyshade"
             rel="noopener noreferrer"
             target="_blank"
           >
-            Docs
+            <TertiaryButton>
+              <GithubSVG height={24} width={26} /> Github
+            </TertiaryButton>
           </a>
-        </li>
-        <li>
-          <Link href="/about">About</Link>
-        </li>
-        <li>
-          <Link href="/pricing">Pricing</Link>
-        </li>
-        <li>
-          <Link href="/share">Share</Link>
-        </li>
-        <li>
           <a
-            href="https://blog.keyshade.io/"
+            href="https://app.keyshade.io"
             rel="noopener noreferrer"
             target="_blank"
           >
-            Blog
+            <CtaButton>
+              {isUserLoggedIn() ? (
+                <span>Open App</span>
+              ) : (
+                <span>Get Started</span>
+              )}{' '}
+              <ArrowRight />
+            </CtaButton>
           </a>
-        </li>
-        <li className="text-white/70">
-          <a
-            href="https://cal.com/keyshade/demo"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Book a Demo
-          </a>
-        </li>
-      </ul>
-      <div className="flex items-center gap-x-4">
-        <a href="https://git.new/keyshade">
-          <button
-            className="hidden rounded-full border border-white/50 px-4 py-2 text-white/80 md:flex"
-            type="button"
-          >
-            View GitHub
-          </button>
-        </a>
-        <a
-          href="https://app.keyshade.io"
-          rel="noopener noreferrer"
-          target="_blank"
+        </div>
+
+        {/* Hamburger Menu Button */}
+        <button
+          className="flex flex-col gap-1 md:hidden"
+          onClick={() => { setIsMenuOpen(!isMenuOpen); }}
+          type="button"
         >
-          <Button duration={6 * 1000}>
-            {isUserLoggedIn() ? 'Open app' : 'Join in'}
-          </Button>
-        </a>
+          <div
+            className={`h-0.5 w-6 bg-white transition-all ${isMenuOpen ? 'translate-y-1.5 rotate-45' : ''}`}
+          />
+          <div
+            className={`h-0.5 w-6 bg-white transition-all ${isMenuOpen ? 'opacity-0' : ''}`}
+          />
+          <div
+            className={`h-0.5 w-6 bg-white transition-all ${isMenuOpen ? '-translate-y-1.5 -rotate-45' : ''}`}
+          />
+        </button>
       </div>
-    </nav>
+
+      {/* Mobile Menu */}
+      {isMenuOpen ? <div className="absolute left-0 top-full z-50 w-full bg-black/90 backdrop-blur-sm md:hidden">
+          <div className={`flex flex-col p-4 ${geist.className}`}>
+            {navContent.map((item) => {
+              return (
+                <Link
+                  className="border-b border-gray-700 px-4 py-3 text-white"
+                  href={item.href}
+                  key={item.name}
+                  onClick={() => { setIsMenuOpen(false); }}
+                >
+                  {item.name}
+                </Link>
+              )
+            })}
+            <div className="mt-4 flex flex-row items-center gap-3 md:flex-col">
+              <a
+                href="https://github.com/keyshade-xyz/keyshade"
+                onClick={() => { setIsMenuOpen(false); }}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <TertiaryButton>
+                  <GithubSVG height={24} width={26} /> Github
+                </TertiaryButton>
+              </a>
+              <a
+                href="https://app.keyshade.io"
+                onClick={() => { setIsMenuOpen(false); }}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <CtaButton>
+                  {isUserLoggedIn() ? (
+                    <span>Open App</span>
+                  ) : (
+                    <span>Get Started</span>
+                  )}{' '}
+                  <ArrowRight />
+                </CtaButton>
+              </a>
+            </div>
+          </div>
+        </div> : null}
+    </>
   )
 }
 

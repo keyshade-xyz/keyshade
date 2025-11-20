@@ -2,7 +2,7 @@ import {
   SecretSVG,
   VariableSVG,
   EnvironmentSVG,
-  FolderSVG
+  SettingsSVG
 } from '@public/svg/dashboard'
 
 export const TAB_CONFIGS = {
@@ -12,10 +12,11 @@ export const TAB_CONFIGS = {
     { id: 'invites', label: 'Invites' }
   ],
   project: [
-    { id: 'overview', label: 'Overview', icon: <FolderSVG /> },
-    { id: 'secret', label: 'Secret', icon: <SecretSVG /> },
-    { id: 'variable', label: 'Variable', icon: <VariableSVG /> },
-    { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> }
+    { id: 'secrets', label: 'Secrets', icon: <SecretSVG /> },
+    { id: 'variables', label: 'Variables', icon: <VariableSVG /> },
+    { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> },
+    // { id: 'log', label: 'Log', icon: <EnvironmentSVG /> }, // TODO: Need to add it later
+    { id: 'settings', label: 'Settings', icon: <SettingsSVG /> }
   ],
   members: [
     { id: 'joined', label: 'Joined' },

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { FooterLogoSVG } from '@public/shared'
 import { SparklesCore } from '@/components/ui/sparkles'
 import EncryptText from '@/components/ui/encrypt-text'
+
 // import EncryptButton from '@/components/ui/encrypt-btn'
 
 function Footer(): React.JSX.Element {
@@ -22,7 +23,7 @@ function Footer(): React.JSX.Element {
             particleColor="#FFFFFF"
             particleDensity={1200}
           />
-          <div className="absolute inset-0 h-full w-full bg-[#04050A] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
+          <div className="absolute inset-0 h-full w-full bg-[#010f13] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
         </div>
       </div>
       <div className="mx-auto flex w-[90%] items-center justify-center">
@@ -119,7 +120,7 @@ function Footer(): React.JSX.Element {
               <ul className="mt-3 flex flex-col gap-y-3">
                 <a
                   className="text-white/60 transition-colors hover:text-white"
-                  href="https://twitter.com/keyshade_xyz"
+                  href="https://twitter.com/keyshade_io"
                   rel="noreferrer"
                   target="_blank"
                 >

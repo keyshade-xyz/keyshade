@@ -13,7 +13,6 @@ function getAbsolutePath(value: string): any {
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: [
-    getAbsolutePath('@chromatic-com/storybook'),
     getAbsolutePath('@storybook/addon-docs'),
     getAbsolutePath('@storybook/addon-onboarding'),
     getAbsolutePath('@storybook/addon-a11y'),
@@ -23,6 +22,25 @@ const config: StorybookConfig = {
     name: '@storybook/nextjs',
     options: {}
   },
-  staticDirs: ['../public']
+  staticDirs: ['../public'],
+  webpackFinal: async (config) => {
+    // Handle SVG imports as React components
+    const fileLoaderRule = config.module?.rules?.find((rule: any) => {
+      return (
+        rule && typeof rule === 'object' && rule.test && rule.test.test('.svg')
+      )
+    })
+
+    if (fileLoaderRule && typeof fileLoaderRule === 'object') {
+      fileLoaderRule.exclude = /\.svg$/
+    }
+
+    config.module?.rules?.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack']
+    })
+
+    return config
+  }
 }
 export default config

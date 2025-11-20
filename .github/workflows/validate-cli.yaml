@@ -23,6 +23,7 @@ on:
         '.github/workflows/validate-cli.yaml'
       ]
 
+
 jobs:
   validate:
     runs-on: ubuntu-latest

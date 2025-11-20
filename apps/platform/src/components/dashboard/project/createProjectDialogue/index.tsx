@@ -3,11 +3,11 @@ import { useAtom, useAtomValue } from 'jotai'
 import { Plus } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
-import CreateProjectEnvironmentList from './create-project-environment-list'
-import CreateProjectStorePrivateKey from './create-project-store-private-key'
-import CreateProjectAccessLevel from './create-project-access-level'
-import CreateProjectDescription from './create-project-description'
 import CreateProjectName from './create-project-name'
+import CreateProjectDescription from './create-project-description'
+import CreateProjectAccessLevel from './create-project-access-level'
+import CreateProjectStorePrivateKey from './create-project-store-private-key'
+import CreateProjectEnvironmentList from './create-project-environment-list'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -104,12 +104,12 @@ export default function CreateProjectDialogue(): JSX.Element {
               disabled={!isAuthorizedToCreateProjects}
               onClick={toggleDialog}
             >
-              <AddSVG /> Create a new Project
+              <AddSVG /> Create Project
             </Button>
           )}
         </DialogTrigger>
         <DialogContent className="h-158 w-188 max-w-full rounded-[12px] border bg-[#1E1E1F] ">
-          <div className="flex h-12.5 w-full flex-col items-start justify-center">
+          <div className="h-12.5 flex w-full flex-col items-start justify-center">
             <DialogTitle className=" font-geist h-7.5 w-34 text-[1.125rem] font-semibold text-white ">
               Create Project
             </DialogTitle>
@@ -119,7 +119,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </DialogDescription>
           </div>
           <div className="flex flex-col gap-y-8 overflow-y-scroll px-2">
-            <div className="flex h-116.5 w-full flex-col gap-4 py-4">
+            <div className="h-116.5 flex w-full flex-col gap-4 py-4">
               {/* NAME */}
               <CreateProjectName
                 onChange={(value) => {

@@ -1,20 +1,17 @@
-import ExportProjectPrivateKeyInput from './export-project-private-key-input'
-import ExportProjectEnvironmentInput from './export-project-environment-input'
 import ExportProjectFormatInput from './export-project-format-input'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle
-} from '@/components/ui/dialog'
+import ExportProjectEnvironmentInput from './export-project-environment-input'
+import ExportProjectPrivateKeyInput from './export-project-private-key-input'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import Visible from '@/components/common/visible'
 import { useProjectEnvironments } from '@/hooks/api/use-project-environments'
 import { useExportProjectDialog } from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-dialog'
 import { useExportProjectForm } from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-form'
-import { useExportConfigurations } from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-configurations'
+import {
+  useExportConfigurations
+} from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-configurations'
 
-export default function ExportProjectConfigurationsDialog(): JSX.Element | null {
+export default function ExportProjectConfigurationsDialog(): React.JSX.Element | null {
   const { environmentsOfProject, selectedProject } = useProjectEnvironments()
 
   const {
@@ -72,9 +69,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
             />
 
             <Visible
-              if={
-                !selectedProject.storePrivateKey && !browserProjectPrivateKey
-              }
+              if={!selectedProject.storePrivateKey && !browserProjectPrivateKey}
             >
               <ExportProjectPrivateKeyInput
                 onChange={(value: string) =>
