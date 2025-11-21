@@ -82,7 +82,32 @@ When you first register on Keyshade, you get a default workspace. This is where 
 
 - To update the workspace name, run
     ```shell
-    keyshade workspace update -n <workspace-name>
+    keyshade workspace update <workspace-slug> -n <workspace-name>
+    ```
+
+{% endtab %}
+
+{% endtabs %}
+
+### Deleting a workspace
+
+{% tabs %}
+
+{% tab title="Web" %}
+
+- From the sidebar, select the workspace that you want to delete
+- Click on **Settings**
+- Scroll down, and select "Delete Workspace"
+- Enter the name of your workspace to confirm your action
+- Click on **Yes, delete the workspace**
+
+{% endtab %}
+
+{% tab title="CLI" %}
+
+- To update the workspace name, run
+    ```shell
+    keyshade workspace delete <workspace-slug>
     ```
 
 {% endtab %}
