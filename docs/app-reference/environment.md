@@ -249,6 +249,6 @@ For detailed CLI commands, see the [CLI Environment Commands](../cli/environment
 
 ## Related Documentation
 
-- [Secrets in Keyshade](./secrets.md) - For sensitive configuration values
-- [Variables in Keyshade](./variables.md) - For non-sensitive configuration values
+- [Secrets in Keyshade](secrets.md) - For sensitive configuration values
+- [Variables in Keyshade](variables.md) - For non-sensitive configuration values
 - [Getting Started Guide](../getting-started/adding-your-first-secret-and-variable.md) - For basic setup
