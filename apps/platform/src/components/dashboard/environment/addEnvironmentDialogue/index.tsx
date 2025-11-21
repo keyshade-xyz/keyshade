@@ -21,7 +21,7 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 
-export default function AddEnvironmentDialogue() {
+export default function AddEnvironmentDialogue(): React.JSX.Element {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
     createEnvironmentOpenAtom
   )
@@ -117,12 +117,8 @@ export default function AddEnvironmentDialogue() {
       open={isCreateEnvironmentOpen}
     >
       <DialogTrigger asChild>
-        <Button
-          className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
-          disabled={!isAuthorizedToCreateEnvironment}
-          variant="outline"
-        >
-          <AddSVG /> Add Environment
+        <Button disabled={!isAuthorizedToCreateEnvironment} variant="primary">
+          <AddSVG /> Create Environments
         </Button>
       </DialogTrigger>
       <DialogContent className="h-100 w-126.5 bg-[#18181B] text-white ">
@@ -138,15 +134,15 @@ export default function AddEnvironmentDialogue() {
 
         <div className=" text-white">
           <div className="space-y-4">
-            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-5 w-28.5 text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="environment-name"
               >
                 Environment Name
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="environment-name"
                 onChange={(e) =>
                   setNewEnvironmentData({
@@ -159,15 +155,15 @@ export default function AddEnvironmentDialogue() {
               />
             </div>
 
-            <div className="flex h-11 w-114.5 items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-5 w-28.5 text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="environmente-note"
               >
                 Environment Description
               </label>
               <Input
-                className="h-11 w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="environment-note"
                 onChange={(e) =>
                   setNewEnvironmentData({

@@ -14,19 +14,21 @@ import {
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
 import {
   allWorkspacesAtom,
   selectedWorkspaceAtom,
   globalSearchDataAtom
 } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export interface AddWorkspaceDialogProps {
   trigger?: React.ReactNode
 }
 
-export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
+export function AddWorkspaceDialog({
+  trigger
+}: AddWorkspaceDialogProps): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -86,35 +88,50 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        {trigger ?? (
-          <Button className="mt-5 w-full">
-            <AddSVG /> New workspace
-          </Button>
-        )}
+        <div>
+          <div className="bg-white/12 border-white/4 my-1 h-px w-full border" />
+          {trigger ?? (
+            <button
+              className="hover:bg-night-c flex w-full cursor-pointer items-center justify-start gap-x-2 rounded-lg p-2 text-sm text-neutral-500 transition-colors"
+              type="button"
+            >
+              <div className="bg-charcoal border-white/4 flex  aspect-square h-9 w-9 items-center justify-center rounded-lg border text-xl">
+                <AddSVG />
+              </div>
+              Create a New Workspace
+            </button>
+          )}
+        </div>
       </DialogTrigger>
-      <DialogContent className="bg-[#1E1E1F]">
+      <DialogContent className="max-w-[783px]">
         <DialogHeader>
-          <DialogTitle>Make a new workspace</DialogTitle>
+          <DialogTitle>Create New Workspace</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-y-5">
           <DialogDescription>
             Create a new workspace to organize your projects.
           </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-y-8">
-          <div className="flex items-center gap-4">
-            <Label htmlFor="workspace-name">Name</Label>
+
+          <div className="flex flex-col gap-4">
+            <Label htmlFor="workspace-name">
+              Workspace Name <span className="font-medium text-red-500">*</span>
+            </Label>
             <Input
               id="workspace-name"
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter the name"
+              placeholder="Enter your workspace name"
               value={name}
             />
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-x-3">
             <Button
               disabled={isLoading}
-              onClick={handleCreate}
-              variant="secondary"
+              onClick={() => setOpen(false)}
+              variant="outline"
             >
+              Close
+            </Button>
+            <Button disabled={isLoading} onClick={handleCreate}>
               Add workspace
             </Button>
           </div>

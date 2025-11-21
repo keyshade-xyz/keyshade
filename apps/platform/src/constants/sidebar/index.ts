@@ -1,2 +1,2 @@
-export const TIRE_PLAN = "Free"
-export const VERSION_BADGE = "ALPHA";
+export const TIRE_PLAN = 'Free'
+export const VERSION_BADGE = 'BETA'

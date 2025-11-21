@@ -2,22 +2,17 @@
 import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
+import type { Workspace } from '@keyshade/schema'
 import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
 import { Skeleton } from './skeleton'
 import { WorkspaceListItem } from './workspace-list-item'
 import { InfiniteScrollList } from './infinite-scroll-list'
+import { Badge } from './badge'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandList
-} from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   allWorkspacesAtom,
@@ -89,7 +84,7 @@ export function Combobox(): React.JSX.Element {
   )
 
   const renderWorkspaceListItem = useCallback(
-    (workspace: WorkspaceWithTierLimitAndProjectCount) => (
+    (workspace: Workspace) => (
       <WorkspaceListItem onClose={() => setOpen(false)} workspace={workspace} />
     ),
     [setOpen]
@@ -139,57 +134,78 @@ export function Combobox(): React.JSX.Element {
     workspaceFromStorage
   ])
 
+  const getSubscriptionPlanDisplay = useCallback((): {
+    name: string
+    color: `#${string}`
+  } => {
+    switch (selectedWorkspace?.subscription.trialPlan) {
+      case 'FREE':
+        return { name: 'Free', color: '#0DA6EF' }
+      case 'HACKER':
+        return { name: 'Hacker', color: '#92DC3C' }
+      case 'TEAM':
+        return { name: 'Team', color: '#2DBE99' }
+      case 'ENTERPRISE':
+        return { name: 'Enterprise', color: '#837DFF' }
+      default:
+        return { name: 'Free', color: '#0DA6EF' }
+    }
+  }, [selectedWorkspace])
+
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-2.75 py-3.25"
+          className="bg-eerie-black border-white/8 flex w-full cursor-pointer items-center justify-between rounded-xl border p-3"
           role="combobox"
           type="button"
         >
           <div className="flex gap-x-[0.88rem]">
-            <div className="flex aspect-square items-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
+            <div className="bg-charcoal border-white/4 flex  aspect-square h-9 w-9 items-center justify-center rounded-lg border text-xl">
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
-            <div className="flex flex-col items-start">
-              <div className="text-start text-lg text-white">
-                {selectedWorkspace?.name ?? (
+            <div className="flex flex-col items-start justify-center">
+              <div className="text-start text-sm font-normal text-white">
+                {selectedWorkspace?.name ? (
+                  <div className="flex items-center gap-x-1">
+                    <div className="w-[111px] truncate">
+                      {selectedWorkspace.name}{' '}
+                    </div>
+                    <Badge
+                      color={getSubscriptionPlanDisplay().color}
+                      size="small"
+                      type="none"
+                      variant="solid"
+                    >
+                      {' '}
+                      {getSubscriptionPlanDisplay().name}
+                    </Badge>
+                  </div>
+                ) : (
                   <Skeleton className="h-6 w-[10vw]" />
                 )}
               </div>
-              <span className="text-xs text-white/55">
-                {selectedWorkspace?.projects}{' '}
-                {selectedWorkspace?.projects === 1 ||
-                selectedWorkspace?.projects === 0
-                  ? 'project'
-                  : 'projects'}
-              </span>
             </div>
           </div>
 
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[16rem] bg-[#161819] text-white">
-        <div>
-          <Command>
-            <CommandInput placeholder="Type a command or search..." />
-            <CommandList className="max-h-40">
-              <CommandEmpty>No workspace found.</CommandEmpty>
-              <div className="max-h-40 overflow-auto">
-                <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
-                  fetchFunction={fetchWorkspaces}
-                  itemComponent={renderWorkspaceListItem}
-                  itemKey={(workspace) => workspace.id}
-                  itemsPerPage={10}
-                />
-              </div>
-            </CommandList>
-          </Command>
-          <AddWorkspaceDialog />
+      <PopoverContent
+        className="border-white/8 bg-night-d rounded-xl p-1 text-white"
+        style={{ width: 'var(--radix-popper-anchor-width)' }}
+      >
+        <div className="max-h-40 overflow-auto">
+          <InfiniteScrollList<Workspace>
+            fetchFunction={fetchWorkspaces}
+            itemComponent={renderWorkspaceListItem}
+            itemKey={(workspace) => workspace.id}
+            itemsPerPage={10}
+          />
         </div>
+        <AddWorkspaceDialog />
       </PopoverContent>
     </Popover>
   )

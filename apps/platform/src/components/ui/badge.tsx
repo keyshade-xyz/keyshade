@@ -5,19 +5,21 @@ import { CircleCheckSVG, CloseCircleSVG, TimerSVG } from '@public/svg/badges'
 import { cn } from '@/lib/utils'
 
 const BadgeVarient = cva(
-  'inline-flex justify-center items-center font-medium text-sm py-[6px] px-3 rounded-lg gap-2',
+  'inline-flex justify-center items-center gap-2 border',
   {
     variants: {
-      color: {
-        green: 'bg-[#0FCC5833] border border-[#16CF833D] text-[#16CF83]',
-        red: 'bg-[#D011043D] border border-[#EC6A5B33] text-[#EC6A5B]',
-        yellow: 'bg-[#C69E0233] border border-[#C69E023D] text-[#FBD029]',
-        blue: 'bg-[#0483D433] border border-[#0A9AF733] text-[#6DC6FF]'
-      },
       variant: {
         solid: '',
         subtle: 'bg-[#FFFFFF1A]! border border-[#FFFFFF33]! text-white!'
+      },
+      size: {
+        default: 'font-medium text-sm py-[6px] px-3 rounded-lg ',
+        small: 'text-xs font-base px-[6px] py-[2px] rounded-sm'
       }
+    },
+    defaultVariants: {
+      variant: 'solid',
+      size: 'default'
     }
   }
 )
@@ -43,7 +45,16 @@ type BadgeProps = (DotBadgeProps | IconBadgeProps) &
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   (
-    { className, children, color, variant, type, icon, ...props }: BadgeProps,
+    {
+      className,
+      children,
+      color,
+      variant,
+      type,
+      size,
+      icon,
+      ...props
+    }: BadgeProps,
     ref
   ) => {
     const renderColor = (): `#${string}` => {
@@ -92,8 +103,13 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 
     return (
       <span
-        className={cn(BadgeVarient({ color, variant }), className)}
+        className={cn(BadgeVarient({ variant, size }), className)}
         ref={ref}
+        style={{
+          backgroundColor: variant === 'solid' ? `${renderColor()}1A` : '', // 10% opacity
+          borderColor: variant === 'solid' ? `${renderColor()}33` : '', // 20% opacity
+          color: variant === 'solid' ? renderColor() : ''
+        }}
         {...props}
       >
         {renderType()}

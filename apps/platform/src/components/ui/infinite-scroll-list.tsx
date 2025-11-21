@@ -22,6 +22,7 @@ interface InfiniteScrollListProps<T> {
   className?: string
   inTable?: boolean
   emptyComponent?: React.ReactNode
+  loadingComponent?: React.ReactNode
 }
 
 export function InfiniteScrollList<T>({
@@ -31,7 +32,8 @@ export function InfiniteScrollList<T>({
   fetchFunction,
   className = '',
   inTable = false,
-  emptyComponent
+  emptyComponent,
+  loadingComponent
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -121,12 +123,20 @@ export function InfiniteScrollList<T>({
     return inTable ? (
       <tr>
         <td className="flex justify-center p-4" colSpan={3}>
-          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          {loadingComponent ? (
+            loadingComponent
+          ) : (
+            <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          )}
         </td>
       </tr>
     ) : (
       <div className="flex justify-center p-4">
-        <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+        {loadingComponent ? (
+          loadingComponent
+        ) : (
+          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+        )}
       </div>
     )
   }
@@ -168,7 +178,11 @@ export function InfiniteScrollList<T>({
         {isLoading ? (
           <tr>
             <td className="flex justify-center p-4" colSpan={3}>
-              <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+              {loadingComponent ? (
+                loadingComponent
+              ) : (
+                <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+              )}
             </td>
           </tr>
         ) : null}
@@ -188,7 +202,11 @@ export function InfiniteScrollList<T>({
 
       {isLoading && items.length > 0 ? (
         <div className="flex justify-center p-4">
-          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          {loadingComponent ? (
+            loadingComponent
+          ) : (
+            <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          )}
         </div>
       ) : null}
     </div>
