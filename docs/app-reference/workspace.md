@@ -2,7 +2,9 @@
 description: Explainer on what workspaces are and how to use them
 ---
 
-# Workspace
+# Workspaces in Keyshade
+
+## What are Workspaces?
 
 A workspace is what holds all of your data—members, projects, secrets, integrations, etc. You can think of it as an organization, which ties up everything related to a business. You get a default workspace when you first register to keyshade.
 
@@ -26,11 +28,13 @@ Each workspace is meant to hold data related to a single project, or organizatio
 
 When you first register on Keyshade, you get a default workspace. This is where you land when you first log in. The default workspace is meant for personal use, hosting portfolio projects and such. We do not support any payments or subscriptions for the default workspace.
 
-## Create a workspace
+## Supported Functionalities
+
+### Creating a workspace
 
 {% tabs %}
 
-{% tab title="App" %}
+{% tab title="Web" %}
 
 - Head over to the dashboard at [app.keyshade.io](https://app.keyshade.io)
 - Navigate to the bottom in the left sidebar and click on the combobox
@@ -62,3 +66,25 @@ When you first register on Keyshade, you get a default workspace. This is where 
 
 {% endtabs %}
 
+### Updating a workspace
+
+{% tabs %}
+
+{% tab title="Web" %}
+
+- From the sidebar, select the workspace that you want to edit
+- Click on **Settings**
+- Update the information and click on **Save Changes**
+
+{% endtab %}
+
+{% tab title="CLI" %}
+
+- To update the workspace name, run
+    ```shell
+    keyshade workspace update -n <workspace-name>
+    ```
+
+{% endtab %}
+
+{% endtabs %}
