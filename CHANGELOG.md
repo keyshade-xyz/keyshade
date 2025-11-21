@@ -1,3 +1,20 @@
+## [2.45.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.4...v2.45.0-stage.5) (2025-11-21)
+
+### 🚀 Features
+
+* **api:** updated prisma version to 7, added config file & updated the script paths ([#1253](https://github.com/keyshade-xyz/keyshade/issues/1253)) ([4a90094](https://github.com/keyshade-xyz/keyshade/commit/4a90094a25febf72a63107694a6d01e5687add38))
+
+### 📚 Documentation
+
+* add docs for workspace, [secure], environment and variable ([#1250](https://github.com/keyshade-xyz/keyshade/issues/1250)) ([d565c88](https://github.com/keyshade-xyz/keyshade/commit/d565c8832524da4cea5060c4336b7dee403f363f))
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** bump form-data in /apps/api ([#1242](https://github.com/keyshade-xyz/keyshade/issues/1242)) ([1c1c357](https://github.com/keyshade-xyz/keyshade/commit/1c1c35705edaca99f25b51c74ca84d8e7ab02a50))
+* **deps:** bump glob in /apps/cli ([#1246](https://github.com/keyshade-xyz/keyshade/issues/1246)) ([03d8b08](https://github.com/keyshade-xyz/keyshade/commit/03d8b0880c92bae32046030178c46e45903bb051))
+* **deps:** bump next from 15.2.3 to 15.4.7 in /apps/platform ([#1247](https://github.com/keyshade-xyz/keyshade/issues/1247)) ([cf0d4cb](https://github.com/keyshade-xyz/keyshade/commit/cf0d4cbd0ec1fa4925c515c07e871590de55ad78))
+* **deps:** update pnpm-lock.yaml ([698a5de](https://github.com/keyshade-xyz/keyshade/commit/698a5de755031d15e9841c3820b2829d6d59e161))
+
 ## [2.45.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.3...v2.45.0-stage.4) (2025-11-19)
 
 ### 🚀 Features
