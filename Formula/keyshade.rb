@@ -6,13 +6,13 @@ class Keyshade < Formula
 
   on_macos do
     on_intel do
-      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.44.0/keyshade-cli-macos-x64"
-      sha256 "c3c80c932cf50ee3ae77c2a618472b59fd71281e51ec1792bd63310546022ac4"
+      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.46.0/keyshade-cli-macos-x64"
+      sha256 "5bb101b64a12533f78a031d65248fdaa7a41206bfcb68071585b8df1adbe321a"
     end
 
     on_arm do
-      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.44.0/keyshade-cli-macos-arm64"
-      sha256 "0996cb9595583d57510e81ea04d8ce208727ee8205fcd4c06d6da7a5f0a6409f"
+      url "https://github.com/keyshade-xyz/keyshade/releases/download/v2.46.0/keyshade-cli-macos-arm64"
+      sha256 "f666c1975d9e5de6f792496be0528c8ade60c4a7972796828d681d303a096229"
     end
   end
 
