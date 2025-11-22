@@ -1,8 +1,19 @@
-## [2.45.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.4...v2.45.0-stage.5) (2025-11-21)
+## [2.46.0](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0...v2.46.0) (2025-11-21)
 
 ### 🚀 Features
 
+* add mobile responsive ([30fcaf9](https://github.com/keyshade-xyz/keyshade/commit/30fcaf992e8aa2e65ba87be8c0c3db141af0252d))
 * **api:** updated prisma version to 7, added config file & updated the script paths ([#1253](https://github.com/keyshade-xyz/keyshade/issues/1253)) ([4a90094](https://github.com/keyshade-xyz/keyshade/commit/4a90094a25febf72a63107694a6d01e5687add38))
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([5a254e6](https://github.com/keyshade-xyz/keyshade/commit/5a254e6208c64c8889913e02754d516ebeef4903))
+* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([2548288](https://github.com/keyshade-xyz/keyshade/commit/25482884f8973025a8629e36b24a425ec3253eec))
+* enhance layout and button responsiveness ([539d4fa](https://github.com/keyshade-xyz/keyshade/commit/539d4fa66e4811f4223df122b99791f0c088891b))
+* **platform:** revamp platform UI ([#1212](https://github.com/keyshade-xyz/keyshade/issues/1212)) ([f53fd7d](https://github.com/keyshade-xyz/keyshade/commit/f53fd7d15022fda482fb14647aa276650366268f))
+* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([f131344](https://github.com/keyshade-xyz/keyshade/commit/f13134410ae49f4363e8de13478c964220b9c0f5))
+
+### 🐛 Bug Fixes
+
+* can not find jsx ([be5319b](https://github.com/keyshade-xyz/keyshade/commit/be5319bba2b78abad886f98f14624676d6c726a8))
+* **web:** merge conflict ([#1240](https://github.com/keyshade-xyz/keyshade/issues/1240)) ([f57c471](https://github.com/keyshade-xyz/keyshade/commit/f57c471434787e4eb268b7d9640e78817af23d4f))
 
 ### 📚 Documentation
 
@@ -14,42 +25,18 @@
 * **deps:** bump glob in /apps/cli ([#1246](https://github.com/keyshade-xyz/keyshade/issues/1246)) ([03d8b08](https://github.com/keyshade-xyz/keyshade/commit/03d8b0880c92bae32046030178c46e45903bb051))
 * **deps:** bump next from 15.2.3 to 15.4.7 in /apps/platform ([#1247](https://github.com/keyshade-xyz/keyshade/issues/1247)) ([cf0d4cb](https://github.com/keyshade-xyz/keyshade/commit/cf0d4cbd0ec1fa4925c515c07e871590de55ad78))
 * **deps:** update pnpm-lock.yaml ([698a5de](https://github.com/keyshade-xyz/keyshade/commit/698a5de755031d15e9841c3820b2829d6d59e161))
-
-## [2.45.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.3...v2.45.0-stage.4) (2025-11-19)
-
-### 🚀 Features
-
-* add mobile responsive ([30fcaf9](https://github.com/keyshade-xyz/keyshade/commit/30fcaf992e8aa2e65ba87be8c0c3db141af0252d))
-* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([2548288](https://github.com/keyshade-xyz/keyshade/commit/25482884f8973025a8629e36b24a425ec3253eec))
-* enhance layout and button responsiveness ([539d4fa](https://github.com/keyshade-xyz/keyshade/commit/539d4fa66e4811f4223df122b99791f0c088891b))
-* **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([f131344](https://github.com/keyshade-xyz/keyshade/commit/f13134410ae49f4363e8de13478c964220b9c0f5))
-
-### 🐛 Bug Fixes
-
-* can not find jsx ([be5319b](https://github.com/keyshade-xyz/keyshade/commit/be5319bba2b78abad886f98f14624676d6c726a8))
-
-### 🔧 Miscellaneous Chores
-
 * **release:** 2.44.0-stage.1 [skip ci] ([2a4834b](https://github.com/keyshade-xyz/keyshade/commit/2a4834b064c8b56568885f02581eb0f78060a6da))
 * **release:** 2.44.0-stage.2 [skip ci] ([877c36e](https://github.com/keyshade-xyz/keyshade/commit/877c36e0d7ccecc326c74c50355455b16633787d))
+* **release:** 2.45.0-stage.1 [skip ci] ([e9abef3](https://github.com/keyshade-xyz/keyshade/commit/e9abef3ae51bffeec37aace980dda6de842746a2))
+* **release:** 2.45.0-stage.2 [skip ci] ([78340e4](https://github.com/keyshade-xyz/keyshade/commit/78340e48c2fc07efdc30e573a43b17153f7de609))
+* **release:** 2.45.0-stage.3 [skip ci] ([15a21e6](https://github.com/keyshade-xyz/keyshade/commit/15a21e61dc9636a0884e0da5744acfdbb135806f))
+* **release:** 2.45.0-stage.4 [skip ci] ([c54e3d8](https://github.com/keyshade-xyz/keyshade/commit/c54e3d86886cf08215afb4d7ab38915980807439))
+* **release:** 2.45.0-stage.5 [skip ci] ([09d9756](https://github.com/keyshade-xyz/keyshade/commit/09d97566629d5569bb94b5a181a74f0640dd1ad0))
 
-## [2.45.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.2...v2.45.0-stage.3) (2025-11-18)
-
-### 🐛 Bug Fixes
-
-* **web:** merge conflict ([#1240](https://github.com/keyshade-xyz/keyshade/issues/1240)) ([f57c471](https://github.com/keyshade-xyz/keyshade/commit/f57c471434787e4eb268b7d9640e78817af23d4f))
-
-## [2.45.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0-stage.1...v2.45.0-stage.2) (2025-11-17)
-
-### 🚀 Features
-
-* **platform:** revamp platform UI ([#1212](https://github.com/keyshade-xyz/keyshade/issues/1212)) ([f53fd7d](https://github.com/keyshade-xyz/keyshade/commit/f53fd7d15022fda482fb14647aa276650366268f))
-
-## [2.45.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0...v2.45.0-stage.1) (2025-11-14)
+## [2.45.0](https://github.com/keyshade-xyz/keyshade/compare/v2.44.0...v2.45.0) (2025-11-14)
 
 ### 🚀 Features
 
-* **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([5a254e6](https://github.com/keyshade-xyz/keyshade/commit/5a254e6208c64c8889913e02754d516ebeef4903))
 * **cli:** add runtime flags to keyshade run command ([#1234](https://github.com/keyshade-xyz/keyshade/issues/1234)) ([1e2a864](https://github.com/keyshade-xyz/keyshade/commit/1e2a864018fa086beb68a93f414d70014fc78b5e))
 * responsive landing page ([#1239](https://github.com/keyshade-xyz/keyshade/issues/1239)) ([6eb0d3b](https://github.com/keyshade-xyz/keyshade/commit/6eb0d3b9e92d49d7a3a641c4da6e29ee1ee5afdd))
 * **web:** revamp landing page ([#1145](https://github.com/keyshade-xyz/keyshade/issues/1145)) ([7212fa4](https://github.com/keyshade-xyz/keyshade/commit/7212fa4a5595d9f0e3c07ea349c725fe20f8eece))
