@@ -22,6 +22,8 @@ import {
   decryptMetadata,
   makeTimedRequest
 } from '@/common/util'
+import { retryWithBackoff } from '@/common/util'
+import { encryptMetadata } from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
@@ -41,7 +43,9 @@ export class VercelIntegration extends BaseIntegration {
       EventType.SECRET_DELETED,
       EventType.VARIABLE_ADDED,
       EventType.VARIABLE_UPDATED,
-      EventType.VARIABLE_DELETED
+      EventType.VARIABLE_DELETED,
+      EventType.ENVIRONMENT_UPDATED,
+      EventType.ENVIRONMENT_DELETED
     ])
   }
 
@@ -147,6 +151,14 @@ export class VercelIntegration extends BaseIntegration {
           await this.delegateConfigurationDeletedEvent(data)
         break
 
+      case EventType.ENVIRONMENT_DELETED:
+        await this.handleEnvironmentDeleted(data)
+        break
+
+      case EventType.ENVIRONMENT_UPDATED:
+        await this.handleEnvironmentUpdated(data)
+        break
+
       default:
         this.logger.warn(
           `Event type ${data.eventType} not supported for Vercel integration.`
@@ -159,6 +171,220 @@ export class VercelIntegration extends BaseIntegration {
       // You may want to adjust this extraction logic as needed
       environmentTarget = (data as any).environmentTarget || 'production'
       await this.triggerRedeploy(data.event.id, environmentTarget)
+    }
+  }
+
+  private async handleEnvironmentDeleted(
+    data: IntegrationEventData
+  ): Promise<void> {
+    this.vercel = await this.getVercelClient()
+
+    const integration = this.getIntegration<VercelIntegrationMetadata>()
+    const metadata = integration.metadata
+
+    const environmentId = data.event.itemId
+    const envEntry = integration.environments.find((e) => e.id === environmentId)
+
+    if (!envEntry) {
+      this.logger.log(
+        `Environment ${environmentId} is not part of integration. Idempotent success.`
+      )
+      return
+    }
+
+    const envSlug = envEntry.slug
+    if (!metadata.environments || !metadata.environments[envSlug]) {
+      this.logger.log(
+        `No metadata found for environment ${envSlug}. Nothing to delete on Vercel.`
+      )
+      // Still attempt to disconnect the environment relation if present
+      try {
+          await (this as any).prisma.integration.update({
+            where: { id: (integration as any).id },
+            data: { environments: { disconnect: { id: environmentId } } }
+          })
+      } catch (err) {
+        this.logger.warn(`Failed to disconnect environment ${environmentId}: ${err}`)
+      }
+      return
+    }
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId: data.event.id,
+      integrationId: (integration as any).id,
+      title: `Cleaning up Vercel environment ${envSlug}`
+    })
+
+    try {
+      const { vercelCustomEnvironmentId, vercelSystemEnvironment } =
+        metadata.environments[envSlug]
+
+      const vercelSystemEnvironmentsSet = new Set<string>()
+      const vercelCustomEnvironmentIdsSet = new Set<string>()
+
+      if (vercelSystemEnvironment) vercelSystemEnvironmentsSet.add(vercelSystemEnvironment)
+      if (vercelCustomEnvironmentId) vercelCustomEnvironmentIdsSet.add(vercelCustomEnvironmentId)
+
+      // Fetch all env vars
+      const { duration: listEnvironmentVariablesDuration, envs } =
+        await this.getAllEnvironmentVariables(integration.metadata.projectId)
+
+      const environmentVariableIds: string[] = []
+      for (const env of envs) {
+        const envTarget = env.target?.[0]
+        const envCustomEnvironmentId = env.customEnvironmentIds?.[0]
+
+        if (
+          (envTarget && vercelSystemEnvironmentsSet.has(envTarget)) ||
+          (envCustomEnvironmentId && vercelCustomEnvironmentIdsSet.has(envCustomEnvironmentId))
+        ) {
+          environmentVariableIds.push(env.id)
+        }
+      }
+
+      // Delete found env vars
+      for (const envVarId of environmentVariableIds) {
+        await makeTimedRequest(() =>
+          retryWithBackoff(() =>
+            this.vercel.projects.removeProjectEnv({
+              id: envVarId,
+              idOrName: integration.metadata.projectId
+            })
+          )
+        )
+      }
+
+      // Remove env metadata and disconnect relation
+      delete metadata.environments[envSlug]
+        await (this as any).prisma.integration.update({
+          where: { id: (integration as any).id },
+          data: {
+            metadata: encryptMetadata(metadata as any),
+            environments: { disconnect: { id: environmentId } }
+          }
+        })
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.SUCCESS,
+        0,
+        ''
+      )
+      } catch (err) {
+      this.logger.error(
+        `Failed cleaning up Vercel environment ${envSlug}: ${err}`
+      )
+
+      // Persist a pending cleanup entry in integration metadata so a reconciler can retry later
+      try {
+        metadata.pendingCleanup = (metadata.pendingCleanup as any[]) || []
+        ;(metadata.pendingCleanup as any[]).push({
+          environmentId,
+          action: 'ENVIRONMENT_DELETED',
+          error: err instanceof Error ? err.message : String(err),
+          attempts: 3,
+          createdAt: new Date().toISOString()
+        })
+        await (this as any).prisma.integration.update({
+          where: { id: (integration as any).id },
+          data: { metadata: encryptMetadata(metadata as any) }
+        })
+      } catch (persistErr) {
+        this.logger.error(
+          `Failed to persist pending cleanup for ${(integration as any).id}: ${persistErr}`
+        )
+      }
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        err instanceof Error ? err.message : String(err)
+      )
+    }
+  }
+
+  private async handleEnvironmentUpdated(
+    data: IntegrationEventData
+  ): Promise<void> {
+    const integration = this.getIntegration<VercelIntegrationMetadata>()
+    const metadata = integration.metadata
+
+    const environmentId = data.event.itemId
+    const envEntry = integration.environments.find((e) => e.id === environmentId)
+    if (!envEntry) {
+      this.logger.warn(
+        `Environment ${environmentId} not part of integration. Skipping update.`
+      )
+      return
+    }
+
+    const envSlug = envEntry.slug
+    const eventMeta = decryptMetadata<any>(data.event.metadata)
+    const newName = eventMeta?.name
+
+    // If metadata key is by slug, there is nothing to change for Vercel mapping
+    // However if consumers rely on environment name stored in metadata, attempt to update it
+    if (!metadata.environments || !metadata.environments[envSlug]) {
+      this.logger.log(
+        `No metadata mapping for environment ${envSlug}. Nothing to update on Vercel.`
+      )
+      return
+    }
+
+    // Try to update Vercel project-level environment name if API supports it
+    try {
+      const { id: integrationRunId } = await this.registerIntegrationRun({
+        eventId: data.event.id,
+        integrationId: (integration as any).id,
+        title: `Updating environment ${envSlug} on Vercel to ${newName}`
+      })
+
+      // Vercel does not currently support renaming system environments. If custom envs exist, attempt update
+      const customEnvId = metadata.environments[envSlug].vercelCustomEnvironmentId
+      if (customEnvId && newName) {
+        try {
+          await makeTimedRequest(() =>
+            this.vercel.environment.updateCustomEnvironment({
+              idOrName: integration.metadata.projectId,
+              environmentSlugOrId: customEnvId,
+              requestBody: { slug: newName, description: newName }
+            })
+          )
+        } catch (err) {
+          this.logger.warn(
+            `Vercel custom environment rename not supported or failed for ${customEnvId}: ${err}`
+          )
+        }
+      }
+
+      // Persist any metadata changes if needed (no-op for now)
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.SUCCESS,
+        0,
+        ''
+      )
+      // Create an audit Event for ENVIRONMENT_UPDATED
+      try {
+        await (this as any).prisma.event.create({
+          data: {
+            source: 'INTEGRATION',
+            triggerer: 'SYSTEM',
+            severity: 'INFO',
+            type: EventType.ENVIRONMENT_UPDATED,
+            title: `Environment ${envSlug} updated via Vercel integration`,
+            metadata: JSON.stringify({ name: newName }),
+            itemId: environmentId
+          }
+        })
+      } catch (e) {
+        this.logger.warn(`Failed to persist audit event for environment update: ${e}`)
+      }
+    } catch (err) {
+      this.logger.error(
+        `Failed updating environment ${envSlug} on Vercel: ${err}`
+      )
     }
   }
 
