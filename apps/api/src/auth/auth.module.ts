@@ -13,6 +13,7 @@ import { seconds, ThrottlerModule } from '@nestjs/throttler'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthorizationService } from './service/authorization.service'
 import { AuthorityCheckerService } from './service/authority-checker.service'
+import { UserAuthProviderService } from '@/common/user-auth-provider.service'
 
 @Global()
 @Module({
@@ -42,6 +43,7 @@ import { AuthorityCheckerService } from './service/authority-checker.service'
     AuthService,
     AuthorizationService,
     AuthorityCheckerService,
+    UserAuthProviderService,
     GithubOAuthStrategyFactory,
     {
       provide: GithubStrategy,
