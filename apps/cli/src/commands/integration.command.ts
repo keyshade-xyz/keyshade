@@ -1,4 +1,9 @@
 import BaseCommand from './base.command'
+import { CreateIntegration } from './integration/create.integration'
+import { DeleteIntegration } from './integration/delete.integration'
+import { GetIntegration } from './integration/get.integration'
+import { ListIntegration } from './integration/list.integration'
+import { UpdateIntegration } from './integration/update.integration'
 
 export default class IntegrationCommand extends BaseCommand {
   getName(): string {
@@ -9,7 +14,13 @@ export default class IntegrationCommand extends BaseCommand {
     return 'Manage your integrations in keyshade.'
   }
 
-  canMakeHttpRequests(): boolean {
-    return true
+  getSubCommands(): BaseCommand[] {
+    return [
+      new CreateIntegration(),
+      new DeleteIntegration(),
+      new GetIntegration(),
+      new ListIntegration(),
+      new UpdateIntegration()
+    ]
   }
 }
