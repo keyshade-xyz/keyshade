@@ -55,14 +55,14 @@ function ServerKeySetup({
 
   return (
     <div
-      className={`flex justify-between gap-2 rounded-lg bg-white/10 p-3 ${isPrivateKeyStoredDB && 'flex-col gap-3'}`}
+      className={`flex items-center justify-between gap-2 rounded-lg bg-white/10 p-3 ${isPrivateKeyStoredDB && 'flex-col gap-3'}`}
     >
       <div>
-        <h1 className="text-lg font-medium text-white">
+        <h1 className="flex items-center gap-2 text-lg font-medium text-white">
           Share project private key with us?{' '}
           <Tooltip>
             <TooltipTrigger>
-              <Info className="ml-1 inline h-5 w-5 text-white/70" />
+              <Info className="inline h-5 w-5 text-white/70" />
             </TooltipTrigger>
             <TooltipContent>
               <p className="max-w-52 bg-white/10 text-center text-sm text-black">
