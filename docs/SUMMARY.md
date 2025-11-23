@@ -11,6 +11,14 @@
 - [Add Keyshade to your project](getting-started/add-keyshade-to-your-project.md)
 - [Running your app](getting-started/running-your-app.md)
 
+## App Reference
+
+- [Introduction](app-reference/introduction.md)
+- [Workspace](app-reference/workspace.md)
+- [Environment](app-reference/environment.md)
+- [Secret](app-reference/secret.md)
+- [Variable](app-reference/variable.md)
+
 ## CLI
 
 - [Introduction](cli/introduction.md)

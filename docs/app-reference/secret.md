@@ -56,38 +56,7 @@ Secrets in Keyshade are **sensitive credentials and authentication data** that n
 - Cloud provider access keys
 - Container registry credentials
 - CI/CD pipeline tokens
-
-## Secret Structure and Fields
-
-### Core Fields
-
-| Field | Type | Description | Required |
-|-------|------|-------------|----------|
-| `name` | String | The name of the secret (e.g., `DATABASE_PASSWORD`) | Yes |
-| `slug` | String | URL-friendly identifier (auto-generated from name) | Auto |
-| `note` | String | Optional description or documentation | No |
-| `rotateAt` | DateTime | When the secret should be automatically rotated | No |
-| `rotateAfter` | Integer | Hours after which to rotate the secret | No |
-
-### Versioning Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `version` | Integer | Version number (increments with each change) |
-| `value` | String | The encrypted secret value |
-| `environmentId` | String | Which environment this version applies to |
-| `createdOn` | DateTime | When this version was created |
-| `createdById` | String | Who created this version |
-
-### Metadata Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `createdAt` | DateTime | When the secret was first created |
-| `updatedAt` | DateTime | When the secret was last modified |
-| `lastUpdatedById` | String | Who last updated the secret |
-| `projectId` | String | Which project this secret belongs to |
-
+- 
 ## Supported Functionalities
 
 ### 1. Creating Secrets
@@ -272,6 +241,6 @@ For detailed CLI commands, see the [CLI Secret Commands](../cli/secret.md) docum
 
 ## Related Documentation
 
-- [Variables in Keyshade](./variables.md) - For non-sensitive configuration values
-- [Environments in Keyshade](./environments.md) - For understanding environment management
+- [Variables in Keyshade](variables.md) - For non-sensitive configuration values
+- [Environments in Keyshade](environments.md) - For understanding environment management
 - [Getting Started Guide](../getting-started/adding-your-first-secret-and-variable.md) - For basic setup
