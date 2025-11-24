@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
+import TableLoader from '../common/table-loader'
 import { cn } from '@/lib/utils'
 
 interface InfiniteScrollListResponse<T> {
@@ -121,25 +122,24 @@ export function InfiniteScrollList<T>({
 
   if (isLoading && items.length === 0) {
     return inTable ? (
-      <tr>
-        <td className="flex justify-center p-4" colSpan={3}>
+      <>
           {loadingComponent ? (
             loadingComponent
           ) : (
-            <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+            <TableLoader />
           )}
-        </td>
-      </tr>
+      </>
     ) : (
-      <div className="flex justify-center p-4">
+      <div>
         {loadingComponent ? (
           loadingComponent
         ) : (
-          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          <TableLoader />
         )}
       </div>
     )
   }
+  
   if (items.length === 0) {
     if (emptyComponent) {
       return inTable ? (
