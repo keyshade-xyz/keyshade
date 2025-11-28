@@ -10,6 +10,7 @@ import { Environment, Project, Secret, Variable } from '@prisma/client'
 @Injectable()
 export class ProjectCacheService {
   private static readonly RAW_PROJECT_PREFIX = 'raw-project-'
+  private static readonly ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
   private readonly logger = new Logger(ProjectCacheService.name)
 
@@ -73,7 +74,11 @@ export class ProjectCacheService {
 
     const key = this.getRawProjectKey(projectSlug)
     const rawProjectJson = JSON.stringify(rawProject)
-    await this.redisClient.publisher.set(key, rawProjectJson)
+    await this.redisClient.publisher.setEx(
+      key,
+      ProjectCacheService.ONE_DAY_IN_SECONDS,
+      rawProjectJson
+    )
 
     this.logger.log(`Raw project ${projectSlug} cached`)
   }

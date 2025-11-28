@@ -11,6 +11,7 @@ export class CollectiveAuthoritiesCacheService {
     'user-project-collective-authorities-'
   private static readonly WORKSPACE_COLLECTIVE_AUTHORITY_KEYS_PREFIX =
     'workspace-collective-authority-keys-'
+  private static readonly ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
   private readonly logger = new Logger(CollectiveAuthoritiesCacheService.name)
 
@@ -25,6 +26,10 @@ export class CollectiveAuthoritiesCacheService {
   ): Promise<void> {
     const key = this.getWorkspaceCollectiveAuthorityKeysKey(workspaceId)
     await this.redisClient.publisher.sAdd(key, newKey)
+    await this.redisClient.publisher.expire(
+      key,
+      CollectiveAuthoritiesCacheService.ONE_DAY_IN_SECONDS
+    )
   }
 
   async removeWorkspaceCollectiveAuthorityCache(
@@ -66,6 +71,10 @@ export class CollectiveAuthoritiesCacheService {
     const values = Array.from(authorities ?? []).map((a) => String(a))
     if (values.length > 0) {
       await this.redisClient.publisher.sAdd(key, values)
+      await this.redisClient.publisher.expire(
+        key,
+        CollectiveAuthoritiesCacheService.ONE_DAY_IN_SECONDS
+      )
     } else {
       this.logger.log(
         `No authorities provided for user ${userId} in workspace ${workspaceId}`
@@ -103,6 +112,10 @@ export class CollectiveAuthoritiesCacheService {
     const values = Array.from(authorities ?? []).map((a) => String(a))
     if (values.length > 0) {
       await this.redisClient.publisher.sAdd(key, values)
+      await this.redisClient.publisher.expire(
+        key,
+        CollectiveAuthoritiesCacheService.ONE_DAY_IN_SECONDS
+      )
     } else {
       this.logger.log(
         `No authorities provided for user ${userId} in project ${projectId}`

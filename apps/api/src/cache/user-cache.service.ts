@@ -6,6 +6,7 @@ import { UserWithWorkspace } from '@/user/user.types'
 @Injectable()
 export class UserCacheService {
   private static readonly PREFIX = 'user-'
+  private static readonly ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
   private readonly logger = new Logger(UserCacheService.name)
 
@@ -21,11 +22,8 @@ export class UserCacheService {
     this.logger.log(`Setting user cache for user ${user.id}`)
     const key = this.getUserKey(user.id)
     const userJson = JSON.stringify(user)
-    if (expirationInSeconds) {
-      await this.redisClient.publisher.setEx(key, expirationInSeconds, userJson)
-    } else {
-      await this.redisClient.publisher.set(key, userJson)
-    }
+    const ttl = expirationInSeconds ?? UserCacheService.ONE_DAY_IN_SECONDS
+    await this.redisClient.publisher.setEx(key, ttl, userJson)
     this.logger.log(`User cache set for user ${user.id}`)
   }
 

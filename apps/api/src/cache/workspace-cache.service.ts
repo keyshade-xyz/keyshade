@@ -21,7 +21,8 @@ export class WorkspaceCacheService {
   private static readonly SUBSCRIPTION_PREFIX = 'workspace-subscription-'
   private static readonly RAW_WORKSPACE_PREFIX = 'raw-workspace-'
   private static readonly WORKSPACE_ADMIN_PREFIX = 'workspace-admin-'
-  private static readonly WORKSPACE_KEYS_PREFIX = 'workspace-keys-' // Stores all the keys associated with this workspace
+  private static readonly WORKSPACE_KEYS_PREFIX = 'workspace-keys-'
+  private static readonly ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
   private readonly logger = new Logger(WorkspaceCacheService.name)
 
@@ -37,6 +38,10 @@ export class WorkspaceCacheService {
     )
     const key = this.getWorkspaceKeysKey(workspaceId)
     await this.redisClient.publisher.sAdd(key, newKey)
+    await this.redisClient.publisher.expire(
+      key,
+      WorkspaceCacheService.ONE_DAY_IN_SECONDS
+    )
     this.logger.log(
       `Workspace key ${newKey} added to cache for workspace ${workspaceId}`
     )
@@ -106,7 +111,11 @@ export class WorkspaceCacheService {
 
     const key = this.getWorkspaceSubscriptionKey(workspaceId)
     const subscriptionJson = JSON.stringify(subscription)
-    await this.redisClient.publisher.set(key, subscriptionJson)
+    await this.redisClient.publisher.setEx(
+      key,
+      WorkspaceCacheService.ONE_DAY_IN_SECONDS,
+      subscriptionJson
+    )
     await this.addWorkspaceKey(workspaceId, key)
 
     this.logger.log(`Subscription cache set for workspace ${workspaceId}`)
@@ -163,7 +172,11 @@ export class WorkspaceCacheService {
 
     const key = this.getRawWorkspaceKey(workspaceSlug)
     const rawWorkspaceJson = JSON.stringify(rawWorkspace)
-    await this.redisClient.publisher.set(key, rawWorkspaceJson)
+    await this.redisClient.publisher.setEx(
+      key,
+      WorkspaceCacheService.ONE_DAY_IN_SECONDS,
+      rawWorkspaceJson
+    )
     await this.addWorkspaceKey(rawWorkspace.id, key)
 
     this.logger.log(`Raw workspace ${workspaceSlug} cached`)
@@ -196,7 +209,11 @@ export class WorkspaceCacheService {
     )
 
     const key = this.getWorkspaceAdminKey(workspaceId)
-    await this.redisClient.publisher.set(key, userId)
+    await this.redisClient.publisher.setEx(
+      key,
+      WorkspaceCacheService.ONE_DAY_IN_SECONDS,
+      String(userId)
+    )
     await this.addWorkspaceKey(workspaceId, key)
 
     this.logger.log(`Workspace ${workspaceId} admin set to ${userId} in cache`)
