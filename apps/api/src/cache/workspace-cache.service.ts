@@ -15,6 +15,7 @@ import { constructErrorBody } from '@/common/util'
 import { RawProject } from '@/project/project.types'
 import { RawIntegration } from '@/integration/integration.types'
 import { RawWorkspaceRole } from '@/workspace-role/workspace-role.types'
+import { CACHE_TTL_ONE_DAY } from '@/cache/constants'
 
 @Injectable()
 export class WorkspaceCacheService {
@@ -22,7 +23,6 @@ export class WorkspaceCacheService {
   private static readonly RAW_WORKSPACE_PREFIX = 'raw-workspace-'
   private static readonly WORKSPACE_ADMIN_PREFIX = 'workspace-admin-'
   private static readonly WORKSPACE_KEYS_PREFIX = 'workspace-keys-'
-  private static readonly ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
   private readonly logger = new Logger(WorkspaceCacheService.name)
 
@@ -38,10 +38,7 @@ export class WorkspaceCacheService {
     )
     const key = this.getWorkspaceKeysKey(workspaceId)
     await this.redisClient.publisher.sAdd(key, newKey)
-    await this.redisClient.publisher.expire(
-      key,
-      WorkspaceCacheService.ONE_DAY_IN_SECONDS
-    )
+    await this.redisClient.publisher.expire(key, CACHE_TTL_ONE_DAY)
     this.logger.log(
       `Workspace key ${newKey} added to cache for workspace ${workspaceId}`
     )
@@ -113,7 +110,7 @@ export class WorkspaceCacheService {
     const subscriptionJson = JSON.stringify(subscription)
     await this.redisClient.publisher.setEx(
       key,
-      WorkspaceCacheService.ONE_DAY_IN_SECONDS,
+      CACHE_TTL_ONE_DAY,
       subscriptionJson
     )
     await this.addWorkspaceKey(workspaceId, key)
@@ -174,7 +171,7 @@ export class WorkspaceCacheService {
     const rawWorkspaceJson = JSON.stringify(rawWorkspace)
     await this.redisClient.publisher.setEx(
       key,
-      WorkspaceCacheService.ONE_DAY_IN_SECONDS,
+      CACHE_TTL_ONE_DAY,
       rawWorkspaceJson
     )
     await this.addWorkspaceKey(rawWorkspace.id, key)
@@ -211,7 +208,7 @@ export class WorkspaceCacheService {
     const key = this.getWorkspaceAdminKey(workspaceId)
     await this.redisClient.publisher.setEx(
       key,
-      WorkspaceCacheService.ONE_DAY_IN_SECONDS,
+      CACHE_TTL_ONE_DAY,
       String(userId)
     )
     await this.addWorkspaceKey(workspaceId, key)

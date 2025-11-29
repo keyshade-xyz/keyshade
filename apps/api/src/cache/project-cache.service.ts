@@ -6,11 +6,11 @@ import { RawProject } from '@/project/project.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { constructErrorBody } from '@/common/util'
 import { Environment, Project, Secret, Variable } from '@prisma/client'
+import { CACHE_TTL_ONE_DAY } from '@/cache/constants'
 
 @Injectable()
 export class ProjectCacheService {
   private static readonly RAW_PROJECT_PREFIX = 'raw-project-'
-  private static readonly ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
   private readonly logger = new Logger(ProjectCacheService.name)
 
@@ -76,7 +76,7 @@ export class ProjectCacheService {
     const rawProjectJson = JSON.stringify(rawProject)
     await this.redisClient.publisher.setEx(
       key,
-      ProjectCacheService.ONE_DAY_IN_SECONDS,
+      CACHE_TTL_ONE_DAY,
       rawProjectJson
     )
 
