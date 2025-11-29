@@ -221,6 +221,7 @@ function ImportConfiguration({
   }
 
   const renderImportingStep = () => {
+    const totalEntriesCount = totalSecrets + totalVariables
     const overallIcon = importStatus.isImporting ? (
       <Loader2 className="h-5 w-5 animate-spin text-white" />
     ) : importStatus.currentStep === 'Import complete' ? (
