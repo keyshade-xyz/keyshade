@@ -58,7 +58,7 @@
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.7",
     "eccrypto": "^1.1.6",
-    "nodemailer": "^6.9.9",
+    "nodemailer": "7.0.11",
     "passport-github2": "^0.1.12",
     "passport-gitlab2": "^5.0.0",
     "passport-google-oauth20": "^2.0.0",
