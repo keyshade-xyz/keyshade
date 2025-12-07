@@ -77,7 +77,7 @@ export default class DeleteWorkspace extends BaseCommand {
       const loading = spinner()
       loading.start('Deleting workspace...')
 
-      let result = null
+      let result: { success: boolean; error: string } | null = null
 
       try {
         const { success, error } =
@@ -87,7 +87,7 @@ export default class DeleteWorkspace extends BaseCommand {
             },
             this.headers
           )
-        result = { success, error }
+        result = { success, error: error.message }
       } finally {
         loading.stop()
         clearSpinnerLines()
@@ -96,7 +96,7 @@ export default class DeleteWorkspace extends BaseCommand {
       if (result.success) {
         await showSuccess(`✅ Workspace ${workspaceSlug} deleted successfully!`)
       } else {
-        await showError(`❌ Failed to delete workspace ${workspaceSlug}!`)
+        await showError(`❌ ${result.error}`)
       }
     }
   }
