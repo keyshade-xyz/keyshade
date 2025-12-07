@@ -1,3 +1,36 @@
+## [2.47.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.46.1-stage.2...v2.47.0-stage.1) (2025-12-07)
+
+### 🚀 Features
+
+* **cache:** add 1-day expiry to all cache entries ([#1244](https://github.com/keyshade-xyz/keyshade/issues/1244)) ([#1257](https://github.com/keyshade-xyz/keyshade/issues/1257)) ([d7210ee](https://github.com/keyshade-xyz/keyshade/commit/d7210ee1dfd518b6e877e083f2ca68ca71aca3f3))
+
+## [2.46.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.46.1-stage.1...v2.46.1-stage.2) (2025-12-07)
+
+### 🐛 Bug Fixes
+
+* improving platform import batching ([#1228](https://github.com/keyshade-xyz/keyshade/issues/1228)) ([508a3dc](https://github.com/keyshade-xyz/keyshade/commit/508a3dc8b4b3da5d784338a70d73bb30f843f963))
+
+## [2.46.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.46.0...v2.46.1-stage.1) (2025-12-07)
+
+### 🐛 Bug Fixes
+
+* **api:** discord webhook url validation ([#1261](https://github.com/keyshade-xyz/keyshade/issues/1261)) ([ecd10c4](https://github.com/keyshade-xyz/keyshade/commit/ecd10c45cb57223f0a7b2f90be52ef4a1064bfc3))
+
+### 📚 Documentation
+
+* update [secure] docs ([4d10343](https://github.com/keyshade-xyz/keyshade/commit/4d10343e8116e193dee9411dc52e00b1f0aea18a))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** update nodemailer ([63b18df](https://github.com/keyshade-xyz/keyshade/commit/63b18df7a27cd1c8b832ba4b96b7fb1dbf3d783c))
+* **cli:** update package managers to use v3.7.0 [skip ci] ([48e6f10](https://github.com/keyshade-xyz/keyshade/commit/48e6f106a5bd6c4939a927082c765059b0f83178))
+* **cli:** update package managers to use v3.7.0 [skip ci] ([b8283e1](https://github.com/keyshade-xyz/keyshade/commit/b8283e1fb4bfa0f39ce517d1ed5f39d677bf8a38))
+* **deps:** bump axios from 1.7.9 to 1.13.2 in /apps/api ([#1248](https://github.com/keyshade-xyz/keyshade/issues/1248)) ([2037700](https://github.com/keyshade-xyz/keyshade/commit/20377003592b83ac7d22f78cd0e12daa37272d03))
+* **deps:** bump glob in /apps/api ([#1241](https://github.com/keyshade-xyz/keyshade/issues/1241)) ([1a8c907](https://github.com/keyshade-xyz/keyshade/commit/1a8c907ba8c6f9a379ab30b2955e30dc6e8f514e))
+* **deps:** bump next from 15.2.3 to 15.4.8 in /apps/web ([#1259](https://github.com/keyshade-xyz/keyshade/issues/1259)) ([cb53d1a](https://github.com/keyshade-xyz/keyshade/commit/cb53d1af396b1d2ff29706ec9b2c3bb31873479a))
+* **deps:** bump next from 15.4.7 to 15.4.8 ([#1260](https://github.com/keyshade-xyz/keyshade/issues/1260)) ([280066a](https://github.com/keyshade-xyz/keyshade/commit/280066a60276a5706635cc35762d16afb5f2d3b0))
+* **web, platform:** update eslint rules ([d1af51d](https://github.com/keyshade-xyz/keyshade/commit/d1af51d05d686dd316fd13959c6cf2b0cc9748ae))
+
 ## [2.46.0](https://github.com/keyshade-xyz/keyshade/compare/v2.45.0...v2.46.0) (2025-11-21)
 
 ### 🚀 Features
