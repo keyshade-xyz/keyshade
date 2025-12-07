@@ -14,6 +14,36 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody, makeTimedRequest } from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 
+
+/**
+ * Validate that a webhook URL matches the Discord webhook pattern.
+ * @param url - The webhook URL to validate.
+ * @returns true if valid Discord webhook; false otherwise.
+ */
+function isValidDiscordWebhookUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    // Accept only discord.com or discordapp.com, path must be /api/webhooks/...
+    const allowedHosts = ['discord.com', 'discordapp.com'];
+    if (!allowedHosts.includes(parsed.hostname)) {
+      return false;
+    }
+    if (!parsed.pathname.startsWith('/api/webhooks/')) {
+      return false;
+    }
+    if (parsed.protocol !== 'https:') {
+      return false;
+    }
+    // Prevent basic SSRF bypass
+    if (parsed.username || parsed.password) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 const DISCORD_INIT_MESSAGE = {
   content: '🥁 Keyshade is now configured with this channel',
   embeds: [
@@ -164,6 +194,15 @@ export class DiscordIntegration extends BaseIntegration {
 
     const integration = this.getIntegration<DiscordIntegrationMetadata>()
 
+    if (!isValidDiscordWebhookUrl(integration.metadata.webhookUrl)) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid Discord webhook URL',
+          'The provided webhook URL does not match Discord\'s official pattern and cannot be used.'
+        )
+      )
+    }
+
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId: data.event.id,
       integrationId: integration.id,
@@ -223,6 +262,15 @@ export class DiscordIntegration extends BaseIntegration {
    */
   public async validateConfiguration(metadata: DiscordIntegrationMetadata) {
     this.logger.log(`Validating Discord webhook URL: ${metadata.webhookUrl}`)
+
+    if (!isValidDiscordWebhookUrl(metadata.webhookUrl)) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid Discord webhook URL',
+          'The provided webhook URL does not match Discord\'s official pattern and cannot be used.'
+        )
+      )
+    }
 
     const { response, duration } = await makeTimedRequest(() =>
       fetch(metadata.webhookUrl, {
