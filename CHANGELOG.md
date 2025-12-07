@@ -1,3 +1,9 @@
+## [2.46.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.46.1-stage.1...v2.46.1-stage.2) (2025-12-07)
+
+### 🐛 Bug Fixes
+
+* improving platform import batching ([#1228](https://github.com/keyshade-xyz/keyshade/issues/1228)) ([508a3dc](https://github.com/keyshade-xyz/keyshade/commit/508a3dc8b4b3da5d784338a70d73bb30f843f963))
+
 ## [2.46.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.46.0...v2.46.1-stage.1) (2025-12-07)
 
 ### 🐛 Bug Fixes
