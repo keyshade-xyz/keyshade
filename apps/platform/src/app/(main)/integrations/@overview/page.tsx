@@ -3,7 +3,7 @@ import IntegrationServices from '@/components/integrations/integrationServices'
 
 function AllAvailableIntegrations() {
   return (
-    <div className="flex flex-col gap-y-10">
+    <div className="flex flex-col gap-y-10 mt-6">
       <div className="flex flex-col gap-y-8 ">
         <div>
           <h1 className="text-[1.75rem] font-semibold ">

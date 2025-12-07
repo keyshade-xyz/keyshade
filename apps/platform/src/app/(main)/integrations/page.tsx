@@ -6,6 +6,7 @@ import IntegrationsPage from './@created/page'
 import AllAvailableIntegrations from './@overview/page'
 import { PageTitle } from '@/components/common/page-title'
 import { selectedWorkspaceAtom } from '@/store'
+import LineTabController from '@/components/shared/navbar/line-tab-controller'
 
 function DetailedIntegrationPage(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -16,6 +17,7 @@ function DetailedIntegrationPage(): React.JSX.Element {
   return (
     <main>
       <PageTitle title={`${selectedWorkspace?.name} | Integrations`} />
+      <LineTabController />
       {tab === 'overview' && <AllAvailableIntegrations />}
       {tab === 'all' && <IntegrationsPage />}
     </main>
