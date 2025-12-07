@@ -5,7 +5,7 @@ import {
   SettingsSVG
 } from '@public/svg/dashboard'
 
-export const TAB_CONFIGS = {
+export const TAB_CONFIGS: Record<string, { id: string; label: string; icon?: React.ReactNode}[]> = {
   settings: [
     { id: 'profile', label: 'Profile' },
     // { id: 'billing', label: 'Billing' },
@@ -24,6 +24,6 @@ export const TAB_CONFIGS = {
   ],
   integrations: [
     { id: 'overview', label: 'Overview' },
-    { id: 'all', label: 'All Integrations', route: 'all' }
+    { id: 'all', label: 'All Integrations' }
   ]
 }
