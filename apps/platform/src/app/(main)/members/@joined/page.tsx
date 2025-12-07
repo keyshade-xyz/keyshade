@@ -14,18 +14,6 @@ import {
   TableRow
 } from '@/components/ui/table'
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle
-} from "@/components/ui/empty"
-import {
   editMemberOpenAtom,
   removeMemberOpenAtom,
   selectedMemberAtom,
@@ -35,6 +23,7 @@ import {
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import MemberRow from '@/components/members/memberRow'
+import EmptyMembersState from '@/components/members/emptyMembersState'
 
 export default function JoinedMembersTable(): React.JSX.Element {
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
@@ -117,7 +106,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full mt-6">
       <div className="w-full">
         <Table className="overflow-hidden rounded-3xl bg-[#1D1D20]">
           <TableHeader>
@@ -137,7 +126,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
           <TableBody>
             <InfiniteScrollList
               className="contents w-full [&>div]:contents"
-              emptyComponent={<EmptyComponent />}
+              emptyComponent={<EmptyMembersState />}
               fetchFunction={fetchMembers}
               inTable
               itemComponent={renderMemberRow}
@@ -159,40 +148,5 @@ export default function JoinedMembersTable(): React.JSX.Element {
       {/* Edit member dialog */}
       {isEditMemberOpen && selectedMember ? <EditMemberDialog /> : null}
     </div>
-  )
-}
-
-function EmptyComponent() {
-  return (
-    <Empty>
-      <EmptyHeader>
-        <EmptyMedia>
-          <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:size-12 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
-            <Avatar>
-              <AvatarImage alt="@shadcn" src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <Avatar>
-              <AvatarImage
-                alt="@maxleiter"
-                src="https://github.com/maxleiter.png"
-              />
-              <AvatarFallback>LR</AvatarFallback>
-            </Avatar>
-            <Avatar>
-              <AvatarImage
-                alt="@evilrabbit"
-                src="https://github.com/evilrabbit.png"
-              />
-              <AvatarFallback>ER</AvatarFallback>
-            </Avatar>
-          </div>
-        </EmptyMedia>
-        <EmptyTitle>No Team Members</EmptyTitle>
-        <EmptyDescription>
-          Invite your team to collaborate on this project.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
   )
 }
