@@ -313,3 +313,7 @@ export function useSetupIntegration(
     handlers
   }
 }
+
+// TODO: Implement getVercelEnvironments API call
+// Issue #1144 - Fetch vercel environments using endpoint
+// This line is just for a draft PR, will be removed later
