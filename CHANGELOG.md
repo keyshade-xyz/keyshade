@@ -1,3 +1,9 @@
+## [2.47.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.46.1-stage.2...v2.47.0-stage.1) (2025-12-07)
+
+### 🚀 Features
+
+* **cache:** add 1-day expiry to all cache entries ([#1244](https://github.com/keyshade-xyz/keyshade/issues/1244)) ([#1257](https://github.com/keyshade-xyz/keyshade/issues/1257)) ([d7210ee](https://github.com/keyshade-xyz/keyshade/commit/d7210ee1dfd518b6e877e083f2ca68ca71aca3f3))
+
 ## [2.46.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.46.1-stage.1...v2.46.1-stage.2) (2025-12-07)
 
 ### 🐛 Bug Fixes
