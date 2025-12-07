@@ -11,7 +11,7 @@ import {
   showError,
   showSuccess
 } from '@/util/prompt'
-import { confirm, note, spinner } from '@clack/prompts'
+import { note, spinner, text } from '@clack/prompts'
 
 export default class DeleteWorkspace extends BaseCommand {
   getName(): string {
@@ -61,14 +61,19 @@ export default class DeleteWorkspace extends BaseCommand {
         'You are about to delete this workspace. This action will:'
       )
 
-      const shouldContinue = await confirm({
-        message: 'Are you sure you want to delete this workspace?',
-        initialValue: false
+      const confirmation = await text({
+        message: `To confirm, please type the workspace slug "${workspaceSlug}"`,
+        validate(value) {
+          if (value !== workspaceSlug) {
+            return 'The entered value does not match the workspace slug'
+          }
+          return ''
+        }
       })
 
-      handleSIGINT(shouldContinue, 'Workspace deletion cancelled!')
+      handleSIGINT(confirmation, 'Workspace deletion cancelled!')
 
-      shouldContinueRemove = shouldContinue === true
+      shouldContinueRemove = confirmation === workspaceSlug
     } else {
       shouldContinueRemove = true
     }
