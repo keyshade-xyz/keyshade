@@ -14,7 +14,6 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody, makeTimedRequest } from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 
-
 /**
  * Validate that a webhook URL matches the Discord webhook pattern.
  * @param url - The webhook URL to validate.
@@ -22,25 +21,22 @@ import { BadRequestException } from '@nestjs/common'
  */
 function isValidDiscordWebhookUrl(url: string): boolean {
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(url)
     // Accept only discord.com or discordapp.com, path must be /api/webhooks/...
-    const allowedHosts = ['discord.com', 'discordapp.com'];
+    const allowedHosts = ['discord.com', 'discordapp.com']
     if (!allowedHosts.includes(parsed.hostname)) {
-      return false;
+      return false
     }
     if (!parsed.pathname.startsWith('/api/webhooks/')) {
-      return false;
+      return false
     }
     if (parsed.protocol !== 'https:') {
-      return false;
+      return false
     }
     // Prevent basic SSRF bypass
-    if (parsed.username || parsed.password) {
-      return false;
-    }
-    return true;
+    return !(parsed.username || parsed.password)
   } catch (e) {
-    return false;
+    return false
   }
 }
 
@@ -198,7 +194,7 @@ export class DiscordIntegration extends BaseIntegration {
       throw new BadRequestException(
         constructErrorBody(
           'Invalid Discord webhook URL',
-          'The provided webhook URL does not match Discord\'s official pattern and cannot be used.'
+          "The provided webhook URL does not match Discord's official pattern and cannot be used."
         )
       )
     }
@@ -267,7 +263,7 @@ export class DiscordIntegration extends BaseIntegration {
       throw new BadRequestException(
         constructErrorBody(
           'Invalid Discord webhook URL',
-          'The provided webhook URL does not match Discord\'s official pattern and cannot be used.'
+          "The provided webhook URL does not match Discord's official pattern and cannot be used."
         )
       )
     }
