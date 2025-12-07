@@ -112,7 +112,7 @@ describe('Integration Controller Tests', () => {
   let getEnvMock: jest.Mock
 
   const USER_IP_ADDRESS = '127.0.0.1'
-  const DUMMY_WEBHOOK_URL = 'https://dummy-webhook-url.com'
+  const DUMMY_WEBHOOK_URL = 'https://discord.com/api/webhooks/some/hash'
 
   const createDummyDiscordWebhookUrlInterceptor = () => {
     const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
