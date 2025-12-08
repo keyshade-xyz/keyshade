@@ -7,12 +7,8 @@ import type {
   CommandArgument,
   CommandOption
 } from '@/types/command/command.types'
-import {
-  fetchPrivateKey,
-  fetchProjectRootConfig,
-  fetchProjectRootConfigFromPath
-} from '@/util/configuration'
-import type { ProjectRootConfig } from '@/types/index.types'
+import { fetchPrivateKey } from '@/util/configuration'
+import { ConfigurationManager } from '@/util/enhanced-configuration'
 import type {
   ClientRegisteredResponse,
   Configuration,
@@ -70,7 +66,28 @@ export default class RunCommand extends BaseCommand {
       {
         short: '-f',
         long: '--config-file <path>',
-        description: 'Path to config file (default: keyshade.json)'
+        description:
+          'Path to config file (supports multiple, default: auto-discover keyshade.json)'
+      },
+      {
+        short: '-P',
+        long: '--profile <name>',
+        description: 'Profile to use from configuration file'
+      },
+      {
+        short: '-n',
+        long: '--no-interactive',
+        description: 'Run in non-interactive mode (error on missing config)'
+      },
+      {
+        short: '-d',
+        long: '--dry-run',
+        description: 'Show resolved configuration without executing the command'
+      },
+      {
+        short: '-D',
+        long: '--debug-config',
+        description: 'Show detailed configuration debug information'
       }
     ]
   }
@@ -90,7 +107,11 @@ export default class RunCommand extends BaseCommand {
       workspace: options.workspace,
       project: options.project,
       environment: options.environment,
-      configFile: options.configFile
+      configFile: options.configFile,
+      profile: options.profile,
+      noInteractive: options.noInteractive,
+      dryRun: options.dryRun,
+      debugConfig: options.debugConfig
     })
 
     await this.connectToSocket(configurations)
@@ -110,38 +131,66 @@ export default class RunCommand extends BaseCommand {
       project?: string
       environment?: string
       configFile?: string
+      profile?: string
+      noInteractive?: boolean
+      dryRun?: boolean
+      debugConfig?: boolean
     } = {}
   ): Promise<RunData> {
-    // Step 1: Load base configuration from file
-    let baseConfig: ProjectRootConfig
+    // Use the enhanced configuration manager
+    const configFiles = options.configFile
+      ? Array.isArray(options.configFile)
+        ? options.configFile
+        : [options.configFile]
+      : undefined
 
-    if (options.configFile) {
-      // Use custom config file if specified
-      baseConfig = await fetchProjectRootConfigFromPath(options.configFile)
-    } else {
-      // Use default keyshade.json
-      baseConfig = await fetchProjectRootConfig()
+    const manager = new ConfigurationManager({
+      workspace: options.workspace,
+      project: options.project,
+      environment: options.environment,
+      configFiles,
+      profile: options.profile,
+      noInteractive: options.noInteractive,
+      dryRun: options.dryRun,
+      debugConfig: options.debugConfig
+    })
+
+    const resolvedConfig = await manager.resolveConfiguration()
+
+    // Handle dry-run mode
+    if (options.dryRun) {
+      console.log('\n=== Dry Run Mode - Resolved Configuration ===')
+      console.log(`Workspace: ${resolvedConfig.workspace}`)
+      console.log(`Project: ${resolvedConfig.project}`)
+      console.log(`Environment: ${resolvedConfig.environment}`)
+      console.log(
+        `Quit on Decryption Failure: ${resolvedConfig.quitOnDecryptionFailure}`
+      )
+
+      if (resolvedConfig.sources.length > 0) {
+        console.log('\nConfiguration Sources:')
+        resolvedConfig.sources.forEach((source, index) => {
+          console.log(`  ${index + 1}. ${source.source}: ${source.path}`)
+        })
+      }
+      console.log('============================================\n')
+      process.exit(0)
     }
 
-    // Step 2: Override with flags (highest precedence)
-    const finalConfig = {
-      workspace: options.workspace ?? baseConfig.workspace,
-      project: options.project ?? baseConfig.project,
-      environment: options.environment ?? baseConfig.environment,
-      quitOnDecryptionFailure: baseConfig.quitOnDecryptionFailure
-    }
-
-    // Step 3: Fetch private key for the project
-    const privateKey = await fetchPrivateKey(finalConfig.project)
+    // Fetch private key for the project
+    const privateKey = await fetchPrivateKey(resolvedConfig.project)
 
     if (!privateKey) {
       throw new Error(
-        `Private key not found for project '${finalConfig.project}'. Please run 'keyshade init' or 'keyshade config private-key add' to add a private key.`
+        `Private key not found for project '${resolvedConfig.project}'. Please run 'keyshade init' or 'keyshade config private-key add' to add a private key.`
       )
     }
 
     return {
-      ...finalConfig,
+      workspace: resolvedConfig.workspace,
+      project: resolvedConfig.project,
+      environment: resolvedConfig.environment,
+      quitOnDecryptionFailure: resolvedConfig.quitOnDecryptionFailure,
       privateKey
     }
   }
