@@ -438,3 +438,9 @@
 ### Minor Changes
 
 - `keyshade run` now accepts all configurations via flags
+
+## 3.8.0-stage.1
+
+### Minor Changes
+
+- Added a confirmation prompt to the `workspace delete` command, displaying a list of consequences before proceeding with deletion.
