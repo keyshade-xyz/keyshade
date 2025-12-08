@@ -5,7 +5,7 @@ import {
   SettingsSVG
 } from '@public/svg/dashboard'
 
-export const TAB_CONFIGS = {
+export const TAB_CONFIGS: Record<string, { id: string; label: string; icon?: React.ReactNode; route?: string }[]> = {
   settings: [
     { id: 'profile', label: 'Profile' },
     // { id: 'billing', label: 'Billing' },

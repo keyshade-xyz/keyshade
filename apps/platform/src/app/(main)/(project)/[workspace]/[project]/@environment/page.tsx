@@ -16,7 +16,7 @@ import EditEnvironmentDialogue from '@/components/dashboard/environment/editEnvi
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { ENVIRONMENTS_PAGE_SIZE } from '@/lib/constants'
-import { EnvironmentLoader } from '@/components/dashboard/environment/environmentLoader'
+import EnvironmentLoader from '@/components/dashboard/environment/environmentLoader'
 import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import { cn } from '@/lib/utils'
@@ -121,10 +121,10 @@ function EnvironmentPage(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <EnvironmentLoader />
-        <EnvironmentLoader />
-        <EnvironmentLoader />
-      </div>
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+              </div>
     )
   }
 
@@ -180,6 +180,11 @@ function EnvironmentPage(): React.JSX.Element {
               }
               itemKey={(item) => item.id}
               itemsPerPage={10}
+              loadingComponent={<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+              </div>}
             />
 
             {/* Delete environment alert dialog */}

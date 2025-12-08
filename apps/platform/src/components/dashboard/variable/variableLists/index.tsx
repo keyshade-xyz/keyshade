@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { useHighlight } from '@/hooks/use-highlight'
 import ProjectErrorCard from '@/components/shared/project-error-card'
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
+import VariableLoader from '@/components/dashboard/variable/variableLoader'
 
 export default function VariableList(): React.JSX.Element {
   const searchParams = useSearchParams()
@@ -167,6 +168,11 @@ export default function VariableList(): React.JSX.Element {
             itemKey={(variableData) => variableData.id}
             itemsPerPage={10}
             key={refetchTrigger}
+            loadingComponent={<div className="flex h-fit w-full flex-col gap-4">
+              <VariableLoader />
+              <VariableLoader />
+              <VariableLoader />
+              </div>}
           />
         </Accordion>
       </div>
