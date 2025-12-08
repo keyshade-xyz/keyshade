@@ -45,7 +45,7 @@ describe('VercelIntegration - environment handlers', () => {
     }
 
     // Inject mock client
-    // @ts-ignore
+    // @ts-expect-error
     instance.vercel = mockVercel
 
     await instance.emitEvent({ event: { id: 'evt-1', itemId: 'env-1', metadata: '{}' }, eventType: EventType.ENVIRONMENT_DELETED } as any)
@@ -100,7 +100,7 @@ describe('VercelIntegration - environment handlers', () => {
     }
 
     // Inject mock client
-    // @ts-ignore
+    // @ts-expect-error
     instance.vercel = mockVercel
 
     const eventMeta = encryptMetadata({ name: 'new-dev-name' } as any)
