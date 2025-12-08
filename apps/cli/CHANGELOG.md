@@ -439,7 +439,7 @@
 
 - `keyshade run` now accepts all configurations via flags
 
-## 3.8.0
+## 3.8.0-stage.1
 
 ### Minor Changes
 
