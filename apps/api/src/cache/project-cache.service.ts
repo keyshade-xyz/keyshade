@@ -6,6 +6,7 @@ import { RawProject } from '@/project/project.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { constructErrorBody } from '@/common/util'
 import { Environment, Project, Secret, Variable } from '@prisma/client'
+import { CACHE_TTL_ONE_DAY } from '@/cache/constants'
 
 @Injectable()
 export class ProjectCacheService {
@@ -73,7 +74,11 @@ export class ProjectCacheService {
 
     const key = this.getRawProjectKey(projectSlug)
     const rawProjectJson = JSON.stringify(rawProject)
-    await this.redisClient.publisher.set(key, rawProjectJson)
+    await this.redisClient.publisher.setEx(
+      key,
+      CACHE_TTL_ONE_DAY,
+      rawProjectJson
+    )
 
     this.logger.log(`Raw project ${projectSlug} cached`)
   }

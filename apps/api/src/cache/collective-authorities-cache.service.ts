@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { Authority, Project, User, Workspace } from '@prisma/client'
+import { CACHE_TTL_ONE_DAY } from '@/cache/constants'
 
 @Injectable()
 export class CollectiveAuthoritiesCacheService {
@@ -25,6 +26,7 @@ export class CollectiveAuthoritiesCacheService {
   ): Promise<void> {
     const key = this.getWorkspaceCollectiveAuthorityKeysKey(workspaceId)
     await this.redisClient.publisher.sAdd(key, newKey)
+    await this.redisClient.publisher.expire(key, CACHE_TTL_ONE_DAY)
   }
 
   async removeWorkspaceCollectiveAuthorityCache(
@@ -66,6 +68,7 @@ export class CollectiveAuthoritiesCacheService {
     const values = Array.from(authorities ?? []).map((a) => String(a))
     if (values.length > 0) {
       await this.redisClient.publisher.sAdd(key, values)
+      await this.redisClient.publisher.expire(key, CACHE_TTL_ONE_DAY)
     } else {
       this.logger.log(
         `No authorities provided for user ${userId} in workspace ${workspaceId}`
@@ -103,6 +106,7 @@ export class CollectiveAuthoritiesCacheService {
     const values = Array.from(authorities ?? []).map((a) => String(a))
     if (values.length > 0) {
       await this.redisClient.publisher.sAdd(key, values)
+      await this.redisClient.publisher.expire(key, CACHE_TTL_ONE_DAY)
     } else {
       this.logger.log(
         `No authorities provided for user ${userId} in project ${projectId}`

@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { UserWithWorkspace } from '@/user/user.types'
+import { CACHE_TTL_ONE_DAY } from '@/cache/constants'
 
 @Injectable()
 export class UserCacheService {
@@ -21,11 +22,8 @@ export class UserCacheService {
     this.logger.log(`Setting user cache for user ${user.id}`)
     const key = this.getUserKey(user.id)
     const userJson = JSON.stringify(user)
-    if (expirationInSeconds) {
-      await this.redisClient.publisher.setEx(key, expirationInSeconds, userJson)
-    } else {
-      await this.redisClient.publisher.set(key, userJson)
-    }
+    const ttl = expirationInSeconds ?? CACHE_TTL_ONE_DAY
+    await this.redisClient.publisher.setEx(key, ttl, userJson)
     this.logger.log(`User cache set for user ${user.id}`)
   }
 
