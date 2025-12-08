@@ -20,9 +20,9 @@ import {
 import {
   constructErrorBody,
   decryptMetadata,
-  makeTimedRequest
+  makeTimedRequest,
+  retryWithBackoff
 } from '@/common/util'
-import { encryptMetadata, retryWithBackoff } from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
 import {
@@ -46,7 +46,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       EventType.VARIABLE_ADDED,
       EventType.VARIABLE_UPDATED,
       EventType.VARIABLE_DELETED,
-      EventType.ENVIRONMENT_UPDATED,
+
       EventType.ENVIRONMENT_DELETED
     ])
   }
@@ -90,7 +90,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: (integration as any).id,
+      integrationId: integration.id,
       title: 'Adding KS_PRIVATE_KEY to Lambda function'
     })
 
@@ -146,10 +146,6 @@ export class AWSLambdaIntegration extends BaseIntegration {
         await this.handleEnvironmentDeleted(data)
         break
 
-      case EventType.ENVIRONMENT_UPDATED:
-        await this.handleEnvironmentUpdated(data)
-        break
-
       default:
         this.logger.warn(
           `Event type ${data.eventType} not supported for AWS Lambda integration.`
@@ -182,7 +178,9 @@ export class AWSLambdaIntegration extends BaseIntegration {
 
     try {
       // Fetch variable and secret names that belong to this environment
-      const variableVersions = await (this as any).prisma.variableVersion.findMany({
+      const variableVersions = await (
+        this as any
+      ).prisma.variableVersion.findMany({
         where: { environmentId },
         distinct: ['variableId'],
         include: { variable: true }
@@ -199,9 +197,10 @@ export class AWSLambdaIntegration extends BaseIntegration {
       secretVersions.forEach((s) => keysToRemove.add(s.secret.name))
 
       // Fetch existing env vars from Lambda
-      const { existingEnvironmentalValues } = await this.getAllEnvironmentalValues(
-        integration.metadata.lambdaFunctionName
-      )
+      const { existingEnvironmentalValues } =
+        await this.getAllEnvironmentalValues(
+          integration.metadata.lambdaFunctionName
+        )
 
       let changed = false
       for (const key of Array.from(keysToRemove)) {
@@ -230,32 +229,9 @@ export class AWSLambdaIntegration extends BaseIntegration {
         integrationRunId,
         IntegrationRunStatus.SUCCESS,
         0,
-        ''
+        'Environment deleted from Lambda function'
       )
-    } catch (err) {
-      this.logger.error(`Failed cleaning up Lambda environment: ${err}`)
-
-      // Persist pending cleanup in metadata
-      try {
-        const metadata = integration.metadata
-        metadata.pendingCleanup = (metadata.pendingCleanup as any[]) || []
-        ;(metadata.pendingCleanup as any[]).push({
-          environmentId,
-          action: 'ENVIRONMENT_DELETED',
-          error: err instanceof Error ? err.message : String(err),
-          attempts: 3,
-          createdAt: new Date().toISOString()
-        })
-        await (this as any).prisma.integration.update({
-          where: { id: (integration as any).id },
-          data: { metadata: encryptMetadata(metadata as any) }
-        })
-      } catch (persistErr) {
-        this.logger.error(
-          `Failed to persist pending cleanup for ${(integration as any).id}: ${persistErr}`
-        )
-      }
-
+    } catch (err: any) {
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.FAILED,
