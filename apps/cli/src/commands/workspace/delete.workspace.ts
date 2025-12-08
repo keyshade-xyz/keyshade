@@ -5,6 +5,7 @@ import {
   type CommandArgument
 } from '@/types/command/command.types'
 import ControllerInstance from '@/util/controller-instance'
+import { extractErrorMessage } from '@/util/error'
 import {
   clearSpinnerLines,
   handleSIGINT,
@@ -92,7 +93,7 @@ export default class DeleteWorkspace extends BaseCommand {
             },
             this.headers
           )
-        result = { success, error: error.message }
+        result = { success, error: extractErrorMessage(error.message) }
       } finally {
         loading.stop()
         clearSpinnerLines()
