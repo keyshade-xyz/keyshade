@@ -66,7 +66,7 @@ function SettingsPage(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-full w-full gap-4 pt-2">
+    <div className="flex h-fit w-full gap-4 pt-2">
       <PageTitle title={`${selectedProject.name} | Overview`} />
       <div className="flex h-full w-[55%] flex-col gap-4 overflow-y-auto">
         {/* Basic project details eg:name , des... */}
@@ -79,8 +79,8 @@ function SettingsPage(): React.JSX.Element {
           projectSlug={selectedProject.slug}
         />
       </div>
-      <div className="flex h-full w-[45%] flex-col gap-4 overflow-y-auto">
-        <div className="flex h-fit w-full flex-col gap-3 rounded-2xl bg-white/5 p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.06),0px_1px_3px_rgba(16,24,40,0.1)]">
+      <div className="grid h-auto w-[45%] gap-4 overflow-y-auto">
+        <div className="flex h-full w-full flex-col gap-3 rounded-2xl bg-white/5 p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.06),0px_1px_3px_rgba(16,24,40,0.1)]">
           <div className="flex items-center gap-x-2 border-b border-white/20 pb-5">
             <LockSVG />
             <p className="text-lg font-bold">Security Settings</p>

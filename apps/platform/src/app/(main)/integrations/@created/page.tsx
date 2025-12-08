@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 
 function IntegrationsPage(): React.JSX.Element {
   return (
-    <div className="flex flex-col gap-y-10">
+    <div className="flex flex-col gap-y-10 mt-6">
       <div className="flex w-full justify-between">
         <div>
           <h1 className="text-[1.75rem] font-semibold ">All Integrations</h1>
@@ -18,7 +18,7 @@ function IntegrationsPage(): React.JSX.Element {
 
         <div className="flex items-center gap-3">
           <Link href="/integrations?tab=overview">
-            <Button className="flex gap-2 text-white" variant="default">
+            <Button className="flex gap-2 text-white" variant="primary">
               <Plus />
               Add Integration
             </Button>

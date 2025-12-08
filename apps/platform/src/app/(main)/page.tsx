@@ -22,6 +22,7 @@ import ProjectLoader from '@/components/main/ProjectLoader'
 import ProjectEmpty from '@/components/main/ProjectEmpty'
 import Visible from '@/components/common/visible'
 import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
+import EmptyProjectsState from '@/components/main/emptyProjectState'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -66,6 +67,7 @@ export default function Index(): React.JSX.Element {
         <ProjectEmpty isEmpty={isProjectsEmpty}>
           <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
             className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
+            emptyComponent={<EmptyProjectsState />}
             fetchFunction={fetchProjects}
             itemComponent={ProjectItemComponent}
             itemKey={(item) => item.id}

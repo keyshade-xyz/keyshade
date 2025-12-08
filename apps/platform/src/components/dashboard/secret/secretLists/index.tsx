@@ -4,6 +4,7 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { useSearchParams } from 'next/navigation'
 import type { Secret } from '@keyshade/schema'
 import EmptySecretListContent from '../emptySecretListSection'
+import SecretLoader from '../secretLoader'
 import { Accordion } from '@/components/ui/accordion'
 import {
   createSecretOpenAtom,
@@ -173,6 +174,11 @@ export default function SecretList({
             itemKey={(secretData) => secretData.id}
             itemsPerPage={10}
             key={refetchTrigger}
+            loadingComponent={<div className="flex h-fit w-full flex-col gap-4">
+              <SecretLoader />
+              <SecretLoader />
+              <SecretLoader />
+            </div>}
           />
         </Accordion>
       </div>

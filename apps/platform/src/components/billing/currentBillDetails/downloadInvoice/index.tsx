@@ -8,7 +8,7 @@ import type {
 } from '@keyshade/schema'
 import { DownloadSVG, MoneySend } from '@public/svg/badges'
 import PlanNameBadge from '../../planNameBadge'
-import TabelLoader from './tabel-loader'
+import TableLoader from '@/components/common/table-loader'
 import {
   Table,
   TableBody,
@@ -205,7 +205,7 @@ export default function DownloadInvoice({
           </TableHeader>
           <TableBody>
             <Visible if={isLoading}>
-              <TabelLoader />
+              <TableLoader />
             </Visible>
             <Visible if={!isLoading && invoices?.length === 0}>
               <TableRow>
