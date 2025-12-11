@@ -78,7 +78,7 @@ type WorkspaceMemberHydrationParams = RootHydrationParams & {
 
 type ProjectHydrationParams = RootHydrationParams & {
   project: RawProject
-  authorizationService: AuthorizationService
+  authorizationService?: AuthorizationService
 }
 
 type WorkspaceHydrationParams = RootHydrationParams & {
@@ -513,11 +513,17 @@ export class HydrationService {
     )
 
     const tierLimits = await this.computeProjectLimits(project)
-    const projectResources = await this.countAuthorizedProjectResources(
-      project,
-      user,
-      authorizationService
-    )
+    const projectResources = authorizationService
+      ? await this.countAuthorizedProjectResources(
+          project,
+          user,
+          authorizationService
+        )
+      : {
+          secrets: 0,
+          variables: 0,
+          environments: 0
+        }
 
     delete project.environments
     delete project.variables
