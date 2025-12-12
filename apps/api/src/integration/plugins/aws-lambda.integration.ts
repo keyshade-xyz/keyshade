@@ -46,7 +46,6 @@ export class AWSLambdaIntegration extends BaseIntegration {
       EventType.VARIABLE_ADDED,
       EventType.VARIABLE_UPDATED,
       EventType.VARIABLE_DELETED,
-
       EventType.ENVIRONMENT_DELETED
     ])
   }
