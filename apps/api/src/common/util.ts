@@ -168,6 +168,30 @@ export const makeTimedRequest = async <T>(
 }
 
 /**
+ * Retry a promise-returning function with exponential backoff.
+ * @param fn function that returns a Promise
+ * @param attempts max attempts (default 3)
+ * @param baseDelay base delay in ms (default 500)
+ */
+export const retryWithBackoff = async <T>(
+  fn: () => Promise<T>,
+  attempts = 3,
+  baseDelay = 500
+): Promise<T> => {
+  let attempt = 0
+  while (true) {
+    try {
+      return await fn()
+    } catch (err) {
+      attempt++
+      if (attempt >= attempts) throw err
+      const delay = baseDelay * Math.pow(2, attempt - 1)
+      await new Promise((res) => setTimeout(res, delay))
+    }
+  }
+}
+
+/**
  * Encrypts the given metadata.
  *
  * This function serializes the metadata into a JSON string and then encrypts it.
