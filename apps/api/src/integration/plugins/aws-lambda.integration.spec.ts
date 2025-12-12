@@ -61,7 +61,7 @@ describe('AWSLambdaIntegration - environment handlers', () => {
     })
 
     // Inject mock lambda client
-    // @ts-ignore
+    // @ts-expect-error - Assigning mock object for testing purposes
     integrationInstance.lambda = { send: sendMock }
 
     await integrationInstance.emitEvent({
@@ -117,7 +117,7 @@ describe('AWSLambdaIntegration - environment handlers', () => {
     instance.setIntegration(integration2 as any)
 
     const sendMock = jest.fn()
-    // @ts-ignore
+    // @ts-expect-error - Assigning mock object for testing purposes
     instance.lambda = { send: sendMock }
 
     const eventMeta = encryptMetadata({ name: 'new-name' } as any)
