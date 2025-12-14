@@ -57,6 +57,15 @@ These are the arguments supported by the `delete` command:
 
 Slug of the workspace which you want to delete.
 
+### Options
+
+The following option is supported by the `delete` command:
+
+#### `-n, --no-confirm`
+
+If provided, skips the interactive confirmation prompt before deleting the workspace.
+Use with caution as when this option is used, the workspace and all its data will be deleted immediately without any confirmation.
+
 ## `export`
 
 ### Usage
