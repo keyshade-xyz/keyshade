@@ -103,6 +103,7 @@
     "lint": "turbo run lint",
     "lint:api": "turbo run lint --filter=@keyshade/api",
     "lint:web": "turbo run lint --filter=@keyshade/web",
+    "lint:web:fix": "turbo run lint --filter=@keyshade/web",
     "lint:platform": "turbo run lint --filter=@keyshade/platform",
     "lint:cli": "turbo run lint --filter=@keyshade/cli",
     "lint:api-client": "turbo run lint --filter=@keyshade/api-client",
