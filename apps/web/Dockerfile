@@ -20,8 +20,8 @@ WORKDIR /app
 RUN curl -fsSL https://bun.sh/install | bash && ln -s /root/.bun/bin/bun /usr/local/bin/bun
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/bun.lock ./bun.lock
-RUN bun install --frozen-lockfile --ignore-scripts
+# Note: turbo prune may generate an invalid bun.lock, so we let bun regenerate it
+RUN bun install --ignore-scripts
 
 # Build the project
 COPY --from=builder /app/out/full/ .
