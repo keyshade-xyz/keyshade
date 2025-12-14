@@ -16,11 +16,11 @@ RUN apk update
 WORKDIR /app
 
 # install the dependencies
-RUN npm install --ignore-scripts -g pnpm
+RUN curl -fsSL https://bun.sh/install | bash && ln -s /root/.bun/bin/bun /usr/local/bin/bun
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --no-cache --ignore-scripts
+COPY --from=builder /app/out/bun.lock ./bun.lock
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Build the project
 COPY --from=builder /app/out/full/ .
@@ -35,7 +35,7 @@ ARG NEXT_PUBLIC_SENTRY_ENVIRONMENT=${NEXT_PUBLIC_SENTRY_ENVIRONMENT}
 ARG NEXT_PUBLIC_POSTHOG_KEY=${NEXT_PUBLIC_POSTHOG_KEY}
 ARG NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
 
-RUN pnpm build:web
+RUN bun build:web
 
 FROM base AS runner
 WORKDIR /app

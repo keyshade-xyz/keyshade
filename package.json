@@ -4,7 +4,7 @@
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
-  "packageManager": "pnpm@9.2.0",
+  "packageManager": "bun@1.3.4",
   "release": {
     "branches": [
       "main",
@@ -97,7 +97,7 @@
     "dev:cli": "turbo run dev --filter=@keyshade/cli",
     "add:global": "pnpm add -w",
     "add:api": "pnpm add --filter=@keyshade/api",
-    "add:web": "pnpm add --filter=@keyshade/web",
+    "add:web": "bun add --filter=@keyshade/web",
     "add:platform": "pnpm add --filter=@keyshade/platform",
     "add:cli": "pnpm add --filter=@keyshade/cli",
     "lint": "turbo run lint",
@@ -111,10 +111,10 @@
     "lint:common": "turbo run lint --filter=@keyshade/common",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && pnpm build:schema && pnpm build:common && turbo run build --filter=@keyshade/api",
-    "build:web": "pnpm build:api-client && turbo run build --filter=@keyshade/web",
+    "build:web": "bun run build:api-client && turbo run build --filter=@keyshade/web",
     "build:platform": "pnpm build:api-client && pnpm build:common && turbo run build --filter=@keyshade/platform",
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=@keyshade/cli",
-    "build:api-client": "pnpm build:schema && turbo run --filter=@keyshade/api-client build",
+    "build:api-client": "bun run build:schema && turbo run --filter=@keyshade/api-client build",
     "build:schema": "turbo run build --filter=@keyshade/schema",
     "build:secret-scan": "turbo run build --filter=@keyshade/secret-scan",
     "build:common": "turbo run build --filter=@keyshade/common",
@@ -197,5 +197,9 @@
     "typescript": "^5.5.2",
     "typescript-transform-paths": "^3.5.0",
     "zod": "^3.23.6"
-  }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
