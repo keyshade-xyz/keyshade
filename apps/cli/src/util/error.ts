@@ -16,15 +16,10 @@ export function extractErrorMessage(errorMessage: string): string {
     const parsed = JSON.parse(errorMessage) as {
       header?: string
       body?: string
-      message?: string
     }
 
     if (parsed.header && parsed.body) {
       return `${parsed.header}: ${parsed.body}`
-    }
-
-    if (parsed.message) {
-      return parsed.message
     }
 
     return errorMessage
