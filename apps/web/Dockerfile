@@ -12,7 +12,7 @@ RUN turbo prune @keyshade/web --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl bash
 RUN apk update
 WORKDIR /app
 
