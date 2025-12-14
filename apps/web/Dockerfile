@@ -2,6 +2,7 @@ FROM node:22.21-alpine AS base
 
 FROM base AS builder
 RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache curl bash
 RUN apk update && apk upgrade
 # working directory
 WORKDIR /app
