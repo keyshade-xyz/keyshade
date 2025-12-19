@@ -52,7 +52,9 @@ describe('AWSLambdaIntegration - environment handlers', () => {
     // Mock lambda client
     const sendMock = jest.fn(async (command: any) => {
       if (command instanceof GetFunctionConfigurationCommand) {
-        return { Environment: { Variables: { VAR1: 'value', KS_PRIVATE_KEY: 'bogus' } } }
+        return {
+          Environment: { Variables: { VAR1: 'value', KS_PRIVATE_KEY: 'bogus' } }
+        }
       }
       if (command instanceof UpdateFunctionConfigurationCommand) {
         return {}
@@ -75,7 +77,9 @@ describe('AWSLambdaIntegration - environment handlers', () => {
     expect(mockPrisma.integration.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'int-1' },
-        data: expect.objectContaining({ environments: { disconnect: { id: 'env-1' } } })
+        data: expect.objectContaining({
+          environments: { disconnect: { id: 'env-1' } }
+        })
       })
     )
   })
@@ -117,12 +121,14 @@ describe('AWSLambdaIntegration - environment handlers', () => {
     instance.setIntegration(integration2 as any)
 
     const sendMock = jest.fn()
-    // @ts-expect-error - Assigning mock object for testing purposes
     instance.lambda = { send: sendMock }
 
     const eventMeta = encryptMetadata({ name: 'new-name' } as any)
 
-    await instance.emitEvent({ event: { id: 'evt-3', itemId: 'env-1', metadata: eventMeta }, eventType: EventType.ENVIRONMENT_UPDATED } as any)
+    await instance.emitEvent({
+      event: { id: 'evt-3', itemId: 'env-1', metadata: eventMeta },
+      eventType: EventType.ENVIRONMENT_UPDATED
+    } as any)
 
     // Lambda should not call send for updates (no-op)
     expect(sendMock).not.toHaveBeenCalled()
