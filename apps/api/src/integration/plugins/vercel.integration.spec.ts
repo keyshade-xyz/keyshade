@@ -38,24 +38,38 @@ describe('VercelIntegration - environment handlers', () => {
 
     const mockVercel: any = {
       projects: {
-        filterProjectEnvs: jest.fn().mockResolvedValue({ envs: [ { id: 'env-var-id', key: 'VAR1', target: ['development'], customEnvironmentIds: [] } ] }),
+        filterProjectEnvs: jest.fn().mockResolvedValue({
+          envs: [
+            {
+              id: 'env-var-id',
+              key: 'VAR1',
+              target: ['development'],
+              customEnvironmentIds: []
+            }
+          ]
+        }),
         removeProjectEnv: jest.fn().mockResolvedValue({})
       },
       environment: { updateCustomEnvironment: jest.fn() }
     }
 
     // Inject mock client
-    // @ts-expect-error
+    // @ts-expect-error Injecting a mock Vercel client for testing
     instance.vercel = mockVercel
 
-    await instance.emitEvent({ event: { id: 'evt-1', itemId: 'env-1', metadata: '{}' }, eventType: EventType.ENVIRONMENT_DELETED } as any)
+    await instance.emitEvent({
+      event: { id: 'evt-1', itemId: 'env-1', metadata: '{}' },
+      eventType: EventType.ENVIRONMENT_DELETED
+    } as any)
 
     expect(mockVercel.projects.filterProjectEnvs).toHaveBeenCalled()
     expect(mockVercel.projects.removeProjectEnv).toHaveBeenCalled()
     expect(mockPrisma.integration.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'int-1' },
-        data: expect.objectContaining({ environments: { disconnect: { id: 'env-1' } } })
+        data: expect.objectContaining({
+          environments: { disconnect: { id: 'env-1' } }
+        })
       })
     )
   })
@@ -100,12 +114,15 @@ describe('VercelIntegration - environment handlers', () => {
     }
 
     // Inject mock client
-    // @ts-expect-error
+    // @ts-expect-error Injecting a mock Vercel client for testing
     instance.vercel = mockVercel
 
     const eventMeta = encryptMetadata({ name: 'new-dev-name' } as any)
 
-    await instance.emitEvent({ event: { id: 'evt-2', itemId: 'env-1', metadata: eventMeta }, eventType: EventType.ENVIRONMENT_UPDATED } as any)
+    await instance.emitEvent({
+      event: { id: 'evt-2', itemId: 'env-1', metadata: eventMeta },
+      eventType: EventType.ENVIRONMENT_UPDATED
+    } as any)
 
     expect(mockVercel.environment.updateCustomEnvironment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -116,11 +133,13 @@ describe('VercelIntegration - environment handlers', () => {
     )
 
     // verify audit event persisted
-    expect(mockPrisma.event.create).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({
-        type: expect.any(String),
-        itemId: 'env-1'
+    expect(mockPrisma.event.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: expect.any(String),
+          itemId: 'env-1'
+        })
       })
-    }))
+    )
   })
 })
