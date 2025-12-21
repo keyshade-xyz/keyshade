@@ -94,7 +94,7 @@
     "eslint-plugin-storybook": "^9.1.10",
     "playwright": "^1.56.0",
     "postcss": "^8.4.31",
-    "storybook": "^9.1.10",
+    "storybook": "^9.1.17",
     "tailwindcss": "^4.1.14",
     "tsconfig": "workspace:*",
     "vitest": "^3.2.4"

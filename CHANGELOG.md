@@ -1,3 +1,13 @@
+## [2.48.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.1...v2.48.0-stage.2) (2025-12-14)
+
+### 🚀 Features
+
+* **cli:** add confirmation option for workspace deletion and update related documentation ([#1256](https://github.com/keyshade-xyz/keyshade/issues/1256)) ([408fd25](https://github.com/keyshade-xyz/keyshade/commit/408fd2590668a432f7f05e668855d626d130c1b6))
+
+### 🔨 Code Refactoring
+
+* **platform:** improve empty states, skeleton loaders & other UI improvements ([#1237](https://github.com/keyshade-xyz/keyshade/issues/1237)) ([61d31ef](https://github.com/keyshade-xyz/keyshade/commit/61d31efe942999a7c02ad4d1c5aef2e46f1c5764))
+
 ## [2.48.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.47.0...v2.48.0-stage.1) (2025-12-08)
 
 ### 🚀 Features
