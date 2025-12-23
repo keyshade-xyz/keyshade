@@ -22,6 +22,7 @@ import { isEmail, isIP } from 'class-validator'
 import { sEncrypt } from '@/common/cryptography'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { TokenService } from '@/common/token.service'
+import { UserAuthProviderService } from '@/common/user-auth-provider.service'
 import dayjs from 'dayjs'
 import { UAParser } from 'ua-parser-js'
 
@@ -36,7 +37,8 @@ export class AuthService {
     private readonly cache: UserCacheService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
-    private readonly workspaceCacheService: WorkspaceCacheService
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly userAuthProviderService: UserAuthProviderService
   ) {}
 
   /**
@@ -485,37 +487,38 @@ export class AuthService {
       )
     }
 
-    // If the user has used OAuth to log in, we need to check if the OAuth provider
-    // used in the current login is different from the one stored in the database.
-
-    // If the CLI was used to sign up, we don't need to check for OAuth provider mismatch.
-    if (mode !== 'cli' && user.authProvider !== authProvider) {
-      let formattedAuthProvider = ''
-
-      switch (user.authProvider) {
-        case AuthProvider.GOOGLE:
-          formattedAuthProvider = 'Google'
-          break
-        case AuthProvider.GITHUB:
-          formattedAuthProvider = 'GitHub'
-          break
-        case AuthProvider.EMAIL_OTP:
-          formattedAuthProvider = 'Email and OTP'
-          break
-        case AuthProvider.GITLAB:
-          formattedAuthProvider = 'GitLab'
-          break
-      }
-
-      this.logger.error(
-        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
+    // Handle auth provider linking for existing users
+    if (mode !== 'cli') {
+      // Check if the user already has this auth provider
+      const hasProvider = this.userAuthProviderService.hasAuthProvider(
+        user,
+        authProvider
       )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Error signing in',
-          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
+
+      if (!hasProvider) {
+        this.logger.log(
+          `User ${email} is signing in with new auth provider ${authProvider}. Adding to their account.`
         )
-      )
+
+        try {
+          // Add the new auth provider to the user's account
+          await this.userAuthProviderService.addAuthProvider(
+            user.id,
+            authProvider
+          )
+          this.logger.log(
+            `Successfully linked ${authProvider} to user ${email}'s account`
+          )
+        } catch (error) {
+          this.logger.warn(
+            `Could not link auth provider ${authProvider} to user ${email}: ${error.message}. This may be expected if the migration hasn't run yet.`
+          )
+        }
+      } else {
+        this.logger.log(
+          `User ${email} already has auth provider ${authProvider} linked`
+        )
+      }
     }
 
     return user
