@@ -21,6 +21,7 @@ import ControllerInstance from '@/lib/controller-instance'
 import CancelInvitationDialog from '@/components/members/cancelInvitationDialog'
 import MemberRow from '@/components/members/memberRow'
 import { useHttp } from '@/hooks/use-http'
+import EmptyMembersState from '@/components/members/emptyMembersState'
 
 export default function InvitedMembersTable(): React.JSX.Element {
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
@@ -113,7 +114,7 @@ export default function InvitedMembersTable(): React.JSX.Element {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full mt-6">
       <div className="w-full">
         <Table className="overflow-hidden rounded-3xl bg-[#1D1D20]">
           <TableHeader>
@@ -133,6 +134,7 @@ export default function InvitedMembersTable(): React.JSX.Element {
           <TableBody>
             <InfiniteScrollList
               className="contents w-full [&>div]:contents"
+              emptyComponent={<EmptyMembersState />}
               fetchFunction={fetchMembers}
               inTable
               itemComponent={renderMemberRow}
