@@ -239,6 +239,10 @@ export class AuthorizationService {
       throw new UnauthorizedException(
         `User ${user.id} is not allowed to access this workspace`
       )
+    } else {
+      this.logger.log(
+        `User ${user.id}'s IP address has access to workspace ${workspace.id}`
+      )
     }
   }
 }
