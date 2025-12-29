@@ -1,3 +1,9 @@
+## [2.48.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.3...v2.48.0-stage.4) (2025-12-29)
+
+### 🚀 Features
+
+* **api:** update encryption and decryption ([#1268](https://github.com/keyshade-xyz/keyshade/issues/1268)) ([92d0d7c](https://github.com/keyshade-xyz/keyshade/commit/92d0d7c9e95b2aebafacbc7210e655d7af1202e6))
+
 ## [2.48.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.2...v2.48.0-stage.3) (2025-12-29)
 
 ### 🚀 Features
