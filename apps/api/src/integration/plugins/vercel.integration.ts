@@ -183,7 +183,9 @@ export class VercelIntegration extends BaseIntegration {
     const metadata = integration.metadata
 
     const environmentId = data.event.itemId
-    const envEntry = integration.environments.find((e) => e.id === environmentId)
+    const envEntry = integration.environments.find(
+      (e) => e.id === environmentId
+    )
 
     if (!envEntry) {
       this.logger.log(
@@ -199,12 +201,14 @@ export class VercelIntegration extends BaseIntegration {
       )
       // Still attempt to disconnect the environment relation if present
       try {
-          await (this as any).prisma.integration.update({
-            where: { id: (integration as any).id },
-            data: { environments: { disconnect: { id: environmentId } } }
-          })
+        await (this as any).prisma.integration.update({
+          where: { id: (integration as any).id },
+          data: { environments: { disconnect: { id: environmentId } } }
+        })
       } catch (err) {
-        this.logger.warn(`Failed to disconnect environment ${environmentId}: ${err}`)
+        this.logger.warn(
+          `Failed to disconnect environment ${environmentId}: ${err}`
+        )
       }
       return
     }
@@ -215,6 +219,9 @@ export class VercelIntegration extends BaseIntegration {
       title: `Cleaning up Vercel environment ${envSlug}`
     })
 
+    // Track total duration across operations in this handler
+    let totalDuration = 0
+
     try {
       const { vercelCustomEnvironmentId, vercelSystemEnvironment } =
         metadata.environments[envSlug]
@@ -222,12 +229,15 @@ export class VercelIntegration extends BaseIntegration {
       const vercelSystemEnvironmentsSet = new Set<string>()
       const vercelCustomEnvironmentIdsSet = new Set<string>()
 
-      if (vercelSystemEnvironment) vercelSystemEnvironmentsSet.add(vercelSystemEnvironment)
-      if (vercelCustomEnvironmentId) vercelCustomEnvironmentIdsSet.add(vercelCustomEnvironmentId)
+      if (vercelSystemEnvironment)
+        vercelSystemEnvironmentsSet.add(vercelSystemEnvironment)
+      if (vercelCustomEnvironmentId)
+        vercelCustomEnvironmentIdsSet.add(vercelCustomEnvironmentId)
 
       // Fetch all env vars
       const { duration: listEnvironmentVariablesDuration, envs } =
         await this.getAllEnvironmentVariables(integration.metadata.projectId)
+      totalDuration = listEnvironmentVariablesDuration
 
       const environmentVariableIds: string[] = []
       for (const env of envs) {
@@ -236,7 +246,8 @@ export class VercelIntegration extends BaseIntegration {
 
         if (
           (envTarget && vercelSystemEnvironmentsSet.has(envTarget)) ||
-          (envCustomEnvironmentId && vercelCustomEnvironmentIdsSet.has(envCustomEnvironmentId))
+          (envCustomEnvironmentId &&
+            vercelCustomEnvironmentIdsSet.has(envCustomEnvironmentId))
         ) {
           environmentVariableIds.push(env.id)
         }
@@ -244,7 +255,7 @@ export class VercelIntegration extends BaseIntegration {
 
       // Delete found env vars
       for (const envVarId of environmentVariableIds) {
-        await makeTimedRequest(() =>
+        const { duration: deleteDuration } = await makeTimedRequest(() =>
           retryWithBackoff(() =>
             this.vercel.projects.removeProjectEnv({
               id: envVarId,
@@ -252,25 +263,27 @@ export class VercelIntegration extends BaseIntegration {
             })
           )
         )
+        totalDuration += deleteDuration
       }
 
       // Remove env metadata and disconnect relation
       delete metadata.environments[envSlug]
-        await (this as any).prisma.integration.update({
-          where: { id: (integration as any).id },
-          data: {
-            metadata: encryptMetadata(metadata as any),
-            environments: { disconnect: { id: environmentId } }
-          }
-        })
+      await (this as any).prisma.integration.update({
+        where: { id: (integration as any).id },
+        data: {
+          metadata: encryptMetadata(metadata as any),
+          environments: { disconnect: { id: environmentId } }
+        }
+      })
 
+      // Updated timing: include list + deletions
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.SUCCESS,
-        0,
+        totalDuration,
         ''
       )
-      } catch (err) {
+    } catch (err) {
       this.logger.error(
         `Failed cleaning up Vercel environment ${envSlug}: ${err}`
       )
@@ -295,10 +308,11 @@ export class VercelIntegration extends BaseIntegration {
         )
       }
 
+      // Updated timing: include work done before failure
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.FAILED,
-        0,
+        totalDuration ?? 0,
         err instanceof Error ? err.message : String(err)
       )
     }
@@ -311,7 +325,9 @@ export class VercelIntegration extends BaseIntegration {
     const metadata = integration.metadata
 
     const environmentId = data.event.itemId
-    const envEntry = integration.environments.find((e) => e.id === environmentId)
+    const envEntry = integration.environments.find(
+      (e) => e.id === environmentId
+    )
     if (!envEntry) {
       this.logger.warn(
         `Environment ${environmentId} not part of integration. Skipping update.`
@@ -341,16 +357,19 @@ export class VercelIntegration extends BaseIntegration {
       })
 
       // Vercel does not currently support renaming system environments. If custom envs exist, attempt update
-      const customEnvId = metadata.environments[envSlug].vercelCustomEnvironmentId
+      let totalDuration = 0
+      const customEnvId =
+        metadata.environments[envSlug].vercelCustomEnvironmentId
       if (customEnvId && newName) {
         try {
-          await makeTimedRequest(() =>
+          const { duration: renameDuration } = await makeTimedRequest(() =>
             this.vercel.environment.updateCustomEnvironment({
               idOrName: integration.metadata.projectId,
               environmentSlugOrId: customEnvId,
               requestBody: { slug: newName, description: newName }
             })
           )
+          totalDuration += renameDuration
         } catch (err) {
           this.logger.warn(
             `Vercel custom environment rename not supported or failed for ${customEnvId}: ${err}`
@@ -359,10 +378,11 @@ export class VercelIntegration extends BaseIntegration {
       }
 
       // Persist any metadata changes if needed (no-op for now)
+      // Updated timing: include any rename API duration
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.SUCCESS,
-        0,
+        totalDuration,
         ''
       )
       // Create an audit Event for ENVIRONMENT_UPDATED
@@ -379,7 +399,9 @@ export class VercelIntegration extends BaseIntegration {
           }
         })
       } catch (e) {
-        this.logger.warn(`Failed to persist audit event for environment update: ${e}`)
+        this.logger.warn(
+          `Failed to persist audit event for environment update: ${e}`
+        )
       }
     } catch (err) {
       this.logger.error(
