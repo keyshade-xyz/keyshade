@@ -218,6 +218,8 @@ export class AWSLambdaIntegration extends BaseIntegration {
         )
       }
 
+      const totalDuration: number = 0
+
       // Disconnect environment from integration
       await (this as any).prisma.integration.update({
         where: { id: (integration as any).id },
@@ -227,7 +229,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.SUCCESS,
-        0,
+        totalDuration,
         'Environment deleted from Lambda function'
       )
     } catch (err: any) {
@@ -415,8 +417,6 @@ export class AWSLambdaIntegration extends BaseIntegration {
       integrationId: integration.id,
       title: `Adding ${data.name} to Lambda function`
     })
-
-    let totalDuration: number = 0
 
     try {
       // Fetch all environmental values from the lambda function
