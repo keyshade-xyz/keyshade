@@ -1,17 +1,19 @@
-import { createDecipheriv, createHash } from 'crypto'
+import { createDecipheriv, createHash, pbkdf2Sync } from 'crypto'
 import * as eccrypto from 'eccrypto'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
+const SALT_LENGTH = 16 // 128-bit salt
 
 /**
- * Derives a cryptographic key from the given string using SHA256 hashing.
+ * Derives a cryptographic key from the given password and salt using PBKDF2.
  *
- * @param keyString - The string from which to derive the key.
+ * @param password - The password from which to derive the key.
+ * @param salt - The salt as a Buffer.
  * @returns A Buffer containing the derived key.
  */
-const deriveKey = (keyString: string): Buffer =>
-  createHash('sha256').update(keyString).digest()
+const deriveKey = (password: string, salt: Buffer): Buffer =>
+  pbkdf2Sync(password, salt, 100000, 32, 'sha256')
 
 /**
  * Interface for the encrypted data structure
@@ -130,12 +132,14 @@ export const decrypt = async (
  * @throws {Error} If the decryption fails.
  */
 export const sDecrypt = (encryptedBase64: string, secret?: string): string => {
-  const key = deriveKey(secret || process.env.SERVER_SECRET)
   const data: Buffer = Buffer.from(encryptedBase64, 'base64')
 
-  const iv = data.subarray(0, IV_LENGTH)
-  const authTag = data.subarray(IV_LENGTH, IV_LENGTH + 16)
-  const encrypted = data.subarray(IV_LENGTH + 16)
+  const salt = data.subarray(0, SALT_LENGTH)
+  const iv = data.subarray(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)
+  const authTag = data.subarray(SALT_LENGTH + IV_LENGTH, SALT_LENGTH + IV_LENGTH + 16)
+  const encrypted = data.subarray(SALT_LENGTH + IV_LENGTH + 16)
+  const key = deriveKey(secret || process.env.SERVER_SECRET, salt)
+
 
   const decipher = createDecipheriv(ALGORITHM, key, iv)
   decipher.setAuthTag(authTag)
