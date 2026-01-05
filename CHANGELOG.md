@@ -1,3 +1,9 @@
+## [2.49.0](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0...v2.49.0) (2026-01-05)
+
+### 🚀 Features
+
+* **api:** update deps ([81666ad](https://github.com/keyshade-xyz/keyshade/commit/81666adfa64070fc8d5487bfe7580887ef292604))
+
 ## [2.48.0](https://github.com/keyshade-xyz/keyshade/compare/v2.47.0...v2.48.0) (2026-01-05)
 
 ### 🚀 Features
