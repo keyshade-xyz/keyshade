@@ -1,3 +1,13 @@
+## [2.48.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.4...v2.48.0-stage.5) (2026-01-05)
+
+### 🚀 Features
+
+* **api:** create example project in default workspace upon user sign up ([#1269](https://github.com/keyshade-xyz/keyshade/issues/1269)) ([93ff036](https://github.com/keyshade-xyz/keyshade/commit/93ff036951031a69db0a422732705d7cd5f681d6))
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** bump qs and express in /apps/api ([#1271](https://github.com/keyshade-xyz/keyshade/issues/1271)) ([6899f67](https://github.com/keyshade-xyz/keyshade/commit/6899f678c133280e1a2d3e90533d59e489660ad0))
+
 ## [2.48.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.3...v2.48.0-stage.4) (2025-12-29)
 
 ### 🚀 Features
