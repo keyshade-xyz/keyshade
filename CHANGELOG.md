@@ -1,3 +1,31 @@
+## [2.48.0](https://github.com/keyshade-xyz/keyshade/compare/v2.47.0...v2.48.0) (2026-01-05)
+
+### 🚀 Features
+
+* **api:** create example project in default workspace upon user sign up ([#1269](https://github.com/keyshade-xyz/keyshade/issues/1269)) ([93ff036](https://github.com/keyshade-xyz/keyshade/commit/93ff036951031a69db0a422732705d7cd5f681d6))
+* **api:** update encryption and decryption ([#1268](https://github.com/keyshade-xyz/keyshade/issues/1268)) ([92d0d7c](https://github.com/keyshade-xyz/keyshade/commit/92d0d7c9e95b2aebafacbc7210e655d7af1202e6))
+* **cli:** add confirmation option for workspace deletion and update related documentation ([#1256](https://github.com/keyshade-xyz/keyshade/issues/1256)) ([408fd25](https://github.com/keyshade-xyz/keyshade/commit/408fd2590668a432f7f05e668855d626d130c1b6))
+* **cli:** bump version to 3.8.0 ([675cce7](https://github.com/keyshade-xyz/keyshade/commit/675cce7b5b348fd4b19bb79862d9268f72e04b62))
+* **platform:** enhance [secure] & variable import configuration with tier limit validation ([#1226](https://github.com/keyshade-xyz/keyshade/issues/1226)) ([65996d0](https://github.com/keyshade-xyz/keyshade/commit/65996d09547daf8ebd887007ee2f82c0a43fde7e))
+* update lockfile ([52b1767](https://github.com/keyshade-xyz/keyshade/commit/52b17678a05be9f7bc4704ec0525e720c6f1568a))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.7.0 [skip ci] ([63ebfc0](https://github.com/keyshade-xyz/keyshade/commit/63ebfc01b8fe2faa48d9f60b94a1018796eaeeba))
+* **deps-dev:** bump storybook from 9.1.16 to 9.1.17 ([#1265](https://github.com/keyshade-xyz/keyshade/issues/1265)) ([42556a2](https://github.com/keyshade-xyz/keyshade/commit/42556a2c2dbd21c65aeac751a7d1e1b190d7462f))
+* **deps:** bump jws from 3.2.2 to 3.2.3 in /apps/api ([#1263](https://github.com/keyshade-xyz/keyshade/issues/1263)) ([4934848](https://github.com/keyshade-xyz/keyshade/commit/49348484ca9a7e65c5dc2569fed12e2fce553bf0))
+* **deps:** bump next from 15.4.8 to 15.4.10 ([#1266](https://github.com/keyshade-xyz/keyshade/issues/1266)) ([68036d9](https://github.com/keyshade-xyz/keyshade/commit/68036d9d897a92c90220d5b414077ee6746dd0eb))
+* **deps:** bump qs and express in /apps/api ([#1271](https://github.com/keyshade-xyz/keyshade/issues/1271)) ([6899f67](https://github.com/keyshade-xyz/keyshade/commit/6899f678c133280e1a2d3e90533d59e489660ad0))
+* **release:** 2.48.0-stage.1 [skip ci] ([56b2c78](https://github.com/keyshade-xyz/keyshade/commit/56b2c78a106de0c35e142bbfefa9cab548d71887))
+* **release:** 2.48.0-stage.2 [skip ci] ([3ed9a24](https://github.com/keyshade-xyz/keyshade/commit/3ed9a24314b2585ebab9fe251844ef4c2d1b982b))
+* **release:** 2.48.0-stage.3 [skip ci] ([3ca197b](https://github.com/keyshade-xyz/keyshade/commit/3ca197b5864fe3d38a3bdf9a506ab041fd470b61))
+* **release:** 2.48.0-stage.4 [skip ci] ([bd7e443](https://github.com/keyshade-xyz/keyshade/commit/bd7e4433e860418cca0f043bcc4346a8bd0af3ab))
+* **release:** 2.48.0-stage.5 [skip ci] ([6a94612](https://github.com/keyshade-xyz/keyshade/commit/6a94612592628844e1dd6b16fe7ef5a6beec88f6))
+
+### 🔨 Code Refactoring
+
+* **platform:** improve empty states, skeleton loaders & other UI improvements ([#1237](https://github.com/keyshade-xyz/keyshade/issues/1237)) ([61d31ef](https://github.com/keyshade-xyz/keyshade/commit/61d31efe942999a7c02ad4d1c5aef2e46f1c5764))
+
 ## [2.48.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.4...v2.48.0-stage.5) (2026-01-05)
 
 ### 🚀 Features
