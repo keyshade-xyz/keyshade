@@ -1,4 +1,4 @@
-import { createDecipheriv, createHash, pbkdf2Sync } from 'crypto'
+import { createDecipheriv, pbkdf2Sync } from 'crypto'
 import * as eccrypto from 'eccrypto'
 
 const ALGORITHM = 'aes-256-gcm'
@@ -136,10 +136,12 @@ export const sDecrypt = (encryptedBase64: string, secret?: string): string => {
 
   const salt = data.subarray(0, SALT_LENGTH)
   const iv = data.subarray(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)
-  const authTag = data.subarray(SALT_LENGTH + IV_LENGTH, SALT_LENGTH + IV_LENGTH + 16)
+  const authTag = data.subarray(
+    SALT_LENGTH + IV_LENGTH,
+    SALT_LENGTH + IV_LENGTH + 16
+  )
   const encrypted = data.subarray(SALT_LENGTH + IV_LENGTH + 16)
   const key = deriveKey(secret || process.env.SERVER_SECRET, salt)
-
 
   const decipher = createDecipheriv(ALGORITHM, key, iv)
   decipher.setAuthTag(authTag)
