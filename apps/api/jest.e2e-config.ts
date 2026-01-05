@@ -4,8 +4,7 @@ export default {
   displayName: 'api',
   testEnvironment: 'node',
   testMatch: [
-    // '**/{api-key,auth,environment,feedback,integration,project,secret,share-secret,user,variable,workspace-membership,workspace-role}.e2e.spec.ts'
-    '**/user.e2e.spec.ts'
+    '**/{api-key,auth,environment,feedback,integration,project,secret,share-secret,user,variable,workspace-membership,workspace-role}.e2e.spec.ts'
   ],
   transform: {
     '^.+\\.[tj]sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
