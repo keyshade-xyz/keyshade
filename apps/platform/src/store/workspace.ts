@@ -19,10 +19,16 @@ export function getSelectedWorkspaceFromStorage(): Workspace | null {
   const selectedWorkspace =
     typeof localStorage !== 'undefined'
       ? localStorage.getItem('selectedWorkspace')
-      : `{}`
+      : null
 
-  if (selectedWorkspace) {
-    return JSON.parse(selectedWorkspace) as Workspace
+  if (selectedWorkspace && selectedWorkspace !== 'undefined' && selectedWorkspace !== 'null') {
+    try {
+      return JSON.parse(selectedWorkspace) as Workspace
+    } catch (error) {
+      // eslint-disable-next-line no-console -- is used for logging
+      console.error("Error parsing selectedWorkspace from localStorage:", error);
+      return null;
+    }
   }
   return null
 }
