@@ -10,7 +10,9 @@ import { Integration } from '@prisma/client'
  */
 export async function processPendingCleanups(prisma: PrismaService) {
   // Fetch all integrations (metadata is encrypted)
-  const integrations: Integration[] = await (prisma as any).integration.findMany()
+  const integrations: Integration[] = await (
+    prisma as any
+  ).integration.findMany()
 
   for (const integration of integrations) {
     try {
@@ -39,9 +41,16 @@ export async function processPendingCleanups(prisma: PrismaService) {
           } as any)
 
           // If successful, remove this pending entry and persist metadata
-          const updatedMeta = decryptMetadata<any>(integration.metadata as string) || {}
-          updatedMeta.pendingCleanup = (updatedMeta.pendingCleanup || []).filter(
-            (p: any) => !(p.environmentId === entry.environmentId && p.action === entry.action)
+          const updatedMeta =
+            decryptMetadata<any>(integration.metadata as string) || {}
+          updatedMeta.pendingCleanup = (
+            updatedMeta.pendingCleanup || []
+          ).filter(
+            (p: any) =>
+              !(
+                p.environmentId === entry.environmentId &&
+                p.action === entry.action
+              )
           )
 
           await (prisma as any).integration.update({
@@ -52,13 +61,17 @@ export async function processPendingCleanups(prisma: PrismaService) {
           // If reconciler attempt fails, leave entry as-is for next run
           // Log and continue
           // eslint-disable-next-line no-console
-          console.warn(`Reconciler: failed to process pending cleanup for ${integration.id}: ${err}`)
+          console.warn(
+            `Reconciler: failed to process pending cleanup for ${integration.id}: ${err}`
+          )
         }
       }
     } catch (err) {
       // Skip malformed metadata
       // eslint-disable-next-line no-console
-      console.warn(`Reconciler: failed to inspect integration ${integration.id}: ${err}`)
+      console.warn(
+        `Reconciler: failed to inspect integration ${integration.id}: ${err}`
+      )
     }
   }
 }

@@ -12,9 +12,7 @@ describe('Health Check', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule]
     }).compile()
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
-    )
+    app = moduleRef.createNestApplication<any>(new FastifyAdapter() as any)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
