@@ -1098,10 +1098,7 @@ describe('Integration Controller Tests', () => {
       })
     })
 
-    // TODO: Re-enable Vercel E2E tests once mocking is stable
-    // These tests were causing CI timeouts due to mock setup issues
-    // See: https://github.com/keyshade-xyz/keyshade/pull/1255
-    describe.skip('Vercel configuration tests', () => {
+    describe('Vercel configuration tests', () => {
       const validDtoVercel: CreateIntegration = {
         name: 'Validation Test',
         type: IntegrationType.VERCEL,
