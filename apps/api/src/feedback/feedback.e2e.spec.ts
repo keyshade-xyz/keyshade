@@ -30,9 +30,7 @@ describe('Feedback Controller (E2E)', () => {
       .useClass(MockMailService)
       .compile()
 
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
-    )
+    app = moduleRef.createNestApplication<any>(new FastifyAdapter() as any)
     feedbackService = moduleRef.get(FeedbackService)
     mockMailService = moduleRef.get(MAIL_SERVICE)
     userService = moduleRef.get(UserService)
