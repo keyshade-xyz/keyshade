@@ -1,3 +1,21 @@
+## [2.48.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.3...v2.48.0-stage.4) (2025-12-29)
+
+### 🚀 Features
+
+* **api:** update encryption and decryption ([#1268](https://github.com/keyshade-xyz/keyshade/issues/1268)) ([92d0d7c](https://github.com/keyshade-xyz/keyshade/commit/92d0d7c9e95b2aebafacbc7210e655d7af1202e6))
+
+## [2.48.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.2...v2.48.0-stage.3) (2025-12-29)
+
+### 🚀 Features
+
+* update lockfile ([52b1767](https://github.com/keyshade-xyz/keyshade/commit/52b17678a05be9f7bc4704ec0525e720c6f1568a))
+
+### 🔧 Miscellaneous Chores
+
+* **deps-dev:** bump storybook from 9.1.16 to 9.1.17 ([#1265](https://github.com/keyshade-xyz/keyshade/issues/1265)) ([42556a2](https://github.com/keyshade-xyz/keyshade/commit/42556a2c2dbd21c65aeac751a7d1e1b190d7462f))
+* **deps:** bump jws from 3.2.2 to 3.2.3 in /apps/api ([#1263](https://github.com/keyshade-xyz/keyshade/issues/1263)) ([4934848](https://github.com/keyshade-xyz/keyshade/commit/49348484ca9a7e65c5dc2569fed12e2fce553bf0))
+* **deps:** bump next from 15.4.8 to 15.4.10 ([#1266](https://github.com/keyshade-xyz/keyshade/issues/1266)) ([68036d9](https://github.com/keyshade-xyz/keyshade/commit/68036d9d897a92c90220d5b414077ee6746dd0eb))
+
 ## [2.48.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0-stage.1...v2.48.0-stage.2) (2025-12-14)
 
 ### 🚀 Features
