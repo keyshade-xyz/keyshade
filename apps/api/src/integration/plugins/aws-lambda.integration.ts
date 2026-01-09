@@ -175,6 +175,8 @@ export class AWSLambdaIntegration extends BaseIntegration {
       title: `Cleaning up Lambda environment ${attachedEnv.slug}`
     })
 
+    let totalDuration = 0
+
     try {
       // Fetch variable and secret names that belong to this environment
       const variableVersions = await (
@@ -196,10 +198,11 @@ export class AWSLambdaIntegration extends BaseIntegration {
       secretVersions.forEach((s) => keysToRemove.add(s.secret.name))
 
       // Fetch existing env vars from Lambda
-      const { existingEnvironmentalValues } =
+      const { existingEnvironmentalValues, duration: listDuration } =
         await this.getAllEnvironmentalValues(
           integration.metadata.lambdaFunctionName
         )
+      totalDuration += listDuration
 
       let changed = false
       for (const key of Array.from(keysToRemove)) {
@@ -210,15 +213,14 @@ export class AWSLambdaIntegration extends BaseIntegration {
       }
 
       if (changed) {
-        await retryWithBackoff(() =>
+        const updateDuration = await retryWithBackoff(() =>
           this.updateLambdaFunctionConfiguration(
             integration.metadata.lambdaFunctionName,
             existingEnvironmentalValues
           )
         )
+        totalDuration += updateDuration
       }
-
-      const totalDuration: number = 0
 
       // Disconnect environment from integration
       await (this as any).prisma.integration.update({
@@ -236,7 +238,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.FAILED,
-        0,
+        totalDuration,
         JSON.stringify(err)
       )
     }
@@ -417,6 +419,8 @@ export class AWSLambdaIntegration extends BaseIntegration {
       integrationId: integration.id,
       title: `Adding ${data.name} to Lambda function`
     })
+
+    let totalDuration = 0
 
     try {
       // Fetch all environmental values from the lambda function
