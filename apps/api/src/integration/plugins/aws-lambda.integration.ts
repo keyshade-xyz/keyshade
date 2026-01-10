@@ -20,7 +20,8 @@ import {
 import {
   constructErrorBody,
   decryptMetadata,
-  makeTimedRequest
+  makeTimedRequest,
+  retryWithBackoff
 } from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
@@ -44,7 +45,8 @@ export class AWSLambdaIntegration extends BaseIntegration {
       EventType.SECRET_DELETED,
       EventType.VARIABLE_ADDED,
       EventType.VARIABLE_UPDATED,
-      EventType.VARIABLE_DELETED
+      EventType.VARIABLE_DELETED,
+      EventType.ENVIRONMENT_DELETED
     ])
   }
 
@@ -93,11 +95,12 @@ export class AWSLambdaIntegration extends BaseIntegration {
 
     // Add the project's private key to the Lambda function's environment variables
     try {
-      const addPrivateKeyDuration =
-        await this.updateLambdaFunctionConfiguration(
+      const addPrivateKeyDuration = await retryWithBackoff(() =>
+        this.updateLambdaFunctionConfiguration(
           integration.metadata.lambdaFunctionName,
           new Map([['KS_PRIVATE_KEY', sEncrypt(privateKey)]])
         )
+      )
 
       this.logger.log('Added project private key to Lambda function')
 
@@ -138,11 +141,127 @@ export class AWSLambdaIntegration extends BaseIntegration {
         await this.delegateConfigurationDeletedEvent(data)
         break
 
+      case EventType.ENVIRONMENT_DELETED:
+        await this.handleEnvironmentDeleted(data)
+        break
+
       default:
         this.logger.warn(
           `Event type ${data.eventType} not supported for AWS Lambda integration.`
         )
     }
+  }
+
+  private async handleEnvironmentDeleted(
+    data: IntegrationEventData
+  ): Promise<void> {
+    this.lambda = this.getLambdaClient()
+
+    const integration = this.getIntegration<AWSLambdaIntegrationMetadata>()
+    const environmentId = data.event.itemId
+
+    // AWS Lambda integration supports only a single environment
+    const attachedEnv = integration.environments?.[0]
+    if (!attachedEnv || attachedEnv.id !== environmentId) {
+      this.logger.log(
+        `Environment ${environmentId} not attached to this Lambda integration. Idempotent success.`
+      )
+      return
+    }
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId: data.event.id,
+      integrationId: (integration as any).id,
+      title: `Cleaning up Lambda environment ${attachedEnv.slug}`
+    })
+
+    let totalDuration = 0
+
+    try {
+      // Fetch variable and secret names that belong to this environment
+      const variableVersions = await (
+        this as any
+      ).prisma.variableVersion.findMany({
+        where: { environmentId },
+        distinct: ['variableId'],
+        include: { variable: true }
+      })
+
+      const secretVersions = await (this as any).prisma.secretVersion.findMany({
+        where: { environmentId },
+        distinct: ['secretId'],
+        include: { secret: true }
+      })
+
+      const keysToRemove = new Set<string>()
+      variableVersions.forEach((v) => keysToRemove.add(v.variable.name))
+      secretVersions.forEach((s) => keysToRemove.add(s.secret.name))
+
+      // Fetch existing env vars from Lambda
+      const { existingEnvironmentalValues, duration: listDuration } =
+        await this.getAllEnvironmentalValues(
+          integration.metadata.lambdaFunctionName
+        )
+      totalDuration += listDuration
+
+      let changed = false
+      for (const key of Array.from(keysToRemove)) {
+        if (existingEnvironmentalValues.has(key)) {
+          existingEnvironmentalValues.delete(key)
+          changed = true
+        }
+      }
+
+      if (changed) {
+        const updateDuration = await retryWithBackoff(() =>
+          this.updateLambdaFunctionConfiguration(
+            integration.metadata.lambdaFunctionName,
+            existingEnvironmentalValues
+          )
+        )
+        totalDuration += updateDuration
+      }
+
+      // Disconnect environment from integration
+      await (this as any).prisma.integration.update({
+        where: { id: (integration as any).id },
+        data: { environments: { disconnect: { id: environmentId } } }
+      })
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.SUCCESS,
+        totalDuration,
+        'Environment deleted from Lambda function'
+      )
+    } catch (err: any) {
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        totalDuration,
+        JSON.stringify(err)
+      )
+    }
+  }
+
+  private async handleEnvironmentUpdated(
+    data: IntegrationEventData
+  ): Promise<void> {
+    const integration = this.getIntegration<AWSLambdaIntegrationMetadata>()
+    const environmentId = data.event.itemId
+
+    const attachedEnv = integration.environments?.[0]
+    if (!attachedEnv || attachedEnv.id !== environmentId) {
+      this.logger.log(
+        `Environment ${environmentId} not attached to this Lambda integration. Skipping update.`
+      )
+      return
+    }
+
+    // For Lambda there's no external environment rename to perform. No-op.
+    this.logger.log(
+      `Environment ${attachedEnv.slug} updated. No external action required for Lambda.`
+    )
   }
 
   public async validateConfiguration(
@@ -301,7 +420,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       title: `Adding ${data.name} to Lambda function`
     })
 
-    let totalDuration: number = 0
+    let totalDuration = 0
 
     try {
       // Fetch all environmental values from the lambda function
