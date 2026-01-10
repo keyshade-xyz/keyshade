@@ -2,6 +2,7 @@ FROM node:22.21-alpine AS base
 
 FROM base AS builder
 RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache curl bash
 RUN apk update && apk upgrade
 # working directory
 WORKDIR /app
@@ -11,16 +12,16 @@ RUN turbo prune @keyshade/web --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl bash
 RUN apk update
 WORKDIR /app
 
 # install the dependencies
-RUN npm install --ignore-scripts -g pnpm
+RUN curl -fsSL https://bun.sh/install | bash && ln -s /root/.bun/bin/bun /usr/local/bin/bun
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --no-cache --ignore-scripts
+# Note: turbo prune may generate an invalid bun.lock, so we let bun regenerate it
+RUN bun install --ignore-scripts
 
 # Build the project
 COPY --from=builder /app/out/full/ .
@@ -35,7 +36,7 @@ ARG NEXT_PUBLIC_SENTRY_ENVIRONMENT=${NEXT_PUBLIC_SENTRY_ENVIRONMENT}
 ARG NEXT_PUBLIC_POSTHOG_KEY=${NEXT_PUBLIC_POSTHOG_KEY}
 ARG NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
 
-RUN pnpm build:web
+RUN bun build:web
 
 FROM base AS runner
 WORKDIR /app

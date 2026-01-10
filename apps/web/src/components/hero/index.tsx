@@ -1,18 +1,17 @@
 'use client'
 import { Toaster } from 'sonner'
+import Image from 'next/image'
+import { Geist, Geist_Mono as GeistMono } from 'next/font/google'
 import { GithubSVG } from '@public/navbar'
 import { BottomGradientSVG, HeroImage, VideoSVG } from '@public/hero'
 import { ArrowRight } from '@public/shared'
-import Image from 'next/image'
-// eslint-disable-next-line camelcase -- IGNORE ---
-import { Geist, Geist_Mono } from 'next/font/google'
 import CtaButton from '../CtaButton'
 import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 const geist = Geist({
   subsets: ['latin']
 })
-const geistMono = Geist_Mono({
+const geistMono = GeistMono({
   subsets: ['latin'],
   weight: ['400', '700']
 })

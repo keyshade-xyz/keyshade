@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- ignore */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment -- ignore */
-/* eslint-disable no-console -- ignore */
-
 'use client'
 import React, { useEffect, useState } from 'react'
 import { Particles, initParticlesEngine } from '@tsparticles/react'
@@ -40,7 +36,7 @@ export function SparklesCore(props: ParticlesProps): React.JSX.Element {
         setInit(true)
       })
       .catch((error) => {
-        console.error('Error initializing particles engine: ', error)
+        console.error('Error initializing particles engine: ', error) // eslint-disable-line no-console -- ignore
       })
   }, [])
   const controls = useAnimation()
@@ -61,7 +57,7 @@ export function SparklesCore(props: ParticlesProps): React.JSX.Element {
             resolve()
           })
           .catch((error) => {
-            console.error('Error starting animation: ', error)
+            console.error('Error starting animation: ', error) // eslint-disable-line no-console -- ignore
             reject(new Error(`${error}`))
           })
       } else {
@@ -98,7 +94,9 @@ export function SparklesCore(props: ParticlesProps): React.JSX.Element {
                   enable: false,
                   mode: 'repulse'
                 },
-                resize: true as any
+                resize: {
+                  enable: true,
+                }
               },
               modes: {
                 push: {
@@ -175,7 +173,7 @@ export function SparklesCore(props: ParticlesProps): React.JSX.Element {
                 close: true,
                 fill: true,
                 options: {},
-                type: {} as SingleOrMultiple<string> | undefined
+                type: {} as SingleOrMultiple<string>
               },
               groups: {},
               move: {

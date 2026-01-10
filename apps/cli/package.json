@@ -17,7 +17,7 @@
   "scripts": {
     "build": "node esbuild.config.js",
     "start": "node dist/index.cjs",
-    "dev": "pnpm build && node dist/index.cjs",
+    "dev": "bun run build && node dist/index.cjs",
     "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "keywords": [

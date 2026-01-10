@@ -26,19 +26,19 @@ jobs:
           node-version: 22.x
           registry-url: https://registry.npmjs.org
 
-      - name: Cache PNPM store
+      - name: Cache Bun cache
         uses: actions/cache@v3
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-bun-
 
-      - name: Install PNPM
-        run: npm i -g pnpm
+      - name: Install Bun
+        run: npm i -g bun
 
       - name: Install
-        run: pnpm i
+        run: bun install --frozen-lockfile
 
       - name: Release
         id: release
@@ -49,7 +49,7 @@ jobs:
           GITHUB_CALLBACK_URL: dummy
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: secret
-        run: pnpm dlx semantic-release
+        run: bun dlx semantic-release
 
       - name: Fetch latest tag
         env:
@@ -129,27 +129,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache PNPM store
+      - name: Cache Bun cache
         uses: actions/cache@v3
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-bun-
 
-      - name: Install PNPM
-        run: npm i -g pnpm
+      - name: Install Bun
+        run: npm i -g bun
 
       - name: Install
-        run: pnpm i
+        run: bun install --frozen-lockfile
 
       - name: Run migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           # Run migrations
-          pnpm db:generate-types
-          DATABASE_URL=$DATABASE_URL pnpm db:deploy-migrations
+          bun run db:generate-types
+          DATABASE_URL=$DATABASE_URL bun run db:deploy-migrations
 
 #  release-sentry-api:
 #    name: Sentry API
@@ -487,22 +487,22 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@keyshade'
 
-      - name: Install pnpm
+      - name: Install Bun
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: npm i -g pnpm
+        run: npm i -g bun
 
-      - name: Cache PNPM store
+      - name: Cache Bun cache
         if: steps.check-versions.outputs.skip_publish != 'true'
         uses: actions/cache@v3
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-bun-
 
       - name: Install dependencies
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: pnpm install
+        run: bun install --frozen-lockfile
 
       - name: Cache CLI Build
         if: steps.check-versions.outputs.skip_publish != 'true'
@@ -515,7 +515,7 @@ jobs:
 
       - name: Build
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: pnpm build:cli
+        run: bun run build:cli
 
       - name: Authenticate with npm
         if: steps.check-versions.outputs.skip_publish != 'true'
@@ -588,14 +588,14 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: Install PNPM
-        run: npm i -g pnpm
+      - name: Install Bun
+        run: npm i -g bun
 
       - name: Install Dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile
 
       - name: Build (TypeScript/monorepo)
-        run: pnpm build:cli
+        run: bun run build:cli
 
       # New: install Bun
       - name: Setup Bun

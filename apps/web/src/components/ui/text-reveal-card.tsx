@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment -- ignore */
-/* eslint-disable @typescript-eslint/no-explicit-any -- ignore */
 'use client'
 import React, { useEffect, useRef, useState, memo } from 'react'
 import { motion } from 'framer-motion'
@@ -27,18 +25,16 @@ export function TextRevealCard({
 
   useEffect(() => {
     if (cardRef.current) {
-      // eslint-disable-next-line @typescript-eslint/no-shadow -- ignore
-      const { left, width: localWidth } =
+      const { left: rectLeft, width: rectLocalWidth } =
         cardRef.current.getBoundingClientRect()
 
-      setLeft(left)
+      setLeft(rectLeft)
 
-      setLocalWidth(localWidth)
+      setLocalWidth(rectLocalWidth)
     }
   }, [])
 
-  function mouseMoveHandler(event: any): void {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- ignore
+  function mouseMoveHandler(event: React.MouseEvent<HTMLDivElement>): void {
     event.preventDefault()
 
     const { clientX } = event
@@ -150,7 +146,7 @@ function Stars(): React.JSX.Element {
   const random = (): number => Math.random()
   return (
     <div className="absolute inset-0">
-      {[...Array(140)].map((_, i) => (
+      {Array.from({ length: 140 }).map((_, i) => (
         <motion.span
           animate={{
             top: `calc(${random() * 100}% + ${randomMove()}px)`,

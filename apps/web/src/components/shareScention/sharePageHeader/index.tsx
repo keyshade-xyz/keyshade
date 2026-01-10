@@ -1,5 +1,5 @@
-import { Logo } from '@public/shared'
 import React from 'react'
+import { Logo } from '@public/shared'
 
 function SharePageHeader() {
   return (
