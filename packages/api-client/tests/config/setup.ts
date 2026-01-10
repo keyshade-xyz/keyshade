@@ -3,8 +3,8 @@ import { exec } from 'child_process'
 export default async function teardown() {
   await executeCommand('docker compose down')
   await executeCommand('docker compose -f ../../docker-compose-test.yml up -d')
-  await executeCommand('cd ../.. && pnpm build:api')
-  await executeCommand('cd ../.. && sleep 2 && pnpm db:deploy-migrations', {
+  await executeCommand('cd ../.. && bun run build:api')
+  await executeCommand('cd ../.. && sleep 2 && bun run db:deploy-migrations', {
     DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
     PATH: process.env.PATH!
   })
@@ -31,7 +31,7 @@ function executeCommand(
 
 function startAPI(): Promise<void> {
   return new Promise((resolve) => {
-    const apiProcess = exec('pnpm run --filter=api start', {
+    const apiProcess = exec('bun run --filter=@keyshade/api start', {
       env: {
         PATH: process.env.PATH,
         DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',

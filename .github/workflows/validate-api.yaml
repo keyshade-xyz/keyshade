@@ -28,48 +28,42 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9.2.0
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          bun-version: 1.3.4
 
       - uses: actions/cache@v4
-        name: Setup pnpm cache
+        name: Setup bun cache
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-bun-
 
       - name: Install packages
         run: |
-          pnpm i
+          bun install --frozen-lockfile
 
       - name: Lint
         run: |
-          pnpm run lint:api
+          bun run lint:api
 
       - name: Build deps
         run: |
-          pnpm run db:generate-types
-          pnpm run build:schema
+          bun run db:generate-types
+          bun run build:schema
 
       - name: Unit tests
         run: |
-          pnpm run db:generate-types
-          pnpm run unit:api
+          bun run db:generate-types
+          bun run unit:api
 
       - name: E2E tests
         env:
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: secret
-        run: pnpm run e2e:api
+        run: bun run e2e:api
 
       - name: Upload e2e test coverage reports to Codecov
         uses: codecov/codecov-action@v3

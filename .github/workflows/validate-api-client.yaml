@@ -33,40 +33,34 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9.2.0
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          bun-version: 1.3.4
 
       - uses: actions/cache@v4
-        name: Setup pnpm cache
+        name: Setup bun cache
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-bun-
 
       - name: Install packages
         run: |
-          pnpm i
+          bun install --frozen-lockfile
 
       - name: Lint
         run: |
-          pnpm run lint:api-client
+          bun run lint:api-client
 
       - name: Build
         run: |
-          pnpm run build:api-client
+          bun run build:api-client
 
       - name: Test
         run: |
-          pnpm run test:api-client
+          bun run test:api-client
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
