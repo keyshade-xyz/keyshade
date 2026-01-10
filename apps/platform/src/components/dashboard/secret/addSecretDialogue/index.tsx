@@ -20,7 +20,10 @@ import {
   selectedProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { parseUpdatedEnvironmentValues } from '@/lib/utils'
+import {
+  parseUpdatedEnvironmentValues,
+  validateAlphanumericInput
+} from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddSecretDialog() {
@@ -41,6 +44,7 @@ export default function AddSecretDialog() {
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >({})
+  const [secretNameError, setSecretNameError] = useState<string>('')
 
   const createSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.createSecret({
@@ -133,15 +137,25 @@ export default function AddSecretDialog() {
                 className="w-[20rem]"
                 disabled={isLoading}
                 id="secret-name"
-                onChange={(e) =>
+                onChange={(e) => {
+                  setSecretNameError(
+                    !validateAlphanumericInput(e.target.value)
+                      ? 'Only English letters and digits are allowed.'
+                      : ''
+                  )
                   setRequestData({
                     ...requestData,
                     name: e.target.value
                   })
-                }
+                }}
                 placeholder="Enter the key of the secret"
                 value={requestData.name}
               />
+              {secretNameError ? (
+                <span className="text-xs text-red-500">
+                  {secretNameError}
+                </span>
+              ) : null}
             </div>
 
             <div className="w-114.5 flex h-11 items-center justify-center gap-6">
@@ -174,7 +188,7 @@ export default function AddSecretDialog() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-10.5 w-25 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                disabled={isLoading}
+                disabled={isLoading || Boolean(secretNameError)}
                 onClick={handleAddSecret}
               >
                 Add Secret

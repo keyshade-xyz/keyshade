@@ -21,6 +21,7 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import { validateAlphanumericInput } from '@/lib/utils'
 
 export interface AddWorkspaceDialogProps {
   trigger?: React.ReactNode
@@ -32,6 +33,7 @@ export function AddWorkspaceDialog({
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [workspaceNameError, setWorkspaceNameError] = useState<string>('')
 
   const createWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.createWorkspace({
@@ -118,10 +120,14 @@ export function AddWorkspaceDialog({
             </Label>
             <Input
               id="workspace-name"
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setWorkspaceNameError(!validateAlphanumericInput(e.target.value) ? 'Only English letters and digits are allowed.' : '')
+                setName(e.target.value)
+              }}
               placeholder="Enter your workspace name"
               value={name}
             />
+            {workspaceNameError ? <span className="text-xs text-red-500">{workspaceNameError}</span> : null}
           </div>
           <div className="flex justify-end gap-x-3">
             <Button
@@ -131,7 +137,7 @@ export function AddWorkspaceDialog({
             >
               Close
             </Button>
-            <Button disabled={isLoading} onClick={handleCreate}>
+            <Button disabled={isLoading || Boolean(workspaceNameError)} onClick={handleCreate}>
               Add workspace
             </Button>
           </div>

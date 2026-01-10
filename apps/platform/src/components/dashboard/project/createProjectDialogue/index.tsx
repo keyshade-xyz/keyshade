@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { Plus } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
@@ -40,6 +40,7 @@ export default function CreateProjectDialogue(): JSX.Element {
     setIsViewAndDownloadProjectKeysDialogOpen
   ] = useAtom(viewAndDownloadProjectKeysOpenAtom)
 
+  const [projectNameError, setProjectNameError] = useState<string>('')
   const [projectSlug, setProjectSlug] = useState<string>('')
   const [projectKeys, setProjectKeys] = useState<{
     projectName: string
@@ -122,6 +123,8 @@ export default function CreateProjectDialogue(): JSX.Element {
             <div className="h-116.5 flex w-full flex-col gap-4 py-4">
               {/* NAME */}
               <CreateProjectName
+                projectNameError={projectNameError}
+                setProjectNameError={setProjectNameError}
                 onChange={(value) => {
                   updateName(value)
                 }}
@@ -184,7 +187,7 @@ export default function CreateProjectDialogue(): JSX.Element {
           <div className="flex h-8 w-full justify-end">
             <Button
               className="font-inter h-9 w-32 rounded-md text-[0.875rem] font-medium"
-              disabled={isLoading}
+              disabled={isLoading || Boolean(projectNameError)}
               onClick={createNewProject}
               variant="secondary"
             >

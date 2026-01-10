@@ -20,7 +20,10 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { parseUpdatedEnvironmentValues } from '@/lib/utils'
+import {
+  parseUpdatedEnvironmentValues,
+  validateAlphanumericInput
+} from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddVariableDialogue(): React.JSX.Element {
@@ -42,6 +45,7 @@ export default function AddVariableDialogue(): React.JSX.Element {
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >({})
+  const [variableNameError, setVariableNameError] = useState<string>('')
 
   const createVariable = useHttp(() =>
     ControllerInstance.getInstance().variableController.createVariable({
@@ -135,15 +139,25 @@ export default function AddVariableDialogue(): React.JSX.Element {
               <Input
                 className="w-[20rem]"
                 id="variable-name"
-                onChange={(e) =>
+                onChange={(e) => {
+                  setVariableNameError(
+                    !validateAlphanumericInput(e.target.value)
+                      ? 'Only English letters and digits are allowed.'
+                      : ''
+                  )
                   setRequestData({
                     ...requestData,
                     name: e.target.value
                   })
-                }
+                }}
                 placeholder="Enter the key of the variable"
                 value={requestData.name}
               />
+              {variableNameError ? (
+                <span className="text-xs text-red-500">
+                  {variableNameError}
+                </span>
+              ) : null}
             </div>
 
             <div className="w-114.5 flex h-11 items-center justify-center gap-6">
@@ -175,7 +189,7 @@ export default function AddVariableDialogue(): React.JSX.Element {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-10.5 w-25 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                disabled={isLoading}
+                disabled={isLoading || Boolean(variableNameError)}
                 onClick={handleAddVariable}
               >
                 Add Variable

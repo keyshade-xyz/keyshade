@@ -20,6 +20,7 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import { validateAlphanumericInput } from '@/lib/utils'
 
 export default function AddEnvironmentDialogue(): React.JSX.Element {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
@@ -37,6 +38,7 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
     environmentDescription: ''
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [environmentNameError, setEnvironmentNameError] = useState<string>('')
 
   // Check if environment name is empty/only whitespace and whether is at least 3 chars length
   const MIN_ENV_NAME_LENGTH = 3
@@ -141,18 +143,23 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
               >
                 Environment Name
               </label>
+              <div className='flex flex-col gap-2 w-full'>
               <Input
                 className="w-[20rem]"
                 id="environment-name"
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = e.target.value
+                  setEnvironmentNameError(!validateAlphanumericInput(value) ? 'Only English letters and digits are allowed.' : '')
                   setNewEnvironmentData({
                     ...newEnvironmentData,
                     environmentName: e.target.value
                   })
-                }
+                }}
                 placeholder="Enter the key of the environment"
                 value={newEnvironmentData.environmentName}
               />
+              {environmentNameError ? <span className="text-xs text-red-500 my-2">{environmentNameError}</span> : null}
+              </div>
             </div>
 
             <div className="w-114.5 flex h-11 items-center justify-center gap-6">
@@ -179,7 +186,7 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-10.5 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                disabled={isLoading}
+                disabled={isLoading || Boolean(environmentNameError)}
                 onClick={handleAddEnvironment}
               >
                 Add Environment
