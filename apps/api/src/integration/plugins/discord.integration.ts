@@ -1,7 +1,9 @@
 import {
+  Event,
   EventType,
   IntegrationRunStatus,
-  IntegrationType
+  IntegrationType,
+  Project
 } from '@prisma/client'
 import {
   DiscordIntegrationMetadata,
@@ -9,7 +11,66 @@ import {
 } from '../integration.types'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import { makeTimedRequest } from '@/common/util'
+import { constructErrorBody, makeTimedRequest } from '@/common/util'
+import { BadRequestException } from '@nestjs/common'
+
+/**
+ * Validate that a webhook URL matches the Discord webhook pattern.
+ * @param url - The webhook URL to validate.
+ * @returns true if valid Discord webhook; false otherwise.
+ */
+function isValidDiscordWebhookUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    // Accept only discord.com or discordapp.com, path must be /api/webhooks/...
+    const allowedHosts = ['discord.com', 'discordapp.com']
+    if (!allowedHosts.includes(parsed.hostname)) {
+      return false
+    }
+    if (!parsed.pathname.startsWith('/api/webhooks/')) {
+      return false
+    }
+    if (parsed.protocol !== 'https:') {
+      return false
+    }
+    // Prevent basic SSRF bypass
+    return !(parsed.username || parsed.password)
+  } catch (e) {
+    return false
+  }
+}
+
+const DISCORD_INIT_MESSAGE = {
+  content: '🥁 Keyshade is now configured with this channel',
+  embeds: [
+    {
+      title: '🎉 Keyshade Integration Successful!',
+      description:
+        'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.',
+      color: 0x00ff00,
+      author: {
+        name: 'Keyshade',
+        url: 'https://keyshade.io'
+      },
+      fields: [
+        {
+          name: 'Status',
+          value: '✅ Connected',
+          inline: true
+        },
+        {
+          name: 'Webhook',
+          value: '✅ Valid',
+          inline: true
+        }
+      ],
+      footer: {
+        text: 'Keyshade Integration'
+      },
+      timestamp: new Date().toISOString()
+    }
+  ]
+}
 
 export class DiscordIntegration extends BaseIntegration {
   constructor(prisma: PrismaService) {
@@ -54,15 +115,89 @@ export class DiscordIntegration extends BaseIntegration {
     return new Set(['webhookUrl'])
   }
 
-  public init(): Promise<void> {
-    // TODO: Send a text message to the discord channel confirming keyshade was added
-    return Promise.resolve()
+  public async init(
+    privateKey: Project['privateKey'],
+    eventId: Event['id']
+  ): Promise<void> {
+    this.logger.log('Initializing Discord integration...')
+
+    const integration = this.getIntegration<DiscordIntegrationMetadata>()
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId,
+      integrationId: integration.id,
+      title: 'Initializing Discord integration'
+    })
+
+    try {
+      const { response, duration } = await makeTimedRequest(() =>
+        fetch(integration.metadata.webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(DISCORD_INIT_MESSAGE)
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        await response.text()
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to send initialization message to Discord: ${response.status} ${response.statusText}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Discord initialization failed',
+            `Discord returned ${response.status} ${response.statusText}`
+          )
+        )
+      } else {
+        this.logger.log(
+          `Successfully sent initialization message to Discord in ${duration}ms`
+        )
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to send initialization message to Discord: ${error}`
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        error instanceof Error ? error.message : String(error)
+      )
+
+      throw new BadRequestException(
+        constructErrorBody(
+          'Discord initialization failed',
+          'Failed to send initialization message to Discord'
+        )
+      )
+    }
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
     this.logger.log(`Emitting event to Discord: ${data.title}`)
 
     const integration = this.getIntegration<DiscordIntegrationMetadata>()
+
+    if (!isValidDiscordWebhookUrl(integration.metadata.webhookUrl)) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid Discord webhook URL',
+          "The provided webhook URL does not match Discord's official pattern and cannot be used."
+        )
+      )
+    }
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId: data.event.id,
@@ -84,7 +219,7 @@ export class DiscordIntegration extends BaseIntegration {
               description: data.description ?? 'No description provided',
               author: {
                 name: 'keyshade',
-                url: 'https://keyshade.xyz'
+                url: 'https://keyshade.io'
               },
               fields: [
                 {
@@ -115,6 +250,42 @@ export class DiscordIntegration extends BaseIntegration {
       )
     } else {
       this.logger.log(`Successfully emitted event to Discord: ${data.title}`)
+    }
+  }
+
+  /**
+   * Test that the webhook URL is valid & reachable.
+   */
+  public async validateConfiguration(metadata: DiscordIntegrationMetadata) {
+    this.logger.log(`Validating Discord webhook URL: ${metadata.webhookUrl}`)
+
+    if (!isValidDiscordWebhookUrl(metadata.webhookUrl)) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid Discord webhook URL',
+          "The provided webhook URL does not match Discord's official pattern and cannot be used."
+        )
+      )
+    }
+
+    const { response, duration } = await makeTimedRequest(() =>
+      fetch(metadata.webhookUrl, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+    )
+
+    this.logger.log(
+      `Discord validation responded ${response.status} in ${duration}ms`
+    )
+
+    if (!response.ok) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Webhook validation failed',
+          `Discord returned ${response.status} ${response.statusText}`
+        )
+      )
     }
   }
 }

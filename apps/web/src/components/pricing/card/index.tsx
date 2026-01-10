@@ -9,6 +9,7 @@ import {
   StarsRightSVG
 } from '@public/pricing'
 import type { PriceCardPropsType } from '@/types'
+import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function PriceCard({
   title,
@@ -19,12 +20,17 @@ function PriceCard({
   spaceProjects,
   spaceUsers,
   spaceAccessSpecifier,
-  spaceIntegerations,
+  spaceIntegrations,
   spaceSecrets,
   spaceEnvironment,
   spaceLiveSupport,
   miscFeatures,
-  PricingType
+  PricingType,
+  versionControl,
+  snapshots,
+  customRoles,
+  auditlogs,
+  spaceVariables
 }: Readonly<PriceCardPropsType>): React.JSX.Element {
   const returnButtonLabel = (): string => {
     if (price === 0) {
@@ -34,6 +40,16 @@ function PriceCard({
       return 'Contact Us'
     }
     return 'Buy Now'
+  }
+  const handleButtonClick = () => {
+    if (price < 0) {
+      window.location.href =
+        'mailto:support@keyshade.io?subject=Enterprise Plan Inquiry&body=Hi, I am interested in the Enterprise plan. Please provide more details about pricing, features, and next steps.'
+    } else if (isUserLoggedIn()) {
+      window.location.href = 'https://app.keyshade.io/dashboard/billing'
+    } else {
+      window.location.href = 'https://app.keyshade.io/auth'
+    }
   }
 
   return (
@@ -83,7 +99,7 @@ function PriceCard({
             Free
           </div>
         ) : (
-          <div className="mt-2 flex flex-row items-end justify-start gap-1  text-sm sm:mt-4">
+          <div className="mt-2 flex flex-row items-center justify-start gap-1  text-sm sm:mt-4">
             <div className="text-xl text-white/80 md:text-3xl">
               {price < 0
                 ? 'Custom Pricing'
@@ -91,7 +107,7 @@ function PriceCard({
             </div>
             {price > 0 ? (
               <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
-                {PricingType === 'monthly' ? '/ month' : '/ year'}
+                per user/month
               </div>
             ) : null}
           </div>
@@ -99,6 +115,7 @@ function PriceCard({
 
         <button
           className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
+          onClick={handleButtonClick}
           type="button"
         >
           {returnButtonLabel()}
@@ -119,6 +136,12 @@ function PriceCard({
             <UserSVG />
             <div>{spaceUsers < 0 ? 'Unlimited' : spaceUsers} Users</div>
           </div>
+          <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              {customRoles < 0 ? 'Unlimited' : customRoles} Custom Roles
+            </div>
+          </div>
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
             <div>
@@ -133,23 +156,45 @@ function PriceCard({
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
             <div>
-              {spaceIntegerations < 0 ? 'Unlimited' : spaceIntegerations}{' '}
-              Integerations
+              {spaceVariables < 0 ? 'Unlimited' : spaceVariables} Variables
+            </div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              {spaceIntegrations < 0 ? 'Unlimited' : spaceIntegrations}{' '}
+              integrations
+            </div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              last {versionControl < 0 ? 'Unlimited' : versionControl} versions
+            </div>
+          </div>
+          {snapshots > 0 && (
+            <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+              <UserSVG />
+              <div>access to {snapshots} snapshots</div>
+            </div>
+          )}
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              {auditlogs < 0 ? 'Unlimited' : auditlogs} days of audit logs
             </div>
           </div>
 
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{spaceAccessSpecifier} Of Access Specifier </div>
+            <div>{spaceAccessSpecifier} Access Specifier </div>
           </div>
 
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
-            <SupportSVG />
-            {spaceLiveSupport ? (
-              <div> Email & Live Support</div>
-            ) : (
-              <div> Email Support</div>
-            )}
+            <div className="flex w-fit">
+              <SupportSVG />
+            </div>
+            <div>{spaceLiveSupport}</div>
           </div>
         </div>
 

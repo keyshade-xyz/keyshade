@@ -1,20 +1,20 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import type {
-  ApiKey,
   Environment,
-  GetAllEnvironmentsOfProjectResponse,
-  GetMembersResponse,
+  EventTypeEnum,
   Integration,
-  ProjectWithTierLimitAndCount,
+  Project,
   Secret,
   SecretVersion,
   User,
   Variable,
   VariableVersion,
-  WorkspaceRole,
-  WorkspaceWithTierLimitAndProjectCount
+  Workspace,
+  WorkspaceMember,
+  WorkspaceRole
 } from '@keyshade/schema'
+import type { VercelEnvironmentMapping } from '@keyshade/common'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
@@ -47,21 +47,50 @@ export const globalSearchDataAtom = atom<{
   projects: []
 })
 
-export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
-  []
-)
-export const selectedWorkspaceAtom =
-  atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
+export const allWorkspacesAtom = atom<Workspace[]>([])
 
-export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
-  null
-)
-export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
+type PartialProject = Pick<Project, 'slug' | 'storePrivateKey' | 'privateKey'>
 
-export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
-export const selectedMemberAtom = atom<
-  GetMembersResponse['items'][number] | null
->(null)
+export const integrationFormAtom = atom<{
+  name: string
+  selectedEvents: Set<EventTypeEnum>
+  selectedProjectSlug: Project['slug'] | null
+  selectedProject: PartialProject | null
+  selectedEnvironments: Environment['slug'][]
+  metadata: Record<string, unknown>
+  mappings: VercelEnvironmentMapping
+  manualPrivateKey: string
+}>({
+  name: '',
+  selectedEvents: new Set<EventTypeEnum>(),
+  selectedProjectSlug: null,
+  selectedProject: null,
+  selectedEnvironments: [],
+  metadata: {},
+  mappings: {},
+  manualPrivateKey: ''
+})
+
+export const resetIntegrationFormAtom = atom(null, (get, set) => {
+  set(integrationFormAtom, {
+    name: '',
+    selectedEvents: new Set<EventTypeEnum>(),
+    selectedProjectSlug: null,
+    selectedProject: null,
+    selectedEnvironments: [],
+    metadata: {},
+    mappings: {},
+    manualPrivateKey: ''
+  })
+})
+
+export const selectedWorkspaceAtom = atom<Workspace | null>(null)
+
+export const selectedProjectAtom = atom<Project | null>(null)
+export const projectsOfWorkspaceAtom = atom<Project[]>([])
+
+export const membersOfWorkspaceAtom = atom<WorkspaceMember[]>([])
+export const selectedMemberAtom = atom<WorkspaceMember | null>(null)
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(
@@ -99,29 +128,30 @@ export const revisionsOfSecretAtom = atom<
   }[]
 >([])
 
-export const selectedEnvironmentAtom = atom<
-  GetAllEnvironmentsOfProjectResponse['items'][number] | null
->(null)
-export const environmentsOfProjectAtom = atom<
-  GetAllEnvironmentsOfProjectResponse['items']
->([])
+export const selectedEnvironmentAtom = atom<Environment | null>(null)
+export const environmentsOfProjectAtom = atom<Omit<Environment, 'project'>[]>(
+  []
+)
 
 export const selectedRoleAtom = atom<WorkspaceRole | null>(null)
 export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
 export const integrationsOfWorkspaceAtom = atom<Integration[]>([])
 
-export const selectedApiKeyAtom = atom<ApiKey | null>(null)
-export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
 export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
 export const localProjectPrivateKeyAtom = atom<
   {
     slug: Environment['slug']
-    key: ProjectWithTierLimitAndCount['privateKey']
+    key: Project['privateKey']
   }[]
 >([])
+export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(
+  'NONE'
+)
 
 export const workspaceProjectCountAtom = atom<number>(0)
 export const workspaceMemberCountAtom = atom<number>(0)
+export const workspaceRolesCountAtom = atom<number>(0)
+export const workspaceIntegrationCountAtom = atom<number>(0)
 export const projectEnvironmentCountAtom = atom<number>(0)
 export const projectSecretCountAtom = atom<number>(0)
 export const projectVariableCountAtom = atom<number>(0)
@@ -144,9 +174,13 @@ export const deleteSecretOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentValueOfSecretOpenAtom = atom<boolean>(false)
 export const secretRevisionsOpenAtom = atom<boolean>(false)
 export const rollbackSecretOpenAtom = atom<boolean>(false)
+export const disableSecretOpenAtom = atom<boolean>(false)
 
 export const selectedIntegrationAtom = atom<Integration | null>(null)
 export const createIntegrationOpenAtom = atom<boolean>(false)
+export const integrationLoadingAtom = atom<boolean>(false)
+export const integrationTestingAtom = atom<boolean>(false)
+export const createIntegrationTypeAtom = atom<Integration['type'] | null>(null)
 export const editIntegrationOpenAtom = atom<boolean>(false)
 export const deleteIntegrationOpenAtom = atom<boolean>(false)
 

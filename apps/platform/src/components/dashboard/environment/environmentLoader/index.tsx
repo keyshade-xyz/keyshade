@@ -1,8 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function EnvironmentLoader() {
+export default function EnvironmentLoader(): React.JSX.Element {
     return (
-        <div className="w-full max-w-md p-6 rounded-lg bg-white/5 text-white space-y-4">
+        <div className="w-full p-6 rounded-lg bg-white/5 text-white space-y-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-2">
                 <Skeleton className="h-8 w-32" />
                 <Skeleton className="h-9 w-32 rounded-md" />

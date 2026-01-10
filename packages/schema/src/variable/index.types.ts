@@ -17,16 +17,31 @@ import {
   GetAllVariablesOfEnvironmentResponseSchema,
   DeleteEnvironmentValueOfVariableRequestSchema,
   DeleteEnvironmentValueOfVariableResponseSchema,
-  VariableVersionSchema
+  VariableRevisionSchema,
+  BulkCreateVariableRequestSchema,
+  BulkCreateVariableResponseSchema,
+  DisableVariableRequestSchema,
+  DisableVariableResponseSchema,
+  EnableVariableRequestSchema,
+  EnableVariableResponseSchema,
+  getAllDisabledEnvironmentsOfVariableRequestSchema,
+  getAllDisabledEnvironmentsOfVariableResponseSchema
 } from '.'
 
 export type Variable = z.infer<typeof VariableSchema>
-export type VariableVersion = z.infer<typeof VariableVersionSchema>
+export type VariableVersion = z.infer<typeof VariableRevisionSchema>
 
 export type CreateVariableRequest = z.infer<typeof CreateVariableRequestSchema>
 
 export type CreateVariableResponse = z.infer<
   typeof CreateVariableResponseSchema
+>
+
+export type BulkCreateVariableRequest = z.infer<
+  typeof BulkCreateVariableRequestSchema
+>
+export type BulkCreateVariableResponse = z.infer<
+  typeof BulkCreateVariableResponseSchema
 >
 
 export type UpdateVariableRequest = z.infer<typeof UpdateVariableRequestSchema>
@@ -49,6 +64,28 @@ export type RollBackVariableRequest = z.infer<
 
 export type RollBackVariableResponse = z.infer<
   typeof RollBackVariableResponseSchema
+>
+
+export type DisableVariableRequest = z.infer<
+  typeof DisableVariableRequestSchema
+>
+
+export type DisableVariableResponse = z.infer<
+  typeof DisableVariableResponseSchema
+>
+
+export type EnableVariableRequest = z.infer<typeof EnableVariableRequestSchema>
+
+export type EnableVariableResponse = z.infer<
+  typeof EnableVariableResponseSchema
+>
+
+export type GetAllDisabledEnvironmentsOfVariableRequest = z.infer<
+  typeof getAllDisabledEnvironmentsOfVariableRequestSchema
+>
+
+export type GetAllDisabledEnvironmentsOfVariableResponse = z.infer<
+  typeof getAllDisabledEnvironmentsOfVariableResponseSchema
 >
 
 export type DeleteVariableRequest = z.infer<typeof DeleteVariableRequestSchema>

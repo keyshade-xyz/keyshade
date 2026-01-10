@@ -1,19 +1,17 @@
 // eslint-disable-next-line prettier/prettier
 import { getCollectiveProjectAuthorities } from '@/common/collective-authorities'
 import { createEvent } from '@/common/event'
-import { paginate } from '@/common/paginate'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
-import {
-  associateWorkspaceOwnerDetails,
-  createWorkspace
-} from '@/common/workspace'
+import { createWorkspace } from '@/common/workspace'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  OnModuleInit
 } from '@nestjs/common'
 import {
   Authority,
@@ -31,23 +29,136 @@ import { CreateWorkspace } from './dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from './dto/update.workspace/update.workspace'
 import { AuthenticatedUser } from '@/user/user.types'
 import { UpdateBlacklistedIpAddresses } from './dto/update.blacklistedIpAddresses/update.blacklistedIpAddresses'
-import {
-  WorkspaceWithLastUpdatedByAndOwner,
-  WorkspaceWithLastUpdatedByAndOwnerAndProjects
-} from './workspace.types'
-import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { HydrationService } from '@/common/hydration.service'
+import { HydratedWorkspace } from './workspace.types'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
+import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
+import { Cron, CronExpression } from '@nestjs/schedule'
 
 @Injectable()
-export class WorkspaceService {
+export class WorkspaceService implements OnModuleInit {
   private readonly logger = new Logger(WorkspaceService.name)
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService,
+    private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly collectiveAuthorityCacheService: CollectiveAuthoritiesCacheService
   ) {}
+
+  /**
+   * Keeps the workspace and its dependent records in sync with
+   * database changes. Here's a list of things it does for now:
+   * - creates a subscription for every workspace that doesn't have one
+   */
+  async onModuleInit() {
+    const currentEnv = process.env.NODE_ENV as unknown as string
+    if (currentEnv !== 'e2e') {
+      // Create default subscriptions for workspaces that don't have one
+      this.logger.log('Fetching workspaces without any subscription...')
+      const workspacesWithoutSubscription =
+        await this.prisma.workspace.findMany({
+          where: {
+            subscription: null
+          }
+        })
+      this.logger.log(
+        `Found ${workspacesWithoutSubscription.length} workspaces without any subscription`
+      )
+
+      const createSubscriptionOps = []
+      for (const workspace of workspacesWithoutSubscription) {
+        this.logger.log(
+          `Creating a subscription for workspace ${workspace.slug}`
+        )
+        createSubscriptionOps.push(
+          this.prisma.subscription.create({
+            data: {
+              workspaceId: workspace.id,
+              userId: workspace.ownerId
+            }
+          })
+        )
+      }
+      await this.prisma.$transaction(createSubscriptionOps)
+      this.logger.log('Finished creating subscriptions for workspaces')
+    }
+  }
+
+  /**
+   * There are cases where the user account gets created, but due to some errors,
+   * the default workspace is not created. This method creates a default workspace
+   * for the user account.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  public async createDefaultWorkspaces() {
+    try {
+      this.logger.log('Scanning for users without a default workspace...')
+
+      const workspaces = await this.prisma.workspace.findMany({
+        where: {
+          isDefault: true
+        },
+        distinct: ['ownerId']
+      })
+
+      const ownerIds: User['id'][] = workspaces.map(
+        (workspace) => workspace.ownerId
+      )
+
+      this.logger.log(
+        `Found ${workspaces.length} default workspaces for ${ownerIds.length} users`
+      )
+
+      const usersWithoutDefaultWorkspace = await this.prisma.user.findMany({
+        where: {
+          id: {
+            notIn: ownerIds
+          },
+          name: {
+            not: 'Admin'
+          }
+        }
+      })
+
+      this.logger.log(
+        `Found ${usersWithoutDefaultWorkspace.length} users without a default workspace`
+      )
+
+      for (const user of usersWithoutDefaultWorkspace) {
+        this.logger.log(
+          `Creating a default workspace for user ${user.id} (${user.email})`
+        )
+        const workspace = await createWorkspace(
+          user as AuthenticatedUser,
+          {
+            name: 'My Workspace'
+          },
+          this.prisma,
+          this.slugGenerator,
+          this.hydrationService,
+          this.workspaceCacheService,
+          true
+        )
+        this.logger.log(
+          `Created workspace ${workspace.slug} for user ${user.id}`
+        )
+      }
+
+      this.logger.log(
+        `Finished creating default workspaces ${usersWithoutDefaultWorkspace.length} users`
+      )
+    } catch (error) {
+      this.logger.error(
+        `Error creating default workspaces: ${error.message}`,
+        error.stack
+      )
+    }
+  }
 
   /**
    * Creates a new workspace for the given user.
@@ -59,25 +170,21 @@ export class WorkspaceService {
   async createWorkspace(
     user: AuthenticatedUser,
     dto: CreateWorkspace
-  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndProjects> {
+  ): Promise<HydratedWorkspace> {
     this.logger.log(
       `User ${user.id} attempted to create a workspace ${dto.name}`
     )
 
     await this.existsByName(dto.name, user.id)
 
-    const newWorkspace = await createWorkspace(
+    return await createWorkspace(
       user,
       dto,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService,
+      this.workspaceCacheService
     )
-
-    return {
-      ...newWorkspace,
-      projects: await this.getProjectsOfWorkspace(newWorkspace, user),
-      ...(await this.parseWorkspaceItemLimits(newWorkspace.id))
-    }
   }
 
   /**
@@ -92,7 +199,7 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<HydratedWorkspace> {
     this.logger.log(
       `User ${user.id} attempted to update a workspace ${workspaceSlug}`
     )
@@ -104,7 +211,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.UPDATE_WORKSPACE]
       })
 
@@ -141,15 +248,7 @@ export class WorkspaceService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      }
+      include: InclusionQuery.Workspace
     })
     this.logger.log(`Updated workspace ${workspace.name} (${workspace.id})`)
 
@@ -169,10 +268,15 @@ export class WorkspaceService {
       this.prisma
     )
 
-    return {
-      ...updatedWorkspace,
-      ownedBy: workspace.ownedBy
-    }
+    const hydratedWorkspace = await this.hydrationService.hydrateWorkspace({
+      workspace: updatedWorkspace,
+      user,
+      authorizationService: this.authorizationService
+    })
+
+    await this.workspaceCacheService.setRawWorkspace(updatedWorkspace)
+
+    return hydratedWorkspace
   }
 
   /**
@@ -196,7 +300,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.DELETE_WORKSPACE]
       })
 
@@ -224,6 +328,10 @@ export class WorkspaceService {
       }
     })
 
+    await this.workspaceCacheService.removeWorkspaceCache(workspace)
+    await this.collectiveAuthorityCacheService.removeWorkspaceCollectiveAuthorityCache(
+      workspace.id
+    )
     this.logger.log(`Deleted workspace ${workspace.name} (${workspace.slug})`)
   }
 
@@ -237,7 +345,7 @@ export class WorkspaceService {
   async getWorkspaceBySlug(
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
-  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndProjects> {
+  ): Promise<HydratedWorkspace> {
     this.logger.log(
       `User ${user.id} attempted to get workspace ${workspaceSlug}`
     )
@@ -246,19 +354,11 @@ export class WorkspaceService {
     this.logger.log(
       `Checking if user has authority to read workspace ${workspaceSlug}`
     )
-    const workspace =
-      await this.authorizationService.authorizeUserAccessToWorkspace({
-        user,
-        entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_USERS]
-      })
-
-    return {
-      ...workspace,
-      isDefault: workspace.isDefault && workspace.ownerId === user.id,
-      projects: await this.getProjectsOfWorkspace(workspace, user),
-      ...(await this.parseWorkspaceItemLimits(workspace.id))
-    }
+    return await this.authorizationService.authorizeUserAccessToWorkspace({
+      user,
+      slug: workspaceSlug,
+      authorities: [Authority.READ_WORKSPACE]
+    })
   }
 
   /**
@@ -278,7 +378,7 @@ export class WorkspaceService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedWorkspace>> {
     this.logger.log(`User ${user.id} attempted to get workspaces of self`)
 
     // Get all workspaces of user for page with limit
@@ -301,28 +401,12 @@ export class WorkspaceService {
           contains: search
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      }
+      include: InclusionQuery.Workspace
     })
 
     this.logger.log(
       `Fetched workspaces of user ${user.id}. Count: ${items.length}`
     )
-
-    // Parsing projects of workspaces
-    this.logger.log(`Parsing projects of workspaces of user ${user.id}`)
-    for (const workspace of items) {
-      this.logger.log(`Parsing projects of workspace ${workspace.slug}`)
-      workspace['projects'] = await this.getProjectsOfWorkspace(workspace, user)
-      this.logger.log(`Parsed projects of workspace ${workspace.slug}`)
-    }
 
     // get total count of workspaces of the user
     const totalCount = await this.prisma.workspace.count({
@@ -350,16 +434,14 @@ export class WorkspaceService {
 
     return {
       items: await Promise.all(
-        items.map(async (item) => {
-          return await associateWorkspaceOwnerDetails(
-            {
-              ...item,
-              isDefault: item.isDefault && item.ownerId === user.id,
-              ...(await this.parseWorkspaceItemLimits(item.id))
-            },
-            this.prisma
-          )
-        })
+        items.map(
+          async (item) =>
+            await this.hydrationService.hydrateWorkspace({
+              workspace: item,
+              user,
+              authorizationService: this.authorizationService
+            })
+        )
       ),
       metadata
     }
@@ -385,9 +467,21 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to export workspace data of disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {}
@@ -490,7 +584,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [
           Authority.READ_WORKSPACE,
           Authority.READ_PROJECT,
@@ -663,7 +757,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
@@ -682,7 +776,7 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateBlacklistedIpAddresses
-  ) {
+  ): Promise<Workspace['blacklistedIpAddresses']> {
     this.logger.log(
       `User ${user.id} attempted to update blacklisted IP addresses for workspace ${workspaceSlug}`
     )
@@ -694,7 +788,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
@@ -728,6 +822,8 @@ export class WorkspaceService {
       this.prisma
     )
 
+    await this.workspaceCacheService.setRawWorkspace(updatedWorkspace)
+
     return updatedWorkspace.blacklistedIpAddresses
   }
 
@@ -756,7 +852,9 @@ export class WorkspaceService {
       const authorities = await getCollectiveProjectAuthorities(
         userId,
         project,
-        this.prisma
+        this.prisma,
+        this.workspaceCacheService,
+        this.collectiveAuthorityCacheService
       )
       if (
         authorities.has(Authority.READ_PROJECT) ||
@@ -912,107 +1010,5 @@ export class WorkspaceService {
     }
 
     this.logger.log(`Workspace ${name} does not exist for user ${userId}`)
-  }
-
-  /**
-   * Retrieves the count of projects within a workspace that a user has permission to access.
-   *
-   * @param workspaceId The ID of the workspace to retrieve projects from.
-   * @param userId The ID of the user whose access permissions are being checked.
-   * @returns The number of projects the user has authority to access within the specified workspace.
-   * @private
-   */
-
-  private async getProjectsOfWorkspace(
-    workspace: Workspace,
-    user: AuthenticatedUser
-  ) {
-    const projects = await this.prisma.project.findMany({
-      where: {
-        workspaceId: workspace.id
-      }
-    })
-
-    let accessibleProjectCount = 0
-
-    for (const project of projects) {
-      let hasAuthority = null
-      try {
-        hasAuthority =
-          await this.authorizationService.authorizeUserAccessToProject({
-            user,
-            entity: { slug: project.slug },
-            authorities: [Authority.READ_PROJECT]
-          })
-      } catch (_ignored) {
-        this.logger.log(
-          `User ${user.id} does not have access to project ${project.slug}`
-        )
-      }
-
-      if (hasAuthority) {
-        accessibleProjectCount++
-      }
-    }
-    return accessibleProjectCount
-  }
-
-  /**
-   * Parses the tier limits for a given workspace and returns an object containing
-   * the maximum allowed and current total of members and projects.
-   *
-   * @param workspace The workspace to parse tier limits for.
-   * @param tierLimitService The service used to obtain tier limits.
-   * @param prisma The Prisma client for database operations.
-   * @returns A promise that resolves to an object containing the workspace with
-   * tier limits, including maximum allowed and total members and projects.
-   */
-
-  private async parseWorkspaceItemLimits(
-    workspaceId: Workspace['id']
-  ): Promise<{
-    maxAllowedProjects: number
-    totalProjects: number
-    maxAllowedMembers: number
-    totalMembers: number
-  }> {
-    this.logger.log(
-      `Parsing workspace item limits for workspace ${workspaceId}`
-    )
-
-    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
-    // Get the tier limit for the members in the workspace
-    const maxAllowedMembers =
-      this.tierLimitService.getMemberTierLimit(workspaceId)
-
-    // Get total members in the workspace
-    const totalMembers = await this.prisma.workspaceMember.count({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
-
-    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
-    // Get project tier limit
-    const maxAllowedProjects =
-      this.tierLimitService.getProjectTierLimit(workspaceId)
-
-    // Get total projects in the workspace
-    const totalProjects = await this.prisma.project.count({
-      where: {
-        workspaceId
-      }
-    })
-    this.logger.log(
-      `Found ${totalProjects} projects in workspace ${workspaceId}`
-    )
-
-    return {
-      maxAllowedMembers,
-      totalMembers,
-      maxAllowedProjects,
-      totalProjects
-    }
   }
 }

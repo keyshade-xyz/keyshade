@@ -219,3 +219,234 @@
 
 - Updated `keyshade project import` to have better feedback
 - Modified Logger functions and implement new table function, revamping cli outputs
+
+## 3.2.1
+
+### Minor Changes
+
+- Updated `keyshade project import` to have better feedback
+- Modified Logger functions and implement new table function, revamping cli outputs
+
+### Patches
+
+- Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
+
+## 3.2.2-stage.1
+
+### Minor Changes
+
+- Added `-e/--environment` option to `keyshade run` command to override the environment configuration at runtime
+
+## 3.2.2-stage.2
+
+### Minor Changes
+
+- Fixed error handling in run command and socket notifier that displayed [object Object]; errors are now properly formatted for clearer CLI output
+
+# 3.2.2
+
+### Minor Changes
+
+- Added `-e/--environment` option to `keyshade run` command to override the environment configuration at runtime
+- Fixed error handling in run command and socket notifier that displayed [object Object]; errors are now properly formatted for clearer CLI output
+
+# 3.2.3-stage.1
+
+### Minor Changes
+
+- Added request and response validation to `keyshade environment` subcommands
+
+# 3.2.3-stage.2
+
+### Minor Changes
+
+- Removed email preference parsing in `keyshade init` command
+
+# 3.2.3
+
+### Minor Changes
+
+- Added request and response validation to `keyshade environment` subcommands
+- Removed email preference parsing in `keyshade init` command
+
+# 3.3.0-stage.1
+
+### Minor Changes
+
+- Interactive mode for `keyshade run` command
+
+### Patches
+
+- `keyshade init` no longer overwrites existing private-keys.json file.
+
+# 3.3.0-stage.3
+
+### Minor Changes
+
+- Interactive code for `keyshade init` command
+
+# 3.4.0-stage.1
+
+- `keyshade login` command added to support interactive login
+- `keyshade profile create, delete, use` commands deleted
+- `keyshade profile list` command updated
+- `keyshade profile switch` allows users to switch between profiles
+- `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend
+
+# 3.4.0
+
+### Features
+
+- `keyshade login` command added to support interactive login
+- `keyshade profile create, delete, use` commands deleted
+- `keyshade profile list` command updated
+- `keyshade profile switch` allows users to switch between profiles
+- `keyshade profile remove` allows users to remove a profile, and log out of the CLI session in the backend
+- 
+### Minor Changes
+
+- Interactive code for `keyshade init` command
+- Interactive mode for `keyshade run` command
+
+### Patches
+
+- `keyshade init` no longer overwrites existing private-keys.json file.
+
+# 3.4.1.stage-1
+
+### Patches
+
+- Removed API key validation from `keyshade run`
+- Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.0.stage-1
+
+### Minor changes
+
+- Improved DX of `keyshade run` command
+
+# 3.5.0
+
+### Minor changes
+
+- Improved DX of `keyshade run` command
+
+### Patches
+
+- Removed API key validation from `keyshade run`
+- Fixed invalid field referencing in variable, and secret commands
+
+# 3.5.1
+
+## Patches
+
+- Update domain to keyshade.io
+
+# 3.5.2
+
+## Patches
+
+- Update URL retrival in login command
+
+# 3.5.3
+
+## Patches
+
+- Updated `keyshade run` command to use POSIX
+- `keyshade run` command now compatible with both Windows and Unix/Linux
+
+# 3.6.0-stage.1
+
+## Minor Changes
+
+- Added `keyshade pat` base command
+- Added `keyshade pat create` command
+- Added `keyshade pat list` command
+- Added `keyshade pat delete` command
+- Added `keyshade pat update` command
+- Added `keyshade pat regenerate` command
+
+# 3.6.0-stage.2
+
+## Minor Changes
+
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command
+
+## 3.6.0-stage.3
+
+## Minor Changes
+
+- Added `keyshade reset` to wipe local profile configuration files.
+
+## 3.6.0
+
+### Minor Changes
+
+- Added `keyshade pat` base command
+- Added `keyshade pat create` command
+- Added `keyshade pat list` command
+- Added `keyshade pat delete` command
+- Added `keyshade pat update` command
+- Added `keyshade pat regenerate` command
+- Added `keyshade import` command
+- Improved efficiency of bulk import
+- Removed `keyshade project import` command
+- Added `keyshade reset` to wipe local profile configuration files.
+
+## 3.6.1-stage.0
+
+### Bug Fixes
+
+- Remove sentry dependency
+- Remove error reporting
+
+## 3.6.1
+
+### Bug Fixes
+
+- Remove sentry dependency
+- Remove error reporting
+
+## 3.6.2-stage.1
+
+### Patches
+
+- Update the name of the command to always display `keyshade`
+
+## 3.6.3
+
+### Patches
+
+- Update the name of the command to always display `keyshade`
+
+## 3.6.4
+
+### Patches
+
+- Fix a bug where all command names were switched to `keyshade`
+
+## 3.7.0-stage.1
+
+### Minor Changes
+
+- `keyshade run` now accepts all configurations via flags
+
+## 3.7.0
+
+### Minor Changes
+
+- `keyshade run` now accepts all configurations via flags
+
+## 3.8.0-stage.1
+
+### Minor Changes
+
+- Added a confirmation prompt to the `workspace delete` command, displaying a list of consequences before proceeding with deletion.
+
+## 3.8.0
+
+### Minor Changes
+
+- Added a confirmation prompt to the `workspace delete` command, displaying a list of consequences before proceeding with deletion.

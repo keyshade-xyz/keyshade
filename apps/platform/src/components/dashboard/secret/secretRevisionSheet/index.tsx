@@ -1,7 +1,8 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Environment, SecretVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
+import { decrypt } from '@keyshade/common'
 import { RollbackSVG } from '@public/svg/shared'
 import {
   Sheet,
@@ -22,16 +23,18 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent
 } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 
 function Loader() {
   return (
-    <div className="flex h-[4rem] animate-pulse items-center gap-x-3 rounded-xl bg-white/5 p-5">
+    <div className="flex h-16 animate-pulse items-center gap-x-3 rounded-xl bg-white/5 p-5">
       <div className="h-5 w-[80%] rounded-full bg-white/5" />
       <div className="h-5 w-[20%] rounded-full bg-white/5" />
     </div>
@@ -39,6 +42,9 @@ function Loader() {
 }
 
 export default function SecretRevisionsSheet(): React.JSX.Element {
+  const [decryptedRevisions, setDecryptedRevisions] = useState<
+    Record<number, string>
+  >({})
   const [isSecretRevisionsOpen, setIsSecretRevisionsOpen] = useAtom(
     secretRevisionsOpenAtom
   )
@@ -51,20 +57,17 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
     selectedSecretRollbackVersionAtom
   )
   const [revisions, setRevisions] = useAtom(revisionsOfSecretAtom)
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const isDecrypted = useMemo(
-    () => selectedProject?.storePrivateKey === true || false,
-    [selectedProject]
-  )
+  const isAuthorizedToEditSecret = selectedSecret?.entitlements.canUpdate
 
   const getAllRevisionsOfSecret = useHttp(
     (environmentSlug: Environment['slug']) =>
       ControllerInstance.getInstance().secretController.getRevisionsOfSecret({
         environmentSlug,
-        secretSlug: selectedSecret!.secret.slug,
-        decryptValue: isDecrypted
+        secretSlug: selectedSecret!.slug
       })
   )
 
@@ -110,6 +113,39 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
     }
   }, [environments, getAllRevisionsOfSecret, selectedSecret, setRevisions])
 
+  useEffect(() => {
+    if (!revisions.length) return
+
+    revisions.forEach(({ versions }) => {
+      versions.forEach((revision) => {
+        if (decryptedRevisions[revision.version]) return
+
+        if (projectPrivateKey) {
+          decrypt(projectPrivateKey, revision.value)
+            .then((decrypted) => {
+              setDecryptedRevisions((prev) => ({
+                ...prev,
+                [revision.version]: decrypted
+              }))
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console -- console.error is used for debugging
+              console.error('Decryption failed:', error)
+              setDecryptedRevisions((prev) => ({
+                ...prev,
+                [revision.version]: 'Hidden'
+              }))
+            })
+        } else {
+          setDecryptedRevisions((prev) => ({
+            ...prev,
+            [revision.version]: 'Hidden'
+          }))
+        }
+      })
+    })
+  }, [projectPrivateKey, revisions, decryptedRevisions])
+
   return (
     <Sheet
       onOpenChange={(open) => setIsSecretRevisionsOpen(open)}
@@ -118,11 +154,11 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">
-            {selectedSecret?.secret.name}&apos;s revisions
+            {selectedSecret?.name}&apos;s revisions
           </SheetTitle>
           <SheetDescription className="text-white/60">
-            See all the values of {selectedSecret?.secret.name} from the past.
-            You can also roll back to a previous version from here.
+            See all the values of {selectedSecret?.name} from the past. You can
+            also roll back to a previous version from here.
           </SheetDescription>
         </SheetHeader>
         <div className="my-10 flex w-full flex-col">
@@ -144,7 +180,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                   versions
                 }) => (
                   <AccordionItem
-                    className="rounded-xl bg-white/[3%] px-5 transition-all duration-150 ease-in hover:bg-white/[5%]"
+                    className="rounded-xl bg-white/3 px-5 transition-all duration-150 ease-in hover:bg-white/5"
                     key={environmentName}
                     value={environmentName}
                   >
@@ -162,12 +198,12 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                       ) : (
                         versions.map((revision, index) => (
                           <div
-                            className={`group flex w-full flex-col gap-y-2 border-white/15 py-5 ${revision.version !== 1 ? 'border-b-[1px] border-white/15' : ''}`}
+                            className={`group flex w-full flex-col gap-y-2 border-white/15 py-5 ${revision.version !== 1 ? 'border-b border-white/15' : ''}`}
                             key={revision.version}
                           >
                             <div className="flex w-full flex-row justify-between">
                               <div className="font-semibold">
-                                {isDecrypted ? revision.value : 'Hidden'}
+                                {decryptedRevisions[revision.version]}
                               </div>
                               <div className="rounded-lg bg-sky-500/30 px-2 text-sky-500">
                                 v{revision.version}
@@ -181,8 +217,9 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                                 <span>{revision.createdBy.name} </span>
                               </div>
                               {index !== 0 ? (
-                                <button
-                                  className="opacity-0 transition-all duration-150 ease-in group-hover:opacity-100"
+                                <Button
+                                  className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
+                                  disabled={!isAuthorizedToEditSecret}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,
@@ -190,9 +227,10 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                                     )
                                   }
                                   type="button"
+                                  variant="ghost"
                                 >
                                   <RollbackSVG />
-                                </button>
+                                </Button>
                               ) : null}
                             </div>
                           </div>

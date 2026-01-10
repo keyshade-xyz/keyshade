@@ -1,4 +1,4 @@
-import { EmailPreference, User, Workspace } from '@prisma/client'
+import { User, Workspace } from '@prisma/client'
 
 export interface UserWithWorkspace extends User {
   defaultWorkspace: Workspace
@@ -6,5 +6,14 @@ export interface UserWithWorkspace extends User {
 
 export interface AuthenticatedUser extends User {
   ipAddress: string
-  emailPreference: EmailPreference
+}
+
+export interface PersonalAccessTokenResponse {
+  id: string
+  token?: string // Will be set only when the token is generated for the first time, and when regenerated
+  name: string
+  createdAt: Date
+  updatedAt: Date
+  expiresOn: Date | null
+  lastUsedOn: Date | null
 }

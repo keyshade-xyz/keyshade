@@ -1,7 +1,9 @@
 import {
+  Event,
   EventType,
   IntegrationRunStatus,
-  IntegrationType
+  IntegrationType,
+  Project
 } from '@prisma/client'
 import {
   SlackIntegrationMetadata,
@@ -10,29 +12,79 @@ import {
 import { App } from '@slack/bolt'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import { decryptMetadata, makeTimedRequest } from '@/common/util'
-import { InternalServerErrorException } from '@nestjs/common'
+import { constructErrorBody, makeTimedRequest } from '@/common/util'
+import {
+  BadRequestException,
+  InternalServerErrorException
+} from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private readonly app: App
-
   constructor(prisma: PrismaService) {
     super(IntegrationType.SLACK, prisma)
-
-    if (!this.app && this.integration) {
-      const metadata = decryptMetadata<SlackIntegrationMetadata>(
-        this.integration.metadata
-      )
-      this.app = new App({
-        token: metadata.botToken,
-        signingSecret: metadata.signingSecret
-      })
-    }
   }
 
-  public init(): Promise<void> {
-    // TODO: implement this
-    return Promise.resolve()
+  public async init(
+    _privateKey: Project['privateKey'],
+    eventId: Event['id']
+  ): Promise<void> {
+    this.logger.log(`Initializing Slack Integration...`)
+
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId: eventId,
+      integrationId: integration.id,
+      title: 'Posting message to Slack'
+    })
+
+    try {
+      const block = [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: '🥁 Keyshade is now configured with this channel!',
+            emoji: true
+          }
+        }
+      ]
+
+      const { response, duration } = await makeTimedRequest(() =>
+        this.getSlackApp().client.chat.postMessage({
+          channel: integration.metadata.channelId,
+          blocks: block,
+          text: 'Integration initialized'
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        response.message.text
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to integrate Slack: ${response.status} - ${response.statusText}`
+        )
+      } else {
+        this.logger.log(`Slack integration initialized in ${duration}ms`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to integrate Slack: ${error}`)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        error.message || 'Unknown error occurred'
+      )
+
+      throw new InternalServerErrorException('Failed to integrate Slack')
+    }
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -71,6 +123,16 @@ export class SlackIntegration extends BaseIntegration {
 
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['botToken', 'signingSecret', 'channelId'])
+  }
+
+  private getSlackApp() {
+    this.logger.log('Generating Slack app...')
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
+
+    return new App({
+      token: integration.metadata.botToken,
+      signingSecret: integration.metadata.signingSecret
+    })
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
@@ -122,14 +184,14 @@ export class SlackIntegration extends BaseIntegration {
           elements: [
             {
               type: 'mrkdwn',
-              text: '<https://keyshade.xyz|View in Keyshade>'
+              text: '<https://keyshade.io|View in Keyshade>'
             }
           ]
         }
       ]
 
       const { response, duration } = await makeTimedRequest(() =>
-        this.app.client.chat.postMessage({
+        this.getSlackApp().client.chat.postMessage({
           channel: integration.metadata.channelId,
           blocks: block,
           text: data.title
@@ -156,5 +218,68 @@ export class SlackIntegration extends BaseIntegration {
       this.logger.error(`Failed to emit event to Slack: ${error}`)
       throw new InternalServerErrorException('Failed to emit event to Slack')
     }
+  }
+
+  public async validateConfiguration(metadata: SlackIntegrationMetadata) {
+    this.logger.log(
+      `Validating Slack integration (channel: ${metadata.channelId})`
+    )
+
+    const { data: authData, duration: authDur } = await this.slackApi<{
+      ok: boolean
+      user_id: string
+      error?: string
+    }>('auth.test', {}, metadata.botToken)
+    this.logger.log(`auth.test ok=${authData.ok} in ${authDur}ms`)
+    if (!authData.ok) {
+      throw new BadRequestException(
+        constructErrorBody('Slack token validation failed', authData.error)
+      )
+    }
+
+    const userId = authData.user_id
+
+    const { data: ephData, duration: ephDur } = await this.slackApi<{
+      ok: boolean
+      error?: string
+    }>(
+      'chat.postEphemeral',
+      {
+        channel: metadata.channelId,
+        user: userId,
+        text: "Keyshade write-test (you won't see this after validation!)"
+      },
+      metadata.botToken
+    )
+    this.logger.log(`chat.postEphemeral ok=${ephData.ok} in ${ephDur}ms`)
+    if (!ephData.ok) {
+      throw new BadRequestException(
+        constructErrorBody('Slack write validation failed', ephData.error!)
+      )
+    }
+
+    this.logger.log(
+      `Slack write validation succeeded (ephemeral in ${metadata.channelId}).`
+    )
+  }
+
+  private async slackApi<T extends { ok: boolean; error?: string }>(
+    method: string,
+    params: Record<string, string>,
+    token: string
+  ): Promise<{ data: T; duration: number }> {
+    const url = `https://slack.com/api/${method}`
+    const body = new URLSearchParams(params).toString()
+    const start = Date.now()
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
+    })
+    const data = await res.json()
+    return { data, duration: Date.now() - start }
   }
 }

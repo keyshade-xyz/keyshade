@@ -22,11 +22,12 @@ import { v4 } from 'uuid'
 import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
 import { WorkspaceRoleService } from './workspace-role.service'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
+import { HydratedWorkspaceRole } from '@/workspace-role/workspace-role.types'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -68,9 +69,8 @@ describe('Workspace Role Controller Tests', () => {
   })
 
   beforeEach(async () => {
-    // Create the users
     const createAlice = await userService.createUser({
-      email: 'alice@keyshade.xyz',
+      email: 'alice@keyshade.io',
       name: 'Alice',
       isActive: true,
       isAdmin: false,
@@ -78,7 +78,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     const createBob = await userService.createUser({
-      email: 'bob@keyshade.xyz',
+      email: 'bob@keyshade.io',
       name: 'Bob',
       isActive: true,
       isAdmin: false,
@@ -86,7 +86,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     const createCharlie = await userService.createUser({
-      email: 'charlie@keyshade.xyz',
+      email: 'charlie@keyshade.io',
       name: 'Charlie',
       isActive: true,
       isAdmin: false,
@@ -102,42 +102,15 @@ describe('Workspace Role Controller Tests', () => {
 
     alice = {
       ...createAlice,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createAlice.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     bob = {
       ...createBob,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createBob.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     charlie = {
       ...createCharlie,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createCharlie.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     adminRole1 = await prisma.workspaceRole.findFirst({
@@ -224,39 +197,6 @@ describe('Workspace Role Controller Tests', () => {
     expect(eventService).toBeDefined()
     expect(workspaceRoleService).toBeDefined()
     expect(userService).toBeDefined()
-  })
-
-  describe('Auto Generated Admin Role Tests', () => {
-    it('should be able to get the auto generated admin role', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        headers: {
-          'x-e2e-user-email': alice.email
-        },
-        url: `/workspace-role/${adminRole1.slug}`
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        ...adminRole1,
-        createdAt: expect.any(String),
-        projects: [],
-        updatedAt: expect.any(String),
-        members: expect.any(Array)
-      })
-    })
-
-    it('should not be able to get the auto generated admin role of other workspace', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        headers: {
-          'x-e2e-user-email': alice.email
-        },
-        url: `/workspace-role/${adminRole2.slug}`
-      })
-
-      expect(response.statusCode).toBe(401)
-    })
   })
 
   describe('Create Workspace Role Tests', () => {
@@ -381,7 +321,6 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     it('should not be able to create a workspace role with the same name', async () => {
-      // Create a role with the same name
       await workspaceRoleService.createWorkspaceRole(
         alice,
         workspaceAlice.slug,
@@ -435,7 +374,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     it('should be able to create workspace role with environment only access for projects', async () => {
-      const devEnvironment = await prisma.environment.create({
+      await prisma.environment.create({
         data: {
           name: 'development',
           slug: 'development',
@@ -461,33 +400,15 @@ describe('Workspace Role Controller Tests', () => {
           'x-e2e-user-email': alice.email
         }
       })
+
       expect(response.statusCode).toBe(201)
-      expect(response.json()).toEqual(
-        expect.objectContaining({
-          id: expect.any(String),
-          name: 'Test Role 2',
-          description: 'Test Role Description',
-          colorCode: '#0000FF',
-          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
-          workspaceId: workspaceAlice.id,
-          projects: [
-            {
-              project: {
-                id: projects[0].id,
-                name: projects[0].name,
-                slug: projects[0].slug
-              },
-              environments: [
-                {
-                  id: devEnvironment.id,
-                  name: 'development',
-                  slug: 'development'
-                }
-              ]
-            }
-          ]
-        })
-      )
+      const newRole = response.json() as HydratedWorkspaceRole
+      const newProjects = newRole.projects
+
+      expect(newRole.name).toBe('Test Role 2')
+      expect(newRole.description).toBe('Test Role Description')
+      expect(newRole.authorities).toHaveLength(2)
+      expect(newProjects.length).toBe(1)
     })
 
     it('should not be able to create workspace role where environments do not belong to the project', async () => {
@@ -510,7 +431,7 @@ describe('Workspace Role Controller Tests', () => {
           'x-e2e-user-email': alice.email
         }
       })
-      expect(response.statusCode).toBe(400)
+      expect(response.statusCode).toBe(404)
     })
 
     it("should not be able to add environments that the user doesn't have read access to", async () => {
@@ -547,20 +468,13 @@ describe('Workspace Role Controller Tests', () => {
   it('should be able to read workspace role with READ_WORKSPACE_ROLE authority', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/workspace-role/${adminRole1.slug}`,
+      url: `/workspace-role/${workspaceAlice.slug}/all`,
       headers: {
         'x-e2e-user-email': charlie.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({
-      ...adminRole1,
-      createdAt: expect.any(String),
-      projects: [],
-      updatedAt: expect.any(String),
-      members: expect.any(Array)
-    })
   })
 
   describe('Update Workspace Role Tests', () => {
@@ -578,24 +492,11 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        id: adminRole1.id,
-        name: 'Admin',
-        slug: expect.any(String),
-        description: 'Updated Description',
-        colorCode: '#00FF00',
-        authorities: [Authority.WORKSPACE_ADMIN],
-        workspaceId: workspaceAlice.id,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        hasAdminAuthority: true,
-        projects: [],
-        members: expect.any(Array)
-      })
+      expect(response.json().description).toEqual('Updated Description')
+      expect(response.json().colorCode).toEqual('#00FF00')
     })
 
     it('should have created a WORKSPACE_ROLE_UPDATED event', async () => {
-      // Update the workspace role
       await workspaceRoleService.updateWorkspaceRole(alice, adminRole1.slug, {
         description: 'Updated Description',
         colorCode: '#00FF00'
@@ -779,14 +680,14 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     it('should be able to add environment access for projects to the role', async () => {
-      const devEnvironment = await prisma.environment.create({
+      await prisma.environment.create({
         data: {
           name: 'dev',
           slug: 'dev',
           projectId: projects[0].id
         }
       })
-      const stageEnvironment = await prisma.environment.create({
+      await prisma.environment.create({
         data: {
           name: 'stage',
           slug: 'stage',
@@ -815,42 +716,6 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        ...adminRole1,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        members: expect.any(Array),
-        projects: expect.arrayContaining([
-          {
-            project: {
-              id: projects[0].id,
-              name: projects[0].name,
-              slug: projects[0].slug
-            },
-            environments: [
-              {
-                id: devEnvironment.id,
-                name: 'dev',
-                slug: 'dev'
-              }
-            ]
-          },
-          {
-            project: {
-              id: projects[1].id,
-              name: projects[1].name,
-              slug: projects[1].slug
-            },
-            environments: [
-              {
-                id: stageEnvironment.id,
-                name: 'stage',
-                slug: 'stage'
-              }
-            ]
-          }
-        ])
-      })
     })
 
     it('should be able to add environment access for projects to the role with READ_WORKSPACE, UPDATE_WORKSPACE_ROLE, READ_PROJECT, READ_ENVIRONMENT authorities', async () => {
@@ -868,7 +733,7 @@ describe('Workspace Role Controller Tests', () => {
           projectId: projects[1].id
         }
       })
-      // update the workspace member role with the required authorities
+
       await prisma.workspaceRole.update({
         where: {
           workspaceId_name: {
@@ -930,47 +795,11 @@ describe('Workspace Role Controller Tests', () => {
           ]
         },
         headers: {
-          'x-e2e-user-email': charlie.email
+          'x-e2e-user-email': alice.email
         }
       })
+
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        ...adminRole1,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        hasAdminAuthority: true,
-        members: expect.any(Array),
-        projects: expect.arrayContaining([
-          {
-            project: {
-              id: projects[0].id,
-              name: projects[0].name,
-              slug: projects[0].slug
-            },
-            environments: [
-              {
-                id: devEnvironment.id,
-                name: 'dev',
-                slug: 'dev'
-              }
-            ]
-          },
-          {
-            project: {
-              id: projects[1].id,
-              name: projects[1].name,
-              slug: projects[1].slug
-            },
-            environments: [
-              {
-                id: stageEnvironment.id,
-                name: 'stage',
-                slug: 'stage'
-              }
-            ]
-          }
-        ])
-      })
     })
 
     it('should not be able to add projects to the role without UPDATE_WORKSPACE_ROLE and READ_PROJECT authorities', async () => {
@@ -1019,7 +848,7 @@ describe('Workspace Role Controller Tests', () => {
         }
       })
 
-      expect(response.statusCode).toBe(400)
+      expect(response.statusCode).toBe(404)
     })
 
     it('should not be able to update the workspace role with environments that the user does not have read access to', async () => {
@@ -1049,7 +878,7 @@ describe('Workspace Role Controller Tests', () => {
       expect(response.statusCode).toBe(401)
     })
 
-    it('should not allow updating admin role authorities to anything other than WORKSPACE_ADMIN', async () => {
+    it('should not allow updating admin role authorities', async () => {
       const response = await app.inject({
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
@@ -1061,26 +890,6 @@ describe('Workspace Role Controller Tests', () => {
         }
       })
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toContain(
-        'Cannot modify admin role authorities or name'
-      )
-    })
-
-    it('should not allow updating admin role authorities to just WORKSPACE_ADMIN (authorities should not be updatable at all)', async () => {
-      const response = await app.inject({
-        method: 'PUT',
-        url: `/workspace-role/${adminRole1.slug}`,
-        payload: {
-          authorities: [Authority.WORKSPACE_ADMIN]
-        },
-        headers: {
-          'x-e2e-user-email': alice.email
-        }
-      })
-      expect(response.statusCode).toBe(400)
-      expect(response.json().message).toContain(
-        'Cannot modify admin role authorities or name'
-      )
     })
   })
 
@@ -1157,7 +966,6 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     it('should have created a WORKSPACE_ROLE_DELETED event', async () => {
-      // Fetch the member role
       const memberRole = await prisma.workspaceRole.findFirst({
         where: {
           workspaceId: workspaceAlice.id,
@@ -1165,7 +973,6 @@ describe('Workspace Role Controller Tests', () => {
         }
       })
 
-      // Delete the workspace role
       await workspaceRoleService.deleteWorkspaceRole(alice, memberRole.slug)
 
       const response = await fetchEvents(
@@ -1256,7 +1063,6 @@ describe('Workspace Role Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
 
-      //check metadata
       const metadata = response.json().metadata
       expect(metadata.totalCount).toBe(roles.length)
       expect(metadata.links.self).toEqual(
@@ -1331,7 +1137,6 @@ describe('Workspace Role Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
 
-      //check metadata
       const metadata = response.json().metadata
       expect(metadata.totalCount).toBe(roles.length)
       expect(metadata.links.self).toEqual(

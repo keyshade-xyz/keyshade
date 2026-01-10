@@ -8,7 +8,7 @@ export interface Configuration {
 
 export interface ClientRegisteredResponse {
   success: boolean
-  message: string
+  message: string | object // Allow both string and object types since server can send either
 }
 
 export interface RunData extends ProjectRootConfig {

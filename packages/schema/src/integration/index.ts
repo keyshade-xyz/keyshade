@@ -4,7 +4,7 @@ import {
   eventTypeEnum,
   integrationRunStatusEnum,
   integrationTypeEnum
-} from '@/enums'
+} from '@/enums/index'
 import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
@@ -41,6 +41,10 @@ export const IntegrationSchema = z.object({
     id: z.string(),
     name: z.string(),
     profilePictureUrl: z.string().nullable()
+  }),
+  entitlements: z.object({
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
   })
 })
 
@@ -89,9 +93,7 @@ export const GetIntegrationRequestSchema = z.object({
   integrationSlug: IntegrationSchema.shape.slug
 })
 
-export const GetIntegrationResponseSchema = IntegrationSchema.extend({
-  workspace: WorkspaceSchema
-})
+export const GetIntegrationResponseSchema = IntegrationSchema
 
 export const GetAllIntegrationRequestSchema = PageRequestSchema.extend({
   workspaceSlug: WorkspaceSchema.shape.slug
@@ -106,3 +108,38 @@ export const GetAllIntegrationRunsRequestSchema = PageRequestSchema.extend({
 
 export const GetAllIntegrationRunsResponseSchema =
   PageResponseSchema(IntegrationRunSchema)
+
+const ValidateIntegrationConfigurationCreateRequestSchema =
+  CreateIntegrationRequestSchema.extend({
+    isCreate: z.literal(true)
+  })
+
+const ValidateIntegrationConfigurationUpdateRequestSchema =
+  UpdateIntegrationRequestSchema.extend({
+    isCreate: z.literal(false),
+    integrationSlug: IntegrationSchema.shape.slug
+  })
+
+export const ValidateIntegrationConfigurationRequestSchema =
+  z.discriminatedUnion('isCreate', [
+    ValidateIntegrationConfigurationCreateRequestSchema,
+    ValidateIntegrationConfigurationUpdateRequestSchema
+  ])
+
+export const ValidateIntegrationConfigurationResponseSchema = z.object({
+  success: z.literal(true)
+})
+
+export const GetVercelEnvironmentsRequestSchema = z.object({
+  token: z.string(),
+  projectId: z.string()
+})
+
+export const GetVercelEnvironmentsResponseSchema = z.record(
+  z.object({
+    vercelSystemEnvironment: z
+      .enum(['production', 'preview', 'development'])
+      .optional(),
+    vercelCustomEnvironmentId: z.string().optional()
+  })
+)

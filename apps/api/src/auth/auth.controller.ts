@@ -3,7 +3,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Logger,
   Param,
   Post,
   Query,
@@ -29,8 +28,6 @@ import { ThrottlerGuard } from '@nestjs/throttler'
 
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name)
-
   constructor(
     private authService: AuthService,
     private githubOAuthStrategyFactory: GithubOAuthStrategyFactory,
@@ -41,10 +38,11 @@ export class AuthController {
   @Public()
   @Post('send-otp/:email')
   async sendOtp(
-    @Param('email')
-    email: string
+    @Req() req: Request,
+    @Param('email') email: string,
+    @Query('mode') mode?: string
   ): Promise<void> {
-    await this.authService.sendOtp(email)
+    await this.authService.sendOtp(req, email, mode)
   }
 
   @Public()
@@ -63,9 +61,21 @@ export class AuthController {
   async validateOtp(
     @Query('email') email: string,
     @Query('otp') otp: string,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
+    @Req() req: Request,
+    @Query('mode') mode?: string
   ) {
-    return setCookie(response, await this.authService.validateOtp(email, otp))
+    const sessionData = await this.authService.validateOtp(
+      email,
+      otp,
+      req,
+      mode
+    )
+    if (mode === 'cli') {
+      return sessionData
+    } else {
+      return setCookie(response, sessionData)
+    }
   }
 
   /* istanbul ignore next */
@@ -74,12 +84,12 @@ export class AuthController {
   async githubOAuthLogin(@Res() res: Response) {
     if (!this.githubOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
-        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
 
-    res.status(302).redirect('/api/auth/github/callback')
+    res.status(302).redirect(`/api/auth/github/callback`)
   }
 
   /* istanbul ignore next */
@@ -102,7 +112,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GITHUB,
-      res
+      res,
+      req
     )
   }
 
@@ -112,7 +123,7 @@ export class AuthController {
   async gitlabOAuthLogin(@Res() res: Response) {
     if (!this.gitlabOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
-        'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
@@ -139,7 +150,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GITLAB,
-      res
+      res,
+      req
     )
   }
 
@@ -149,7 +161,7 @@ export class AuthController {
   async googleOAuthLogin(@Res() res: Response) {
     if (!this.googleOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
-        'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.io/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
@@ -177,8 +189,15 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GOOGLE,
-      res
+      res,
+      req
     )
+  }
+
+  @Post('logout')
+  async logout(@Res() res: Response): Promise<void> {
+    await this.authService.logout(res)
+    res.status(HttpStatus.OK).send({ message: 'Logged out successfully' })
   }
 
   /* istanbul ignore next */
@@ -187,25 +206,22 @@ export class AuthController {
     name: string,
     profilePictureUrl: string,
     oauthProvider: AuthProvider,
-    response: Response
+    response: Response,
+    req?: any
   ) {
     try {
       const data = await this.authService.handleOAuthLogin(
         email,
         name,
         profilePictureUrl,
-        oauthProvider
+        oauthProvider,
+        req
       )
+
       const user = setCookie(response, data)
       sendOAuthSuccessRedirect(response, user)
     } catch (error) {
       sendOAuthFailureRedirect(response, JSON.parse(error.message).body)
     }
-  }
-
-  @Post('logout')
-  async logout(@Res() res: Response): Promise<void> {
-    await this.authService.logout(res)
-    res.status(HttpStatus.OK).send({ message: 'Logged out successfully' })
   }
 }

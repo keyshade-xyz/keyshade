@@ -4,7 +4,7 @@ description: Get up and running with our CLI tool in no time.
 
 # Introduction
 
-Our CLI is one of the major component of keyshade. The CLI is the entrypoint for your application to tap into the live updates from our platform. Whatever changes you make to your secrets or variables in your project, are reflected automatically in your application. Besides that, it also helps you to interact with the keyshade API.
+Our CLI is one of the major component of Keyshade. The CLI is the entrypoint for your application to tap into the live updates from our platform. Whatever changes you make to your secrets or variables in your project, are reflected automatically in your application. Besides that, it also helps you to interact with the Keyshade API.
 
 ## Commands
 
@@ -42,4 +42,4 @@ This flag is used to specify the API key to use. Won't work if the [`--profile`]
 
 ### `--base-url <url>`
 
-This flag is used to specify the base URL of the API to use. Won't work if the [`--profile`](#--profile-profile) flag is specified. The default is `https://api.keyshade.xyz`.
+This flag is used to specify the base URL of the API to use. Won't work if the [`--profile`](#--profile-profile) flag is specified. The default is `https://api.keyshade.io`.

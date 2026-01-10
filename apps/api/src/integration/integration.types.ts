@@ -45,6 +45,15 @@ export interface IntegrationRunData {
 export interface IntegrationMetadata extends Record<string, unknown> {}
 
 /**
+ * Integration metadata that would be common to all AWS integrations
+ */
+export interface BaseAWSIntegrationMetadata extends IntegrationMetadata {
+  region: string
+  accessKeyId: string
+  secretAccessKey: string
+}
+
+/**
  * Discord Integration Data
  * @property webhookUrl The webhook URL that will be used to send messages to Discord.
  */
@@ -65,9 +74,9 @@ export interface VercelIntegrationMetadata extends IntegrationMetadata {
   // Vercel project's ID for which the configuration will be managed
   projectId: string
 
-  // Vercel environments mapping with keyshade environment names
+  // Vercel environments mapping with keyshade environment slugs
   environments: Record<
-    Environment['name'],
+    Environment['slug'],
     {
       vercelSystemEnvironment?: 'production' | 'preview' | 'development'
       vercelCustomEnvironmentId?: string
@@ -75,35 +84,41 @@ export interface VercelIntegrationMetadata extends IntegrationMetadata {
   >
 }
 
-export interface IntegrationWithLastUpdatedBy extends Integration {
+export interface AWSLambdaIntegrationMetadata
+  extends BaseAWSIntegrationMetadata {
+  lambdaFunctionName: string
+}
+
+export type IntegrationWithEnvironmentsAndMetadata<
+  T extends IntegrationMetadata
+> = Omit<HydratedIntegration, 'metadata'> & {
+  metadata: T
+}
+
+export interface HydratedIntegration extends Integration {
   lastUpdatedBy: {
     id: string
     name: string
     profilePictureUrl: string
   }
-}
-
-export interface IntegrationWithEnvironments extends Integration {
-  environments: {
-    id: string
-    name: string
-    slug: string
-  }[]
-}
-
-export type IntegrationWithEnvironmentsAndMetadata<
-  T extends IntegrationMetadata
-> = Omit<IntegrationWithEnvironments, 'metadata'> & {
-  metadata: T
-}
-
-export interface IntegrationWithLastUpdatedByAndReferences
-  extends IntegrationWithLastUpdatedBy,
-    IntegrationWithEnvironments {
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
   workspace: Workspace
   project: {
     id: string
     name: string
     slug: string
   } | null
+  environments: {
+    id: string
+    name: string
+    slug: string
+  }[]
+  totalTriggers: number
 }
+
+export interface RawIntegration
+  extends Omit<HydratedIntegration, 'entitlements' | 'totalTriggers'> {}
+export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'

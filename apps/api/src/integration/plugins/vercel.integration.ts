@@ -6,6 +6,7 @@ import {
   Project
 } from '@prisma/client'
 import {
+  EnvironmentSupportType,
   IntegrationEventData,
   VercelIntegrationMetadata
 } from '../integration.types'
@@ -16,10 +17,15 @@ import {
   ConfigurationDeletedEventMetadata,
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
-import { decryptMetadata, makeTimedRequest } from '@/common/util'
-import { InternalServerErrorException } from '@nestjs/common'
+import {
+  constructErrorBody,
+  decryptMetadata,
+  makeTimedRequest
+} from '@/common/util'
+import { BadRequestException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
+import { GetVercelEnvironments } from '../dto/getVercelEnvironments/getVercelEnvironments'
 
 export class VercelIntegration extends BaseIntegration {
   private vercel: Vercel
@@ -47,12 +53,12 @@ export class VercelIntegration extends BaseIntegration {
     return true
   }
 
-  public areEnvironmentsRequired(): boolean {
+  public isPrivateKeyRequired(): boolean {
     return true
   }
 
-  public isPrivateKeyRequired(): boolean {
-    return true
+  public environmentSupport(): EnvironmentSupportType {
+    return 'atleast-one'
   }
 
   public async init(
@@ -65,16 +71,16 @@ export class VercelIntegration extends BaseIntegration {
 
     const integration = this.getIntegration<VercelIntegrationMetadata>()
 
+    this.logger.log('Adding project private key to Vercel project...')
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId,
+      integrationId: (integration as any).id,
+      title: 'Adding KS_PRIVATE_KEY to Vercel project'
+    })
+
     // Add the project's private key to the Vercel project
     try {
-      this.logger.log('Adding project private key to Vercel project...')
-
-      const { id: integrationRunId } = await this.registerIntegrationRun({
-        eventId,
-        integrationId: integration.id,
-        title: 'Adding KS_PRIVATE_KEY to Vercel project'
-      })
-
       // Add new environment variables
       const { response, duration } = await makeTimedRequest(() =>
         this.vercel.projects.createProjectEnv({
@@ -107,77 +113,116 @@ export class VercelIntegration extends BaseIntegration {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
       )
-      throw new InternalServerErrorException(error)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        error instanceof Error ? error.message : String(error)
+      )
+
+      throw new BadRequestException(error)
     }
   }
 
   public async emitEvent(data: IntegrationEventData): Promise<void> {
+    let shouldTriggerRedeploy = false
+    let environmentTarget: string | undefined = undefined
+
     switch (data.eventType) {
       case EventType.SECRET_ADDED:
       case EventType.VARIABLE_ADDED:
-        /**
-         * We have 3 cases in here:
-         * 1. The configuration has no records that were added to it
-         * 2. The configuration has only one record
-         * 3. The configuration has multiple records.
-         *
-         * For 1 - we don't make an API call.
-         * For 2 and 3, we make an API call.
-         */
-        const addEventMetadata =
-          decryptMetadata<ConfigurationAddedEventMetadata>(data.event.metadata)
-
-        await this.addEnvironmentalVariable(addEventMetadata, data.event.id)
+        shouldTriggerRedeploy = await this.delegateConfigurationAddedEvent(data)
         break
 
       case EventType.SECRET_UPDATED:
       case EventType.VARIABLE_UPDATED:
-        /**
-         * We have 4 cases in here:
-         * 1. The name of a configuration got updated
-         * 2. A new version was created for an existing environment
-         * 3. A new version was created for a non-existing environment
-         * 4. A version was rolled back for an existing environment
-         */
-
-        const updateEventMetadata =
-          decryptMetadata<ConfigurationUpdatedEventMetadata>(
-            data.event.metadata
-          )
-
-        // Update the name of the environment
-        await this.updateEnvironmentalVariableNameAndDescription(
-          updateEventMetadata,
-          data.event.id
-        )
-
-        // Update the value of the environment
-        await this.addEnvironmentalVariable(
-          {
-            ...updateEventMetadata,
-            name: updateEventMetadata.newName
-          },
-          data.event.id
-        )
+        shouldTriggerRedeploy =
+          await this.delegateConfigurationUpdatedEvent(data)
         break
 
       case EventType.SECRET_DELETED:
       case EventType.VARIABLE_DELETED:
-        const deleteEventMetadata =
-          decryptMetadata<ConfigurationDeletedEventMetadata>(
-            data.event.metadata
-          )
-
-        await this.deleteEnvironmentalVariable(
-          deleteEventMetadata,
-          data.event.id
-        )
+        shouldTriggerRedeploy =
+          await this.delegateConfigurationDeletedEvent(data)
         break
+
       default:
         this.logger.warn(
           `Event type ${data.eventType} not supported for Vercel integration.`
         )
     }
+
+    // Try to extract environment from event data if present
+    if (shouldTriggerRedeploy) {
+      // Prefer environment from data if available, fallback to 'production'
+      // You may want to adjust this extraction logic as needed
+      environmentTarget = (data as any).environmentTarget || 'production'
+      await this.triggerRedeploy(data.event.id, environmentTarget)
+    }
+  }
+
+  /**
+   * We have 3 cases in here:
+   * 1. The configuration has no records that were added to it
+   * 2. The configuration has only one record
+   * 3. The configuration has multiple records.
+   *
+   * For 1 - we don't make an API call.
+   * For 2 and 3, we make an API call.
+   */
+  private async delegateConfigurationAddedEvent(
+    data: IntegrationEventData
+  ): Promise<boolean> {
+    const addEventMetadata = decryptMetadata<ConfigurationAddedEventMetadata>(
+      data.event.metadata
+    )
+    return this.addEnvironmentalVariable(addEventMetadata, data.event.id)
+  }
+
+  /**
+   * We have 4 cases in here:
+   * 1. The name of a configuration got updated
+   * 2. A new version was created for an existing environment
+   * 3. A new version was created for a non-existing environment
+   * 4. A version was rolled back for an existing environment
+   */
+  private async delegateConfigurationUpdatedEvent(
+    data: IntegrationEventData
+  ): Promise<boolean> {
+    const updateEventMetadata =
+      decryptMetadata<ConfigurationUpdatedEventMetadata>(data.event.metadata)
+
+    // Update the name of the environment
+    const nameUpdated =
+      await this.updateEnvironmentalVariableNameAndDescription(
+        updateEventMetadata,
+        data.event.id
+      )
+
+    // Update the value of the environment
+    const valueUpdated = await this.addEnvironmentalVariable(
+      {
+        ...updateEventMetadata,
+        name: updateEventMetadata.newName
+      },
+      data.event.id
+    )
+
+    // Trigger redeploy only if at least one Vercel API was called
+    return nameUpdated || valueUpdated
+  }
+
+  private async delegateConfigurationDeletedEvent(
+    data: IntegrationEventData
+  ): Promise<boolean> {
+    const deleteEventMetadata =
+      decryptMetadata<ConfigurationDeletedEventMetadata>(data.event.metadata)
+
+    return await this.deleteEnvironmentalVariable(
+      deleteEventMetadata,
+      data.event.id
+    )
   }
 
   /**
@@ -198,13 +243,12 @@ export class VercelIntegration extends BaseIntegration {
   private async addEnvironmentalVariable(
     data: ConfigurationAddedEventMetadata,
     eventId: Event['id']
-  ): Promise<void> {
-    // Only make an API call if there are environment variables
+  ): Promise<boolean> {
     if (Object.entries(data.values).length === 0) {
       this.logger.log(
-        'No environment variables found while adding secret. Skipping Vercel API call.'
+        'No environment variables found while adding configuration. Skipping Vercel API call.'
       )
-      return
+      return false
     }
 
     this.vercel = await this.getVercelClient()
@@ -223,22 +267,30 @@ export class VercelIntegration extends BaseIntegration {
       ([environmentName]) => metadata.environments[environmentName]
     )
     this.logger.log(
-      `Found ${filteredValues.length} environment(s) that are part of the integration: ${filteredValues.map(([environmentName]) => environmentName).join(', ')}`
+      `Found ${filteredValues.length} environment(s) that are part of the integration: ${filteredValues
+        .map(([environmentName]) => environmentName)
+        .join(', ')}`
     )
 
     if (filteredValues.length === 0) {
       this.logger.log(
         `No environments found that are part of the integration. Skipping Vercel API call.`
       )
-      return
+      return false
     }
 
-    let totalDuration = 0
+    let totalDuration: number = 0
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
-      title: `Adding environment variable ${data.name} to targets ${filteredValues.map(([environmentName]) => metadata.environments[environmentName].vercelCustomEnvironmentId || metadata.environments[environmentName].vercelSystemEnvironment).join(', ')}`
+      integrationId: (integration as any).id,
+      title: `Adding environment variable ${data.name} to targets ${filteredValues
+        .map(
+          ([environmentName]) =>
+            metadata.environments[environmentName].vercelCustomEnvironmentId ||
+            metadata.environments[environmentName].vercelSystemEnvironment
+        )
+        .join(', ')}`
     })
 
     try {
@@ -276,7 +328,7 @@ export class VercelIntegration extends BaseIntegration {
                   totalDuration,
                   `Failed to decrypt value using KS_PRIVATE_KEY.`
                 )
-                return
+                return false
               }
             }
 
@@ -299,7 +351,7 @@ export class VercelIntegration extends BaseIntegration {
             totalDuration,
             `Failed to fetch KS_PRIVATE_KEY from project ${integration.metadata.projectId}`
           )
-          return
+          return true
         }
       }
 
@@ -338,6 +390,7 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         response.failed.map(({ error }) => error.message).join('\n')
       )
+      return true
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -346,16 +399,17 @@ export class VercelIntegration extends BaseIntegration {
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.FAILED,
-        0,
+        totalDuration,
         error instanceof Error ? error.message : String(error)
       )
+      return false
     }
   }
 
   private async updateEnvironmentalVariableNameAndDescription(
     data: ConfigurationUpdatedEventMetadata,
     eventId: Event['id']
-  ): Promise<void> {
+  ): Promise<boolean> {
     this.vercel = await this.getVercelClient()
 
     const integration = this.getIntegration<VercelIntegrationMetadata>()
@@ -366,7 +420,7 @@ export class VercelIntegration extends BaseIntegration {
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
+      integrationId: (integration as any).id,
       title: `Updating environment variable name from ${data.oldName} to ${data.newName}`
     })
 
@@ -392,6 +446,16 @@ export class VercelIntegration extends BaseIntegration {
         `Found ${vercelEnvironmentIds.length} environment variables with the old name in Vercel`
       )
 
+      if (vercelEnvironmentIds.length === 0) {
+        await this.markIntegrationRunAsFinished(
+          integrationRunId,
+          IntegrationRunStatus.SUCCESS,
+          totalDuration,
+          'No variables found to update'
+        )
+        return false
+      }
+
       // Update existing environment variable name
       for (const envId of vercelEnvironmentIds) {
         this.logger.log(`Updating environment variable ${envId} in Vercel...`)
@@ -413,16 +477,13 @@ export class VercelIntegration extends BaseIntegration {
         )
       }
 
-      this.logger.log(
-        'Updated environment variable names successfully in Vercel'
-      )
-
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.SUCCESS,
         totalDuration,
         ''
       )
+      return true
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -434,21 +495,21 @@ export class VercelIntegration extends BaseIntegration {
         0,
         error instanceof Error ? error.message : String(error)
       )
+
+      return false
     }
   }
 
   private async deleteEnvironmentalVariable(
     data: ConfigurationDeletedEventMetadata,
     eventId: Event['id']
-  ): Promise<void> {
+  ): Promise<boolean> {
     this.vercel = await this.getVercelClient()
 
     const integration = this.getIntegration<VercelIntegrationMetadata>()
     const metadata = integration.metadata
 
-    this.logger.log(
-      `Deleting environment variable ${data.name} across ${metadata.environments.length} environments`
-    )
+    this.logger.log(`Attempting to delete environment variable ${data.name}`)
 
     this.logger.log(
       `Filtering out environments that are not part of the integration...`
@@ -464,12 +525,12 @@ export class VercelIntegration extends BaseIntegration {
       this.logger.log(
         `No environment(s) that are part of the integration. Skipping Vercel API call.`
       )
-      return
+      return false
     }
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
-      integrationId: integration.id,
+      integrationId: (integration as any).id,
       title: `Deleting environment variable ${data.name}`
     })
 
@@ -514,6 +575,16 @@ export class VercelIntegration extends BaseIntegration {
         `Found ${environmentVariableIds.length} environment variable(s) to delete`
       )
 
+      if (environmentVariableIds.length === 0) {
+        await this.markIntegrationRunAsFinished(
+          integrationRunId,
+          IntegrationRunStatus.SUCCESS,
+          totalDuration,
+          ''
+        )
+        return false
+      }
+
       for (const environmentVariableId of environmentVariableIds) {
         this.logger.log(
           `Deleting environment variable ${environmentVariableId} from Vercel`
@@ -541,6 +612,7 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         ''
       )
+      return true
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -552,6 +624,7 @@ export class VercelIntegration extends BaseIntegration {
         0,
         error instanceof Error ? error.message : String(error)
       )
+      return false
     }
   }
 
@@ -568,22 +641,266 @@ export class VercelIntegration extends BaseIntegration {
 
     return {
       envs: response['envs'],
-      duration: duration
+      duration
     }
   }
 
-  private async getVercelClient(): Promise<Vercel> {
+  private async getVercelClient(token?: string): Promise<Vercel> {
     const { Vercel } = await import('@vercel/sdk')
 
-    if (!this.vercel) {
+    if (!this.vercel || token) {
       this.logger.log('Generating Vercel client...')
-      const integration = this.getIntegration<VercelIntegrationMetadata>()
+
+      const bearerToken = token
       this.vercel = new Vercel({
-        bearerToken: integration.metadata.token
+        bearerToken
       })
       this.logger.log('Generated Vercel client')
     }
 
     return this.vercel
+  }
+
+  public async getVercelEnvironments(
+    dto: GetVercelEnvironments
+  ): Promise<VercelIntegrationMetadata['environments']> {
+    const { token, projectId } = dto
+
+    this.logger.log(
+      `Fetching environments from Vercel for project: ${projectId}`
+    )
+
+    const environments: VercelIntegrationMetadata['environments'] = {
+      development: { vercelSystemEnvironment: 'development' },
+      preview: { vercelSystemEnvironment: 'preview' },
+      production: { vercelSystemEnvironment: 'production' }
+    }
+
+    this.vercel = await this.getVercelClient(token)
+
+    try {
+      const response =
+        await this.vercel.environment.getV9ProjectsIdOrNameCustomEnvironments({
+          idOrName: projectId
+        })
+
+      for (const env of response.environments ?? []) {
+        environments[env.slug] = {
+          vercelCustomEnvironmentId: env.id
+        }
+      }
+    } catch (err) {
+      this.logger.error(`Fetching custom vercel envs failed`, err)
+    }
+
+    return {
+      environments
+    }
+  }
+
+  private async triggerRedeploy(
+    eventId: Event['id'],
+    environmentTarget: string
+  ): Promise<void> {
+    const integration = this.getIntegration<VercelIntegrationMetadata>()
+    const projectId: string = integration.metadata.projectId
+
+    this.vercel = await this.getVercelClient()
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId,
+      integrationId: (integration as any).id,
+      title: `Triggering Vercel redeploy for project ${projectId} (target: ${environmentTarget})`
+    })
+
+    let duration = 0
+
+    try {
+      this.logger.log(`Checking for active deployments for ${projectId}...`)
+      const { deployments: activeDeployments } =
+        await this.vercel.deployments.getDeployments({
+          projectId,
+          state: 'BUILDING', // Check for in-progress states
+          target: environmentTarget,
+          limit: 10 // Check multiple to be safe
+        })
+
+      if (activeDeployments?.length > 0) {
+        this.logger.log(
+          `Found ${activeDeployments.length} active deployment(s), cancelling...`
+        )
+        // Measure duration for cancelling all deployments
+        const { duration: cancelDuration } = await makeTimedRequest(
+          async () => {
+            for (const activeDeployment of activeDeployments) {
+              try {
+                await this.vercel.deployments.cancelDeployment({
+                  id: activeDeployment.uid
+                })
+                this.logger.log(`Cancelled deployment: ${activeDeployment.uid}`)
+              } catch (cancelErr) {
+                this.logger.warn(
+                  `Failed to cancel deployment ${activeDeployment.uid}:`,
+                  cancelErr
+                )
+              }
+            }
+          }
+        )
+        duration += cancelDuration
+      }
+
+      this.logger.log(`Fetching latest READY deployments for ${projectId}...`)
+
+      const { deployments } = await this.vercel.deployments.getDeployments({
+        projectId,
+        state: 'READY',
+        target: environmentTarget,
+        limit: 1
+      })
+
+      const latest = deployments?.[0]
+      const deploymentId = latest?.uid
+      if (!deploymentId) {
+        this.logger.warn(`No valid deployment UID found, skipping redeploy.`)
+
+        await this.markIntegrationRunAsFinished(
+          integrationRunId,
+          IntegrationRunStatus.FAILED,
+          duration,
+          'No valid deployment UID found for redeployment.'
+        )
+        return
+      }
+
+      const { duration: fetchDuration, response: fullDeployment } =
+        await makeTimedRequest(() =>
+          this.vercel.deployments.getDeployment({ idOrUrl: deploymentId })
+        )
+      duration += fetchDuration
+
+      const {
+        id,
+        name,
+        target,
+        projectId: deploymentProjectId,
+        meta
+      } = fullDeployment as {
+        id: string
+        name: string
+        target?: string | null
+        projectId: string
+        meta?: Record<string, string>
+      }
+
+      this.logger.log(`Triggering redeploy from deployment ID: ${id}`)
+
+      const { duration: redeployDuration, response: result } =
+        await makeTimedRequest(() =>
+          this.vercel.deployments.createDeployment({
+            requestBody: {
+              deploymentId: id,
+              name,
+              project: deploymentProjectId,
+              target: target ?? 'production',
+              meta: meta ?? {},
+              withLatestCommit: true
+            }
+          })
+        )
+      duration += redeployDuration
+
+      this.logger.log(`Redeployment triggered: ${result.url}`)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.SUCCESS,
+        duration,
+        ''
+      )
+    } catch (err) {
+      this.logger.error(`Redeployment failed`, err)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        duration,
+        err instanceof Error ? err.message : String(err)
+      )
+    }
+  }
+
+  public async validateConfiguration(metadata: VercelIntegrationMetadata) {
+    this.logger.log(
+      `Validating Vercel integration for project ${metadata.projectId}`
+    )
+
+    try {
+      const { Vercel } = await import('@vercel/sdk')
+      const vercel = new Vercel({ bearerToken: metadata.token })
+
+      const { response, duration } = await makeTimedRequest(() =>
+        vercel.environment.getV9ProjectsIdOrNameCustomEnvironments({
+          idOrName: metadata.projectId
+        })
+      )
+
+      if (!Array.isArray(response.environments)) {
+        throw new Error('Unexpected response format from Vercel API')
+      }
+
+      const builtInEnvs = new Set([
+        'production',
+        'preview',
+        'development'
+      ] as const)
+
+      const customEnvDefs = response.environments
+      const customIds = new Set(customEnvDefs.map((e) => e.id))
+
+      const invalid = Object.entries(metadata.environments).filter(
+        ([, { vercelSystemEnvironment, vercelCustomEnvironmentId }]) => {
+          if (vercelSystemEnvironment) {
+            return !builtInEnvs.has(vercelSystemEnvironment)
+          }
+          if (vercelCustomEnvironmentId) {
+            return !customIds.has(vercelCustomEnvironmentId)
+          }
+          return true
+        }
+      )
+
+      if (invalid.length > 0) {
+        const badList = invalid
+          .map(
+            ([
+              slug,
+              { vercelSystemEnvironment, vercelCustomEnvironmentId }
+            ]) => {
+              const val = vercelSystemEnvironment ?? vercelCustomEnvironmentId
+              return `${slug} (${val})`
+            }
+          )
+          .join(', ')
+        throw new Error(
+          `The following metadata.environments keys are invalid for project ` +
+            `"${metadata.projectId}": ${badList}`
+        )
+      }
+
+      this.logger.log(
+        `Vercel validation succeeded for project "${metadata.projectId}" in ${duration}ms`
+      )
+    } catch (error) {
+      this.logger.error(
+        `Vercel configuration validation failed: ${error instanceof Error ? error.message : String(error)}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Vercel validation failed',
+          error instanceof Error ? error.message : String(error)
+        )
+      )
+    }
   }
 }

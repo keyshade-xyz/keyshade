@@ -12,11 +12,13 @@ interface TabProps {
   searchParams: ReadonlyURLSearchParams
   customID: string
   icon?: React.ReactNode
+  route?: string
 }
 
 function Tab({
   text,
   selected,
+  route,
   // setSelected,
   searchParams,
   customID,
@@ -37,18 +39,19 @@ function Tab({
   return (
     <button
       className={cn(
-        selected ? '!text-white' : 'hover:text-white/40',
-        `relative rounded-md px-2 py-1 text-sm font-medium text-white/50 transition-colors duration-300`
+        `border-jet-black relative flex min-w-[114.6px] cursor-pointer justify-center rounded-md border p-3 text-sm text-white/50 transition-colors duration-300`
       )}
       onClick={() => {
         // setSelected(text)
         router.push(
-          `${pathname}?${createQueryString('tab', text.toLocaleLowerCase())}`
+          `${pathname}?${createQueryString('tab', route || text.toLocaleLowerCase())}`
         )
       }}
       type="button"
     >
-      <span className="relative z-10 flex items-center gap-2">
+      <span
+        className={`${selected ? 'text-primary-200' : 'text-neutral-500'} relative z-10 flex place-content-center gap-2 transition-colors`}
+      >
         {icon ? <span className="h-4 w-4">{icon}</span> : null}
         {text}
       </span>
@@ -58,7 +61,7 @@ function Tab({
           layoutId={`${customID}linetab`}
           transition={{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }}
         >
-          <span className="z-0 h-[1px] w-[80%] rounded-full bg-white" />
+          <span className="bg-primary-1100 border-primary-300/30 z-0 h-full w-full rounded-lg border" />
         </motion.div>
       ) : null}
     </button>
@@ -69,6 +72,7 @@ interface TabConfig {
   id: string
   label: string
   icon?: React.ReactNode
+  route?: string
 }
 
 interface LineTabsProps {
@@ -82,14 +86,17 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
 
   return (
     <div
-      className={cn('border-black-500/25 flex flex-wrap items-center gap-2')}
+      className={cn(
+        'border-black-500/25 flex h-fit flex-wrap items-center gap-2'
+      )}
     >
       {tabs.map((tab) => (
         <Tab
           customID={customID}
           icon={tab.icon}
           key={tab.id}
-          searchParams={searchParams} 
+          route={tab.route}
+          searchParams={searchParams}
           selected={search?.toLocaleLowerCase() === tab.id.toLocaleLowerCase()}
           text={tab.label}
         />

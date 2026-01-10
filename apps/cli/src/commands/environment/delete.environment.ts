@@ -5,6 +5,10 @@ import {
   type CommandArgument
 } from 'src/types/command/command.types'
 import { Logger } from '@/util/logger'
+import {
+  DeleteEnvironmentRequestSchema,
+  DeleteEnvironmentResponseSchema
+} from '@keyshade/schema/raw'
 
 export class DeleteEnvironment extends BaseCommand {
   getName(): string {
@@ -31,23 +35,32 @@ export class DeleteEnvironment extends BaseCommand {
   async action({ args }: CommandActionData): Promise<void> {
     const [environmentSlug] = args
 
-    if (!environmentSlug) {
-      Logger.error('Environment Slug is required')
+    const request = DeleteEnvironmentRequestSchema.safeParse({
+      slug: environmentSlug
+    })
+    if (!request.success) {
+      Logger.error(request.error.toString())
       return
     }
 
     Logger.info('Deleting Environment...')
 
-    const { success, error } =
+    const { success, data, error } =
       await ControllerInstance.getInstance().environmentController.deleteEnvironment(
-        { slug: environmentSlug },
+        request.data,
         this.headers
       )
 
-    if (success) {
+    if (!success) {
+      this.logError(error)
+      return
+    }
+
+    const response = DeleteEnvironmentResponseSchema.safeParse(data)
+    if (response.success) {
       Logger.info('Environment deleted successfully')
     } else {
-      this.logError(error)
+      Logger.error('Invalid server response')
     }
   }
 }

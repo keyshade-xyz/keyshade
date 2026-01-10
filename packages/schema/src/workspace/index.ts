@@ -1,6 +1,12 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { authorityEnum, projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
+import {
+  authorityEnum,
+  projectAccessLevelEnum,
+  rotateAfterEnum,
+  subscriptionPlanEnum,
+  subscriptionStatusEnum
+} from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 
 export const WorkspaceSchema = z.object({
@@ -8,13 +14,35 @@ export const WorkspaceSchema = z.object({
   name: z.string(),
   slug: z.string(),
   icon: z.string().nullable(),
-  isFreeTier: z.boolean(),
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   ownerId: z.string(),
   isDefault: z.boolean(),
+  isDisabled: z.boolean(),
   lastUpdatedById: z.string().nullable(),
-  lastUpdateBy: z
+  maxAllowedMembers: z.number(),
+  totalMembers: z.number(),
+  maxAllowedProjects: z.number(),
+  totalProjects: z.number(),
+  maxAllowedIntegrations: z.number(),
+  totalIntegrations: z.number(),
+  maxAllowedRoles: z.number(),
+  totalRoles: z.number(),
+  projects: z.number(),
+  integrations: z.number(),
+  entitlements: z.object({
+    canReadProjects: z.boolean(),
+    canCreateProjects: z.boolean(),
+    canReadMembers: z.boolean(),
+    canInviteMembers: z.boolean(),
+    canReadIntegrations: z.boolean(),
+    canCreateIntegrations: z.boolean(),
+    canReadRoles: z.boolean(),
+    canCreateRoles: z.boolean(),
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
+  }),
+  lastUpdatedBy: z
     .object({
       id: z.string(),
       name: z.string(),
@@ -26,30 +54,31 @@ export const WorkspaceSchema = z.object({
     name: z.string(),
     profilePictureUrl: z.string().nullable(),
     ownedSince: z.string().datetime()
+  }),
+  subscription: z.object({
+    id: z.string(),
+    plan: subscriptionPlanEnum,
+    status: subscriptionStatusEnum,
+    renewsOn: z.string().datetime().optional(),
+    activatedOn: z.string().datetime(),
+    seatsBooked: z.number(),
+    isAnnual: z.boolean(),
+    trialActivatedOn: z.string().datetime().nullable(),
+    trialPlan: subscriptionPlanEnum.nullable(),
+    user: z.object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
   })
 })
-
-export const WorkspaceWithProjectCountSchema = WorkspaceSchema.extend({
-  projects: z.number()
-})
-
-export const WorkspaceWithTierLimitSchema = WorkspaceSchema.extend({
-  maxAllowedMembers: z.number(),
-  maxAllowedProjects: z.number(),
-  totalMembers: z.number(),
-  totalProjects: z.number()
-})
-
-export const WorkspaceWithTierLimitAndProjectCountSchema =
-  WorkspaceWithProjectCountSchema.and(WorkspaceWithTierLimitSchema)
 
 export const CreateWorkspaceRequestSchema = z.object({
   name: WorkspaceSchema.shape.name,
   icon: z.string().optional()
 })
 
-export const CreateWorkspaceResponseSchema =
-  WorkspaceWithTierLimitAndProjectCountSchema
+export const CreateWorkspaceResponseSchema = WorkspaceSchema
 
 export const UpdateWorkspaceRequestSchema = z.object({
   name: WorkspaceSchema.shape.name.optional(),
@@ -69,8 +98,7 @@ export const GetWorkspaceRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug
 })
 
-export const GetWorkspaceResponseSchema =
-  WorkspaceWithTierLimitAndProjectCountSchema
+export const GetWorkspaceResponseSchema = WorkspaceSchema
 
 export const InviteMemberRequestSchema = z.object({
   email: z.string().email(),
@@ -81,9 +109,8 @@ export const InviteMemberResponseSchema = z.void()
 
 export const GetAllWorkspacesOfUserRequestSchema = PageRequestSchema
 
-export const GetAllWorkspacesOfUserResponseSchema = PageResponseSchema(
-  WorkspaceWithTierLimitAndProjectCountSchema
-)
+export const GetAllWorkspacesOfUserResponseSchema =
+  PageResponseSchema(WorkspaceSchema)
 
 export const ExportDataRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug

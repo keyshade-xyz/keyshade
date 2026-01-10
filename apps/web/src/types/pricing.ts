@@ -5,13 +5,18 @@ export interface PriceCardPropsType {
   yearlyPrice?: number
 
   isPopular: boolean
-
-  spaceWorkspace: number
   spaceProjects: number
   spaceEnvironment: number
   spaceSecrets: number
-  spaceIntegerations: number
-  spaceLiveSupport: boolean
+  spaceVariables: number
+  versionControl: number
+  auditlogs: number
+  spaceIntegrations: number
+  spaceLiveSupport: string
+
+  customRoles: number
+
+  snapshots: number
 
   spaceAccessSpecifier: string
 
@@ -26,6 +31,7 @@ export interface PriceTabPropsType {
   label: string
   tag?: string
   special?: boolean
+  default?: boolean
 }
 
 export type PriceTabDataType = PriceTabPropsType[]

@@ -1,15 +1,126 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@theme {
+  /* Custom Colors */
+  --color-primary-100: oklch(0.9008 0.0713 209.29);
+  --color-primary-200: oklch(0.8566 0.0997 210.04);
+  --color-primary-300: oklch(0.8178 0.1217 211.95);
+  --color-primary-400: oklch(0.7848 0.1334 214.25);
+  --color-primary-500: oklch(0.7004 0.1213 214.65);
+  --color-primary-600: oklch(0.5775 0.0996 214.76);
+  --color-primary-700: oklch(0.524 0.0895 213.37);
+  --color-primary-800: oklch(0.4605 0.0786 214.26);
+  --color-primary-900: oklch(0.3942 0.0667 214.17);
+  --color-primary-1000: oklch(0.3252 0.0539 214.18);
+  --color-primary-1100: oklch(0.2553 0.0408 211.08);
+
+  --color-neutral-100: oklch(1 0 0);
+  --color-neutral-200: oklch(0.931 0 0);
+  --color-neutral-300: oklch(0.8638 0 0);
+  --color-neutral-400: oklch(0.7668 0 0);
+  --color-neutral-500: oklch(0.6927 0 0);
+  --color-neutral-600: oklch(0.6167 0 0);
+  --color-neutral-700: oklch(0.5382 0 0);
+  --color-neutral-800: oklch(0.4604 0 0);
+  --color-neutral-900: oklch(0.3753 0 0);
+  --color-neutral-1000: oklch(0.285 0 0);
+
+  --color-night-a: oklch(0.1857 0.0102 294.56);
+  --color-night-b: oklch(0.182 0.0044 264.46);
+  --color-night-c: oklch(0.1955 0.0043 264.47);
+  --color-night-d: oklch(0.1657 0.0083 285.46);
+  --color-night-e: oklch(0.1744 0.0061 285.74);
+
+  --color-charcoal: oklch(0.2121 0.005 248.06);
+  --color-slate-black: oklch(0.2084 0.0025 247.95);
+  --color-jet-black: oklch(0.2354 0.0019 286.25);
+  --color-reisin-black: oklch(0.2167 0.0098 294.74);
+  --color-platinum: oklch(0.8884 0 0);
+  --color-eerie-black: oklch(0.2175 0.0042 264.48);
+  --color-autumn-leaf: oklch(0.6614 0.1653 44.93);
+
+  /* Custom CSS Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+  --animate-marquee: marquee 10s linear infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - 1rem));
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 body {
-  @apply bg-[#0b0d0f] text-white;
+  @apply bg-night-e text-white;
 }
 
 /* For WebKit Browsers such as Chrome, Safari */
 
 ::-webkit-scrollbar {
-  @apply m-20 h-[10px] w-[10px] bg-transparent;
+  @apply m-20 h-2.5 w-2.5 bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -32,7 +143,7 @@ body {
 
 /* For Edge */
 *::-webkit-scrollbar {
-  @apply w-[10px];
+  @apply w-2.5;
 }
 
 *::-webkit-scrollbar-track {
@@ -52,7 +163,8 @@ body {
 }
 
 @keyframes highlight {
-  0%, 100% {
+  0%,
+  100% {
     border: transparent;
   }
   50% {

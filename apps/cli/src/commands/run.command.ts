@@ -4,10 +4,15 @@ import { io } from 'socket.io-client'
 import { spawn } from 'child_process'
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
-import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
-import { Logger } from '@/util/logger'
+import {
+  fetchPrivateKey,
+  fetchProjectRootConfig,
+  fetchProjectRootConfigFromPath
+} from '@/util/configuration'
+import type { ProjectRootConfig } from '@/types/index.types'
 import type {
   ClientRegisteredResponse,
   Configuration,
@@ -17,13 +22,15 @@ import type {
 import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
+import { log, spinner } from '@clack/prompts'
+import { clearSpinnerLines, showError, showSuccess } from '@/util/prompt'
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
 
   private projectSlug: string
   private environmentSlug: string
-  private readonly command: string
+  private command: string
 
   private childProcess = null
 
@@ -32,7 +39,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'Run a command'
+    return 'Run a command with live configuration updates from keyshade'
   }
 
   getArguments(): CommandArgument[] {
@@ -43,7 +50,32 @@ export default class RunCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-e',
+        long: '--environment <slug>',
+        description: 'Environment to configure'
+      },
+      {
+        short: '-w',
+        long: '--workspace <slug>',
+        description: 'Workspace to configure'
+      },
+      {
+        short: '-p',
+        long: '--project <slug>',
+        description: 'Project to configure'
+      },
+      {
+        short: '-f',
+        long: '--config-file <path>',
+        description: 'Path to config file (default: keyshade.json)'
+      }
+    ]
+  }
+
+  async action({ options, args }: CommandActionData): Promise<void> {
     // Join all arguments to form the complete command
     if (args.length === 0) {
       throw new Error('No command provided')
@@ -53,36 +85,64 @@ export default class RunCommand extends BaseCommand {
     // args return string[][] instead of string[]
     this.command = args[0].join(' ')
 
-    const configurations = await this.fetchConfigurations()
-    await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
+    // Pass all relevant options to fetchConfigurations for proper precedence handling
+    const configurations = await this.fetchConfigurations({
+      workspace: options.workspace,
+      project: options.project,
+      environment: options.environment,
+      configFile: options.configFile
+    })
+
     await this.connectToSocket(configurations)
     await this.sleep(3000)
     await this.prefetchConfigurations(configurations.privateKey)
     this.spawnCommand()
 
     process.on('SIGINT', () => {
-      this.killCommand()
+      void this.killCommand()
       process.exit(0)
     })
   }
 
-  private async fetchConfigurations(): Promise<RunData> {
-    const { environment, project, workspace, quitOnDecryptionFailure } =
-      await fetchProjectRootConfig()
-    const privateKey = await fetchPrivateKey(project)
+  private async fetchConfigurations(
+    options: {
+      workspace?: string
+      project?: string
+      environment?: string
+      configFile?: string
+    } = {}
+  ): Promise<RunData> {
+    // Step 1: Load base configuration from file
+    let baseConfig: ProjectRootConfig
+
+    if (options.configFile) {
+      // Use custom config file if specified
+      baseConfig = await fetchProjectRootConfigFromPath(options.configFile)
+    } else {
+      // Use default keyshade.json
+      baseConfig = await fetchProjectRootConfig()
+    }
+
+    // Step 2: Override with flags (highest precedence)
+    const finalConfig = {
+      workspace: options.workspace ?? baseConfig.workspace,
+      project: options.project ?? baseConfig.project,
+      environment: options.environment ?? baseConfig.environment,
+      quitOnDecryptionFailure: baseConfig.quitOnDecryptionFailure
+    }
+
+    // Step 3: Fetch private key for the project
+    const privateKey = await fetchPrivateKey(finalConfig.project)
 
     if (!privateKey) {
       throw new Error(
-        'Private key not found for this project. Please run `keyshade init` or `keyshade config private-key add` to add a private key.'
+        `Private key not found for project '${finalConfig.project}'. Please run 'keyshade init' or 'keyshade config private-key add' to add a private key.`
       )
     }
 
     return {
-      environment,
-      project,
-      workspace,
-      privateKey,
-      quitOnDecryptionFailure
+      ...finalConfig,
+      privateKey
     }
   }
 
@@ -94,22 +154,25 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async connectToSocket(data: RunData) {
-    Logger.info('Connecting to socket...')
-    const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
-    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
+    const loading = spinner()
+    loading.start('Connecting to keyshade servers...')
+    await this.sleep(2000)
+
+    // Fix: Parse the full host from baseUrl, not just the last segment
+    const url = new URL(this.baseUrl)
+    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${url.host}/change-notifier`
     const privateKey = data.privateKey
     const quitOnDecryptionFailure = data.quitOnDecryptionFailure
 
     const ioClient = io(websocketUrl, {
       autoConnect: false,
       extraHeaders: {
-        'x-keyshade-token': this.apiKey
+        'x-keyshade-token': this.token
       },
       transports: ['websocket']
     })
 
     ioClient.connect()
-
     ioClient.on('connect', async () => {
       ioClient.emit('register-client-app', {
         workspaceSlug: data.workspace,
@@ -118,22 +181,20 @@ export default class RunCommand extends BaseCommand {
       })
 
       ioClient.on('configuration-updated', async (data: Configuration) => {
-        Logger.info(
-          `Configuration change received from API (name: ${data.name})`
-        )
+        log.info(`${data.name} got updated. Restarting the process...`)
 
         if (!data.isPlaintext) {
           try {
             data.value = await decrypt(privateKey, data.value)
           } catch (error) {
             if (quitOnDecryptionFailure) {
-              Logger.error(
-                `Decryption failed for ${data.name}. Stopping the process.`
+              await showError(
+                `Failed decrypting ${data.name}'s value. Stopping the process.`
               )
               process.exit(1)
             } else {
-              Logger.warn(
-                `Decryption failed for ${data.name}. Skipping this configuration.`
+              await showError(
+                `Failed decrypting ${data.name}'s value. No changes will be made to the process.`
               )
               return
             }
@@ -141,27 +202,72 @@ export default class RunCommand extends BaseCommand {
         }
 
         this.processEnvironmentalVariables[data.name] = data.value
-        this.restartCommand()
+        await this.restartCommand()
       })
+      // Set a timeout for registration response
+      const registrationTimeout = setTimeout(() => {
+        showError(
+          'We tried connecting to keyshade servers for 30 seconds but failed. Please try again later.'
+        )
+          .catch(() => {})
+          .finally(() => process.exit(1))
+      }, 30000)
 
       ioClient.on(
         'client-registered',
-        (registrationResponse: ClientRegisteredResponse) => {
+        async (registrationResponse: ClientRegisteredResponse) => {
+          clearTimeout(registrationTimeout)
+
           if (registrationResponse.success) {
             this.projectSlug = data.project
             this.environmentSlug = data.environment
-            Logger.info('Successfully registered to API')
-          } else {
-            let errorText: string
 
-            try {
-              const { header, body } = JSON.parse(registrationResponse.message)
-              errorText = `${header}: ${body}`
-            } catch {
-              errorText = `Error registering to API: ${registrationResponse.message}`
+            loading.stop()
+            clearSpinnerLines()
+            await showSuccess('Successfully connected to keyshade servers!')
+          } else {
+            // Extract meaningful error message
+            let errorMessage = 'Unknown error'
+
+            if (typeof registrationResponse.message === 'string') {
+              // If it is just a string, use it directly
+              errorMessage = registrationResponse.message
+            } else if (
+              typeof registrationResponse.message === 'object' &&
+              registrationResponse.message !== null
+            ) {
+              // If the message is an object and not null
+              // Attempt to parse the message if it's a JSON string
+              // Handle nested error structure
+              const msgObj = registrationResponse.message as any
+              const nestedMessage = msgObj.response?.message || msgObj.message // Fallback to message if response is not available
+
+              if (typeof nestedMessage === 'string') {
+                try {
+                  const parsed = JSON.parse(nestedMessage)
+                  if (parsed.header && parsed.body) {
+                    errorMessage = `${parsed.header}: ${parsed.body}`
+                  } else {
+                    errorMessage = nestedMessage
+                  }
+                } catch {
+                  // If parsing fails, fallback to string representation
+                  errorMessage = nestedMessage
+                }
+              } else {
+                // If the message is not a string, stringify it
+                errorMessage = JSON.stringify(msgObj)
+              }
+            } else {
+              // Handle other types (undefined, null, etc.)
+              errorMessage = String(registrationResponse.message)
             }
 
-            Logger.error(errorText)
+            loading.stop()
+            clearSpinnerLines()
+            await showError(
+              `We encountered an error while connecting you to our servers: ${errorMessage}`
+            )
             process.exit(1)
           }
         }
@@ -170,7 +276,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async prefetchConfigurations(privateKey: string) {
-    Logger.info('Prefetching configurations...')
+    log.info('Fetching existing secrets and variables from your project...')
     const secretController = new SecretController(this.baseUrl)
     const variableController = new VariableController(this.baseUrl)
 
@@ -180,7 +286,7 @@ export default class RunCommand extends BaseCommand {
         projectSlug: this.projectSlug
       },
       {
-        'x-keyshade-token': this.apiKey
+        'x-keyshade-token': this.token
       }
     )
 
@@ -195,7 +301,7 @@ export default class RunCommand extends BaseCommand {
           projectSlug: this.projectSlug
         },
         {
-          'x-keyshade-token': this.apiKey
+          'x-keyshade-token': this.token
         }
       )
 
@@ -215,8 +321,8 @@ export default class RunCommand extends BaseCommand {
 
     // Merge secrets and variables
     const configurations = [...decryptedSecrets, ...variablesResponse.data]
-    Logger.info(
-      `Fetched ${configurations.length} configurations (${secretsResponse.data.length} secrets, ${variablesResponse.data.length} variables)`
+    log.info(
+      `Fetched ${secretsResponse.data.length} secrets and ${variablesResponse.data.length} variables`
     )
 
     // Set the configurations as environmental variables
@@ -231,60 +337,159 @@ export default class RunCommand extends BaseCommand {
     })
   }
 
-  private async checkApiKeyValidity(
-    baseUrl: string,
-    apiKey: string
+  private async waitForExit(
+    child: ReturnType<typeof spawn>,
+    timeoutMs = 15000
   ): Promise<void> {
-    Logger.info('Checking API key validity...')
-    const response = await fetch(`${baseUrl}/api/api-key/access/live-updates`, {
-      headers: {
-        'x-keyshade-token': apiKey
+    if (!child) return
+
+    await new Promise<void>((resolve, reject) => {
+      let settled = false
+
+      const onExit = () => {
+        if (!settled) {
+          settled = true
+          resolve()
+        }
       }
+
+      child.once('exit', onExit)
+      child.once('close', onExit)
+
+      const t = setTimeout(() => {
+        if (!settled) {
+          settled = true
+          reject(new Error('Child did not exit before timeout'))
+        }
+      }, timeoutMs)
+
+      // Cleanup if promise resolves early
+      const cleanup = () => {
+        clearTimeout(t)
+      }
+      child.once('exit', cleanup)
+      child.once('close', cleanup)
     })
-
-    if (!response.ok) {
-      throw new Error(
-        'API key is not valid. Please check the key and try again.'
-      )
-    }
-
-    Logger.info('API key is valid!')
   }
 
   private spawnCommand() {
-    this.childProcess = spawn(this.command, {
-      // @ts-expect-error this just works
-      stdio: ['inherit', 'pipe', 'pipe'],
+    // POSIX: create a new process group so -PID signals the entire tree
+    const isWin = process.platform === 'win32'
+
+    this.childProcess = spawn(this.command, [], {
       shell: true,
-      env: { ...process.env, ...this.processEnvironmentalVariables },
-      detached: true
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        ...Object.fromEntries(
+          Object.entries(this.processEnvironmentalVariables).map(
+            ([key, value]) => [key, String(value)]
+          )
+        )
+      },
+      detached: !isWin // only on POSIX
     })
 
-    this.childProcess.stdout.on('data', (data) => {
-      process.stdout.write(`[COMMAND] ${data}`)
-    })
+    // Allow parent to exit independently of child on POSIX process groups
+    if (!isWin && this.childProcess?.pid) {
+      this.childProcess.unref()
+    }
 
-    this.childProcess.stderr.on('data', (data) => {
-      process.stderr.write(`[COMMAND] ${data}`)
-    })
-
-    this.childProcess.on('exit', (code: number | null) => {
-      // Code is 0 only if the command exits on its own
-      if (code === 0) {
-        Logger.info('Command exited successfully!')
-        process.exit(1)
+    this.childProcess.on(
+      'exit',
+      (code: number | null, signal: NodeJS.Signals | null) => {
+        // Do NOT exit the CLI on child exit; we want to keep listening & restart on updates.
+        if (code === 0) {
+          log.info(
+            `Command exited successfully${signal ? ` (signal ${signal})` : ''}.`
+          )
+        } else {
+          log.info(
+            `Command exited${code !== null ? ` with code ${code}` : ''}${signal ? ` (signal ${signal})` : ''}.`
+          )
+        }
       }
-    })
+    )
   }
 
-  private restartCommand() {
-    this.killCommand()
-    this.spawnCommand()
+  private async restartCommand() {
+    try {
+      await this.killCommand() // now truly awaits exit
+      this.spawnCommand()
+    } catch (e) {
+      console.error('Failed to restart command:', e)
+      // As a last resort, try to spawn anyway
+      this.spawnCommand()
+    }
   }
 
-  private killCommand() {
-    if (this.childProcess !== null) {
-      process.kill(-this.childProcess.pid, 'SIGKILL')
+  private async killCommand() {
+    const child = this.childProcess
+    if (!child?.pid) return
+
+    const isWin = process.platform === 'win32'
+    const pid = child.pid
+
+    try {
+      // 1) Try graceful termination
+      if (isWin) {
+        // /T kills the whole tree; /F is force; first attempt without /F
+        await new Promise<void>((resolve) => {
+          const killer = spawn('taskkill', ['/PID', String(pid), '/T'], {
+            stdio: 'ignore'
+          })
+          killer.on('exit', () => {
+            resolve()
+          })
+          killer.on('error', () => {
+            resolve()
+          }) // ignore errors, we’ll force kill below if needed
+        })
+      } else {
+        // Negative PID targets the process group (requires detached: true at spawn)
+        try {
+          process.kill(-pid, 'SIGTERM')
+        } catch {
+          // Fallback to direct child if not in its own group
+          try {
+            process.kill(pid, 'SIGTERM')
+          } catch {}
+        }
+      }
+
+      // 2) Wait up to 5s for clean exit
+      try {
+        await this.waitForExit(child, 5000)
+      } catch {
+        // 3) Force kill if it didn’t exit
+        if (isWin) {
+          await new Promise<void>((resolve) => {
+            const killer = spawn(
+              'taskkill',
+              ['/PID', String(pid), '/T', '/F'],
+              { stdio: 'ignore' }
+            )
+            killer.on('exit', () => {
+              resolve()
+            })
+            killer.on('error', () => {
+              resolve()
+            })
+          })
+        } else {
+          try {
+            process.kill(-pid, 'SIGKILL')
+          } catch {
+            try {
+              process.kill(pid, 'SIGKILL')
+            } catch {}
+          }
+          // Give the OS a moment to reap and free the port
+          await this.sleep(200)
+        }
+      }
+    } finally {
+      this.childProcess = null
     }
   }
 }

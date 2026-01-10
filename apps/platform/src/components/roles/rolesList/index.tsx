@@ -13,8 +13,6 @@ import {
 } from '@/components/ui/table'
 import ErrorCard from '@/components/shared/error-card'
 
-type ErrorMessage = { header: string; body: string } | null
-
 function RoleListItemSkeleton(): React.JSX.Element {
   return (
     <div className="grid grid-cols-4 items-center justify-between gap-x-10">
@@ -30,7 +28,8 @@ export default function RoleList(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [roles, setRoles] = useAtom(rolesOfWorkspaceAtom)
   const [loading, setLoading] = useState<boolean>(true)
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
+
+  const isAuthorizedToViewRoles = selectedWorkspace?.entitlements.canReadRoles
 
   const getAllRolesOfWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceRoleController.getWorkspaceRolesOfWorkspace(
@@ -41,36 +40,37 @@ export default function RoleList(): React.JSX.Element {
   )
 
   useEffect(() => {
-    if (selectedWorkspace) {
-      getAllRolesOfWorkspace()
-        .then(({ data, success, error }) => {
-          if (success && data) {
-            setRoles(data.items)
-          }
-          if (error) {
-            const errorMsg = error.message
-            const parsedError = JSON.parse(errorMsg) as ErrorMessage
-            setErrorMessage(parsedError)
-          }
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-    }
-  }, [getAllRolesOfWorkspace, selectedWorkspace, setRoles])
+    if (!isAuthorizedToViewRoles) return
+    getAllRolesOfWorkspace()
+      .then(({ data, success }) => {
+        if (success && data) {
+          setRoles(data.items)
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [
+    getAllRolesOfWorkspace,
+    selectedWorkspace,
+    setRoles,
+    isAuthorizedToViewRoles
+  ])
+
+  if (!isAuthorizedToViewRoles) {
+    return <ErrorCard tab="roles" />
+  }
 
   return loading ? (
     <div className="flex animate-pulse flex-col gap-y-4">
-      <div className="mb-3 h-[3.125rem] w-full rounded-lg bg-white/5" />
+      <div className="mb-3 h-12.5 w-full rounded-lg bg-white/5" />
       <RoleListItemSkeleton />
       <RoleListItemSkeleton />
       <RoleListItemSkeleton />
     </div>
-  ) : roles.length === 0 ? (
-    <ErrorCard description={errorMessage?.body} header={errorMessage?.header} />
   ) : (
     <Table className="h-full w-full">
-      <TableHeader className="h-[3.125rem] w-full">
+      <TableHeader className="h-12.5 w-full">
         <TableRow className="h-full w-full bg-white/10 ">
           <TableHead className="h-full w-2/12 rounded-tl-xl text-base font-normal text-white/50">
             Name

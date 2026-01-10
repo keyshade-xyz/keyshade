@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "LoginSession" ADD COLUMN     "lastLoggedOnAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

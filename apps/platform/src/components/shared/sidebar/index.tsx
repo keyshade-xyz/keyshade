@@ -2,29 +2,38 @@
 import React from 'react'
 import { useAtomValue } from 'jotai'
 import {
+  CardSVG,
   DashboardSVG,
+  DocumentSVG,
+  FeedbackSVG,
   IntegrationSVG,
   KeyshadeLogoSVG,
+  LinkArrowSVG,
   RolesSVG,
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import TierLimit from './tierLimit'
 import SidebarTab from './sidebarTab'
-import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
-import { Button } from '@/components/ui/button'
-import { TIRE_PLAN, VERSION_BADGE } from '@/constants/sidebar'
+import { VERSION_BADGE } from '@/constants/sidebar'
+import { GeistSansFont } from '@/fonts'
+import { Combobox } from '@/components/ui/combobox'
 
-function Sidebar(): JSX.Element {
+function Sidebar(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const sidebarTabData = [
     {
-      name: 'Dashboard',
+      name: 'Projects',
       icon: <DashboardSVG />,
       link: '/',
       matchTo: '/'
+    },
+    {
+      name: 'Integrations',
+      icon: <IntegrationSVG />,
+      link: '/integrations?tab=overview',
+      matchTo: '/integrations'
     },
     {
       name: 'Members',
@@ -38,33 +47,40 @@ function Sidebar(): JSX.Element {
       link: '/roles',
       matchTo: '/roles'
     },
+
     {
-      name: 'Integrations',
-      icon: <IntegrationSVG />,
-      link: '/integrations',
-      matchTo: '/integrations'
+      name: 'Billing',
+      icon: <CardSVG />,
+      link: `/${selectedWorkspace?.slug}/billing`,
+      matchTo: `/${selectedWorkspace?.slug}/billing`
     },
     {
       name: 'Settings',
       icon: <SettingsSVG />,
-      link: `/${selectedWorkspace?.slug}`,
-      matchTo: `/${selectedWorkspace?.slug}`
+      link: `/${selectedWorkspace?.slug}/settings`,
+      matchTo: `/${selectedWorkspace?.slug}/settings`
     }
   ]
 
   return (
-    <aside className="m-8 w-[20rem]">
-      <div className="grid gap-y-[1.88rem]">
-        <div className="mt-5 flex items-center justify-between">
-          <div className=" flex gap-2 text-xl">
-            <KeyshadeLogoSVG /> Keyshade
-          </div>
-          <div className="rounded bg-white/10 px-2 py-[0.12rem] text-xs font-bold">
-            {VERSION_BADGE}
+    <aside
+      className={`${GeistSansFont.className}  m-6 w-40 min-w-[16rem] shrink-0 `}
+    >
+      <div className=" flex h-full flex-col gap-2">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-50 pb-4">
+          <div className=" flex items-center justify-between">
+            <div className=" flex gap-2 text-xl">
+              <KeyshadeLogoSVG /> Keyshade
+            </div>
+            <div className="rounded-sm bg-white/10 px-2 py-[0.12rem] text-xs font-normal">
+              {VERSION_BADGE}
+            </div>
           </div>
         </div>
-        <Combobox />
-        <div className="flex w-full flex-col">
+
+        {/* Scrollable Menu Items */}
+        <div className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent min-h-0 flex-1 overflow-y-auto overscroll-contain pt-2">
           {sidebarTabData.map((tabData) => {
             return (
               <SidebarTab
@@ -77,14 +93,31 @@ function Sidebar(): JSX.Element {
             )
           })}
         </div>
-        <div className="absolute bottom-10 w-[17rem] rounded-lg border border-white/10 bg-white/5 p-4">
-          <div className="mb-5 flex items-center gap-3">
-            <Button className="h-6 bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
-              {TIRE_PLAN}
-            </Button>
-          </div>
 
-          <TierLimit />
+        <div className="flex flex-col gap-y-8 text-neutral-500 [&_a]:flex [&_a]:gap-x-2.5 [&_a]:transition-colors [&_a]:hover:text-white">
+          <a
+            className="pl-5"
+            href="https://docs.keyshade.io/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <DocumentSVG /> Docs{' '}
+            <LinkArrowSVG className="-translate-x-1 translate-y-1.5" />
+          </a>
+
+          <a
+            className="pl-5"
+            href="mailto:support@keyshade.io?subject=Feedback%20for%20Keyshade%20Platform"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <FeedbackSVG /> Feedback
+          </a>
+        </div>
+
+        {/* Sticky Footer */}
+        <div className="sticky bottom-0 z-50 pt-4">
+          <Combobox />
         </div>
       </div>
     </aside>

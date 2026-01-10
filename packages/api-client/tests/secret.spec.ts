@@ -84,7 +84,7 @@ describe('Secret Controller Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    secretSlug = createSecretResponse.data.secret.slug
+    secretSlug = createSecretResponse.data.slug
   })
 
   afterEach(async () => {
@@ -112,15 +112,15 @@ describe('Secret Controller Tests', () => {
       { 'x-e2e-user-email': email }
     )
 
-    expect(secret.data.secret.name).toBe('Secret 2')
-    expect(secret.data.secret.slug).toBeDefined()
-    expect(secret.data.values.length).toBe(1)
-    expect(secret.data.values[0].environment.slug).toBe(environmentSlug)
+    expect(secret.data.name).toBe('Secret 2')
+    expect(secret.data.slug).toBeDefined()
+    expect(secret.data.versions.length).toBe(1)
+    expect(secret.data.versions[0].environment.slug).toBe(environmentSlug)
     expect(secret.error).toBe(null)
 
     // Delete the secret
     await secretController.deleteSecret(
-      { secretSlug: secret.data.secret.slug },
+      { secretSlug: secret.data.slug },
       { 'x-e2e-user-email': email }
     )
   })
@@ -134,11 +134,11 @@ describe('Secret Controller Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    expect(updatedSecret.data.secret.name).toBe('Updated Secret 1')
+    expect(updatedSecret.data.name).toBe('Updated Secret 1')
 
     // Delete the secret since the slug will be updated
     const deleteSecretResponse = await secretController.deleteSecret(
-      { secretSlug: updatedSecret.data.secret.slug },
+      { secretSlug: updatedSecret.data.slug },
       { 'x-e2e-user-email': email }
     )
 
@@ -159,7 +159,7 @@ describe('Secret Controller Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    expect(updatedSecret.data.updatedVersions.length).toBe(1)
+    expect(updatedSecret.data.versions.length).toBe(2)
   })
 
   it('should be able to delete an environment value of a secret', async () => {

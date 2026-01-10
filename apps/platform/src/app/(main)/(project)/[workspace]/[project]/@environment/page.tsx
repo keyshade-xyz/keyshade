@@ -16,11 +16,12 @@ import EditEnvironmentDialogue from '@/components/dashboard/environment/editEnvi
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { ENVIRONMENTS_PAGE_SIZE } from '@/lib/constants'
-import { EnvironmentLoader } from '@/components/dashboard/environment/environmentLoader'
+import EnvironmentLoader from '@/components/dashboard/environment/environmentLoader'
 import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import { cn } from '@/lib/utils'
 import { PageTitle } from '@/components/common/page-title'
+import ProjectErrorCard from '@/components/shared/project-error-card'
 
 function EnvironmentItemComponent({
   item,
@@ -72,6 +73,9 @@ function EnvironmentPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
 
+  const isAuthorizedToReadEnvironments =
+    selectedProject?.entitlements.canReadEnvironments
+
   const getAllEnvironmentsOfProject = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
       {
@@ -82,12 +86,17 @@ function EnvironmentPage(): React.JSX.Element {
   )
 
   useEffect(() => {
-    if (selectedProject) {
+    if (selectedProject && isAuthorizedToReadEnvironments) {
       setIsLoading(true)
 
       getAllEnvironmentsOfProject().finally(() => setIsLoading(false))
     }
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+  }, [
+    getAllEnvironmentsOfProject,
+    selectedProject,
+    setEnvironments,
+    isAuthorizedToReadEnvironments
+  ])
 
   useEffect(() => {
     if (highlightSlug) {
@@ -105,13 +114,17 @@ function EnvironmentPage(): React.JSX.Element {
     }
   }, [highlightSlug, environments])
 
+  if (!isAuthorizedToReadEnvironments) {
+    return <ProjectErrorCard tab="environments" />
+  }
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <EnvironmentLoader />
-        <EnvironmentLoader />
-        <EnvironmentLoader />
-      </div>
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+              </div>
     )
   }
 
@@ -119,7 +132,7 @@ function EnvironmentPage(): React.JSX.Element {
     <div
       className={`flex h-full w-full ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
     >
-      <PageTitle title={`${selectedProject?.name} | Environments`} />
+      <PageTitle title={`${selectedProject.name} | Environments`} />
       {/* Showing this when there are no environments present */}
       {environments.length === 0 ? (
         <EmptyEnvironmentListContent />
@@ -141,7 +154,7 @@ function EnvironmentPage(): React.JSX.Element {
                 const response =
                   await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
                     {
-                      projectSlug: selectedProject!.slug,
+                      projectSlug: selectedProject.slug,
                       page,
                       limit
                     }
@@ -167,6 +180,11 @@ function EnvironmentPage(): React.JSX.Element {
               }
               itemKey={(item) => item.id}
               itemsPerPage={10}
+              loadingComponent={<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+                <EnvironmentLoader />
+              </div>}
             />
 
             {/* Delete environment alert dialog */}

@@ -12,7 +12,7 @@ import { ProjectModule } from '@/project/project.module'
 import { ProjectService } from '@/project/project.service'
 import { SecretModule } from '@/secret/secret.module'
 import { SecretService } from '@/secret/secret.service'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { VariableService } from '@/variable/variable.service'
 import { VariableModule } from '@/variable/variable.module'
@@ -127,19 +127,19 @@ describe('Workspace Membership Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
 
     const createUser3 = await userService.createUser({
-      email: 'sadie@keyshade.xyz',
+      email: 'sadie@keyshade.io',
       name: 'Sadie',
       isOnboardingFinished: true
     })
@@ -150,42 +150,15 @@ describe('Workspace Membership Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user3 = {
       ...createUser3,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser3.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     workspace1 = await workspaceService.createWorkspace(user1, {
@@ -383,10 +356,14 @@ describe('Workspace Membership Controller Tests', () => {
     })
 
     it('should not be able to invite users if tier limit is reached', async () => {
+      const maxMembers = (
+        await tierLimitService.getWorkspaceTierLimit(workspace1.id)
+      ).MAX_MEMBERS_PER_WORKSPACE
+
       // Invite users until the tier limit is reached
       for (
         let i = 0;
-        i < tierLimitService.getMemberTierLimit(workspace1.id) - 1; // Subtract 1 for the user who owns the workspace
+        i < maxMembers - 1; // Subtract 1 for the user who owns the workspace
         i++
       ) {
         // Create a user
@@ -563,7 +540,7 @@ describe('Workspace Membership Controller Tests', () => {
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
         payload: [
           {
-            email: 'joy@keyshade.xyz',
+            email: 'joy@keyshade.io',
             roleSlugs: [memberRole.slug]
           }
         ]
@@ -574,18 +551,20 @@ describe('Workspace Membership Controller Tests', () => {
       // Expect the user to have been created
       const user = await prisma.user.findUnique({
         where: {
-          email: 'joy@keyshade.xyz'
+          email: 'joy@keyshade.io'
         }
       })
 
       expect(user).toBeDefined()
-      expect(user.email).toBe('joy@keyshade.xyz')
+      expect(user.email).toBe('joy@keyshade.io')
       expect(user.authProvider).toBe(AuthProvider.EMAIL_OTP)
     })
   })
 
   describe('Remove Users Tests', () => {
     it('should be able to remove users from workspace', async () => {
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
       const response = await app.inject({
         method: 'DELETE',
         headers: {

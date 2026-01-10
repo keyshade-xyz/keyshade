@@ -1,18 +1,18 @@
 import { InternalServerErrorException, Logger } from '@nestjs/common'
 import {
   Environment,
+  Event,
   EventSeverity,
+  EventSource,
   EventTriggerer,
   EventType,
-  EventSource,
+  Integration,
   Project,
   Secret,
   User,
-  Workspace,
-  WorkspaceRole,
   Variable,
-  Integration,
-  Event
+  Workspace,
+  WorkspaceRole
 } from '@prisma/client'
 import IntegrationFactory from '@/integration/plugins/integration.factory'
 import { EventService } from '@/event/event.service'
@@ -20,6 +20,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody, encryptMetadata } from './util'
 import { PrismaService } from '@/prisma/prisma.service'
 import { EventMetadata } from '@/event/event.types'
+import { InclusionQuery } from './inclusion-query'
 
 /**
  * Creates a new event and saves it to the database.
@@ -63,6 +64,11 @@ export const createEvent = async (
     )
   }
 
+  const metadataToPersist = data.metadata
+  if (data.source === EventSource.SECRET) {
+    delete metadataToPersist.values
+  }
+
   const event = await prisma.event.create({
     data: {
       triggerer: data.triggerer ?? EventTriggerer.USER,
@@ -71,7 +77,7 @@ export const createEvent = async (
       source: data.source,
       title: data.title,
       description: data.description ?? '',
-      metadata: encryptMetadata(data.metadata),
+      metadata: encryptMetadata(metadataToPersist),
       userId: data.triggeredBy?.id,
       itemId: data.entity?.id,
       workspaceId: data.workspaceId
@@ -153,9 +159,7 @@ export const createEvent = async (
           has: data.type
         }
       },
-      include: {
-        environments: true
-      }
+      include: InclusionQuery.Integration
     })
 
     logger.log(
@@ -173,16 +177,25 @@ export const createEvent = async (
         prisma
       )
 
-      integrationInstance.emitEvent({
-        entity: data.entity,
-        source: data.source,
-        eventType: data.type,
-        title: data.title,
-        description: data.description,
-        event
-      })
-
-      logger.log(`Event emitted for integration with id ${integration.id}`)
+      integrationInstance
+        .emitEvent({
+          entity: data.entity,
+          source: data.source,
+          eventType: data.type,
+          title: data.title,
+          description: data.description,
+          event
+        })
+        .then(() => {
+          logger.log(
+            `Event emitted for integration with id ${integration.id} and type ${integration.type}`
+          )
+        })
+        .catch((error) => {
+          logger.error(
+            `Error emitting event for integration with id ${integration.id} and type ${integration.type}: ${error}`
+          )
+        })
     }
   }
   return event

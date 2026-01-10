@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
-import { LinkSVG } from '@public/svg/shared'
+import { LinkSVG, LoadingSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import {
@@ -11,6 +11,8 @@ import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 import { Label } from '@/components/ui/label'
 import WarningCard from '@/components/shared/warning-card'
 import { CommandSuggestion } from '@/components/shared/dashboard/command-suggestion'
+import { downalodFile } from '@/lib/download-file'
+import { withLoading } from '@/lib/with-loading'
 
 interface ViewAndDownloadProjectKeysDialogProps {
   projectKeys?: {
@@ -43,27 +45,20 @@ export default function ViewAndDownloadProjectKeysDialog({
     setIsViewAndDownloadProjectKeysDialogOpen((prev) => !prev)
   }, [setIsViewAndDownloadProjectKeysDialogOpen])
 
-  const handleDownloadKeys = () => {
-    setIsDownloading(true)
+  const handleDownloadKeys = withLoading(() => {
+    if (!projectKeys) {
+      return
+    }
 
-    const privateKey = projectKeys?.keys.privateKey
-    const publicKey = projectKeys?.keys.publicKey
+    const privateKey = projectKeys.keys.privateKey
+    const publicKey = projectKeys.keys.publicKey
 
     const fileContent = `private_key=${privateKey}\npublic_key=${publicKey}`
-    const blob = new Blob([fileContent], { type: 'text/plain' })
 
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
+    const projectName = projectKeys.projectName
 
-    const projectName = projectKeys?.projectName
-    link.download = `${projectName}-keys.txt`
-
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    setIsDownloading(false)
-  }
+    downalodFile(fileContent, `${projectName}-keys.txt`, 'text/plain')
+  }, setIsDownloading)
 
   return (
     <Dialog
@@ -102,7 +97,7 @@ export default function ViewAndDownloadProjectKeysDialog({
             </Label>
             <a
               className="flex items-center gap-1 text-xs text-blue-400 transition-colors hover:text-blue-300"
-              href="https://docs.keyshade.xyz/cli/introduction"
+              href="https://docs.keyshade.io/cli/introduction"
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -131,7 +126,7 @@ export default function ViewAndDownloadProjectKeysDialog({
             onClick={handleDownloadKeys}
             variant="secondary"
           >
-            Download keys
+            {isDownloading ? <LoadingSVG /> : 'Download keys'}
           </Button>
         </div>
       </DialogContent>

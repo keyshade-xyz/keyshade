@@ -80,9 +80,11 @@ async function initializeNestApp() {
     credentials: true,
     origin: [
       'http://localhost:3025',
-      'https://keyshade.xyz',
-      'https://app.keyshade.xyz',
-      'https://stage.app.keyshade.xyz'
+      'http://localhost:6969',
+      'https://keyshade.io',
+      'https://stage.keyshade.io',
+      'https://app.keyshade.io',
+      'https://stage.app.keyshade.io'
     ]
   })
   app.use(cookieParser())

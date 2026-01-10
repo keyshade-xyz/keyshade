@@ -5,18 +5,39 @@ import { IMailService } from './interface.service'
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
 
+  async shareSecret(
+    email: string,
+    data: { expiresAt: Date; isPasswordProtected: boolean; url: string }
+  ): Promise<void> {
+    this.log.log(
+      `[MOCK] Secret shared notification would be sent to ${email}: Expiration Date=${data.expiresAt.toISOString()}, URL=${data.url}`
+    )
+  }
+
   async invitedToWorkspace(
     email: string,
     workspaceName: string,
     actionUrl: string,
     invitedBy: string,
-    invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void> {
     this.log.log(
       forRegisteredUser
-        ? `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Invitation details can be accessed at ${actionUrl}.`
-        : `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Since the user is not registered, they can sign up and access the invitation details at ${actionUrl}.`
+        ? `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy}. Invitation details can be accessed at ${actionUrl}.`
+        : `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy}. Since the user is not registered, they can sign up and access the invitation details at ${actionUrl}.`
+    )
+  }
+
+  async sendSignInCode(
+    email: string,
+    code: string,
+    name: string,
+    device: string,
+    location: string
+  ): Promise<void> {
+    this.log.log(
+      `Sign-in code for ${email} is ${code} and name is ${name}. Device is ${device} and location is ${location}`
     )
   }
 
@@ -54,5 +75,22 @@ export class MockMailService implements IMailService {
     this.log.log(
       `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn.toISOString()}`
     )
+  }
+
+  async sendLoginNotification(
+    email: string,
+    data: { ip: string; device: string; location?: string }
+  ): Promise<void> {
+    this.log.log(
+      `[MOCK] Login notification would be sent to ${email}: IP=${data.ip}, Location=${data.location}, Device=${data.device}`
+    )
+  }
+
+  async sendOnboardingReminder(
+    email: string,
+    name: string | null,
+    reminderIndex: number
+  ): Promise<void> {
+    return
   }
 }

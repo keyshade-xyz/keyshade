@@ -17,15 +17,31 @@ import {
   GetAllSecretsOfEnvironmentResponseSchema,
   DeleteEnvironmentValueOfSecretRequestSchema,
   DeleteEnvironmentValueOfSecretResponseSchema,
-  SecretVersionSchema
+  SecretRevisionSchema,
+  BulkCreateSecretResponseSchema,
+  BulkCreateSecretRequestSchema,
+  DisableSecretRequestSchema,
+  DisableSecretResponseSchema,
+  EnableSecretRequestSchema,
+  EnableSecretResponseSchema,
+  getAllDisabledEnvironmentsOfSecretRequestSchema,
+  getAllDisabledEnvironmentsOfSecretResponseSchema
 } from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
-export type SecretVersion = z.infer<typeof SecretVersionSchema>
+export type SecretVersion = z.infer<typeof SecretRevisionSchema>
 
 export type CreateSecretRequest = z.infer<typeof CreateSecretRequestSchema>
 
 export type CreateSecretResponse = z.infer<typeof CreateSecretResponseSchema>
+
+export type BulkCreateSecretRequest = z.infer<
+  typeof BulkCreateSecretRequestSchema
+>
+
+export type BulkCreateSecretResponse = z.infer<
+  typeof BulkCreateSecretResponseSchema
+>
 
 export type UpdateSecretRequest = z.infer<typeof UpdateSecretRequestSchema>
 
@@ -47,6 +63,22 @@ export type RollBackSecretRequest = z.infer<typeof RollBackSecretRequestSchema>
 
 export type RollBackSecretResponse = z.infer<
   typeof RollBackSecretResponseSchema
+>
+
+export type DisableSecretRequest = z.infer<typeof DisableSecretRequestSchema>
+
+export type DisableSecretResponse = z.infer<typeof DisableSecretResponseSchema>
+
+export type EnableSecretRequest = z.infer<typeof EnableSecretRequestSchema>
+
+export type EnableSecretResponse = z.infer<typeof EnableSecretResponseSchema>
+
+export type GetAllDisabledEnvironmentsOfSecretRequest = z.infer<
+  typeof getAllDisabledEnvironmentsOfSecretRequestSchema
+>
+
+export type GetAllDisabledEnvironmentsOfSecretResponse = z.infer<
+  typeof getAllDisabledEnvironmentsOfSecretResponseSchema
 >
 
 export type GetAllSecretsOfProjectRequest = z.infer<

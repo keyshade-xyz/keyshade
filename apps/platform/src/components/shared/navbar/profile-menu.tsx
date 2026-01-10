@@ -10,15 +10,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import AvatarComponent from '@/components/common/avatar'
-import { userAtom } from '@/store'
+import { selectedWorkspaceAtom, userAtom } from '@/store'
 
 export default function ProfileMenu() {
   const user = useAtomValue(userAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const logOut = useHttp(() =>
     ControllerInstance.getInstance().authController.logOut()
@@ -50,11 +50,11 @@ export default function ProfileMenu() {
     <>
       {user ? (
         <DropdownMenu>
-          <DropdownMenuTrigger className=" flex items-center gap-x-2 rounded-xl bg-[#2A2C2E] px-3 py-2">
+          <DropdownMenuTrigger className=" flex items-center gap-x-2 rounded-xl border border-white/10 bg-zinc-900 p-2">
             {!user.name ? (
               <>
                 <span className="h-6 w-6 animate-pulse rounded-full bg-white/20" />
-                <span className="h-5 w-20 animate-pulse rounded bg-white/20" />
+                <span className="h-5 w-20 animate-pulse rounded-sm bg-white/20" />
               </>
             ) : (
               <>
@@ -62,24 +62,23 @@ export default function ProfileMenu() {
                   name={user.name}
                   profilePictureUrl={user.profilePictureUrl || ''}
                 />
-                <span>{user.name}</span>
+                <span>{user.name.split(' ')[0]}</span>
               </>
             )}
             <DropdownSVG />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+          <DropdownMenuContent align="end" className="w-[16.25rem]">
             <Link href="/settings?tab=profile">
               <DropdownMenuItem>Profile</DropdownMenuItem>
             </Link>
-            <Link href="/settings?tab=billing">
+            <Link href={`/${selectedWorkspace?.slug}/billing`}>
               <DropdownMenuItem>Billing</DropdownMenuItem>
             </Link>
+            <DropdownMenuSeparator />
             <Link href="/settings?tab=invites">
               <DropdownMenuItem>View Invites</DropdownMenuItem>
             </Link>
-            <Link href="/teams">
+            <Link href="/members?tab=joined">
               <DropdownMenuItem>Team</DropdownMenuItem>
             </Link>
 

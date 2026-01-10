@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { AuthService } from './service/auth.service'
 import { AuthController } from './auth.controller'
 import { JwtModule } from '@nestjs/jwt'
@@ -21,8 +21,8 @@ import { AuthorityCheckerService } from './service/authority-checker.service'
       global: true,
       secret: process.env.JWT_SECRET ?? 'secret',
       signOptions: {
-        expiresIn: '1d',
-        issuer: 'keyshade.xyz',
+        expiresIn: '30d',
+        issuer: 'keyshade.io',
         algorithm: 'HS256'
       }
     }),

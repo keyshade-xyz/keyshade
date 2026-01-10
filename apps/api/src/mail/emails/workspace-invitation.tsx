@@ -1,62 +1,64 @@
 import * as React from 'react'
-import { Button, Section, Text } from '@react-email/components'
-import dayjs from 'dayjs'
-import {
-  ctaButton,
-  text,
-  workspaceDetails,
-  workspaceInfo
-} from './styles/common-styles'
+import { Button, Text } from '@react-email/components'
+import { ctaButton, text } from './styles/common-styles'
 import BaseEmailTemplate from './components/base-email-template'
 
 interface WorkspaceInvitationEmailProps {
+  inviteeName?: string
   workspaceName: string
   actionUrl: string
   invitedBy: string
-  invitedOn: string
   forRegisteredUser: boolean
 }
 
 export const WorkspaceInvitationEmail = ({
+  inviteeName,
   workspaceName,
   actionUrl,
-  invitedBy,
-  invitedOn,
-  forRegisteredUser
+  invitedBy
 }: WorkspaceInvitationEmailProps) => {
-  const formattedInvitedOnDate = dayjs(invitedOn).format(
-    'ddd, MMM D, YYYY h:mm A'
-  )
+  const previewText = 'You are Invited to Join Keyshade Workspace'
 
-  const previewText = forRegisteredUser
-    ? 'Welcome Back! Join Your Workspace'
-    : 'You are Invited to Join the Workspace'
+  const userName = inviteeName?.trim() || 'there'
 
   return (
     <BaseEmailTemplate previewText={previewText} heading={previewText}>
-      <Text style={text}>Dear User,</Text>
       <Text style={text}>
-        We're excited to inform you that you've been invited to join a workspace
-        on Keyshade. Here are the details of your invitation:
+        Hey <strong>{userName}</strong>,
       </Text>
-      <Section style={workspaceDetails}>
-        <Text style={workspaceInfo}>
-          <strong>Workspace Name:</strong> {workspaceName}
-        </Text>
-        <Text style={workspaceInfo}>
-          <strong>Invited By:</strong> {invitedBy}
-        </Text>
-        <Text style={workspaceInfo}>
-          <strong>Invited On:</strong> {formattedInvitedOnDate}
-        </Text>
-      </Section>
       <Text style={text}>
-        Join the project by clicking the button below - we're excited to have
-        you!
+        You have been invited to join the <strong>{workspaceName}</strong> on
+        Keyshade by {invitedBy}!
       </Text>
+
+      <Text style={text}>Here you&apos;ll be able to:</Text>
+      <ul>
+        <li>
+          <Text style={text}>Collaborate with your team in real-time</Text>
+        </li>
+        <li>
+          <Text style={text}>Access shared resources and tools</Text>
+        </li>
+        <li>
+          <Text style={text}>
+            Stay updated on everything happening in the workspace
+          </Text>
+        </li>
+      </ul>
+
       <Button href={actionUrl} style={ctaButton}>
-        Get started
+        Join Workspace
       </Button>
+
+      <Text style={text}>
+        If you weren't expecting this invitation, you can safely ignore this
+        email. Looking forward to seeing you inside!
+      </Text>
+      <Text style={text}>
+        Best,
+        <br />
+        The Keyshade Team
+      </Text>
     </BaseEmailTemplate>
   )
 }

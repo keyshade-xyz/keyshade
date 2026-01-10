@@ -6,6 +6,10 @@ import {
   type CommandArgument,
   type CommandOption
 } from 'src/types/command/command.types'
+import {
+  UpdateEnvironmentRequestSchema,
+  UpdateEnvironmentResponseSchema
+} from '@keyshade/schema/raw'
 
 export class UpdateEnvironment extends BaseCommand {
   getName(): string {
@@ -48,8 +52,13 @@ export class UpdateEnvironment extends BaseCommand {
     const [environmentSlug] = args
     const { name, description } = options
 
-    if (!environmentSlug) {
-      Logger.error('Environment slug is required')
+    const request = UpdateEnvironmentRequestSchema.safeParse({
+      name,
+      description,
+      slug: environmentSlug
+    })
+    if (!request.success) {
+      Logger.error(request.error.toString())
       return
     }
 
@@ -60,17 +69,23 @@ export class UpdateEnvironment extends BaseCommand {
       error,
       data: environment
     } = await ControllerInstance.getInstance().environmentController.updateEnvironment(
-      { name, description, slug: environmentSlug },
+      request.data,
       this.headers
     )
 
-    if (success) {
+    if (!success) {
+      this.logError(error)
+      return
+    }
+
+    const response = UpdateEnvironmentResponseSchema.safeParse(environment)
+    if (response.success) {
       Logger.info('Environment updated successfully')
       Logger.info(
         `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
-      this.logError(error)
+      Logger.error('Invalid server response')
     }
   }
 }

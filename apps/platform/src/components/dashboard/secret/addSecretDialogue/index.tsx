@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import { Input } from '../../../ui/input'
+import { Button } from '../../../ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,17 +12,18 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../../../ui/dialog'
-import { Button } from '../../../ui/button'
-import { Input } from '../../../ui/input'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
-  selectedProjectAtom,
+  projectSecretCountAtom,
   secretsOfProjectAtom,
-  projectSecretCountAtom
+  selectedProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { cn, parseUpdatedEnvironmentValues, validateAlphanumericInput } from '@/lib/utils'
+import {
+  parseUpdatedEnvironmentValues,
+  validateAlphanumericInput
+} from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddSecretDialog() {
@@ -29,6 +32,9 @@ export default function AddSecretDialog() {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
+
+  const isAuthorizedToCreateSecret =
+    selectedProject?.entitlements.canCreateSecrets
 
   const [requestData, setRequestData] = useState({
     name: '',
@@ -101,104 +107,96 @@ export default function AddSecretDialog() {
   ])
 
   return (
-    <div className="flex items-center justify-center gap-6">
-      <Dialog onOpenChange={handleClose} open={isCreateSecretOpen}>
-        <DialogTrigger asChild>
-          <Button
-            className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
-            variant="outline"
-          >
-            <AddSVG /> Add Secret
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="w-[31.625rem] bg-[#18181B] text-white ">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold">
-              Add a new secret
-            </DialogTitle>
-            <DialogDescription>
-              Add a new secret to the project. This secret will be encrypted and
-              stored securely.
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog onOpenChange={handleClose} open={isCreateSecretOpen}>
+      <DialogTrigger asChild>
+        <Button disabled={!isAuthorizedToCreateSecret}>
+          <AddSVG /> Create Secret
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="w-126.5 bg-[#18181B] text-white ">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold">
+            Add a new secret
+          </DialogTitle>
+          <DialogDescription>
+            Add a new secret to the project. This secret will be encrypted and
+            stored securely.
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className=" text-white">
-            <div className="space-y-4">
-              <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
-                <label
-                  className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
-                  htmlFor="secret-name"
-                >
-                  Secret Name
-                </label>
-                <div className="flex w-full flex-col gap-2">
-                  <Input
-                    className={cn('h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500', {
-                      'border-red-500': Boolean(secretNameError)
-                    })}
-                    disabled={isLoading}
-                    id="secret-name"
-                    onChange={(e) => {
-                      const value = e.target.value
-                      setSecretNameError(
-                        !validateAlphanumericInput(value)
-                          ? 'Only English letters and digits are allowed.'
-                          : ''
-                      )
-                      setRequestData({
-                        ...requestData,
-                        name: value
-                      })
-                    }}
-                    placeholder="Enter the key of the secret"
-                    value={requestData.name}
-                  />
-                  {secretNameError ? <span className="my-2 text-xs text-red-500">
-                      {secretNameError}
-                    </span> : null}
-                </div>
-              </div>
-
-              <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
-                <label
-                  className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
-                  htmlFor="secrete-note"
-                >
-                  Extra Note
-                </label>
-                <Input
-                  className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
-                  disabled={isLoading}
-                  id="secret-note"
-                  onChange={(e) =>
-                    setRequestData({
-                      ...requestData,
-                      note: e.target.value
-                    })
-                  }
-                  placeholder="Enter the note of the secret"
-                  value={requestData.note}
-                />
-              </div>
-
-              <EnvironmentValueEditor
-                environmentValues={environmentValues}
-                setEnvironmentValues={setEnvironmentValues}
+        <div className=" text-white">
+          <div className="space-y-4">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
+              <label
+                className="w-28.5 h-5 text-base font-semibold"
+                htmlFor="secret-name"
+              >
+                Secret Name
+              </label>
+              <Input
+                className="w-[20rem]"
+                disabled={isLoading}
+                id="secret-name"
+                onChange={(e) => {
+                  setSecretNameError(
+                    !validateAlphanumericInput(e.target.value)
+                      ? 'Only English letters and digits are allowed.'
+                      : ''
+                  )
+                  setRequestData({
+                    ...requestData,
+                    name: e.target.value
+                  })
+                }}
+                placeholder="Enter the key of the secret"
+                value={requestData.name}
               />
+              {secretNameError ? (
+                <span className="text-xs text-red-500">
+                  {secretNameError}
+                </span>
+              ) : null}
+            </div>
 
-              <div className="flex justify-end pt-4">
-                <Button
-                  className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                  disabled={isLoading || Boolean(secretNameError)}
-                  onClick={handleAddSecret}
-                >
-                  Add Secret
-                </Button>
-              </div>
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
+              <label
+                className="w-28.5 h-5 text-base font-semibold"
+                htmlFor="secrete-note"
+              >
+                Extra Note
+              </label>
+              <Input
+                className="w-[20rem]"
+                disabled={isLoading}
+                id="secret-note"
+                onChange={(e) =>
+                  setRequestData({
+                    ...requestData,
+                    note: e.target.value
+                  })
+                }
+                placeholder="Enter the note of the secret"
+                value={requestData.note}
+              />
+            </div>
+
+            <EnvironmentValueEditor
+              environmentValues={environmentValues}
+              setEnvironmentValues={setEnvironmentValues}
+            />
+
+            <div className="flex justify-end pt-4">
+              <Button
+                className="h-10.5 w-25 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                disabled={isLoading || Boolean(secretNameError)}
+                onClick={handleAddSecret}
+              >
+                Add Secret
+              </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

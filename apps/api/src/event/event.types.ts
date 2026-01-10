@@ -1,7 +1,6 @@
-import { Environment } from '@prisma/client'
-import { JsonObject } from '@prisma/client/runtime/library'
+import { Environment, Prisma } from '@prisma/client'
 
-export interface EventMetadata extends JsonObject {}
+export interface EventMetadata extends Prisma.JsonObject {}
 
 export interface ConfigurationAddedEventMetadata extends EventMetadata {
   name: string

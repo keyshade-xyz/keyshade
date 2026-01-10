@@ -20,9 +20,9 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
-import { cn, validateAlphanumericInput } from '@/lib/utils'
+import { validateAlphanumericInput } from '@/lib/utils'
 
-export default function AddEnvironmentDialogue() {
+export default function AddEnvironmentDialogue(): React.JSX.Element {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
     createEnvironmentOpenAtom
   )
@@ -30,12 +30,21 @@ export default function AddEnvironmentDialogue() {
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
   const setProjectEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
 
+  const isAuthorizedToCreateEnvironment =
+    selectedProject?.entitlements.canCreateEnvironments
+
   const [newEnvironmentData, setNewEnvironmentData] = useState({
     environmentName: '',
     environmentDescription: ''
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [environmentNameError, setEnvironmentNameError] = useState<string>('')
+
+  // Check if environment name is empty/only whitespace and whether is at least 3 chars length
+  const MIN_ENV_NAME_LENGTH = 3
+  const isInvalidEnvironmentName =
+    newEnvironmentData.environmentName.trim() === '' ||
+    newEnvironmentData.environmentName.trim().length < MIN_ENV_NAME_LENGTH
 
   const createEnvironment = useHttp(() =>
     ControllerInstance.getInstance().environmentController.createEnvironment({
@@ -47,12 +56,12 @@ export default function AddEnvironmentDialogue() {
 
   const handleAddEnvironment = useCallback(async () => {
     if (selectedProject) {
-      // Check if environment name is empty/only whitespace and whether is at least 3 chars length
-      if (newEnvironmentData.environmentName.trim() === '' || newEnvironmentData.environmentName.trim().length < 3) {
+      if (isInvalidEnvironmentName) {
         toast.error('Environment name is required', {
           description: (
             <p className="text-xs text-red-300">
-              Please provide a valid name for the environment (not blank and at least has 3 chars).
+              Please provide a valid name for the environment (not blank and at
+              least has 3 chars).
             </p>
           )
         })
@@ -97,11 +106,11 @@ export default function AddEnvironmentDialogue() {
     }
   }, [
     createEnvironment,
-    newEnvironmentData.environmentName,
     selectedProject,
     setEnvironments,
     setProjectEnvironmentCount,
-    setIsCreateEnvironmentOpen
+    setIsCreateEnvironmentOpen,
+    isInvalidEnvironmentName
   ])
 
   return (
@@ -110,14 +119,11 @@ export default function AddEnvironmentDialogue() {
       open={isCreateEnvironmentOpen}
     >
       <DialogTrigger asChild>
-        <Button
-          className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
-          variant="outline"
-        >
-          <AddSVG /> Add Environment
+        <Button disabled={!isAuthorizedToCreateEnvironment} variant="primary">
+          <AddSVG /> Create Environments
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[25rem] w-[31.625rem] bg-[#18181B] text-white ">
+      <DialogContent className="h-100 w-126.5 bg-[#18181B] text-white ">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new environment
@@ -130,18 +136,16 @@ export default function AddEnvironmentDialogue() {
 
         <div className=" text-white">
           <div className="space-y-4">
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="environment-name"
               >
                 Environment Name
               </label>
               <div className='flex flex-col gap-2 w-full'>
               <Input
-                className={cn('h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500', {
-                  'border-red-500': Boolean(environmentNameError)
-                })}
+                className="w-[20rem]"
                 id="environment-name"
                 onChange={(e) => {
                   const value = e.target.value
@@ -158,15 +162,15 @@ export default function AddEnvironmentDialogue() {
               </div>
             </div>
 
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="environmente-note"
               >
                 Environment Description
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="environment-note"
                 onChange={(e) =>
                   setNewEnvironmentData({
@@ -181,7 +185,7 @@ export default function AddEnvironmentDialogue() {
 
             <div className="flex justify-end pt-4">
               <Button
-                className="h-[2.625rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                className="h-10.5 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 disabled={isLoading || Boolean(environmentNameError)}
                 onClick={handleAddEnvironment}
               >

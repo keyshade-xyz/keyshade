@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { localProjectPrivateKeyAtom } from '@/store'
+import { localProjectPrivateKeyAtom, privateKeyStorageTypeAtom } from '@/store'
 import { Input } from '@/components/ui/input'
 
 interface SetupLocalKeyDialogProps {
@@ -27,6 +27,7 @@ function SetupLocalKeyDialog({
 }: SetupLocalKeyDialogProps): React.JSX.Element {
   const [keyValue, setKeyValue] = useState<string>('')
   const setLocalProjectPrivateKey = useSetAtom(localProjectPrivateKeyAtom)
+  const setPrivateKeyStorageType = useSetAtom(privateKeyStorageTypeAtom)
 
   const handleSaveChanges = useCallback(() => {
     setLocalProjectPrivateKey((prevKeys) => {
@@ -35,7 +36,14 @@ function SetupLocalKeyDialog({
     })
     toast.success('Key saved successfully!')
     onClose()
-  }, [keyValue, onClose, currentProject, setLocalProjectPrivateKey])
+    setPrivateKeyStorageType('IN_ATOM')
+  }, [
+    keyValue,
+    onClose,
+    currentProject,
+    setLocalProjectPrivateKey,
+    setPrivateKeyStorageType
+  ])
 
   return (
     <AlertDialog onOpenChange={onClose} open={isOpen}>

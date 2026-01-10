@@ -18,28 +18,30 @@ function SidebarTab({
   matchTo
 }: SidebarTabProps): React.JSX.Element {
   const currentPath = usePathname()
+
   /**
-   * Determines the background color for a tab based on the current active path.
-   * @param tabName - The name of the tab.
-   * @returns The background color for the tab.
+   * Determines if a tab is active based on the current path.
+   * It strips any query parameters from matchTo and checks if
+   * the current path is equal to or starts with that base.
    */
-  const isCurrentActive = (tabName: string): boolean => {
-    if (currentPath === tabName) {
-      return true
+  const isCurrentActive = (matchPattern: string): boolean => {
+    if (!matchPattern || typeof matchPattern !== 'string') {
+      return false
     }
-    return false
+    const basePath = matchPattern.split('?')[0]
+    return currentPath === basePath || currentPath.startsWith(`${basePath}/`)
   }
 
   return (
     <Link
-      className="relative flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:text-white/60"
+      className={`${isCurrentActive(matchTo) ? 'text-primary-200' : 'text-neutral-500 hover:text-white'} relative flex w-full items-center gap-x-3 rounded-xl p-2.5 text-base capitalize transition-colors`}
       href={link}
     >
       {isCurrentActive(matchTo) && (
         <motion.span
-          className="absolute inset-0 z-10 bg-white/10 mix-blend-difference"
+          className="bg-primary-1100 border-primary-200/30 absolute inset-0 -z-10 border"
           layoutId="bubble"
-          style={{ borderRadius: 6 }}
+          style={{ borderRadius: 12 }}
           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}

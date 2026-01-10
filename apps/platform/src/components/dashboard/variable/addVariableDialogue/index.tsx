@@ -20,16 +20,22 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { cn, parseUpdatedEnvironmentValues, validateAlphanumericInput } from '@/lib/utils'
+import {
+  parseUpdatedEnvironmentValues,
+  validateAlphanumericInput
+} from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
-export default function AddVariableDialogue() {
+export default function AddVariableDialogue(): React.JSX.Element {
   const [isCreateVariableOpen, setIsCreateVariableOpen] = useAtom(
     createVariableOpenAtom
   )
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setVariables = useSetAtom(variablesOfProjectAtom)
   const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
+
+  const isAuthorizedToCreateVariable =
+    selectedProject?.entitlements.canCreateVariables
 
   const [requestData, setRequestData] = useState({
     name: '',
@@ -51,7 +57,7 @@ export default function AddVariableDialogue() {
   )
 
   const handleClose = useCallback(() => {
-    setIsCreateVariableOpen(false)
+    setIsCreateVariableOpen((prev) => !prev)
     setRequestData({
       name: '',
       note: ''
@@ -107,14 +113,11 @@ export default function AddVariableDialogue() {
       open={isCreateVariableOpen}
     >
       <DialogTrigger asChild>
-        <Button
-          className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
-          variant="outline"
-        >
-          <AddSVG /> Add Variable
+        <Button disabled={!isAuthorizedToCreateVariable} variant="primary">
+          <AddSVG /> Create Variables
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[31.625rem] bg-[#18181B] text-white ">
+      <DialogContent className="w-126.5 bg-[#18181B] text-white ">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new variable
@@ -126,49 +129,46 @@ export default function AddVariableDialogue() {
 
         <div className=" text-white">
           <div className="space-y-4">
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="variable-name"
               >
                 Variable Name
               </label>
-              <div className="flex w-full flex-col gap-2">
-                <Input
-                  className={cn('h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500', {
-                    'border-red-500': Boolean(variableNameError)
-                  })}
-                  id="variable-name"
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setVariableNameError(
-                      !validateAlphanumericInput(value)
-                        ? 'Only English letters and digits are allowed.'
-                        : ''
-                    )
-                    setRequestData({
-                      ...requestData,
-                      name: value
-                    })
-                  }}
-                  placeholder="Enter the key of the variable"
-                  value={requestData.name}
-                />
-                {variableNameError ? <span className="my-2 text-xs text-red-500">
-                    {variableNameError}
-                  </span> : null}
-              </div>
+              <Input
+                className="w-[20rem]"
+                id="variable-name"
+                onChange={(e) => {
+                  setVariableNameError(
+                    !validateAlphanumericInput(e.target.value)
+                      ? 'Only English letters and digits are allowed.'
+                      : ''
+                  )
+                  setRequestData({
+                    ...requestData,
+                    name: e.target.value
+                  })
+                }}
+                placeholder="Enter the key of the variable"
+                value={requestData.name}
+              />
+              {variableNameError ? (
+                <span className="text-xs text-red-500">
+                  {variableNameError}
+                </span>
+              ) : null}
             </div>
 
-            <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+            <div className="w-114.5 flex h-11 items-center justify-center gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="w-28.5 h-5 text-base font-semibold"
                 htmlFor="variable-name"
               >
                 Extra Note
               </label>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className="w-[20rem]"
                 id="variable-name"
                 onChange={(e) =>
                   setRequestData({
@@ -188,7 +188,7 @@ export default function AddVariableDialogue() {
 
             <div className="flex justify-end pt-4">
               <Button
-                className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                className="h-10.5 w-25 rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 disabled={isLoading || Boolean(variableNameError)}
                 onClick={handleAddVariable}
               >

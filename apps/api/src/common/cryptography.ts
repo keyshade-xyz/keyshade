@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import {
+import crypto, {
   createCipheriv,
   createDecipheriv,
   createHash,
@@ -30,13 +30,20 @@ export const createKeyPair = (): {
   }
 }
 
-/**
- * Generates a new API key.
- *
- * @returns A new API key as a string in the format 'ks_<24 bytes of random data>'.
- */
-export const generateApiKey = (): string =>
-  'ks_' + randomBytes(24).toString('hex')
+export const generateRandomBytes = (
+  length: number
+): {
+  plaintext: string
+  hash: string
+} => {
+  const plaintext = crypto.randomBytes(length).toString('hex')
+  const hash = toSHA256(plaintext)
+
+  return {
+    plaintext,
+    hash
+  }
+}
 
 /**
  * Returns the SHA256 hash of the given string as a hexadecimal string.
@@ -57,10 +64,11 @@ const deriveKey = (keyString: string): Buffer =>
  * Encrypts the given string using the given string key.
  *
  * @param text - The string to encrypt.
+ * @param secret - Optionally, The string secret to use for encryption.
  * @returns The encrypted string as a base64-encoded string.
  */
-export const sEncrypt = (text: string): string => {
-  const key = deriveKey(process.env.SERVER_SECRET)
+export const sEncrypt = (text: string, secret?: string): string => {
+  const key = deriveKey(secret || process.env.SERVER_SECRET)
   const iv = randomBytes(IV_LENGTH)
   const cipher = createCipheriv(ALGORITHM, key, iv)
 
@@ -74,13 +82,14 @@ export const sEncrypt = (text: string): string => {
  * Decrypts the given encrypted string using the given string key.
  *
  * @param encryptedBase64 - The encrypted string as a base64-encoded string.
+ * @param secret - Optionally, The string secret to use for decryption.
  *
  * @returns The decrypted string.
  *
  * @throws {Error} If the decryption fails.
  */
-export const sDecrypt = (encryptedBase64: string): string => {
-  const key = deriveKey(process.env.SERVER_SECRET)
+export const sDecrypt = (encryptedBase64: string, secret?: string): string => {
+  const key = deriveKey(secret || process.env.SERVER_SECRET)
   const data: Buffer = Buffer.from(encryptedBase64, 'base64')
 
   const iv = data.subarray(0, IV_LENGTH)

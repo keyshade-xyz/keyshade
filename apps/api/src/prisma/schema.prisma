@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum EventSource {
@@ -136,6 +135,7 @@ enum IntegrationType {
   GITHUB
   GITLAB
   VERCEL
+  AWS_LAMBDA
 }
 
 enum AuthProvider {
@@ -155,6 +155,102 @@ enum IntegrationRunStatus {
   RUNNING
   SUCCESS
   FAILED
+}
+
+enum SubscriptionPlanType {
+  FREE
+  HACKER
+  TEAM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  UNPAID
+}
+
+model DeviceDetail {
+  id                 String  @id @default(cuid())
+  encryptedIpAddress String?
+  os                 String?
+  agent              String?
+  city               String?
+  region             String?
+  country            String?
+
+  cliSessions                 CliSession[]
+  browserSessions             BrowserSession[]
+  ServiceAccountAccessHistory ServiceAccountAccessHistory[]
+
+  @@index([encryptedIpAddress, os, agent])
+}
+
+model PersonalAccessToken {
+  id         String    @id @default(cuid())
+  name       String
+  hash       String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedOn DateTime?
+  expiresOn  DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+
+  @@unique([name, userId])
+}
+
+model CliSession {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedOn DateTime?
+  expiresOn  DateTime
+
+  deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  deviceDetailId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+}
+
+model BrowserSession {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedOn DateTime?
+  expiresOn  DateTime
+
+  deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  deviceDetailId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+}
+
+model ServiceAccountAccessToken {
+  id         String    @id @default(cuid())
+  name       String
+  hash       String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedOn DateTime?
+  expiresOn  DateTime?
+
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
+
+  serviceAccount   ServiceAccount @relation(fields: [serviceAccountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  serviceAccountId String
+
+  serviceAccountAccessHistory ServiceAccountAccessHistory[]
+
+  @@unique([name, serviceAccountId])
 }
 
 model Event {
@@ -204,61 +300,77 @@ model Notification {
 }
 
 model User {
-  id                   String        @id @default(cuid())
-  email                String        @unique
-  name                 String?
-  profilePictureUrl    String?
-  isActive             Boolean       @default(true)
-  isOnboardingFinished Boolean       @default(false)
-  isAdmin              Boolean       @default(false)
-  authProvider         AuthProvider?
-  subscription         Subscription?
-  joinedOn             DateTime      @default(now())
-  referralCode         String        @unique
+  id                         String             @id @default(cuid())
+  email                      String             @unique
+  name                       String?
+  profilePictureUrl          String?
+  isActive                   Boolean            @default(true)
+  isOnboardingFinished       Boolean            @default(false)
+  isAdmin                    Boolean            @default(false)
+  authProvider               AuthProvider?
+  joinedOn                   DateTime           @default(now())
+  timesRemindedForOnboarding Int                @default(0)
+  referralCode               String             @unique
+  workspaceMembers           WorkspaceMember[]
+  workspaces                 Workspace[]
+  otp                        Otp?
+  notifications              Notification[]
+  secrets                    Secret[] // Stores the secrets the user updated
+  variables                  Variable[] // Stores the variables the user updated
+  projects                   Project[] // Stores the projects the user updated
+  environments               Environment[] // Stores the environments the user updated
+  secretVersion              SecretVersion[]
+  variableVersion            VariableVersion[]
+  events                     Event[]
+  integrations               Integration[] // Stores the integrations the user updated
+  emailPreference            EmailPreference?
+  onboardingAnswers          OnboardingAnswers?
+  subscriptions              Subscription[]
 
-  workspaceMembers WorkspaceMember[]
-  workspaces       Workspace[]
-  apiKeys          ApiKey[]
-  otp              Otp?
-  notifications    Notification[]
-  secrets          Secret[] // Stores the secrets the user updated
-  variables        Variable[] // Stores the variables the user updated
-  projects         Project[] // Stores the projects the user updated
-  environments     Environment[] // Stores the environments the user updated
-  secretVersion    SecretVersion[]
-  variableVersion  VariableVersion[]
-  events           Event[]
-  integrations     Integration[] // Stores the integrations the user updated
-  emailPreference  EmailPreference?
-  onboardingAnswers OnboardingAnswers?
+  referredById  String?
+  referredBy    User?   @relation("UserReferrals", fields: [referredById], references: [id])
+  referredUsers User[]  @relation("UserReferrals")
 
-  referredById         String?       
-  referredBy           User?         @relation("UserReferrals", fields: [referredById], references: [id])
-  referredUsers        User[]        @relation("UserReferrals")
+  cliSessions                CliSession[]
+  personalAccessTokens       PersonalAccessToken[]
+  browserSessions            BrowserSession[]
+  serviceAccounts            ServiceAccount[]
+  serviceAccountAccessTokens ServiceAccountAccessToken[]
 
   @@index([email], name: "email")
 }
 
 model OnboardingAnswers {
-  id   String @id @default(cuid())
-  role String?
-  industry String?
-  teamSize String?
+  id           String  @id @default(cuid())
+  role         String?
+  industry     String?
+  teamSize     String?
   productStage String?
-  useCase String?
-  heardFrom String?
+  useCase      String?
+  heardFrom    String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @unique
 }
 
 model Subscription {
-  id       String  @id @default(cuid())
-  plan     String
-  isActive Boolean @default(true)
+  id                   String               @id @default(cuid())
+  plan                 SubscriptionPlanType @default(FREE)
+  status               SubscriptionStatus   @default(INCOMPLETE)
+  seatsBooked          Int                  @default(3)
+  isAnnual             Boolean              @default(false)
+  activatedOn          DateTime             @default(now())
+  renewsOn             DateTime?
+  vendorSubscriptionId String?
+  vendorCustomerId     String?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
+  userId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String    @unique
+
+  @@index([vendorSubscriptionId])
 }
 
 model Integration {
@@ -275,15 +387,15 @@ model Integration {
   lastUpdatedById String?
 
   // An integration will always be tied to a workspace
-  workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  workspaceId   String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String
 
   // An integration may or may not have relations with projects
-  project       Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  projectId     String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId String?
 
   // An integration may or may not have relations with environments of the project
-  environments  Environment[]
+  environments Environment[]
 
   integrationTrigger IntegrationRun[]
 
@@ -309,6 +421,8 @@ model Environment {
   projectId String
 
   projectWorkspaceRoleAssociations ProjectWorkspaceRoleAssociation[]
+  disabledEnvironmentOfSecret      DisabledEnvironmentOfSecret[]
+  disabledEnvironmentOfVariable    DisabledEnvironmentOfVariable[]
 
   @@unique([projectId, name])
   @@index([name])
@@ -324,7 +438,6 @@ model Project {
   publicKey       String
   privateKey      String? // We store this only if the user wants us to do so! 
   storePrivateKey Boolean            @default(false)
-  isDisabled      Boolean            @default(false) // This is set to true when the user stops his subscription and still has premium features in use
   accessLevel     ProjectAccessLevel @default(PRIVATE)
   isForked        Boolean            @default(false)
 
@@ -368,9 +481,10 @@ model WorkspaceRole {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  authorities      Authority[]
-  workspaceMembers WorkspaceMemberRoleAssociation[]
-  projects         ProjectWorkspaceRoleAssociation[]
+  authorities              Authority[]
+  workspaceMembers         WorkspaceMemberRoleAssociation[]
+  workspaceServiceAccounts WorkspaceServiceAccountRoleAssociation[]
+  projects                 ProjectWorkspaceRoleAssociation[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -388,6 +502,18 @@ model WorkspaceMemberRoleAssociation {
   workspaceMemberId String
 
   @@unique([roleId, workspaceMemberId])
+}
+
+model WorkspaceServiceAccountRoleAssociation {
+  id String @id @default(cuid())
+
+  role   WorkspaceRole @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roleId String
+
+  serviceAccount   ServiceAccount @relation(fields: [serviceAccountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  serviceAccountId String
+
+  @@unique([roleId, serviceAccountId])
 }
 
 // This model stores the membership of a workspace-user and their roles.
@@ -422,6 +548,16 @@ model SecretVersion {
   @@index([secretId, environmentId])
 }
 
+model DisabledEnvironmentOfSecret {
+  secretId      String
+  environmentId String
+
+  secret      Secret      @relation(fields: [secretId], references: [id])
+  environment Environment @relation(fields: [environmentId], references: [id])
+
+  @@unique([secretId, environmentId])
+}
+
 model Secret {
   id          String          @id @default(cuid())
   name        String
@@ -436,8 +572,9 @@ model Secret {
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId                   String
+  project                     Project                       @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  disabledEnvironmentOfSecret DisabledEnvironmentOfSecret[]
 
   @@unique([projectId, name])
 }
@@ -460,6 +597,16 @@ model VariableVersion {
   @@index([variableId, environmentId])
 }
 
+model DisabledEnvironmentOfVariable {
+  variableId    String
+  environmentId String
+
+  variable    Variable    @relation(fields: [variableId], references: [id])
+  environment Environment @relation(fields: [environmentId], references: [id])
+
+  @@unique([variableId, environmentId])
+}
+
 model Variable {
   id        String            @id @default(cuid())
   name      String
@@ -472,27 +619,11 @@ model Variable {
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId                     String
+  project                       Project                         @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  disabledEnvironmentOfVariable DisabledEnvironmentOfVariable[]
 
   @@unique([projectId, name])
-}
-
-model ApiKey {
-  id          String      @id @default(cuid())
-  name        String
-  preview     String      @default("ks_******")
-  slug        String      @unique
-  value       String      @unique
-  expiresAt   DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  authorities Authority[]
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
-
-  @@unique([userId, name])
 }
 
 model Otp {
@@ -509,27 +640,65 @@ model Otp {
 }
 
 model Workspace {
-  id                     String   @id @default(cuid())
+  id                     String        @id @default(cuid())
   name                   String
-  slug                   String   @unique
-  isFreeTier             Boolean  @default(true)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  slug                   String        @unique
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
   ownerId                String
-  isDefault              Boolean  @default(false)
+  isDefault              Boolean       @default(false)
   icon                   String?
   blacklistedIpAddresses String[]
+  isDisabled             Boolean       @default(false) // This is set to true when the user stops their subscription and still has premium features in use
+  workspaceLockdownIn    DateTime?
+  subscription           Subscription?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
-  projects     Project[]
-  members      WorkspaceMember[]
-  roles        WorkspaceRole[]
-  events       Event[]
-  integrations Integration[]
+  projects        Project[]
+  members         WorkspaceMember[]
+  roles           WorkspaceRole[]
+  events          Event[]
+  integrations    Integration[]
+  serviceAccounts ServiceAccount[]
 
   @@unique([name, ownerId])
+}
+
+model ServiceAccount {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String
+
+  accessTokens     ServiceAccountAccessToken[]
+  roleAssociations WorkspaceServiceAccountRoleAssociation[]
+  accessHistory    ServiceAccountAccessHistory[]
+
+  @@unique([name, workspaceId])
+}
+
+model ServiceAccountAccessHistory {
+  id           String   @id @default(cuid())
+  lastAccessed DateTime @default(now()) @updatedAt
+
+  deviceDetail   DeviceDetail @relation(fields: [deviceDetailId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  deviceDetailId String
+
+  serviceAccount   ServiceAccount @relation(fields: [serviceAccountId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  serviceAccountId String
+
+  serviceAccountAccessToken   ServiceAccountAccessToken? @relation(fields: [serviceAccountAccessTokenId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  serviceAccountAccessTokenId String?
 }
 
 model ChangeNotificationSocketMap {
@@ -548,16 +717,37 @@ model UserEmailChange {
 }
 
 model EmailPreference {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  marketing   Boolean  @default(true)
-  activity    Boolean  @default(true)
-  critical    Boolean  @default(true)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  marketing Boolean @default(true)
+  activity  Boolean @default(true)
+  critical  Boolean @default(true)
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
   @@index([userId, id], name: "userEmailPreference")
+}
+
+model Share {
+  id                  String   @id @default(cuid())
+  hash                String   @unique
+  secret              String
+  expiresAt           DateTime
+  isPasswordProtected Boolean
+  viewLimit           Int
+  timesViewed         Int      @default(0)
+  recepientEmails     String[] @default([])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Metric {
+  id                        String @id @default(cuid())
+  totalSecretPulls          Int    @default(0)
+  totalVariablePulls        Int    @default(0)
+  totalRunCommandExecutions Int    @default(0)
+  date                      String
 }

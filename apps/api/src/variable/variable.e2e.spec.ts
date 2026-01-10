@@ -12,10 +12,10 @@ import {
   EventTriggerer,
   EventType,
   Project,
+  ProjectAccessLevel,
   Variable,
   VariableVersion,
-  Workspace,
-  ProjectAccessLevel
+  Workspace
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
 import { AppModule } from '@/app/app.module'
@@ -32,7 +32,7 @@ import { EventService } from '@/event/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
@@ -109,13 +109,13 @@ describe('Variable Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
@@ -127,29 +127,11 @@ describe('Variable Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -183,21 +165,19 @@ describe('Variable Controller Tests', () => {
       }
     })
 
-    variable1 = (
-      await variableService.createVariable(
-        user1,
-        {
-          name: 'Variable 1',
-          entries: [
-            {
-              environmentSlug: environment1.slug,
-              value: 'Variable 1 value'
-            }
-          ]
-        },
-        project1.slug
-      )
-    ).variable as Variable
+    variable1 = (await variableService.createVariable(
+      user1,
+      {
+        name: 'Variable 1',
+        entries: [
+          {
+            environmentSlug: environment1.slug,
+            value: 'Variable 1 value'
+          }
+        ]
+      },
+      project1.slug
+    )) as Variable
   })
 
   afterEach(async () => {
@@ -241,27 +221,212 @@ describe('Variable Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.variable.name).toBe('Variable 3')
-      expect(body.variable.slug).toBeDefined()
-      expect(body.variable.note).toBe('Variable 3 note')
-      expect(body.variable.projectId).toBe(project1.id)
-      expect(body.values.length).toBe(1)
-      expect(body.values[0].value).toBe('Variable 3 value')
+      expect(body.name).toBe('Variable 3')
+      expect(body.slug).toBeDefined()
+      expect(body.note).toBe('Variable 3 note')
+      expect(body.projectId).toBe(project1.id)
+      expect(body.versions.length).toBe(1)
+      expect(body.versions[0].value).toBe('Variable 3 value')
 
       const variable = await prisma.variable.findUnique({
         where: {
-          id: body.variable.id
+          id: body.id
         }
       })
 
       expect(variable).toBeDefined()
     })
 
+    it('should bulk create multiple variables successfully', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Bulk Variable 1',
+              note: 'Bulk Var 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk Var 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = response.json()
+
+      expect(body).toHaveLength(2)
+    })
+
+    it('should reject bulk create if any variable is are invalid', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: '',
+              value: 'v',
+              environmentSlug: environment1.slug
+            },
+            {
+              name: 'Variable',
+              value: 'v',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should reject bulk create if any variable already exists', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Variable 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if any secret already exists', async () => {
+      // Create a variable named Bulk Variable 1
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'Bulk Variable 1',
+          note: 'Bulk 1 note',
+          entries: [
+            {
+              value: 'v1',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        project1.slug
+      )
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Variable 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if tier limit will be hit', async () => {
+      // Create 13 variables
+      for (let i = 2; i < 15; i++) {
+        await variableService.createVariable(
+          user1,
+          {
+            name: `Variable ${i}`,
+            note: `Variable ${i} note`,
+            entries: [
+              {
+                value: `v${i}`,
+                environmentSlug: environment1.slug
+              }
+            ]
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Bulk Variable 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     it('should not be able to create variables if tier limit is reached', async () => {
+      const maxVariables = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_VARIABLES_PER_PROJECT
+
       // Create variables until tier limit is reached
       for (
         let x = 100;
-        x < 100 + tierLimitService.getVariableTierLimit(project1.id) - 1; // Subtract 1 for the variables created above
+        x < 100 + maxVariables - 1; // Subtract 1 for the variables created above
         x++
       ) {
         await variableService.createVariable(
@@ -406,16 +571,14 @@ describe('Variable Controller Tests', () => {
     })
 
     it('should not create a variable version entity if value-environmentSlug is not provided during creation', async () => {
-      const variable = (
-        await variableService.createVariable(
-          user1,
-          {
-            name: 'Var 3',
-            note: 'Var 3 note'
-          },
-          project1.slug
-        )
-      ).variable
+      const variable = (await variableService.createVariable(
+        user1,
+        {
+          name: 'Var 3',
+          note: 'Var 3 note'
+        },
+        project1.slug
+      )) as Variable
 
       const variableVersions = await prisma.variableVersion.findMany({
         where: {
@@ -455,7 +618,7 @@ describe('Variable Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Secret already exists')
       expect(msg.body).toBe(
-        `Secret COLLIDE already exists in project ${project1.slug}`
+        `A secret named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -547,10 +710,10 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().variable.name).toEqual('Updated Variable 1')
-      expect(response.json().variable.note).toEqual('Updated Variable 1 note')
+      expect(response.json().name).toEqual('Updated Variable 1')
+      expect(response.json().note).toEqual('Updated Variable 1 note')
       expect(response.json().slug).not.toBe(variable1.slug)
-      expect(response.json().updatedVersions.length).toEqual(0)
+      expect(response.json().versions.length).toEqual(1)
 
       const variableVersion = await prisma.variableVersion.findMany({
         where: {
@@ -584,7 +747,7 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toEqual(1)
+      expect(response.json().versions.length).toEqual(1)
 
       const variableVersion = await prisma.variableVersion.findMany({
         where: {
@@ -663,7 +826,7 @@ describe('Variable Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Secret already exists')
       expect(msg.body).toBe(
-        `Secret COLLIDE already exists in project ${project1.slug}`
+        'A secret named COLLIDE already exists in this project. Please choose a different name.'
       )
     })
   })
@@ -769,7 +932,7 @@ describe('Variable Controller Tests', () => {
       await variableService.updateVariable(user1, variable1.slug, {
         entries: [
           {
-            value: 'Updated Variable 1 value',
+            value: 'Updated Variable 1 value 2',
             environmentSlug: environment1.slug
           }
         ]
@@ -778,7 +941,16 @@ describe('Variable Controller Tests', () => {
       await variableService.updateVariable(user1, variable1.slug, {
         entries: [
           {
-            value: 'Updated Variable 1 value 2',
+            value: 'Updated Variable 1 value 3',
+            environmentSlug: environment1.slug
+          }
+        ]
+      })
+
+      await variableService.updateVariable(user1, variable1.slug, {
+        entries: [
+          {
+            value: 'Updated Variable 1 value 4',
             environmentSlug: environment1.slug
           }
         ]
@@ -792,11 +964,11 @@ describe('Variable Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(3)
+      expect(versions.length).toBe(4)
 
       const response = await app.inject({
         method: 'PUT',
-        url: `/variable/${variable1.slug}/rollback/1?environmentSlug=${environment1.slug}`,
+        url: `/variable/${variable1.slug}/rollback/2?environmentSlug=${environment1.slug}`,
         headers: {
           'x-e2e-user-email': user1.email
         }
@@ -804,6 +976,9 @@ describe('Variable Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().count).toEqual(2)
+      expect(response.json().currentRevision.value).toEqual(
+        'Updated Variable 1 value 2'
+      )
 
       versions = await prisma.variableVersion.findMany({
         where: {
@@ -811,7 +986,7 @@ describe('Variable Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(1)
+      expect(versions.length).toBe(2)
     })
 
     it('should not be able to roll back if the variable has no versions', async () => {
@@ -846,31 +1021,19 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { variable, values } = response.json().items[0]
+      const variable = response.json().items[0]
+      const versions = variable.versions
       expect(variable).toBeDefined()
-      expect(variable.versions).toBeUndefined()
-      expect(values).toBeDefined()
-      expect(values.length).toBe(1)
-      expect(values[0].value).toBe('Variable 1 value')
-      expect(values[0].version).toBe(1)
-      expect(values[0].environment.id).toBe(environment1.id)
-      expect(values[0].environment.slug).toBe(environment1.slug)
-      expect(values[0].environment.name).toBe(environment1.name)
-      expect(variable).toStrictEqual({
-        id: variable1.id,
-        name: variable1.name,
-        slug: variable1.slug,
-        note: variable1.note,
-        projectId: project1.id,
-        lastUpdatedById: variable1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: variable1.createdAt.toISOString(),
-        updatedAt: variable1.updatedAt.toISOString()
-      })
+      expect(versions).toBeDefined()
+      expect(versions.length).toBe(1)
+      expect(versions[0].value).toBe('Variable 1 value')
+      expect(versions[0].version).toBe(1)
+      expect(versions[0].environment.id).toBe(environment1.id)
+      expect(versions[0].environment.slug).toBe(environment1.slug)
+      expect(versions[0].environment.name).toBe(environment1.name)
+      expect(variable.id).toBe(variable1.id)
+      expect(variable.name).toBe(variable1.name)
+      expect(variable.slug).toBe(variable1.slug)
 
       //check metadata
       const metadata = response.json().metadata
@@ -910,32 +1073,19 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { variable, values } = response.json().items[0]
+      const variable = response.json().items[0]
+      const versions = variable.versions
       expect(variable).toBeDefined()
-      expect(variable.versions).toBeUndefined()
-      expect(values).toBeDefined()
-      expect(values.length).toBe(1)
-      expect(values[0].value).toBe('Variable 1 new value')
-      expect(values[0].version).toBe(2)
-      expect(values[0].environment.id).toBe(environment1.id)
-      expect(values[0].environment.slug).toBe(environment1.slug)
-      expect(values[0].environment.name).toBe(environment1.name)
-
-      expect(variable).toStrictEqual({
-        id: variable1.id,
-        name: variable1.name,
-        slug: variable1.slug,
-        note: variable1.note,
-        projectId: project1.id,
-        lastUpdatedById: variable1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: variable1.createdAt.toISOString(),
-        updatedAt: expect.any(String)
-      })
+      expect(versions).toBeDefined()
+      expect(versions.length).toBe(1)
+      expect(versions[0].value).toBe('Variable 1 new value')
+      expect(versions[0].version).toBe(2)
+      expect(versions[0].environment.id).toBe(environment1.id)
+      expect(versions[0].environment.slug).toBe(environment1.slug)
+      expect(versions[0].environment.name).toBe(environment1.name)
+      expect(variable.id).toBe(variable1.id)
+      expect(variable.name).toBe(variable1.name)
+      expect(variable.slug).toBe(variable1.slug)
 
       //check metadata
       const metadata = response.json().metadata
@@ -1182,6 +1332,151 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
+    })
+  })
+
+  describe('Disable/Enable Variable Tests', () => {
+    it('should not be able to disable a variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to enable a variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to disable a variable that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/non-existent-variable-slug/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a variable that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/non-existent-variable-slug/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to disable a variable in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/disable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a variable in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should be able to disable a variable', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+
+      // Re-enabling variable for further tests
+      await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+    })
+
+    it('should be able to enable a variable', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+  })
+
+  describe('Fetch All Disabled Environments Of Variable Tests', () => {
+    it('should not be able to fetch disabled environments of a non-existent variable', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/non-existent-variable-slug/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch disabled environments of a variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${variable1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should be able to fetch disabled environments of a variable', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${variable1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
     })
   })
 })

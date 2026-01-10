@@ -6,11 +6,19 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
-  webpack(config, { isServer }) {
+  productionBrowserSourceMaps: true,
+  webpack(config, { isServer, dev }) {
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack']
     })
+    if (dev) {
+      // https://webpack.js.org/configuration/cache/#cache
+      config.cache = {
+        type: 'memory',
+        maxGenerations: 5
+      }
+    }
 
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = dirname(__filename)
@@ -89,7 +97,7 @@ const sentryBuildOptions: SentryBuildOptions = {
   // tunnelRoute: "/monitoring",
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
+  disableLogger: process.env.NODE_ENV === 'production',
 
   // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
   // See the following for more information:

@@ -5,13 +5,21 @@ export interface IMailService {
 
   sendEmailChangedOtp(email: string, otp: string): Promise<void>
 
+  sendSignInCode(
+    email: string,
+    code: string,
+    name: string,
+    device: string,
+    location: string
+  ): Promise<void>
+
   invitedToWorkspace(
     email: string,
     workspaceName: string,
     projectUrl: string,
     invitedBy: string,
-    invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void>
 
   accountLoginEmail(
@@ -28,5 +36,31 @@ export interface IMailService {
     email: string,
     workspaceName: string,
     removedOn: Date
+  ): Promise<void>
+
+  sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      device: string
+      date: string
+      time: string
+      location: string
+    }
+  ): Promise<void>
+
+  shareSecret(
+    email: string,
+    data: {
+      expiresAt: Date
+      isPasswordProtected: boolean
+      url: string
+    }
+  ): Promise<void>
+
+  sendOnboardingReminder(
+    email: string,
+    name: string | null,
+    reminderIndex: number
   ): Promise<void>
 }

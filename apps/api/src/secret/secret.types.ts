@@ -6,43 +6,57 @@ import {
   User
 } from '@prisma/client'
 
-export interface SecretWithValue extends Secret {
-  value: string
+export interface HydratedSecretRevision {
+  environment: {
+    id: Environment['id']
+    name: Environment['name']
+    slug: Environment['slug']
+    maxAllowedRevisions: number
+    totalRevisions: number
+  }
+  value: SecretVersion['value']
+  version: SecretVersion['version']
+  createdOn: SecretVersion['createdOn']
+  createdBy: {
+    id: User['id']
+    name: User['name']
+    profilePictureUrl: User['profilePictureUrl']
+  }
 }
 
-export interface SecretWithVersion extends Secret {
-  versions: {
-    environment: {
-      id: Environment['id']
-      name: Environment['name']
-      slug: Environment['slug']
-    }
-    value: SecretVersion['value']
-    version: SecretVersion['version']
-    createdOn: SecretVersion['createdOn']
-    createdBy: {
-      id: User['id']
-      name: User['name']
-      profilePictureUrl: User['profilePictureUrl']
-    }
-  }[]
+export interface RawSecretRevision
+  extends Omit<HydratedSecretRevision, 'environment'> {
+  environment: {
+    id: Environment['id']
+    name: Environment['name']
+    slug: Environment['slug']
+  }
 }
 
-export interface SecretWithProject extends Secret {
-  project: Project
+export interface HydratedSecret extends Secret {
+  lastUpdatedBy: {
+    id: User['id']
+    name: User['name']
+    profilePictureUrl: User['profilePictureUrl']
+  }
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
+  // Deleted before returning
+  project: {
+    id: Project['id']
+    name: Project['name']
+    slug: Project['slug']
+    workspaceId: Project['workspaceId']
+    publicKey: Project['publicKey']
+    privateKey: Project['privateKey']
+    storePrivateKey: Project['storePrivateKey']
+  }
+  versions: Array<HydratedSecretRevision>
 }
 
-export type SecretWithProjectAndVersion = SecretWithProject & SecretWithVersion
-
-export interface SecretWithValues {
-  secret: Secret & { lastUpdatedBy: { id: string; name: string } }
-  values: Array<{
-    environment: {
-      id: string
-      name: string
-      slug: string
-    }
-    value: string
-    version: number
-  }>
+export interface RawSecret
+  extends Omit<HydratedSecret, 'entitlements' | 'versions'> {
+  versions: Array<RawSecretRevision>
 }

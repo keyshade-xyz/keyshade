@@ -22,7 +22,6 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
-import LineTab from '@/components/ui/line-tab'
 
 interface SelectedRoles {
   name: string
@@ -40,12 +39,8 @@ export default function MembersHeader(): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setMemberCount = useSetAtom(workspaceMemberCountAtom)
 
-  const TAB_CONFIGS = {
-    members: [
-      { id: 'joined', label: 'Joined' },
-      { id: 'invited', label: 'Invited' }
-    ]
-  }
+  const isAuthorizedToInviteMembers =
+    currentWorkspace?.entitlements.canInviteMembers
 
   const toggleRole = (role: SelectedRoles): void => {
     setSelectedRoles((prev) => {
@@ -110,13 +105,15 @@ export default function MembersHeader(): React.JSX.Element {
   }, [email, selectedRoles.length, handleClose, inviteMember, setMemberCount])
 
   return (
-    <div className="">
-      <div className='flex justify-between pb-6'>
+    <div className="flex justify-between pb-6">
       <div className="text-3xl font-medium">Members</div>
       <div className="flex gap-x-4">
         <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button
+              disabled={!isAuthorizedToInviteMembers}
+              onClick={() => setIsDialogOpen(true)}
+            >
               <AddSVG /> Add Member
             </Button>
           </DialogTrigger>
@@ -131,7 +128,7 @@ export default function MembersHeader(): React.JSX.Element {
                 </Label>
                 <div className="flex flex-row gap-1">
                   <Input
-                    className="w-3/4 bg-white/5 text-white outline-none"
+                    className="w-3/4 bg-white/5 text-white outline-hidden"
                     onChange={(e) => setEmail(e.target.value)}
                     type="email"
                     value={email}
@@ -178,7 +175,7 @@ export default function MembersHeader(): React.JSX.Element {
                     )}
                   </div>
                   <ChevronDown
-                    className={`flex-shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    className={`shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                     size={16}
                   />
                 </Button>
@@ -194,9 +191,12 @@ export default function MembersHeader(): React.JSX.Element {
                           checked={selectedRoles.some(
                             (r) => r.roleSlug === role.slug
                           )}
-                          className="mr-2 rounded-sm border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
+                          className="mr-2 rounded-xs border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
                           onCheckedChange={() =>
-                            toggleRole({ name: role.name, roleSlug: role.slug })
+                            toggleRole({
+                              name: role.name,
+                              roleSlug: role.slug
+                            })
                           }
                         />
                         <span className="text-white">{role.name}</span>
@@ -209,8 +209,6 @@ export default function MembersHeader(): React.JSX.Element {
           </DialogContent>
         </Dialog>
       </div>
-      </div>
-      <LineTab customID="linetab" tabs={TAB_CONFIGS.members} />
     </div>
   )
 }

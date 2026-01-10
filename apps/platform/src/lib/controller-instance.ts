@@ -1,80 +1,91 @@
 import {
   AuthController,
   EnvironmentController,
+  EventController,
+  IntegrationController,
+  PaymentController,
   ProjectController,
   SecretController,
   UserController,
   VariableController,
   WorkspaceController,
   WorkspaceMembershipController,
-  WorkspaceRoleController,
-  ApiKeyController,
-  IntegrationController,
-  EventController
+  WorkspaceRoleController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
   private static instance: ControllerInstance | null
 
   private _authController: AuthController
-  private _userController: UserController
-  private _workspaceController: WorkspaceController
-  private _workspaceMembershipController: WorkspaceMembershipController
-  private _workspaceRoleController: WorkspaceRoleController
-  private _projectController: ProjectController
-  private _environmentController: EnvironmentController
-  private _secretController: SecretController
-  private _variableController: VariableController
-  private _apiKeyController: ApiKeyController
-  private _integrationController: IntegrationController
-  private _eventController: EventController
 
   get authController(): AuthController {
     return this._authController
   }
 
-  get workspaceController(): WorkspaceController {
-    return this._workspaceController
-  }
-
-  get workspaceMembershipController(): WorkspaceMembershipController {
-    return this._workspaceMembershipController
-  }
-
-  get workspaceRoleController(): WorkspaceRoleController {
-    return this._workspaceRoleController
-  }
-
-  get projectController(): ProjectController {
-    return this._projectController
-  }
-
-  get environmentController(): EnvironmentController {
-    return this._environmentController
-  }
-
-  get secretController(): SecretController {
-    return this._secretController
-  }
-
-  get variableController(): VariableController {
-    return this._variableController
-  }
+  private _userController: UserController
 
   get userController(): UserController {
     return this._userController
   }
 
-  get apiKeyController(): ApiKeyController {
-    return this._apiKeyController
+  private _workspaceController: WorkspaceController
+
+  get workspaceController(): WorkspaceController {
+    return this._workspaceController
   }
+
+  private _workspaceMembershipController: WorkspaceMembershipController
+
+  get workspaceMembershipController(): WorkspaceMembershipController {
+    return this._workspaceMembershipController
+  }
+
+  private _workspaceRoleController: WorkspaceRoleController
+
+  get workspaceRoleController(): WorkspaceRoleController {
+    return this._workspaceRoleController
+  }
+
+  private _projectController: ProjectController
+
+  get projectController(): ProjectController {
+    return this._projectController
+  }
+
+  private _environmentController: EnvironmentController
+
+  get environmentController(): EnvironmentController {
+    return this._environmentController
+  }
+
+  private _secretController: SecretController
+
+  get secretController(): SecretController {
+    return this._secretController
+  }
+
+  private _variableController: VariableController
+
+  get variableController(): VariableController {
+    return this._variableController
+  }
+
+  private _integrationController: IntegrationController
 
   get integrationController(): IntegrationController {
     return this._integrationController
   }
 
+  private _eventController: EventController
+
   get eventController(): EventController {
     return this._eventController
+  }
+
+  private _paymentController: PaymentController
+
+  get paymentController(): PaymentController {
+    return this._paymentController
   }
 
   static getInstance(): ControllerInstance {
@@ -103,12 +114,12 @@ export default class ControllerInstance {
       ControllerInstance.instance._variableController = new VariableController(
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
-      ControllerInstance.instance._apiKeyController = new ApiKeyController(
-        process.env.NEXT_PUBLIC_BACKEND_URL
-      )
       ControllerInstance.instance._integrationController =
         new IntegrationController(process.env.NEXT_PUBLIC_BACKEND_URL)
       ControllerInstance.instance._eventController = new EventController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._paymentController = new PaymentController(
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
     }

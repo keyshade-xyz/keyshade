@@ -4,11 +4,11 @@ export interface ChangeNotifierRegistration {
   environmentSlug: string
 }
 
-export interface ChangeNotification {
+export interface Configuration {
   name: string
   value: string
 }
 
-export interface ChangeNotificationEvent extends ChangeNotification {
+export interface ChangeNotificationEvent extends Configuration {
   environmentId: string
 }

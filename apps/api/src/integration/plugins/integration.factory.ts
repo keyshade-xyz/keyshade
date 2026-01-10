@@ -5,12 +5,15 @@ import { InternalServerErrorException } from '@nestjs/common'
 import { SlackIntegration } from './slack.integration'
 import { PrismaService } from '@/prisma/prisma.service'
 import {
+  AWSLambdaIntegrationMetadata,
   DiscordIntegrationMetadata,
-  IntegrationWithEnvironments,
+  HydratedIntegration,
+  RawIntegration,
   SlackIntegrationMetadata,
   VercelIntegrationMetadata
 } from '../integration.types'
 import { VercelIntegration } from './vercel.integration'
+import { AWSLambdaIntegration } from './aws-lambda.integration'
 /**
  * Factory class to create integrations. This class will be called to create an integration,
  * based on the integration type. This has only a single factory method. You will need to
@@ -33,6 +36,8 @@ export default class IntegrationFactory {
         return new SlackIntegration(prisma)
       case IntegrationType.VERCEL:
         return new VercelIntegration(prisma)
+      case IntegrationType.AWS_LAMBDA:
+        return new AWSLambdaIntegration(prisma)
       default:
         throw new InternalServerErrorException('Integration type not found')
     }
@@ -47,7 +52,10 @@ export default class IntegrationFactory {
    * @returns The integration object.
    */
   public static createIntegration(
-    integration: IntegrationWithEnvironments,
+    integration:
+      | HydratedIntegration
+      | Omit<HydratedIntegration, 'entitlements'>
+      | RawIntegration,
     prisma: PrismaService
   ): BaseIntegration {
     const baseIntegration = IntegrationFactory.createIntegrationWithType(
@@ -64,6 +72,11 @@ export default class IntegrationFactory {
         break
       case IntegrationType.VERCEL:
         baseIntegration.setIntegration<VercelIntegrationMetadata>(integration)
+        break
+      case IntegrationType.AWS_LAMBDA:
+        baseIntegration.setIntegration<AWSLambdaIntegrationMetadata>(
+          integration
+        )
         break
       default:
         throw new InternalServerErrorException('Integration type not found')

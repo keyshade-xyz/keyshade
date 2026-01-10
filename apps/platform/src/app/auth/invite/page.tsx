@@ -21,7 +21,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
           >
             Invite Teammates
           </h1>
-          <div className="flex w-[23rem] flex-col items-center text-center">
+          <div className="flex w-92 flex-col items-center text-center">
             <span className={GeistSansFont.className}>
               Invite your teammates and have the best team experience while
               securing your security
@@ -49,7 +49,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
                 role="button"
                 tabIndex={0}
               >
-                <div className="flex items-center gap-2 rounded-lg border border-white/40 p-1 hover:shadow">
+                <div className="flex items-center gap-2 rounded-lg border border-white/40 p-1 hover:shadow-sm">
                   swatilakah25@gmail
                   <button className="" type="button">
                     <svg
@@ -70,7 +70,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
                   </button>
                 </div>
                 <input
-                  className="flex h-10 w-full border border-transparent bg-transparent text-sm ring-offset-transparent placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full border border-transparent bg-transparent text-sm ring-offset-transparent placeholder:text-zinc-500 focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   ref={inputRef}
                   type="email"
                 />

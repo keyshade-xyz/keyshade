@@ -2,3 +2,7 @@
 
 open_collective: keyshade
 custom: ["https://console.algora.io/bounties/new"]
+
+# .github/funding.yml
+github: keyshade-xyz
+custom: ["https://github.com/sponsors/keyshade-xyz"]

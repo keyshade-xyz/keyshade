@@ -3,7 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
   Query
@@ -11,14 +14,37 @@ import {
 import { IntegrationService } from './integration.service'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateIntegration } from './dto/create.integration/create.integration'
-import { Authority } from '@prisma/client'
+import { Authority, Integration } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthenticatedUser } from '@/user/user.types'
+import { GetVercelEnvironments } from './dto/getVercelEnvironments/getVercelEnvironments'
 
 @Controller('integration')
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
+
+  @Post('validate-config')
+  @HttpCode(HttpStatus.OK)
+  @RequiredApiKeyAuthorities(
+    Authority.CREATE_INTEGRATION,
+    Authority.READ_WORKSPACE,
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT
+  )
+  async validateIntegrationConfiguration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateIntegration | UpdateIntegration,
+    @Query('isCreate', ParseBoolPipe) isCreate: boolean,
+    @Query('integrationSlug') integrationSlug?: Integration['slug']
+  ) {
+    return await this.integrationService.validateIntegrationMetadata(
+      user,
+      dto,
+      isCreate,
+      integrationSlug
+    )
+  }
 
   @Post(':workspaceSlug')
   @RequiredApiKeyAuthorities(
@@ -115,5 +141,18 @@ export class IntegrationController {
       user,
       integrationSlug
     )
+  }
+
+  @Put('vercel/environments')
+  @RequiredApiKeyAuthorities(
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT,
+    Authority.READ_INTEGRATION
+  )
+  async getVercelEnvironments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: GetVercelEnvironments
+  ) {
+    return await this.integrationService.getVercelEnvironments(user, dto)
   }
 }

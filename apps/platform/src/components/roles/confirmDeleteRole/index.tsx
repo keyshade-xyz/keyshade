@@ -15,7 +15,8 @@ import {
 import {
   deleteRoleOpenAtom,
   rolesOfWorkspaceAtom,
-  selectedRoleAtom
+  selectedRoleAtom,
+  workspaceRolesCountAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
@@ -24,6 +25,7 @@ function ConfirmDeleteRole() {
   const [selectedRole, setSelectedRole] = useAtom(selectedRoleAtom)
   const [isDeleteRoleOpen, setIsDeleteRoleOpen] = useAtom(deleteRoleOpenAtom)
   const setRoles = useSetAtom(rolesOfWorkspaceAtom)
+  const setWorkspaceRolesCount = useSetAtom(workspaceRolesCountAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -48,6 +50,7 @@ function ConfirmDeleteRole() {
         const { success } = await deleteRole()
 
         if (success) {
+          setWorkspaceRolesCount((prev) => prev - 1)
           toast.success('Role deleted successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -69,7 +72,14 @@ function ConfirmDeleteRole() {
         handleClose()
       }
     }
-  }, [selectedRole, deleteRole, setRoles, setSelectedRole, handleClose])
+  }, [
+    selectedRole,
+    deleteRole,
+    setRoles,
+    setSelectedRole,
+    handleClose,
+    setWorkspaceRolesCount
+  ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {

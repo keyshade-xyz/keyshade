@@ -8,6 +8,11 @@ import {
 import { Logger } from '@/util/logger'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
 import { Table } from '@/util/table'
+import {
+  GetAllEnvironmentsOfProjectRequestSchema,
+  GetAllEnvironmentsOfProjectResponseSchema
+} from '@keyshade/schema/raw'
+import { type GetEnvironmentResponse } from '@keyshade/schema'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -38,8 +43,12 @@ export class ListEnvironment extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
-    if (!projectSlug) {
-      Logger.error('Project slug is required')
+    const request = GetAllEnvironmentsOfProjectRequestSchema.safeParse({
+      projectSlug,
+      ...options
+    })
+    if (!request.success) {
+      Logger.error(request.error.toString())
       return
     }
 
@@ -50,20 +59,33 @@ export class ListEnvironment extends BaseCommand {
       error,
       success
     } = await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-      { projectSlug, ...options },
+      request.data,
       this.headers
     )
 
-    if (success) {
-      const headers = ['#', '📦 Environment Name', '🆔 Environment Slug']
-      const rows = environments.items.map((environment: any, index: number) => [
-        (index + 1).toString(),
-        environment.name,
-        environment.slug
-      ])
-      Table.render(headers, rows)
-    } else {
+    if (!success) {
       this.logError(error)
+      return
+    }
+
+    const response =
+      GetAllEnvironmentsOfProjectResponseSchema.safeParse(environments)
+    if (response.success) {
+      if (response.data.items.length > 0) {
+        const headers = ['#', '📦 Environment Name', '🆔 Environment Slug']
+        const rows = response.data.items.map(
+          (environment: GetEnvironmentResponse, index: number) => [
+            (index + 1).toString(),
+            environment.name,
+            environment.slug
+          ]
+        )
+        Table.render(headers, rows)
+      } else {
+        Logger.info('No environments found')
+      }
+    } else {
+      Logger.error('Invalid server response')
     }
   }
 }

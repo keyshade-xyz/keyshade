@@ -11,25 +11,23 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
+import type { PartialEnvironment, PartialProject } from '@/types'
 
-type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
-type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
-
-interface ProjectEnvironmentInputProps {
+interface SimpleProjectEnvironmentInputProps {
+  initialProject?: PartialProject | null
+  initialEnvironments?: PartialEnvironment[]
   onProjectChange?: (projectSlug: Project['slug'] | null) => void
   onEnvironmentChange?: (environmentSlugs: Environment['slug'][]) => void
-  initialProject?: PartialProject | null
-  initialEnvironments?: PartialEnvironment[] | null
   isProjectDisabled?: boolean
 }
 
 export default function ProjectEnvironmentInput({
-  onProjectChange,
-  onEnvironmentChange,
   initialProject,
   initialEnvironments,
+  onProjectChange,
+  onEnvironmentChange,
   isProjectDisabled = false
-}: ProjectEnvironmentInputProps): React.JSX.Element {
+}: SimpleProjectEnvironmentInputProps): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [projects, setProjects] = useState<PartialProject[]>([])
   const [environments, setEnvironments] = useState<PartialEnvironment[]>([])
@@ -56,19 +54,20 @@ export default function ProjectEnvironmentInput({
     )
   )
 
-  // Fetch all projects of the workspace
+  // Fetch projects on mount
   useEffect(() => {
     if (!currentWorkspace || isProjectDisabled) return
 
     getAllProjectsOfWorkspace().then(({ data, success }) => {
-      if (!success || !data) return
-      setProjects(
-        data.items.map((project) => ({
-          id: project.id,
-          name: project.name,
-          slug: project.slug
-        }))
-      )
+      if (success && data) {
+        setProjects(
+          data.items.map((project) => ({
+            id: project.id,
+            name: project.name,
+            slug: project.slug
+          }))
+        )
+      }
     })
   }, [currentWorkspace, getAllProjectsOfWorkspace, isProjectDisabled])
 
@@ -81,28 +80,27 @@ export default function ProjectEnvironmentInput({
 
     getAllEnvironmentsOfProject(selectedProject.slug).then(
       ({ data, success }) => {
-        if (!success || !data) return
-        setEnvironments(
-          data.items.map((env) => ({
-            id: env.id,
-            name: env.name,
-            slug: env.slug
-          }))
-        )
+        if (success && data) {
+          setEnvironments(
+            data.items.map((env) => ({
+              id: env.id,
+              name: env.name,
+              slug: env.slug
+            }))
+          )
+        }
       }
     )
   }, [selectedProject, getAllEnvironmentsOfProject])
 
   const handleProjectSelect = useCallback(
     (project: PartialProject) => {
-      if (isProjectDisabled) return
-
       setSelectedProject(project)
-      if (onProjectChange) onProjectChange(project.slug)
       setSelectedEnvironments([])
-      if (onEnvironmentChange) onEnvironmentChange([])
+      onProjectChange?.(project.slug)
+      onEnvironmentChange?.([])
     },
-    [onProjectChange, onEnvironmentChange, isProjectDisabled]
+    [onProjectChange, onEnvironmentChange]
   )
 
   const handleEnvironmentToggle = useCallback(
@@ -113,9 +111,7 @@ export default function ProjectEnvironmentInput({
           ? prev.filter((env) => env.id !== environment.id)
           : [...prev, environment]
 
-        if (onEnvironmentChange) {
-          onEnvironmentChange(newSelection.map((env) => env.slug))
-        }
+        onEnvironmentChange?.(newSelection.map((env) => env.slug))
         return newSelection
       })
     },
@@ -124,9 +120,10 @@ export default function ProjectEnvironmentInput({
 
   return (
     <div className="flex flex-col gap-y-5">
+      {/* Project Selection */}
       <div className="flex flex-col gap-y-2">
-        <label className=" font-medium text-white" htmlFor="project-select">
-          Specify Project
+        <label className="font-medium text-white" htmlFor="project-select">
+          Select Project
         </label>
         <Select
           disabled={isProjectDisabled}
@@ -137,9 +134,7 @@ export default function ProjectEnvironmentInput({
           value={selectedProject ? JSON.stringify(selectedProject) : undefined}
         >
           <SelectTrigger
-            className={`h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 ${
-              isProjectDisabled ? 'cursor-not-allowed opacity-50' : ''
-            }`}
+            className="h-9 w-140 rounded-md border-[0.013rem] border-white/10 bg-white/5"
             id="project-select"
           >
             <SelectValue placeholder="Select project">
@@ -162,14 +157,16 @@ export default function ProjectEnvironmentInput({
         </Select>
       </div>
 
+      {/* Environment Selection */}
       <div className="flex flex-col gap-y-2">
         <label className="font-medium text-white" htmlFor="environment-select">
-          Specify Environments
+          Select Environments
         </label>
         <div className="max-h-40 overflow-y-auto rounded-md border border-white/10 p-2">
           {!selectedProject ? (
             <div className="px-2 py-4 text-sm text-white/60">
-              Please select a project first
+              Please select a project first{' '}
+              {isProjectDisabled ? '(disabled)' : null}
             </div>
           ) : environments.length > 0 ? (
             environments.map((env) => (
@@ -177,7 +174,7 @@ export default function ProjectEnvironmentInput({
                 aria-checked={selectedEnvironments.some(
                   (selected) => selected.id === env.id
                 )}
-                className="flex cursor-pointer items-center gap-2 rounded p-2 hover:bg-white/10"
+                className="flex cursor-pointer items-center gap-2 rounded-sm p-2 hover:bg-white/10"
                 key={env.id}
                 onClick={() => handleEnvironmentToggle(env)}
                 onKeyDown={(e) => {
@@ -193,7 +190,7 @@ export default function ProjectEnvironmentInput({
                   checked={selectedEnvironments.some(
                     (selected) => selected.id === env.id
                   )}
-                  className="rounded border-white/20 bg-white/10 text-blue-500"
+                  className="rounded-sm border-white/20 bg-white/10 text-blue-500"
                   onChange={() => handleEnvironmentToggle(env)}
                   type="checkbox"
                 />

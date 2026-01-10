@@ -7,6 +7,7 @@ export default {
   transform: {
     '^.+\\.[tj]sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
   },
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!(?:@vercel/sdk)/)'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },

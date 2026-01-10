@@ -1,26 +1,13 @@
 'use client'
 import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
-import type {
-  ProjectWithCount,
-  ProjectWithTierLimitAndCount
-} from '@keyshade/schema'
+import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
-import {
-  SecretSVG,
-  EnvironmentSVG,
-  VariableSVG,
-  GlobalSVG,
-  PrivateSVG,
-  InternalSVG
-} from '@public/svg/dashboard'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger
-} from '@/components/ui/context-menu'
+import { MoreHorizontalIcon } from 'lucide-react'
+import { EnvironmentSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
+import ProjectContextMenu from './project-context-menu'
+import ProjectDropdownMenu from './project-dropdown-menu'
+import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
@@ -29,9 +16,15 @@ import {
   selectedWorkspaceAtom
 } from '@/store'
 import { copyToClipboard } from '@/lib/clipboard'
+import { ProjectTag } from '@/components/ui/project-tag'
+import { GeistSansFont } from '@/fonts'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 
 interface ProjectCardProps {
-  project: ProjectWithTierLimitAndCount
+  project: GetAllProjectsResponse['items'][number]
 }
 
 export default function ProjectCard({
@@ -42,10 +35,11 @@ export default function ProjectCard({
     slug,
     name,
     description,
-    environmentCount,
-    secretCount,
-    variableCount,
-    accessLevel
+    totalEnvironments,
+    totalVariables,
+    totalSecrets,
+    accessLevel,
+    entitlements
   } = project
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
@@ -53,6 +47,9 @@ export default function ProjectCard({
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setIsExportConfigurationDialogOpen = useSetAtom(exportConfigOpenAtom)
+
+  const isAuthorizedToEditProjects = entitlements.canUpdate
+  const isAuthorizedToDeleteProjects = entitlements.canDelete
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -79,93 +76,89 @@ export default function ProjectCard({
     setIsExportConfigurationDialogOpen(true)
   }
 
-  const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
-    switch (accessLvl) {
-      case 'GLOBAL':
-        return <GlobalSVG width={16} />
-      case 'PRIVATE':
-        return <PrivateSVG width={16} />
-      case 'INTERNAL':
-        return <InternalSVG width={16} />
-      default:
-        return null
-    }
-  }
-
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="flex h-[7rem]">
+      <ContextMenuTrigger className="flex h-28">
         <Link
-          className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
+          className={`${GeistSansFont.className} bg-night-c hover:bg-night-b border-white/8 flex h-fit w-full flex-col justify-between gap-y-10 rounded-lg border p-4 shadow-lg`}
+          href={`${selectedWorkspace?.slug}/${slug}?tab=secrets`}
           key={id}
         >
-          <div className="flex items-center gap-x-5">
-            <Avvvatars size={56} style="shape" value={id} />
-            <div>
-              <div className="font-semibold">{name}</div>
-              <span className="text-xs font-semibold text-white/60">
-                {description}
-              </span>
+          <div className="flex justify-between">
+            <div className="flex min-w-0 items-center gap-x-2">
+              <div className="shrink-0">
+                <Avvvatars radius={4} size={40} style="shape" value={id} />
+              </div>
+              <div className="flex min-w-0 flex-col overflow-hidden">
+                <div className="w-[199px] truncate text-base font-semibold">
+                  {name}
+                </div>
+                <span className="wrap-break-word line-clamp-2 w-[199px] truncate text-sm text-white/60">
+                  {description}
+                </span>
+              </div>
             </div>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  type="button"
+                >
+                  <MoreHorizontalIcon />
+                </button>
+              </DropdownMenuTrigger>
+              <ProjectDropdownMenu
+                copyToClipboard={copyToClipboard}
+                handleCopyToClipboard={handleCopyToClipboard}
+                handleDeleteProject={handleDeleteProject}
+                handleEditProject={handleEditProject}
+                handleExportConfiguration={handleExportConfiguration}
+                isAuthorizedToDeleteProjects={isAuthorizedToDeleteProjects}
+                isAuthorizedToEditProjects={isAuthorizedToEditProjects}
+                selectedWorkspace={selectedWorkspace!}
+                slug={slug}
+              />
+            </DropdownMenu>
           </div>
-          <div className="flex h-full flex-col items-end justify-between">
-            <div className="flex items-center gap-1 rounded-md border border-white/70 px-2 py-1 capitalize">
-              {accessLevelToSVG(accessLevel)}
-              {accessLevel.toLowerCase()}
-            </div>
+
+          <div className="flex h-full items-end justify-between">
             <div className="grid grid-cols-3 gap-x-3">
               <div className="flex items-center gap-x-1">
-                <EnvironmentSVG width={16} />
-                {environmentCount}
+                <EnvironmentSVG />
+                {totalEnvironments}
               </div>
               <div className="flex items-center gap-x-1">
-                <VariableSVG width={16} />
-                {variableCount}
+                <VariableSVG />
+                {totalVariables}
               </div>
               <div className="flex items-center gap-x-1">
-                <SecretSVG width={16} />
-                {secretCount}
+                <SecretSVG />
+                {totalSecrets}
               </div>
             </div>
+            <ProjectTag
+              variant={
+                accessLevel.toLowerCase() as 'private' | 'internal' | 'global'
+              }
+            />
           </div>
         </Link>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
-          <ContextMenuItem inset>Open</ContextMenuItem>
-        </Link>
-        <a
-          href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <ContextMenuItem inset>Open in new tab</ContextMenuItem>
-        </a>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            copyToClipboard(`${window.location.origin}/project/${slug}`)
-          }}
-        >
-          Copy link
-        </ContextMenuItem>
-        <ContextMenuItem inset onClick={handleCopyToClipboard}>
-          Copy slug
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem inset onClick={handleExportConfiguration}>
-          Export configuration
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem inset onClick={handleEditProject}>
-          Edit
-        </ContextMenuItem>
-        <ContextMenuItem inset onClick={handleDeleteProject}>
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <ProjectContextMenu
+        copyToClipboard={copyToClipboard}
+        handleCopyToClipboard={handleCopyToClipboard}
+        handleDeleteProject={handleDeleteProject}
+        handleEditProject={handleEditProject}
+        handleExportConfiguration={handleExportConfiguration}
+        isAuthorizedToDeleteProjects={isAuthorizedToDeleteProjects}
+        isAuthorizedToEditProjects={isAuthorizedToEditProjects}
+        selectedWorkspace={selectedWorkspace!}
+        slug={slug}
+      />
     </ContextMenu>
   )
 }

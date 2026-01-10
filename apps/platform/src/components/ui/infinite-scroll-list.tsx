@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
-import ErrorCard from '../shared/error-card'
+import TableLoader from '../common/table-loader'
 import { cn } from '@/lib/utils'
 
 interface InfiniteScrollListResponse<T> {
   success: boolean
   data: {
     items: T[]
-    metadata?: { totalCount: number }
+    metadata?: { totalCount?: number }
   }
   error?: { message: string }
 }
-type ErrorMessage = { header: string; body: string } | null
 
 interface InfiniteScrollListProps<T> {
   itemKey: (item: T) => string | number
@@ -23,6 +22,8 @@ interface InfiniteScrollListProps<T> {
   }) => Promise<InfiniteScrollListResponse<T>>
   className?: string
   inTable?: boolean
+  emptyComponent?: React.ReactNode
+  loadingComponent?: React.ReactNode
 }
 
 export function InfiniteScrollList<T>({
@@ -31,11 +32,12 @@ export function InfiniteScrollList<T>({
   itemsPerPage,
   fetchFunction,
   className = '',
-  inTable = false
+  inTable = false,
+  emptyComponent,
+  loadingComponent
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
 
   const pageRef = useRef<number>(0)
   const hasMoreRef = useRef<boolean>(true)
@@ -60,9 +62,6 @@ export function InfiniteScrollList<T>({
         limit: itemsPerPage
       })
       if (!success && err) {
-        const errorMsg = err.message
-        const parsedError = JSON.parse(errorMsg) as ErrorMessage
-        setErrorMessage(parsedError)
         return
       }
       const fetched = data.items
@@ -80,7 +79,6 @@ export function InfiniteScrollList<T>({
 
         return [...prev, ...newItems]
       })
-      setErrorMessage(null)
     } catch (e) {
       hasMoreRef.current = false
     } finally {
@@ -91,7 +89,6 @@ export function InfiniteScrollList<T>({
 
   useEffect(() => {
     setItems([])
-    setErrorMessage(null)
     pageRef.current = 0
     hasMoreRef.current = true
     loadingRef.current = false
@@ -125,23 +122,35 @@ export function InfiniteScrollList<T>({
 
   if (isLoading && items.length === 0) {
     return inTable ? (
-      <tr>
-        <td className="flex justify-center p-4" colSpan={3}>
-          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
-        </td>
-      </tr>
+      <>
+          {loadingComponent ? (
+            loadingComponent
+          ) : (
+            <TableLoader />
+          )}
+      </>
     ) : (
-      <div className="flex justify-center p-4">
-        <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+      <div>
+        {loadingComponent ? (
+          loadingComponent
+        ) : (
+          <TableLoader />
+        )}
       </div>
     )
   }
-  if (errorMessage && items.length === 0) {
-    return (
-      <ErrorCard description={errorMessage.body} header={errorMessage.header} />
-    )
-  }
+  
   if (items.length === 0) {
+    if (emptyComponent) {
+      return inTable ? (
+        <tr>
+          <td colSpan={3}>{emptyComponent}</td>
+        </tr>
+      ) : (
+        <>{emptyComponent}</>
+      )
+    }
+
     return inTable ? (
       <tr>
         <td className="p-4 text-center text-gray-500" colSpan={3}>
@@ -169,7 +178,11 @@ export function InfiniteScrollList<T>({
         {isLoading ? (
           <tr>
             <td className="flex justify-center p-4" colSpan={3}>
-              <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+              {loadingComponent ? (
+                loadingComponent
+              ) : (
+                <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+              )}
             </td>
           </tr>
         ) : null}
@@ -189,7 +202,11 @@ export function InfiniteScrollList<T>({
 
       {isLoading && items.length > 0 ? (
         <div className="flex justify-center p-4">
-          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          {loadingComponent ? (
+            loadingComponent
+          ) : (
+            <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+          )}
         </div>
       ) : null}
     </div>

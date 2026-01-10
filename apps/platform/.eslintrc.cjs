@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['custom/next'],
+  extends: ['custom/next', 'plugin:storybook/recommended'],
   parserOptions: {
     project: 'tsconfig.json',
     tsconfigRootDir: __dirname,
@@ -23,6 +23,9 @@ module.exports = {
     'no-nested-ternary': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@next/next/no-html-link-for-pages': 'off',
-    'turbo/no-undeclared-env-vars': 'off'
-  }
+    'turbo/no-undeclared-env-vars': 'off',
+    '@typescript-eslint/dot-notation': 'off',
+    '@typescript-eslint/no-empty-function': 'off'
+  },
+  ignorePatterns: ['vitest.shims.d.ts', 'vitest.config.ts']
 }

@@ -7,20 +7,27 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { createWorkspace } from './workspace'
-import { UserWithWorkspace } from '@/user/user.types'
+import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import { constructErrorBody, generateReferralCode } from './util'
 import SlugGenerator from './slug-generator.service'
+import { HydrationService } from './hydration.service'
+import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
  * @param dto - The user data to create a user with.
  * @param prisma - The prisma service to use for database operations.
+ * @param slugGenerator
+ * @param hydrationService
+ * @param workspaceCacheService
  * @returns The created user and, if the user is not an admin, a default workspace.
  */
 export async function createUser(
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider; id?: User['id'] },
   prisma: PrismaService,
-  slugGenerator: SlugGenerator
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
@@ -64,10 +71,12 @@ export async function createUser(
     // Create the user's default workspace
     logger.log(`User ${user.id} is not an admin. Creating default workspace.`)
     const workspace = await createWorkspace(
-      user,
+      user as AuthenticatedUser, // Doesn't harm us
       { name: 'My Workspace' },
       prisma,
       slugGenerator,
+      hydrationService,
+      workspaceCacheService,
       true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
@@ -81,7 +90,7 @@ export async function createUser(
     throw new InternalServerErrorException(
       constructErrorBody(
         'Error creating user',
-        'An error occurred while creating the user.'
+        'An error occurred while creating the user'
       )
     )
   }
@@ -91,13 +100,18 @@ export async function createUser(
  * Finds a user by their email or ID.
  * @param input The email or ID of the user to find.
  * @param prisma The Prisma client to use for the database operation.
+ * @param slugGenerator
+ * @param hydrationService
+ * @param workspaceCacheService
  * @throws {NotFoundException} If the user is not found.
  * @returns The user with their default workspace.
  */
 export async function getUserByEmailOrId(
   input: User['email'] | User['id'],
   prisma: PrismaService,
-  slugGenerator: SlugGenerator
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService,
+  workspaceCacheService: WorkspaceCacheService
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('getUserByEmailOrId')
 
@@ -110,17 +124,11 @@ export async function getUserByEmailOrId(
       (await prisma.user.findUnique({
         where: {
           email: input.toLowerCase()
-        },
-        include: {
-          emailPreference: true
         }
       })) ??
       (await prisma.user.findUnique({
         where: {
           id: input
-        },
-        include: {
-          emailPreference: true
         }
       }))
   } catch (error) {
@@ -134,7 +142,7 @@ export async function getUserByEmailOrId(
   }
 
   if (!user) {
-    logger.error(`User not found: ${input}`)
+    logger.warn(`User not found: ${input}`)
     throw new NotFoundException(
       constructErrorBody('User not found', `User ${input} not found`)
     )
@@ -167,10 +175,12 @@ export async function getUserByEmailOrId(
         `User ${user.id} has no default workspace. Creating default workspace.`
       )
       defaultWorkspace = await createWorkspace(
-        user,
+        user as AuthenticatedUser, // Doesn't harm us
         { name: 'My Workspace' },
         prisma,
         slugGenerator,
+        hydrationService,
+        workspaceCacheService,
         true
       )
       logger.log(

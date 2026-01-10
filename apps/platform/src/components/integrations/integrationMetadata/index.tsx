@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input'
 interface IntegrationMetadataProps {
   integrationType: IntegrationTypeEnum
   initialMetadata?: Record<string, unknown>
+  integrationName: string
   onChange: (metadata: Record<string, string>) => void
 }
 
 function IntegrationMetadata({
   integrationType,
   initialMetadata = {},
+  integrationName,
   onChange
 }: IntegrationMetadataProps): JSX.Element {
   const metadataFields = useMemo(
@@ -20,7 +22,7 @@ function IntegrationMetadata({
   )
 
   const [metadata, setMetadata] = useState<Record<string, string>>(() => {
-    return metadataFields.reduce<Record<string, string>>((acc, field) => {
+    return metadataFields!.reduce<Record<string, string>>((acc, field) => {
       acc[field.requestFieldName] =
         initialMetadata[field.requestFieldName] !== undefined
           ? String(initialMetadata[field.requestFieldName])
@@ -36,16 +38,18 @@ function IntegrationMetadata({
   const handleInputChange = (fieldKey: string, value: string) => {
     setMetadata((prev) => ({ ...prev, [fieldKey]: value }))
   }
+  if (!metadataFields) {
+    return <>No metadata fields available</>
+  }
 
   return (
     <div className="flex flex-col gap-y-2">
       <h3 className="font-medium capitalize text-white">
-        {integrationType} Configuration
+        {integrationName} Configuration
       </h3>
       <div className="flex flex-col gap-y-4 rounded-lg border border-white/10  p-4">
-        {metadataFields
-          .filter((field) => !field.isEnvironment)
-          .map(({ name, requestFieldName, description, placeholder }) => (
+        {metadataFields.map(
+          ({ name, requestFieldName, description, placeholder }) => (
             <div className="flex flex-col gap-y-1" key={requestFieldName}>
               <label
                 className="font-medium text-white"
@@ -66,7 +70,8 @@ function IntegrationMetadata({
                 value={metadata[requestFieldName]}
               />
             </div>
-          ))}
+          )
+        )}
       </div>
     </div>
   )

@@ -54,7 +54,7 @@ export class EventService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_EVENT]
       })
     const workspaceId = workspace.id

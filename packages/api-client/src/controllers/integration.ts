@@ -10,7 +10,11 @@ import {
   GetIntegrationRequest,
   GetIntegrationResponse,
   UpdateIntegrationRequest,
-  UpdateIntegrationResponse
+  UpdateIntegrationResponse,
+  ValidateIntegrationConfigurationRequest,
+  ValidateIntegrationConfigurationResponse,
+  GetVercelEnvironmentsRequest,
+  GetVercelEnvironmentsResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { ClientResponse } from '@keyshade/schema'
@@ -83,6 +87,18 @@ export default class IntegrationController {
     return await parseResponse<GetAllIntegrationRunsResponse>(response)
   }
 
+  async getVercelEnvironments(
+    request: GetVercelEnvironmentsRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetVercelEnvironmentsResponse>> {
+    const response = await this.apiClient.put(
+      `/api/integration/vercel/environments`,
+      headers
+    )
+
+    return await parseResponse<GetVercelEnvironmentsResponse>(response)
+  }
+
   async deleteIntegration(
     request: DeleteIntegrationRequest,
     headers?: Record<string, string>
@@ -92,5 +108,28 @@ export default class IntegrationController {
       headers
     )
     return await parseResponse<DeleteIntegrationResponse>(response)
+  }
+
+  async validateIntegrationConfiguration(
+    request: ValidateIntegrationConfigurationRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<ValidateIntegrationConfigurationResponse>> {
+    const {
+      isCreate,
+      integrationSlug = '',
+      ...bodyPayload
+    } = request as ValidateIntegrationConfigurationRequest & {
+      integrationSlug?: string
+    }
+
+    const url =
+      `/api/integration/validate-config?` +
+      (isCreate ? 'isCreate=true' : 'isCreate=false') +
+      (isCreate === false ? `&integrationSlug=${integrationSlug}` : '')
+
+    const response = await this.apiClient.post(url, bodyPayload, headers)
+    return await parseResponse<ValidateIntegrationConfigurationResponse>(
+      response
+    )
   }
 }

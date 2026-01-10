@@ -38,8 +38,23 @@ import ErrorInfoSVG from './errorInfo.svg'
 import DiscordSVG from './discord.svg'
 import SlackSVG from './slack.svg'
 import VercelSVG from './vercel.svg'
+import LambdaSVG from './lambda.svg'
+import AmplifySVG from './Amplify.svg'
+import NetlifySVG from './netlify.svg'
+import DigitalOceanSVG from './digital-ocean.svg'
+import HerokuSVG from './heroku.svg'
+import RailwaySVG from './railway.svg'
+import FlyioSVG from './flyio.svg'
+import GitHubSVG from './github.svg'
 import EmptyIntegrationSVG from './emptyIntegration.svg'
-import PendingSVG from './pending.svg'
+import SuccessTriggerSVG from './successTrigger.svg'
+import ErrorTriggerSVG from './errorTrigger.svg'
+import RefreshTriggerSVG from './refreshTrigger.svg'
+import CardSVG from './card.svg'
+import DocumentSVG from './document.svg'
+import FeedbackSVG from './feedback.svg'
+import LinkArrowSVG from './link-arrow.svg'
+import ImportSVG from './import.svg'
 
 export {
   DropdownSVG,
@@ -82,6 +97,21 @@ export {
   ErrorInfoSVG,
   DiscordSVG,
   SlackSVG,
-  PendingSVG,
-  VercelSVG
+  VercelSVG,
+  LambdaSVG,
+  AmplifySVG,
+  NetlifySVG,
+  DigitalOceanSVG,
+  HerokuSVG,
+  RailwaySVG,
+  FlyioSVG,
+  GitHubSVG,
+  SuccessTriggerSVG,
+  ErrorTriggerSVG,
+  RefreshTriggerSVG,
+  CardSVG,
+  DocumentSVG,
+  FeedbackSVG,
+  LinkArrowSVG,
+  ImportSVG
 }

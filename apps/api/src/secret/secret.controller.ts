@@ -15,6 +15,7 @@ import { CreateSecret } from './dto/create.secret/create.secret'
 import { UpdateSecret } from './dto/update.secret/update.secret'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { AuthenticatedUser } from '@/user/user.types'
+import { BulkCreateSecret } from './dto/bulk.create.secret/bulk.create.secret'
 
 @Controller('secret')
 export class SecretController {
@@ -28,6 +29,16 @@ export class SecretController {
     @Body() dto: CreateSecret
   ) {
     return await this.secretService.createSecret(user, dto, projectSlug)
+  }
+
+  @Post(':projectSlug/bulk')
+  @RequiredApiKeyAuthorities(Authority.CREATE_SECRET)
+  async bulkCreateSecrets(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectSlug') projectSlug: string,
+    @Body() dto: BulkCreateSecret
+  ) {
+    return await this.secretService.bulkCreateSecrets(user, projectSlug, dto)
   }
 
   @Put(':secretSlug')
@@ -53,6 +64,46 @@ export class SecretController {
       secretSlug,
       environmentSlug,
       rollbackVersion
+    )
+  }
+
+  @Put(':secretSlug/disable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
+  async disableSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.secretService.disableSecret(
+      user,
+      secretSlug,
+      environmentSlug
+    )
+  }
+
+  @Put(':secretSlug/enable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
+  async enableSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.secretService.enableSecret(
+      user,
+      secretSlug,
+      environmentSlug
+    )
+  }
+
+  @Get(':secretSlug/disabled')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
+  async getAllDisabledEnvironmentsOfSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string
+  ) {
+    return await this.secretService.getAllDisabledEnvironmentsOfSecret(
+      user,
+      secretSlug
     )
   }
 

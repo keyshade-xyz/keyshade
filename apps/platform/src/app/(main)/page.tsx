@@ -1,151 +1,110 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { FolderIconSVG } from '@public/svg/dashboard'
+import { useAtomValue, useSetAtom } from 'jotai'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
-import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
 import CreateProjectDialogue from '@/components/dashboard/project/createProjectDialogue'
 import {
-  createProjectOpenAtom,
-  selectedWorkspaceAtom,
-  projectsOfWorkspaceAtom,
   deleteProjectOpenAtom,
   selectedProjectAtom,
-  userAtom,
-  globalSearchDataAtom
+  selectedWorkspaceAtom,
+  userAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import ExportProjectConfigurationsDialog from '@/components/dashboard/project/exportProjectConfigurations'
-import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
 import { useHttp } from '@/hooks/use-http'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import { PageTitle } from '@/components/common/page-title'
+import { useGetAllProjects } from '@/hooks/api/use-get-all-projects'
+import ProjectLoader from '@/components/main/ProjectLoader'
+import ProjectEmpty from '@/components/main/ProjectEmpty'
+import Visible from '@/components/common/visible'
+import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
+import EmptyProjectsState from '@/components/main/emptyProjectState'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
 }
-export default function Index(): React.JSX.Element {
-  const [loading, setLoading] = useState<boolean>(true)
 
+export default function Index(): React.JSX.Element {
   const setUser = useSetAtom(userAtom)
-  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
-  // Projects to be displayed in the dashboard
-  const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
 
-  const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
+  const isAuthorizedToViewProject =
+    selectedWorkspace?.entitlements.canReadProjects
 
-  const getAllProjects = useHttp(() =>
-    ControllerInstance.getInstance().projectController.getAllProjects({
-      workspaceSlug: selectedWorkspace!.slug
-    })
-  )
-
-  const fetchProjects = async ({
-    page,
-    limit
-  }: {
-    page: number
-    limit: number
-  }) => {
-    const response =
-      await ControllerInstance.getInstance().projectController.getAllProjects({
-        workspaceSlug: selectedWorkspace!.slug,
-        page,
-        limit
-      })
-
-    return {
-      success: response.success,
-      error: response.error ? { message: response.error.message } : undefined,
-      data: response.data ?? {
-        items: [],
-        metadata: { totalCount: 0 }
-      }
-    }
-  }
+  const { loading, isProjectsEmpty, fetchProjects } = useGetAllProjects()
 
   const getSelf = useHttp(() =>
     ControllerInstance.getInstance().userController.getSelf()
   )
 
   useEffect(() => {
-    selectedWorkspace &&
-      getAllProjects()
-        .then(({ data, success }) => {
-          if (success && data) {
-            setProjects(data.items)
-            setGlobalSearchData((prev) => ({
-              ...prev,
-              projects: data.items.map((project) => ({
-                name: project.name,
-                slug: project.slug,
-                description: project.description
-              }))
-            }))
-          }
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-
     getSelf().then(({ data, success }) => {
       if (success && data) {
         setUser(data)
       }
     })
-  }, [
-    getAllProjects,
-    selectedWorkspace,
-    setProjects,
-    getSelf,
-    setUser,
-    setGlobalSearchData
-  ])
+  }, [getSelf, setUser])
+
+  /**
+   * Based on `isAuthorizedToViewProject` decide which component to load
+   */
+  function renderAuthorizedProjectView(): React.JSX.Element {
+    if (isAuthorizedToViewProject === undefined) {
+      return (
+        <div className="w-full">
+          <ProjectScreenLoader />
+        </div>
+      )
+    }
+    if (isAuthorizedToViewProject) {
+      return (
+        <ProjectEmpty isEmpty={isProjectsEmpty}>
+          <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
+            className="grid auto-rows-[9.5rem] grid-cols-1 gap-5 py-2 md:grid-cols-2 lg:grid-cols-4"
+            emptyComponent={<EmptyProjectsState />}
+            fetchFunction={fetchProjects}
+            itemComponent={ProjectItemComponent}
+            itemKey={(item) => item.id}
+            itemsPerPage={15}
+            loadingComponent={
+              <div className="w-full">
+                <ProjectScreenLoader />
+              </div>
+            }
+          />
+        </ProjectEmpty>
+      )
+    }
+    return (
+      <div>
+        You don&apos;t have permission to view projects in this workspace
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4">
-      <PageTitle title={`${selectedWorkspace?.name} | Dashboard`} />
+      <PageTitle title={`${selectedWorkspace?.name ?? ''} | Dashboard`} />
       <div className="flex items-center justify-between">
-        {!isProjectsEmpty && (
-          <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
-        )}
+        <Visible if={!isProjectsEmpty}>
+          <h1 className="text-[28px]">All Projects</h1>
+        </Visible>
         <CreateProjectDialogue />
       </div>
 
-      {loading ? (
-        <ProjectScreenLoader />
-      ) : !isProjectsEmpty ? (
-        <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
-          className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
-          fetchFunction={fetchProjects}
-          itemComponent={ProjectItemComponent}
-          itemKey={(item) => item.id}
-          itemsPerPage={15}
-        />
-      ) : (
-        <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
-          <FolderIconSVG width="100" />
-          <div className="text-4xl">Start your First Project</div>
-          <div>
-            Create a project and start setting up your variables and secret keys
-          </div>
-          <Button
-            onClick={() => setIsCreateProjectDialogOpen(true)}
-            variant="secondary"
-          >
-            Create project
-          </Button>
-        </div>
-      )}
+      <ProjectLoader loading={loading}>
+        {renderAuthorizedProjectView()}
+      </ProjectLoader>
 
-      {isDeleteProjectOpen && selectedProject ? <ConfirmDeleteProject /> : null}
+      <Visible if={Boolean(isDeleteProjectOpen && selectedProject)}>
+        <ConfirmDeleteProject />
+      </Visible>
 
       <EditProjectSheet />
       <ExportProjectConfigurationsDialog />

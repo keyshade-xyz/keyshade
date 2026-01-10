@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   AlertDialog,
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import {
   localProjectPrivateKeyAtom,
+  privateKeyStorageTypeAtom,
   selectedProjectPrivateKeyAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
@@ -23,17 +24,18 @@ interface ConfirmDeleteKeyDialogProps {
   isOpen: boolean
   onClose: () => void
   currentProject: string
-  isStoredOnServer: boolean
 }
 
 function ConfirmDeleteKeyDialog({
   isOpen,
   onClose,
-  currentProject,
-  isStoredOnServer
+  currentProject
 }: ConfirmDeleteKeyDialogProps): React.JSX.Element {
   const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
   const setLocalProjectPrivateKey = useSetAtom(localProjectPrivateKeyAtom)
+  const [privateKeyStorageType, setPrivateKeyStorageType] = useAtom(
+    privateKeyStorageTypeAtom
+  )
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const deletePrivateKey = useHttp(() =>
@@ -43,9 +45,10 @@ function ConfirmDeleteKeyDialog({
     })
   )
 
+  const isPrivateKeyInDb = privateKeyStorageType === 'IN_DB'
   const handleDeleteSecret = useCallback(async () => {
     setIsLoading(true)
-    if (isStoredOnServer) {
+    if (isPrivateKeyInDb) {
       await deletePrivateKey()
     } else {
       setLocalProjectPrivateKey((prev) =>
@@ -53,6 +56,7 @@ function ConfirmDeleteKeyDialog({
       )
     }
     setProjectPrivateKey(null)
+    setPrivateKeyStorageType('NONE')
     toast.success('Private key is deleted successfully!')
     setIsLoading(false)
     onClose()
@@ -61,8 +65,9 @@ function ConfirmDeleteKeyDialog({
     setLocalProjectPrivateKey,
     setProjectPrivateKey,
     currentProject,
-    isStoredOnServer,
-    deletePrivateKey
+    deletePrivateKey,
+    setPrivateKeyStorageType,
+    isPrivateKeyInDb
   ])
 
   return (
@@ -71,7 +76,7 @@ function ConfirmDeleteKeyDialog({
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
             Do you want to delete Private key from{' '}
-            {isStoredOnServer ? 'server' : 'browser'}?
+            {isPrivateKeyInDb ? 'server' : 'browser'}?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-gray-400">
             This action cannot be undone. This will delete your private key so

@@ -23,6 +23,7 @@ import {
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import MemberRow from '@/components/members/memberRow'
+import EmptyMembersState from '@/components/members/emptyMembersState'
 
 export default function JoinedMembersTable(): React.JSX.Element {
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
@@ -105,7 +106,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full mt-6">
       <div className="w-full">
         <Table className="overflow-hidden rounded-3xl bg-[#1D1D20]">
           <TableHeader>
@@ -125,6 +126,7 @@ export default function JoinedMembersTable(): React.JSX.Element {
           <TableBody>
             <InfiniteScrollList
               className="contents w-full [&>div]:contents"
+              emptyComponent={<EmptyMembersState />}
               fetchFunction={fetchMembers}
               inTable
               itemComponent={renderMemberRow}

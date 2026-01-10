@@ -32,7 +32,7 @@ import { EventService } from '@/event/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
@@ -108,13 +108,13 @@ describe('Secret Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'johndoe@keyshade.xyz',
+      email: 'johndoe@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'janedoe@keyshade.xyz',
+      email: 'janedoe@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
@@ -126,32 +126,14 @@ describe('Secret Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
-    project1 = (await projectService.createProject(user1, workspace1.slug, {
+    project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Project 1 description',
       storePrivateKey: true,
@@ -166,9 +148,9 @@ describe('Secret Controller Tests', () => {
           description: 'Environment 2 description'
         }
       ]
-    })) as Project
+    })
 
-    project2 = (await projectService.createProject(user1, workspace1.slug, {
+    project2 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 2',
       description: 'Project 2 description',
       storePrivateKey: false,
@@ -179,7 +161,7 @@ describe('Secret Controller Tests', () => {
           description: 'Environment 1 description'
         }
       ]
-    })) as Project
+    })
 
     environment1 = await prisma.environment.findFirst({
       where: {
@@ -188,23 +170,21 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    secret1 = (
-      await secretService.createSecret(
-        user1,
-        {
-          name: 'Secret 1',
-          rotateAfter: '24',
-          note: 'Secret 1 note',
-          entries: [
-            {
-              environmentSlug: environment1.slug,
-              value: 'Secret 1 value'
-            }
-          ]
-        },
-        project1.slug
-      )
-    ).secret as Secret
+    secret1 = await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 1',
+        rotateAfter: '24',
+        note: 'Secret 1 note',
+        entries: [
+          {
+            environmentSlug: environment1.slug,
+            value: 'Secret 1 value'
+          }
+        ]
+      },
+      project1.slug
+    )
   })
 
   afterEach(async () => {
@@ -248,13 +228,13 @@ describe('Secret Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.secret.name).toBe('Secret 2')
-      expect(body.secret.note).toBe('Secret 2 note')
-      expect(body.secret.projectId).toBe(project1.id)
-      expect(body.values.length).toBe(1)
-      expect(body.values[0].value).not.toBe('Secret 2 value')
-      expect(body.values[0].environment.id).toBe(environment1.id)
-      expect(body.values[0].environment.slug).toBe(environment1.slug)
+      expect(body.name).toBe('Secret 2')
+      expect(body.note).toBe('Secret 2 note')
+      expect(body.projectId).toBe(project1.id)
+      expect(body.versions.length).toBe(1)
+      expect(body.versions[0].value).not.toBe('Secret 2 value')
+      expect(body.versions[0].environment.id).toBe(environment1.id)
+      expect(body.versions[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should have encrypted value if project does not store private key', async () => {
@@ -293,20 +273,212 @@ describe('Secret Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.secret.name).toBe('Secret 2')
-      expect(body.secret.note).toBe('Secret 2 note')
-      expect(body.secret.projectId).toBe(project1.id)
-      expect(body.values.length).toBe(1)
-      expect(body.values[0].value).not.toBe('Secret 2 value')
-      expect(body.values[0].environment.id).toBe(environment1.id)
-      expect(body.values[0].environment.slug).toBe(environment1.slug)
+      expect(body.name).toBe('Secret 2')
+      expect(body.note).toBe('Secret 2 note')
+      expect(body.projectId).toBe(project1.id)
+      expect(body.versions.length).toBe(1)
+      expect(body.versions[0].value).not.toBe('Secret 2 value')
+      expect(body.versions[0].environment.id).toBe(environment1.id)
+      expect(body.versions[0].environment.slug).toBe(environment1.slug)
+    })
+
+    it('should bulk create multiple secrets successfully', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = response.json()
+
+      expect(body).toHaveLength(2)
+    })
+
+    it('should reject bulk create if any secret is invalid', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: '', // Invalid name
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should reject bulk create if any secret already exists', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if any variable already exists', async () => {
+      // Create a secret named Bulk Secret 1
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'Bulk Secret 1',
+          note: 'Bulk 1 note',
+          entries: [
+            {
+              value: 'v1',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        project1.slug
+      )
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should reject bulk create if tier limit will be hit', async () => {
+      // Create 13 secrets
+      for (let i = 2; i < 15; i++) {
+        await secretService.createSecret(
+          user1,
+          {
+            name: `Secret ${i}`,
+            note: `Secret ${i} note`,
+            entries: [
+              {
+                value: `v${i}`,
+                environmentSlug: environment1.slug
+              }
+            ],
+            rotateAfter: '24'
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              value: 'v1',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              value: 'v2',
+              environmentSlug: environment1.slug,
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
 
     it('should not be able to create secrets if tier limit is reached', async () => {
       // Create secrets until tier limit is reached
+      const maxSecrets = (
+        await tierLimitService.getWorkspaceTierLimit(project1.workspaceId)
+      ).MAX_SECRETS_PER_PROJECT
+
       for (
         let x = 100;
-        x < 100 + tierLimitService.getSecretTierLimit(project1.id) - 1; // Subtract 1 for the secrets created above
+        x < 100 + maxSecrets - 1; // Subtract 1 for the secrets created above
         x++
       ) {
         await secretService.createSecret(
@@ -482,7 +654,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        `Variable COLLIDE already exists in project ${project1.slug}`
+        `A variable named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -538,9 +710,8 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().secret.name).toEqual('Updated Secret 1')
-      expect(response.json().secret.note).toEqual('Updated Secret 1 note')
-      expect(response.json().updatedVersions.length).toBe(0)
+      expect(response.json().name).toEqual('Updated Secret 1')
+      expect(response.json().note).toEqual('Updated Secret 1 note')
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
@@ -574,8 +745,8 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).not.toBe(
+      expect(response.json().versions.length).toBe(1)
+      expect(response.json().versions[0].value).not.toBe(
         'Updated Secret 1 value'
       )
 
@@ -621,8 +792,8 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).not.toBe(
+      expect(response.json().versions.length).toBe(1)
+      expect(response.json().versions[0].value).not.toBe(
         'Updated Secret 1 value'
       )
 
@@ -706,7 +877,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        `Variable COLLIDE already exists in project ${project1.slug}`
+        `A variable named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
   })
@@ -767,17 +938,15 @@ describe('Secret Controller Tests', () => {
     })
 
     it('should not create a secret version entity if value-environmentSlug is not provided during creation', async () => {
-      const secret = (
-        await secretService.createSecret(
-          user1,
-          {
-            name: 'Secret 4',
-            note: 'Secret 4 note',
-            rotateAfter: '24'
-          },
-          project1.slug
-        )
-      ).secret
+      const secret = await secretService.createSecret(
+        user1,
+        {
+          name: 'Secret 4',
+          note: 'Secret 4 note',
+          rotateAfter: '24'
+        },
+        project1.slug
+      )
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
@@ -793,7 +962,7 @@ describe('Secret Controller Tests', () => {
       await secretService.updateSecret(user1, secret1.slug, {
         entries: [
           {
-            value: 'Updated Secret 1 value',
+            value: 'Updated Secret 1 value 2',
             environmentSlug: environment1.slug
           }
         ]
@@ -802,7 +971,16 @@ describe('Secret Controller Tests', () => {
       await secretService.updateSecret(user1, secret1.slug, {
         entries: [
           {
-            value: 'Updated Secret 1 value 2',
+            value: 'Updated Secret 1 value 3',
+            environmentSlug: environment1.slug
+          }
+        ]
+      })
+
+      await secretService.updateSecret(user1, secret1.slug, {
+        entries: [
+          {
+            value: 'Updated Secret 1 value 4',
             environmentSlug: environment1.slug
           }
         ]
@@ -817,26 +995,26 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(versions.length).toBe(3)
+      expect(versions.length).toBe(4)
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await app.inject({
         method: 'PUT',
-        url: `/secret/${secret1.slug}/rollback/1?environmentSlug=${environment1.slug}`,
+        url: `/secret/${secret1.slug}/rollback/2?environmentSlug=${environment1.slug}`,
         headers: {
           'x-e2e-user-email': user1.email
         }
       })
 
-      // expect(response.json().count).toEqual(2)
+      expect(response.json().count).toEqual(2)
 
-      // versions = await prisma.secretVersion.findMany({
-      //   where: {
-      //     secretId: secret1.id
-      //   }
-      // })
+      versions = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id
+        }
+      })
 
-      // expect(versions.length).toBe(1)
+      expect(versions.length).toBe(2)
     })
   })
 
@@ -853,27 +1031,13 @@ describe('Secret Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { secret, values } = response.json().items[0]
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: secret1.updatedAt.toISOString(),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
-      expect(values.length).toBe(1)
+      const secret = response.json().items[0]
+      expect(secret.id).toBe(secret1.id)
+      expect(secret.name).toBe(secret1.name)
+      expect(secret.slug).toBe(secret1.slug)
+      expect(secret.versions.length).toBe(1)
 
-      const value = values[0]
+      const value = secret.versions[0]
       expect(value.version).toBe(1)
       expect(value.environment.id).toBe(environment1.id)
       expect(value.environment.slug).toBe(environment1.slug)
@@ -918,28 +1082,14 @@ describe('Secret Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toBe(1)
 
-      const { secret, values } = response.json().items[0]
+      const secret = response.json().items[0]
 
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: expect.any(String),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
-      expect(values.length).toBe(1)
+      expect(secret.id).toBe(secret1.id)
+      expect(secret.name).toBe(secret1.name)
+      expect(secret.slug).toBe(secret1.slug)
+      expect(secret.versions.length).toBe(1)
 
-      const value = values[0]
+      const value = secret.versions[0]
       expect(value.version).toBe(2)
       expect(value.environment.id).toBe(environment1.id)
       expect(value.environment.slug).toBe(environment1.slug)
@@ -1139,23 +1289,21 @@ describe('Secret Controller Tests', () => {
 
   describe('Rotate Secrets Tests', () => {
     it('should have not created a new secret version when there is no rotation defined', async () => {
-      const secretWithoutRotation = (
-        await secretService.createSecret(
-          user1,
-          {
-            name: 'Secret',
-            note: 'Secret note',
-            rotateAfter: 'never',
-            entries: [
-              {
-                environmentSlug: environment1.slug,
-                value: 'Secret value'
-              }
-            ]
-          },
-          project1.slug
-        )
-      ).secret as Secret
+      const secretWithoutRotation = await secretService.createSecret(
+        user1,
+        {
+          name: 'Secret',
+          note: 'Secret note',
+          rotateAfter: 'never',
+          entries: [
+            {
+              environmentSlug: environment1.slug,
+              value: 'Secret value'
+            }
+          ]
+        },
+        project1.slug
+      )
 
       await secretService.rotateSecrets()
 
@@ -1336,6 +1484,151 @@ describe('Secret Controller Tests', () => {
       const secret = response.json()[0]
       expect(secret.name).toBe('Secret 20')
       expect(secret.value).not.toBe('Secret 20 value')
+    })
+  })
+
+  describe('Disable/Enable Secret Tests', () => {
+    it('should not be able to disable a secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to enable a secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to disable a secret that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/non-existent-secret-slug/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a secret that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/non-existent-secret-slug/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to disable a secret in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/disable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a secret in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should be able to disable a secret', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+
+      // Re-enabling secret for further tests
+      await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+    })
+
+    it('should be able to enable a secret', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+  })
+
+  describe('Fetch All Disabled Environments Of Secret Tests', () => {
+    it('should not be able to fetch disabled environments of a non-existent secret', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/non-existent-secret-slug/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch disabled environments of a secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${secret1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should be able to fetch disabled environments of a secret', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${secret1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
     })
   })
 })

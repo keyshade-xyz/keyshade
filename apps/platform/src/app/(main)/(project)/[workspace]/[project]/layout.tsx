@@ -1,28 +1,34 @@
 'use client'
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useAtom, useSetAtom } from 'jotai'
-import OverviewPage from './@overview/page'
-import EnvironmentPage from './@environment/page'
-import SecretPage from './@secret/page'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { CodeSVG } from '@public/svg/dashboard'
 import VariablePage from './@variable/page'
+import SecretPage from './@secret/page'
+import EnvironmentPage from './@environment/page'
+import SettingsPage from './@overview/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
 import {
-  selectedProjectAtom,
   environmentsOfProjectAtom,
   globalSearchDataAtom,
   projectEnvironmentCountAtom,
   projectSecretCountAtom,
-  projectVariableCountAtom
+  projectVariableCountAtom,
+  selectedProjectAtom,
+  selectedWorkspaceAtom
 } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
+import LineTabController from '@/components/shared/navbar/line-tab-controller'
+import { Button } from '@/components/ui/button'
+import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
 
-function DetailedProjectPage(): JSX.Element {
+function DetailedProjectPage(): React.JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
   const setSecretCount = useSetAtom(projectSecretCountAtom)
   const setVariableCount = useSetAtom(projectVariableCountAtom)
@@ -31,6 +37,11 @@ function DetailedProjectPage(): JSX.Element {
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
+
+  const isAuthorizedToViewProject =
+    selectedWorkspace?.entitlements.canReadProjects
+  const isAuthorizedToViewEnvironments =
+    selectedProject?.entitlements.canReadEnvironments
 
   const getProject = useHttp(() =>
     ControllerInstance.getInstance().projectController.getProject({
@@ -48,6 +59,7 @@ function DetailedProjectPage(): JSX.Element {
 
   useEffect(() => {
     if (!projectSlug) return
+    if (!isAuthorizedToViewProject) return
 
     getProject().then(({ data, success, error }) => {
       if (success && data) {
@@ -65,11 +77,12 @@ function DetailedProjectPage(): JSX.Element {
     setSelectedProject,
     setEnvironmentCount,
     setSecretCount,
-    setVariableCount
+    setVariableCount,
+    isAuthorizedToViewProject
   ])
 
   useEffect(() => {
-    selectedProject &&
+    isAuthorizedToViewEnvironments &&
       getAllEnvironmentsOfProject().then(({ data, success }) => {
         if (success && data) {
           setEnvironments(data.items)
@@ -87,24 +100,33 @@ function DetailedProjectPage(): JSX.Element {
     getAllEnvironmentsOfProject,
     selectedProject,
     setEnvironments,
-    setGlobalSearchData
+    setGlobalSearchData,
+    isAuthorizedToViewEnvironments
   ])
 
   return (
     <main className="flex h-full flex-col gap-4">
-      {tab !== 'overview' && (
-        <div className="flex h-[3.625rem] w-full justify-between p-3 ">
-          <div className="text-3xl">{selectedProject?.name}</div>
-          {tab === 'secret' && <AddSecretDialog />}
-          {tab === 'variable' && <AddVariableDialogue />}
-          {tab === 'environment' && <AddEnvironmentDialogue />}
+      <div className="flex flex-row items-center justify-between">
+        <h1 className="text-[28px]">{selectedProject?.name}</h1>
+        <div className="flex flex-row items-center gap-x-2">
+          <ImportEnvButton projectSlug={projectSlug} />
+          <Button type="button" variant="outline">
+            <CodeSVG />
+          </Button>
         </div>
-      )}
+      </div>
+
+      <div className="h-14.5 flex w-full justify-between py-3 ">
+        <LineTabController />
+        {tab === 'secrets' && <AddSecretDialog />}
+        {tab === 'variables' && <AddVariableDialogue />}
+        {tab === 'environment' && <AddEnvironmentDialogue />}
+      </div>
 
       <div className="h-full w-full overflow-y-scroll">
-        {tab === 'overview' && <OverviewPage />}
-        {tab === 'secret' && <SecretPage />}
-        {tab === 'variable' && <VariablePage />}
+        {tab === 'settings' && <SettingsPage />}
+        {tab === 'secrets' && <SecretPage />}
+        {tab === 'variables' && <VariablePage />}
         {tab === 'environment' && <EnvironmentPage />}
       </div>
     </main>

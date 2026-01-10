@@ -21,7 +21,7 @@ import {
 import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/user.service'
+import { UserService } from '@/user/service/user.service'
 import { WorkspaceService } from './workspace.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { ProjectModule } from '@/project/project.module'
@@ -124,19 +124,19 @@ describe('Workspace Controller Tests', () => {
 
   beforeEach(async () => {
     const createUser1 = await userService.createUser({
-      email: 'john@keyshade.xyz',
+      email: 'john@keyshade.io',
       name: 'John Doe',
       isOnboardingFinished: true
     })
 
     const createUser2 = await userService.createUser({
-      email: 'jane@keyshade.xyz',
+      email: 'jane@keyshade.io',
       name: 'Jane Doe',
       isOnboardingFinished: true
     })
 
     const createUser3 = await userService.createUser({
-      email: 'sadie@keyshade.xyz',
+      email: 'sadie@keyshade.io',
       name: 'Sadie',
       isOnboardingFinished: true
     })
@@ -148,29 +148,11 @@ describe('Workspace Controller Tests', () => {
 
     user1 = {
       ...createUser1,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser1.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
     user2 = {
       ...createUser2,
-      ipAddress: USER_IP_ADDRESS,
-      emailPreference: {
-        id: expect.any(String),
-        userId: createUser2.id,
-        marketing: true,
-        activity: true,
-        critical: true,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }
+      ipAddress: USER_IP_ADDRESS
     }
 
     workspace1 = await workspaceService.createWorkspace(user1, {
@@ -238,7 +220,6 @@ describe('Workspace Controller Tests', () => {
       expect(body.slug).toBeDefined()
       expect(body.icon).toBe('🤓')
       expect(body.ownerId).toBe(user1.id)
-      expect(body.isFreeTier).toBe(true)
       expect(body.isDefault).toBe(false)
     })
 
@@ -277,7 +258,6 @@ describe('Workspace Controller Tests', () => {
       expect(workspace2.name).toBe('Workspace 1')
       expect(workspace2.icon).toBe('🤓')
       expect(workspace2.ownerId).toBe(user2.id)
-      expect(workspace2.isFreeTier).toBe(true)
       expect(workspace2.isDefault).toBe(false)
     })
 
@@ -447,7 +427,7 @@ describe('Workspace Controller Tests', () => {
 
   describe('Get All Workspace Of User Tests', () => {
     it('should be able to fetch all the workspaces the user is a member of', async () => {
-      // Create the invitation, but don't accept it.
+      // Create the invitation but don't accept it.
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
 
       const response = await app.inject({

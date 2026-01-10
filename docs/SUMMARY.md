@@ -1,20 +1,29 @@
 # Table of contents
 
-- [❔ What is keyshade?](README.md)
+- [❔ What is Keyshade?](README.md)
 
 ## Getting Started
 
 - [Introduction](getting-started/introduction.md)
-- [Adding your first secret and variable](getting-started/adding-your-first-secret-and-variable.md)
 - [Installing the CLI](getting-started/installing-the-cli.md)
-- [Setting up your profile](getting-started/setting-up-your-profile.md)
-- [Add keyshade to your project](getting-started/add-keyshade-to-your-project.md)
+- [Creating a project](getting-started/creating-a-project.md)
+- [Importing your environment variables](getting-started/importing-your-environment-variables.md)
+- [Add Keyshade to your project](getting-started/add-keyshade-to-your-project.md)
 - [Running your app](getting-started/running-your-app.md)
+
+## App Reference
+
+- [Introduction](app-reference/introduction.md)
+- [Workspace](app-reference/workspace.md)
+- [Environment](app-reference/environment.md)
+- [Secret](app-reference/secret.md)
+- [Variable](app-reference/variable.md)
 
 ## CLI
 
 - [Introduction](cli/introduction.md)
 - [Profile](cli/profile.md)
+- [Reset](cli/reset.md)
 - [Init](cli/init.md)
 - [Workspace](cli/workspace.md)
 - [Project](cli/project.md)
@@ -24,11 +33,16 @@
 
 ## Integrations 
 
-- Frameworks
-  - [Set up Keyshade with Next.js](integration/frameworks/set-up-with-nextjs.md)
-  - [Set up Keyshade with Node.js](integration/frameworks/set-up-with-nodejs.md)
-- Languages
+- [Frameworks](integration/frameworks/README.md)
+  - [Next.js](integration/frameworks/set-up-with-nextjs.md)
+  - [Node.js](integration/frameworks/set-up-with-nodejs.md)
+- [Languages](integration/languages/README.md)
+  - [Go](integration/languages/set-up-with-go.md)
   - [Python](integration/languages/set-up-with-python.md)
+  - [Rust](integration/languages/set-up-with-rust.md)
+- [Platforms](integration/platforms/README.md)
+  - [AWS Lambda](integration/platforms/set-up-with-aws.md)
+  - [Vercel](integration/platforms/set-up-with-vercel.md)
 
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
@@ -53,5 +67,5 @@
 
 ## Internals
 
-- [Architecture of keyshade](internals/architecture-of-keyshade.md)
+- [Architecture of Keyshade](internals/architecture-of-keyshade.md)
 - [How the CLI works](internals/how-the-cli-works.md)

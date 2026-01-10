@@ -15,6 +15,7 @@ import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateVariable } from './dto/create.variable/create.variable'
 import { UpdateVariable } from './dto/update.variable/update.variable'
 import { AuthenticatedUser } from '@/user/user.types'
+import { BulkCreateVariable } from './dto/bulk.create.variable/bulk.create.variable'
 
 @Controller('variable')
 export class VariableController {
@@ -28,6 +29,20 @@ export class VariableController {
     @Body() dto: CreateVariable
   ) {
     return await this.variableService.createVariable(user, dto, projectSlug)
+  }
+
+  @Post(':projectSlug/bulk')
+  @RequiredApiKeyAuthorities(Authority.CREATE_VARIABLE)
+  async bulkCreateVariables(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectSlug') projectSlug: string,
+    @Body() dto: BulkCreateVariable
+  ) {
+    return await this.variableService.bulkCreateVariables(
+      user,
+      projectSlug,
+      dto
+    )
   }
 
   @Put(':variableSlug')
@@ -53,6 +68,46 @@ export class VariableController {
       variableSlug,
       environmentSlug,
       rollbackVersion
+    )
+  }
+
+  @Put(':variableSlug/disable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
+  async disableVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.variableService.disableVariable(
+      user,
+      variableSlug,
+      environmentSlug
+    )
+  }
+
+  @Put(':variableSlug/enable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
+  async enableVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.variableService.enableVariable(
+      user,
+      variableSlug,
+      environmentSlug
+    )
+  }
+
+  @Get(':variableSlug/disabled')
+  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
+  async getAllDisabledEnvironmentsOfVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string
+  ) {
+    return await this.variableService.getAllDisabledEnvironmentsOfVariable(
+      user,
+      variableSlug
     )
   }
 

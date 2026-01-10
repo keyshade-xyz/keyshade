@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   forwardRef,
   Inject,
@@ -13,7 +14,6 @@ import {
   EventSource,
   EventType,
   Project,
-  User,
   Variable,
   VariableVersion
 } from '@prisma/client'
@@ -23,11 +23,8 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import {
-  ChangeNotification,
-  ChangeNotificationEvent
-} from '@/socket/socket.types'
-import { paginate } from '@/common/paginate'
+import { ChangeNotificationEvent, Configuration } from '@/socket/socket.types'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { createEvent } from '@/common/event'
 import {
@@ -35,9 +32,8 @@ import {
   limitMaxItemsPerPage,
   mapEntriesToEventMetadata
 } from '@/common/util'
-import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
-import { VariableWithValues } from './variable.types'
+import { HydratedVariable, RawVariableRevision } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import {
@@ -46,6 +42,12 @@ import {
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
 import { SecretService } from '@/secret/secret.service'
+import { HydrationService } from '@/common/hydration.service'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { checkForDisabledWorkspace } from '@/common/workspace'
+import { ProjectCacheService } from '@/cache/project-cache.service'
+import { BulkCreateVariable } from '@/variable/dto/bulk.create.variable/bulk.create.variable'
+import { MetricService } from '@/common/metrics.service'
 
 @Injectable()
 export class VariableService {
@@ -57,12 +59,15 @@ export class VariableService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService,
+    private readonly metricsService: MetricService,
     @Inject(forwardRef(() => SecretService))
     private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    private readonly projectCacheService: ProjectCacheService
   ) {
     this.redis = redisClient.publisher
   }
@@ -78,7 +83,7 @@ export class VariableService {
     user: AuthenticatedUser,
     dto: CreateVariable,
     projectSlug: Project['slug']
-  ): Promise<VariableWithValues> {
+  ): Promise<HydratedVariable> {
     this.logger.log(
       `User ${user.id} attempted to create variable ${dto.name} in project ${projectSlug}`
     )
@@ -90,37 +95,46 @@ export class VariableService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.CREATE_VARIABLE]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create variable ${dto.name} in disabled workspace ${project.workspaceId}`
+    )
 
     // Check if more variables are allowed in the project
     await this.tierLimitService.checkVariableLimitReached(project)
 
     // Check if a variable with the same name already exists in the project
-    await this.variableExists(dto.name, project)
+    await this.variableExists(dto.name, project.id)
 
     // Check if a secret with the same name already exists in the project
-    await this.secretService.secretExists(dto.name, project)
+    await this.secretService.secretExists(dto.name, project.id)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto,
-      user,
-      project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
+    let environmentSlugToIdMap: Map<string, string>
+    if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+    }
 
     // Create the variable
     this.logger.log(`Creating variable ${dto.name} in project ${project.slug}`)
-    const variableData = await this.prisma.variable.create({
+    const variable = await this.prisma.variable.create({
       data: {
         name: dto.name,
         slug: await this.slugGenerator.generateEntitySlug(dto.name, 'VARIABLE'),
@@ -149,40 +163,24 @@ export class VariableService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        versions: {
-          select: {
-            environment: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            version: true,
-            value: true
-          }
-        }
-      }
+      include: InclusionQuery.Variable
     })
 
     this.logger.log(
-      `Created variable ${variableData.name} in project ${project.slug}`
+      `Created variable ${variable.name} in project ${project.slug}`
     )
 
-    const variable = getVariableWithValues(variableData)
+    const hydratedVariable = await this.hydrationService.hydrateVariable({
+      user,
+      variable,
+      authorizationService: this.authorizationService
+    })
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing variable creation to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+            `Publishing variable creation to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -194,7 +192,7 @@ export class VariableService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published variable update to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+            `Published variable update to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -202,16 +200,21 @@ export class VariableService {
       }
     }
 
+    await this.projectCacheService.addVariableToProjectCache(
+      projectSlug,
+      variable
+    )
+
     await createEvent(
       {
         triggeredBy: user,
-        entity: variable.variable,
+        entity: hydratedVariable,
         type: EventType.VARIABLE_ADDED,
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          name: variableData.name,
-          description: variable.variable.note,
+          name: hydratedVariable.name,
+          description: hydratedVariable.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: false,
           isPlaintext: true
@@ -221,7 +224,192 @@ export class VariableService {
       this.prisma
     )
 
-    return variable
+    delete hydratedVariable.project
+    return hydratedVariable
+  }
+
+  async bulkCreateVariables(
+    user: AuthenticatedUser,
+    projectSlug: string,
+    dto: BulkCreateVariable
+  ): Promise<HydratedVariable[]> {
+    const totalVariablesToCreate = dto.variables.length
+
+    this.logger.log(
+      `User ${user.id} attempted to create ${totalVariablesToCreate} variables in project ${projectSlug}`
+    )
+
+    // Fetch the project
+    this.logger.log(
+      `Checking if user ${user.id} has access to create variable in project ${projectSlug}`
+    )
+    const project =
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
+        slug: projectSlug,
+        authorities: [Authority.CREATE_VARIABLE]
+      })
+
+    // Check if more variables are allowed in the project
+    const workspaceTierLimit =
+      await this.tierLimitService.getWorkspaceTierLimit(project.workspaceId)
+    const maxAllowedVariables = workspaceTierLimit.MAX_VARIABLES_PER_PROJECT
+    if (maxAllowedVariables === -1) {
+      this.logger.log(
+        `Workspace ${project.workspaceId} can have infinite variables`
+      )
+    } else {
+      this.logger.log(`Fetching existing variables in project ${projectSlug}`)
+      const existingVariableCount = await this.prisma.variable.count({
+        where: {
+          projectId: project.id
+        }
+      })
+      this.logger.log(`Existing variables count: ${existingVariableCount}`)
+
+      if (
+        totalVariablesToCreate + existingVariableCount >
+        maxAllowedVariables
+      ) {
+        this.logger.error(
+          `Project ${project.id} has reached the limit of maximum variables: ${maxAllowedVariables}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Maximum limit of variables reached',
+            `You can create a maximum of ${maxAllowedVariables} variables`
+          )
+        )
+      } else {
+        this.logger.log(
+          `Project ${project.id} has not reached the limit of variables`
+        )
+      }
+    }
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create variables in disabled workspace ${project.workspaceId}`
+    )
+
+    // Get environment id to slug map
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto.variables.map((v) => v.environmentSlug),
+      user,
+      project,
+      this.authorizationService,
+      true
+    )
+
+    // Check if the names are unique
+    for (const variable of dto.variables) {
+      await this.variableExists(variable.name, project.id)
+      await this.secretService.secretExists(variable.name, project.id)
+    }
+
+    this.logger.log(
+      `User ${user.id} started bulk creation of ${totalVariablesToCreate} variables in project ${projectSlug}`
+    )
+
+    const createVariablesTx = []
+    for (const variable of dto.variables) {
+      createVariablesTx.push(
+        this.prisma.variable.create({
+          data: {
+            name: variable.name,
+            slug: await this.slugGenerator.generateEntitySlug(
+              variable.name,
+              'VARIABLE'
+            ),
+            note: variable.note,
+            versions: {
+              create: {
+                value: variable.value,
+                createdById: user.id,
+                environmentId: environmentSlugToIdMap.get(
+                  variable.environmentSlug
+                )
+              }
+            },
+            projectId: project.id,
+            lastUpdatedById: user.id
+          },
+          include: InclusionQuery.Variable
+        })
+      )
+    }
+    const rawVariables = await this.prisma.$transaction(createVariablesTx)
+    const hydratedVariables: HydratedVariable[] = []
+
+    for (const variable of rawVariables) {
+      // Hydrate the variable
+      const hydratedVariable = await this.hydrationService.hydrateVariable({
+        user,
+        variable,
+        authorizationService: this.authorizationService
+      })
+      hydratedVariables.push(hydratedVariable)
+
+      // Getting the first element since there will always be 1 version created
+      const environment = hydratedVariable.versions[0].environment
+      const value = hydratedVariable.versions[0].value
+
+      // Publish the change in redis
+      try {
+        this.logger.log(
+          `Publishing variable creation to Redis for variable ${hydratedVariable.slug} in environment ${environment.slug}`
+        )
+        await this.redis.publish(
+          CHANGE_NOTIFIER_RSC,
+          JSON.stringify({
+            environmentId: environment.id,
+            name: variable.name,
+            value,
+            isPlaintext: true
+          } as ChangeNotificationEvent)
+        )
+        this.logger.log(
+          `Published variable update to Redis for variable ${hydratedVariable.slug} in environment ${environment.slug}`
+        )
+      } catch (error) {
+        this.logger.error(`Error publishing variable update to Redis: ${error}`)
+      }
+
+      // Cache the variable
+      await this.projectCacheService.addVariableToProjectCache(
+        projectSlug,
+        variable
+      )
+
+      // Create the event
+      await createEvent(
+        {
+          triggeredBy: user,
+          entity: hydratedVariable,
+          type: EventType.VARIABLE_ADDED,
+          source: EventSource.VARIABLE,
+          title: `Variable created`,
+          metadata: {
+            name: hydratedVariable.name,
+            description: hydratedVariable.note,
+            values: {
+              [environment.slug]: value
+            },
+            isSecret: false,
+            isPlaintext: true
+          } as ConfigurationAddedEventMetadata,
+          workspaceId: project.workspaceId
+        },
+        this.prisma
+      )
+    }
+
+    this.logger.log(
+      `User ${user.id} created ${rawVariables.length} variables in project ${projectSlug}`
+    )
+
+    return hydratedVariables
   }
 
   /**
@@ -235,7 +423,7 @@ export class VariableService {
     user: AuthenticatedUser,
     variableSlug: Variable['slug'],
     dto: UpdateVariable
-  ) {
+  ): Promise<HydratedVariable> {
     this.logger.log(
       `User ${user.id} attempted to update variable ${variableSlug}`
     )
@@ -247,31 +435,23 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
     // Check if the variable already exists in the project
-    await this.variableExists(dto.name, variable.project)
+    await this.variableExists(dto.name, variable.projectId)
 
     // Check if a secret with the same name already exists in the project
-    await this.secretService.secretExists(dto.name, variable.project)
+    await this.secretService.secretExists(dto.name, variable.projectId)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
-    // Check if the user has access to the environments
-    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
-      dto,
-      user,
-      variable.project,
-      this.authorizationService,
-      shouldCreateRevisions
-    )
-
     const op = []
+    let environmentSlugToIdMap: Map<string, string>
 
     // Update the variable
 
@@ -289,12 +469,6 @@ export class VariableService {
           ),
           note: dto.note,
           lastUpdatedById: user.id
-        },
-        select: {
-          id: true,
-          name: true,
-          note: true,
-          slug: true
         }
       })
     )
@@ -302,7 +476,31 @@ export class VariableService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      // Check if the user has access to the environments
+      environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+        dto.entries.map((e) => e.environmentSlug),
+        user,
+        variable.project,
+        this.authorizationService,
+        shouldCreateRevisions
+      )
+
+      await checkForDisabledWorkspace(
+        variable.project.workspaceId,
+        this.prisma,
+        `User ${user.id} attempted to update variable ${variableSlug} in disabled workspace ${variable.project.workspaceId}`
+      )
+
       for (const entry of dto.entries) {
+        const environmentId = environmentSlugToIdMap.get(entry.environmentSlug)
+
+        // Check for secret revision tier limit
+        await this.tierLimitService.checkConfigurationVersionLimitReached(
+          variable,
+          environmentId,
+          'variable'
+        )
+
         // Fetch the latest version of the variable for the environment
         this.logger.log(
           `Fetching latest version of variable ${variableSlug} for environment ${entry.environmentSlug}`
@@ -310,7 +508,7 @@ export class VariableService {
         const latestVersion = await this.prisma.variableVersion.findFirst({
           where: {
             variableId: variable.id,
-            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
+            environmentId
           },
           select: {
             version: true
@@ -331,28 +529,8 @@ export class VariableService {
               value: entry.value,
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
+              environmentId,
               variableId: variable.id
-            },
-            select: {
-              id: true,
-              value: true,
-              version: true,
-              environment: {
-                select: {
-                  id: true,
-                  slug: true,
-                  name: true
-                }
-              },
-              createdOn: true,
-              createdBy: {
-                select: {
-                  id: true,
-                  name: true,
-                  profilePictureUrl: true
-                }
-              }
             }
           })
         )
@@ -360,14 +538,20 @@ export class VariableService {
     }
 
     // Make the transaction
-    const tx = await this.prisma.$transaction(op)
-    const updatedVariable = tx[0]
-    const updatedVersions = tx.slice(1)
+    await this.prisma.$transaction(op)
 
-    const result = {
+    const updatedVariable = await this.prisma.variable.findUnique({
+      where: {
+        id: variable.id
+      },
+      include: InclusionQuery.Variable
+    })
+
+    const hydratedVariable = await this.hydrationService.hydrateVariable({
+      user,
       variable: updatedVariable,
-      updatedVersions: updatedVersions
-    }
+      authorizationService: this.authorizationService
+    })
 
     // Notify the new variable version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -418,7 +602,7 @@ export class VariableService {
 
     this.logger.log(`User ${user.id} updated variable ${variable.id}`)
 
-    return result
+    return hydratedVariable
   }
 
   /**
@@ -452,7 +636,7 @@ export class VariableService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
     const environmentId = environment.id
@@ -461,7 +645,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -512,7 +696,10 @@ export class VariableService {
     variableSlug: Variable['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: VariableVersion['version']
-  ) {
+  ): Promise<{
+    count: number
+    currentRevision: RawVariableRevision
+  }> {
     this.logger.log(
       `User ${user.id} attempted to rollback variable ${variableSlug} to version ${rollbackVersion}`
     )
@@ -524,7 +711,7 @@ export class VariableService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
     const environmentId = environment.id
@@ -536,22 +723,21 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
-    // Filter the variable versions by the environment
-    this.logger.log(
-      `Filtering variable versions of variable ${variableSlug} in environment ${environmentSlug}`
-    )
-    variable.versions = variable.versions.filter(
-      (version) => version.environment.id === environmentId
-    )
-    this.logger.log(
-      `Found ${variable.versions.length} versions for variable ${variableSlug} in environment ${environmentSlug}`
-    )
+    // TODO: remove this after implementing variable cache with variableCache.getRawVariable call
+    // Get all the variable versions
+    const variableVersions = await this.prisma.variableVersion.findMany({
+      where: {
+        variableId: variable.id,
+        environmentId
+      },
+      select: InclusionQuery.Variable['versions']['select']
+    })
 
-    if (variable.versions.length === 0) {
+    if (variableVersions.length === 0) {
       const errorMessage = `Variable ${variable} has no versions for environment ${environmentSlug}`
       this.logger.error(errorMessage)
       throw new NotFoundException(
@@ -560,7 +746,7 @@ export class VariableService {
     }
 
     let maxVersion = 0
-    for (const element of variable.versions) {
+    for (const element of variableVersions) {
       if (element.version > maxVersion) {
         maxVersion = element.version
       }
@@ -590,11 +776,13 @@ export class VariableService {
         }
       }
     })
+    const currentRevision = variableVersions.find(
+      (revision) => revision.version === rollbackVersion
+    )!
+    const variableValue = currentRevision.value
     this.logger.log(
       `Rolled back variable ${variableSlug} to version ${rollbackVersion}`
     )
-
-    const variableValue = variable.versions[rollbackVersion - 1].value
 
     try {
       // Notify the new variable version through Redis
@@ -638,14 +826,167 @@ export class VariableService {
       this.prisma
     )
 
-    const currentRevision = variable.versions.find(
-      (version) => version.version === rollbackVersion
-    )!
-
     return {
       ...result,
       currentRevision
     }
+  }
+
+  /**
+   * Disables a variable in a given environment
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable to disable
+   * @param environmentSlug the slug of the environment in which the variable will be disabled
+   * @returns void
+   */
+  async disableVariable(
+    user: AuthenticatedUser,
+    variableSlug: Variable['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to disable variable ${variableSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the environment
+    this.logger.log(
+      `Checking if user has permissions to disable variable ${variableSlug} in environment ${environmentSlug}`
+    )
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        slug: environmentSlug,
+        authorities: [Authority.UPDATE_VARIABLE]
+      })
+
+    // Fetch the variable
+    const variable =
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
+        slug: variableSlug,
+        authorities: [Authority.UPDATE_VARIABLE]
+      })
+
+    // Disable the variable if not already disabled
+    await this.prisma.disabledEnvironmentOfVariable.upsert({
+      where: {
+        variableId_environmentId: {
+          variableId: variable.id,
+          environmentId: environment.id
+        }
+      },
+      update: {},
+      create: {
+        variableId: variable.id,
+        environmentId: environment.id
+      }
+    })
+
+    this.logger.log(
+      `Disabled variable ${variableSlug} in environment ${environmentSlug}`
+    )
+  }
+
+  /**
+   * Enables a variable in a given environment
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable to enable
+   * @param environmentSlug the slug of the environment in which the variable will be enabled
+   * @returns void
+   */
+  async enableVariable(
+    user: AuthenticatedUser,
+    variableSlug: Variable['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to enable variable ${variableSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the environment
+    this.logger.log(
+      `Checking if user has permissions to enable variable ${variableSlug} in environment ${environmentSlug}`
+    )
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        slug: environmentSlug,
+        authorities: [Authority.UPDATE_VARIABLE]
+      })
+
+    // Fetch the variable
+    const variable =
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
+        slug: variableSlug,
+        authorities: [Authority.UPDATE_VARIABLE]
+      })
+
+    // Enable the variable
+    try {
+      await this.prisma.disabledEnvironmentOfVariable.delete({
+        where: {
+          variableId_environmentId: {
+            variableId: variable.id,
+            environmentId: environment.id
+          }
+        }
+      })
+    } catch (error) {
+      if (error.code === 'P2025') {
+        this.logger.log(
+          `Variable ${variableSlug} is not disabled in ${environmentSlug}`
+        )
+      } else {
+        this.logger.error(`Error disabling variable ${variableSlug}`)
+        throw error
+      }
+    }
+
+    this.logger.log(
+      `Enabled variable ${variableSlug} in environment ${environmentSlug}`
+    )
+  }
+
+  /**
+   * Gets all disabled environments of a variable
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable
+   * @returns an array of environment IDs where the variable is disabled
+   */
+  async getAllDisabledEnvironmentsOfVariable(
+    user: AuthenticatedUser,
+    variableSlug: Variable['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all disabled environments of variable ${variableSlug}`
+    )
+
+    // Fetch the variable
+    const variable =
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
+        slug: variableSlug,
+        authorities: [Authority.READ_VARIABLE]
+      })
+
+    const variableId = variable.id
+
+    // Get the environments
+    const environments = await this.prisma.environment.findMany({
+      where: {
+        disabledEnvironmentOfVariable: {
+          some: {
+            variableId
+          }
+        }
+      },
+      select: {
+        id: true
+      }
+    })
+
+    return environments.map((env) => env.id)
   }
 
   /**
@@ -671,7 +1012,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.DELETE_VARIABLE]
       })
 
@@ -688,6 +1029,11 @@ export class VariableService {
       }
     })
     this.logger.log(`Deleted variable ${variable.slug}`)
+
+    await this.projectCacheService.removeVariableFromProjectCache(
+      variable.project.slug,
+      variable.id
+    )
 
     await createEvent(
       {
@@ -727,7 +1073,7 @@ export class VariableService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedVariable>> {
     this.logger.log(
       `User ${user.id} attempted to get all variables of project ${projectSlug}`
     )
@@ -736,14 +1082,17 @@ export class VariableService {
     this.logger.log(
       `Checking if user has permissions to get all variables of project ${projectSlug}`
     )
-    const { id: projectId } =
+    const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_VARIABLE]
       })
+    const projectId = project.id
 
-    this.logger.log(`Getting all variables of project ${projectSlug}`)
+    this.logger.log(
+      `Fetching all variables of project ${projectSlug} with search query ${search}`
+    )
     const variables = await this.prisma.variable.findMany({
       where: {
         projectId,
@@ -751,36 +1100,7 @@ export class VariableService {
           contains: search
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        },
-        versions: {
-          select: {
-            value: true,
-            version: true,
-            environment: {
-              select: {
-                name: true,
-                id: true,
-                slug: true
-              }
-            },
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            },
-            createdOn: true
-          }
-        }
-      },
+      include: InclusionQuery.Variable,
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -788,93 +1108,32 @@ export class VariableService {
       }
     })
     this.logger.log(
-      `Got all variables of project ${projectSlug}. Count: ${variables.length}`
+      `Fetched ${variables.length} variables of project ${projectSlug}`
     )
 
-    const variablesWithEnvironmentalValues = new Set<{
-      variable: Partial<Variable>
-      values: {
-        environment: {
-          name: Environment['name']
-          id: Environment['id']
-          slug: Environment['slug']
-        }
-        value: VariableVersion['value']
-        version: VariableVersion['version']
-        createdBy: {
-          id: User['id']
-          name: User['name']
-          profilePictureUrl: User['profilePictureUrl']
-        }
-        createdOn: VariableVersion['createdOn']
-      }[]
-    }>()
-
-    for (const variable of variables) {
-      // Logic to update the map:
-      // 1. If the environment ID is not present in the key, insert the environment ID and the variable version
-      // 2. If the environment ID is already present, check if the existing variable version is lesser than the new variable version.
-      //    If it is, update the variable version
-      const envIdToVariableVersionMap = new Map<
-        Environment['id'],
-        Partial<VariableVersion> & {
-          environment: {
-            id: Environment['id']
-            slug: Environment['slug']
-            name: Environment['name']
-          }
-          createdBy: {
-            id: User['id']
-            name: User['name']
-            profilePictureUrl: User['profilePictureUrl']
-          }
-        }
-      >()
-
-      for (const variableVersion of variable.versions) {
-        const environmentId = variableVersion.environment.id
-        const existingVariableVersion =
-          envIdToVariableVersionMap.get(environmentId)
-
-        if (!existingVariableVersion) {
-          envIdToVariableVersionMap.set(environmentId, variableVersion)
-        } else {
-          if (existingVariableVersion.version < variableVersion.version) {
-            envIdToVariableVersionMap.set(environmentId, variableVersion)
-          }
-        }
-      }
-
-      delete variable.versions
-
-      // Add the variable to the map
-      variablesWithEnvironmentalValues.add({
-        variable,
-        values: await Promise.all(
-          Array.from(envIdToVariableVersionMap.values()).map(
-            async (variableVersion) => ({
-              environment: {
-                id: variableVersion.environment.id,
-                name: variableVersion.environment.name,
-                slug: variableVersion.environment.slug
-              },
-              value: variableVersion.value,
-              version: variableVersion.version,
-              createdBy: {
-                id: variableVersion.createdBy.id,
-                name: variableVersion.createdBy.name,
-                profilePictureUrl: variableVersion.createdBy.profilePictureUrl
-              },
-              createdOn: variableVersion.createdOn
-            })
-          )
-        )
-      })
+    try {
+      await this.metricsService.incrementVariablePull(variables.length)
+    } catch (err) {
+      this.logger.error(`Failed to increment variable pull metric: ${err}`)
     }
 
-    const items = Array.from(variablesWithEnvironmentalValues.values())
+    const hydratedVariables: HydratedVariable[] = []
 
-    //calculate metadata
+    for (const variable of variables) {
+      const hydratedVariable = await this.hydrationService.hydrateVariable({
+        authorizationService: this.authorizationService,
+        user,
+        variable
+      })
+
+      delete variable.project
+      hydratedVariables.push(hydratedVariable)
+    }
+    this.logger.log(
+      `Hydrated ${hydratedVariables.length} variables of project ${projectSlug}`
+    )
+
+    // Calculate pagination metadata
     const totalCount = await this.prisma.variable.count({
       where: {
         projectId,
@@ -892,7 +1151,7 @@ export class VariableService {
       search
     })
 
-    return { items, metadata }
+    return { items: hydratedVariables, metadata }
   }
 
   /**
@@ -916,7 +1175,7 @@ export class VariableService {
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
-  ) {
+  ): Promise<PaginatedResponse<RawVariableRevision>> {
     this.logger.log(
       `User ${user.id} attempted to get revisions of variable ${variableSlug} in environment ${environmentSlug}`
     )
@@ -928,7 +1187,7 @@ export class VariableService {
     const { id: variableId } =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.READ_VARIABLE]
       })
 
@@ -939,7 +1198,7 @@ export class VariableService {
     const { id: environmentId } =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
 
@@ -952,25 +1211,7 @@ export class VariableService {
         variableId: variableId,
         environmentId: environmentId
       },
-      select: {
-        value: true,
-        version: true,
-        createdOn: true,
-        environment: {
-          select: {
-            id: true,
-            slug: true,
-            name: true
-          }
-        },
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      },
+      select: InclusionQuery.Variable['versions']['select'],
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -1010,7 +1251,7 @@ export class VariableService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     environmentSlug: Environment['slug']
-  ) {
+  ): Promise<Configuration[]> {
     this.logger.log(
       `User ${user.id} attempted to get all variables of project ${projectSlug} and environment ${environmentSlug}`
     )
@@ -1022,7 +1263,7 @@ export class VariableService {
     const { id: projectId } =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_VARIABLE]
       })
 
@@ -1033,7 +1274,7 @@ export class VariableService {
     const { id: environmentId } =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
 
@@ -1046,6 +1287,12 @@ export class VariableService {
         projectId,
         versions: {
           some: {
+            environmentId
+          }
+        },
+        // Ignore disabled variables
+        disabledEnvironmentOfVariable: {
+          none: {
             environmentId
           }
         }
@@ -1082,51 +1329,58 @@ export class VariableService {
       `Fetched ${variables.length} variables for project ${projectSlug} and environment ${environmentSlug}`
     )
 
-    return variables.map(
-      (variable) =>
-        ({
-          name: variable.name,
-          value: variable.versions[0].value,
-          isPlaintext: true
-        }) as ChangeNotification
-    )
+    try {
+      await this.metricsService.incrementVariablePull(variables.length)
+    } catch (err) {
+      this.logger.error(`Error incrementing variable pull metric: ${err}`)
+    }
+
+    return variables.map((variable) => ({
+      name: variable.name,
+      value: variable.versions[0].value,
+      isPlaintext: true
+    }))
   }
 
   /**
    * Checks if a variable with a given name already exists in a project.
    * Throws a ConflictException if the variable already exists.
    * @param variableName the name of the variable to check for
-   * @param project the project to check in
+   * @param projectId the project to check in
    * @returns nothing
    * @throws `ConflictException` if the variable already exists
    */
   async variableExists(
     variableName: Variable['name'] | null | undefined,
-    project: Project
+    projectId: Project['id']
   ) {
     if (!variableName) return
 
     this.logger.log(
-      `Checking if variable ${variableName} already exists in project ${project.slug}`
+      `Checking if variable ${variableName} already exists in project ${projectId}`
     )
 
     if (
       (await this.prisma.variable.findFirst({
         where: {
           name: variableName,
-          projectId: project.id
+          projectId
         }
       })) !== null
     ) {
-      const errorMessage = `Variable ${variableName} already exists in project ${project.slug}`
-      this.logger.error(errorMessage)
+      this.logger.error(
+        `Variable ${variableName} already exists in project ${projectId}`
+      )
       throw new ConflictException(
-        constructErrorBody('Variable already exists', errorMessage)
+        constructErrorBody(
+          'Variable already exists',
+          `A variable named ${variableName} already exists in this project. Please choose a different name.`
+        )
       )
     }
 
     this.logger.log(
-      `Variable ${variableName} does not exist in project ${project.slug}`
+      `Variable ${variableName} does not exist in project ${projectId}`
     )
   }
 }

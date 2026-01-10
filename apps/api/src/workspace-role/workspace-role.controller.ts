@@ -21,7 +21,11 @@ export class WorkspaceRoleController {
   constructor(private readonly workspaceRoleService: WorkspaceRoleService) {}
 
   @Post(':workspaceSlug')
-  @RequiredApiKeyAuthorities(Authority.CREATE_WORKSPACE_ROLE)
+  @RequiredApiKeyAuthorities(
+    Authority.CREATE_WORKSPACE_ROLE,
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT
+  )
   async createWorkspaceRole(
     @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
@@ -35,7 +39,11 @@ export class WorkspaceRoleController {
   }
 
   @Put(':workspaceRoleSlug')
-  @RequiredApiKeyAuthorities(Authority.UPDATE_WORKSPACE_ROLE)
+  @RequiredApiKeyAuthorities(
+    Authority.UPDATE_WORKSPACE_ROLE,
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT
+  )
   async updateWorkspaceRole(
     @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceRoleSlug') workspaceRoleSlug: WorkspaceRole['slug'],
@@ -55,18 +63,6 @@ export class WorkspaceRoleController {
     @Param('workspaceRoleSlug') workspaceRoleSlug: WorkspaceRole['slug']
   ) {
     return await this.workspaceRoleService.deleteWorkspaceRole(
-      user,
-      workspaceRoleSlug
-    )
-  }
-
-  @Get(':workspaceRoleSlug')
-  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE_ROLE)
-  async getWorkspaceRole(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('workspaceRoleSlug') workspaceRoleSlug: WorkspaceRole['slug']
-  ) {
-    return await this.workspaceRoleService.getWorkspaceRole(
       user,
       workspaceRoleSlug
     )

@@ -32,7 +32,7 @@ function ConfirmDeleteSecret() {
 
   const deleteSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.deleteSecret({
-      secretSlug: selectedSecret!.secret.slug
+      secretSlug: selectedSecret!.slug
     })
   )
 
@@ -60,9 +60,7 @@ function ConfirmDeleteSecret() {
 
           // Remove the secret from the store
           setSecrets((prevSecrets) =>
-            prevSecrets.filter(
-              ({ secret }) => secret.slug !== selectedSecret.secret.slug
-            )
+            prevSecrets.filter((secret) => secret.slug !== selectedSecret.slug)
           )
           setSelectedSecret(null)
         }
@@ -106,7 +104,7 @@ function ConfirmDeleteSecret() {
           <div className="flex items-center gap-x-3">
             <TrashSVG />
             <AlertDialogTitle className="text-lg font-semibold">
-              Do you really want to delete {selectedSecret?.secret.name}?
+              Do you really want to delete {selectedSecret?.name}?
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
@@ -126,7 +124,7 @@ function ConfirmDeleteSecret() {
             disabled={isLoading}
             onClick={handleDeleteSecret}
           >
-            Yes, delete {selectedSecret?.secret.name}
+            Yes, delete {selectedSecret?.name}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

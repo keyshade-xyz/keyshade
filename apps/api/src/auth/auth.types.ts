@@ -3,17 +3,32 @@ import { Authority, User, Workspace } from '@prisma/client'
 
 export interface UserAuthenticatedResponse extends UserWithWorkspace {
   token: string
+  cliSessionId?: string
+}
+
+export enum ActorType {
+  USER = 'USER',
+  SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 }
 
 export type AuthenticatedUserContext = User & {
   ipAddress: string
-  isAuthViaApiKey?: boolean
-  apiKeyAuthorities?: Set<Authority>
+  actorType: ActorType
   defaultWorkspace: Workspace
 }
 
 export interface AuthorizationParams {
   user: AuthenticatedUser
   authorities: Authority[]
-  entity: { slug?: string; name?: string }
+  slug: string
+}
+
+export interface DeviceDetail {
+  ipAddress: string
+  encryptedIpAddress: string
+  os: string
+  agent: string
+  city: string
+  region: string
+  country: string
 }

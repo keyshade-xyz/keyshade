@@ -11,7 +11,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { selectedProjectPrivateKeyAtom } from '@/store'
+import {
+  privateKeyStorageTypeAtom,
+  selectedProjectPrivateKeyAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Input } from '@/components/ui/input'
@@ -29,6 +32,7 @@ function ServerKeySetupDialog({
 }: ServerKeySetupDialogProps): React.JSX.Element {
   const [keyValue, setKeyValue] = useState<string>('')
   const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
+  const setPrivateKeyStorageType = useSetAtom(privateKeyStorageTypeAtom)
 
   const SavePrivateKey = useHttp((key: string) =>
     ControllerInstance.getInstance().projectController.updateProject({
@@ -44,8 +48,15 @@ function ServerKeySetupDialog({
       setProjectPrivateKey(keyValue)
       toast.success('Key saved successfully!')
     }
+    setPrivateKeyStorageType('IN_DB')
     onClose()
-  }, [keyValue, onClose, setProjectPrivateKey, SavePrivateKey])
+  }, [
+    keyValue,
+    onClose,
+    setProjectPrivateKey,
+    SavePrivateKey,
+    setPrivateKeyStorageType
+  ])
 
   return (
     <AlertDialog onOpenChange={onClose} open={isOpen}>
