@@ -31,7 +31,8 @@ function Navbar(): React.JSX.Element {
     {
       name: 'Blog',
       href: 'https://blog.keyshade.io/'
-    }
+    },
+    { name: "Share", href: '/share' }
   ]
 
   return (
