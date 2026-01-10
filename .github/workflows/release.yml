@@ -151,56 +151,56 @@ jobs:
           pnpm db:generate-types
           DATABASE_URL=$DATABASE_URL pnpm db:deploy-migrations
 
-  release-sentry-api:
-    name: Sentry API
-    runs-on: ubuntu-latest
-    environment: ${{ needs.release.outputs.environment }}
-    needs: [deploy-api, release]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Cache PNPM store
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install PNPM
-        run: npm i -g pnpm
-
-      - name: Install
-        run: pnpm i
-
-      - name: Cache API Build
-        uses: actions/cache@v3
-        with:
-          path: apps/api/dist
-          key: ${{ runner.os }}-api-dist-${{ hashFiles('apps/api/src/**/*', 'apps/api/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-api-dist-
-
-      - name: Build
-        run: pnpm build:api
-
-      - name: Install Sentry CLI
-        run: npm i -g @sentry/cli
-
-      - name: Sentry Release
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_API_PROJECT }}
-          ENVIRONMENT: ${{ needs.release.outputs.environment }}
-          VERSION: ${{ needs.release.outputs.version }}
-        run: |
-          sentry-cli releases new $VERSION
-          sentry-cli releases set-commits --auto $VERSION
-          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli sourcemaps inject apps/api/dist
-          sentry-cli sourcemaps upload --rewrite --url-prefix '~/dist' --release $VERSION -p $SENTRY_PROJECT apps/api/dist
+#  release-sentry-api:
+#    name: Sentry API
+#    runs-on: ubuntu-latest
+#    environment: ${{ needs.release.outputs.environment }}
+#    needs: [deploy-api, release]
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Cache PNPM store
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.pnpm-store
+#          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-pnpm-store-
+#
+#      - name: Install PNPM
+#        run: npm i -g pnpm
+#
+#      - name: Install
+#        run: pnpm i
+#
+#      - name: Cache API Build
+#        uses: actions/cache@v3
+#        with:
+#          path: apps/api/dist
+#          key: ${{ runner.os }}-api-dist-${{ hashFiles('apps/api/src/**/*', 'apps/api/package.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-api-dist-
+#
+#      - name: Build
+#        run: pnpm build:api
+#
+#      - name: Install Sentry CLI
+#        run: npm i -g @sentry/cli
+#
+#      - name: Sentry Release
+#        env:
+#          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+#          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+#          SENTRY_PROJECT: ${{ vars.SENTRY_API_PROJECT }}
+#          ENVIRONMENT: ${{ needs.release.outputs.environment }}
+#          VERSION: ${{ needs.release.outputs.version }}
+#        run: |
+#          sentry-cli releases new $VERSION
+#          sentry-cli releases set-commits --auto $VERSION
+#          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+#          sentry-cli sourcemaps inject apps/api/dist
+#          sentry-cli sourcemaps upload --rewrite --url-prefix '~/dist' --release $VERSION -p $SENTRY_PROJECT apps/api/dist
 
   deploy-platform:
     needs: release
@@ -272,58 +272,58 @@ jobs:
               --resource-group $PLATFORM_CONTAINER_RG \
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
 
-  release-sentry-platform:
-    name: Sentry Platform
-    runs-on: ubuntu-latest
-    environment: ${{ needs.release.outputs.environment }}
-    needs: [deploy-platform, release]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Cache PNPM store
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install PNPM
-        run: npm i -g pnpm
-
-      - name: Install
-        run: pnpm i
-
-      - name: Cache Platform Build
-        uses: actions/cache@v3
-        with:
-          path: apps/platform/.next
-          key: ${{ runner.os }}-platform-next-${{ hashFiles('apps/platform/**/*.[jt]s*', 'apps/platform/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-platform-next-
-
-      - name: Build
-        run: pnpm build:platform
-
-      - name: Install Sentry CLI
-        run: npm i -g @sentry/cli
-
-      - name: Sentry Release
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PLATFORM_PROJECT }}
-          ENVIRONMENT: ${{ needs.release.outputs.environment }}
-          VERSION: ${{ needs.release.outputs.version }}
-        run: |
-          sentry-cli releases new $VERSION
-          sentry-cli releases set-commits --auto $VERSION
-          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next/static/chunks \
-            --url-prefix '~/_next' \
-            --validate \
-            --rewrite
+#  release-sentry-platform:
+#    name: Sentry Platform
+#    runs-on: ubuntu-latest
+#    environment: ${{ needs.release.outputs.environment }}
+#    needs: [deploy-platform, release]
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Cache PNPM store
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.pnpm-store
+#          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-pnpm-store-
+#
+#      - name: Install PNPM
+#        run: npm i -g pnpm
+#
+#      - name: Install
+#        run: pnpm i
+#
+#      - name: Cache Platform Build
+#        uses: actions/cache@v3
+#        with:
+#          path: apps/platform/.next
+#          key: ${{ runner.os }}-platform-next-${{ hashFiles('apps/platform/**/*.[jt]s*', 'apps/platform/package.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-platform-next-
+#
+#      - name: Build
+#        run: pnpm build:platform
+#
+#      - name: Install Sentry CLI
+#        run: npm i -g @sentry/cli
+#
+#      - name: Sentry Release
+#        env:
+#          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+#          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+#          SENTRY_PROJECT: ${{ vars.SENTRY_PLATFORM_PROJECT }}
+#          ENVIRONMENT: ${{ needs.release.outputs.environment }}
+#          VERSION: ${{ needs.release.outputs.version }}
+#        run: |
+#          sentry-cli releases new $VERSION
+#          sentry-cli releases set-commits --auto $VERSION
+#          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+#          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next/static/chunks \
+#            --url-prefix '~/_next' \
+#            --validate \
+#            --rewrite
 
   deploy-web:
     runs-on: ubuntu-latest
@@ -392,57 +392,57 @@ jobs:
               --resource-group $WEB_CONTAINER_RG \
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
 
-  sentry-release-web:
-    name: Sentry Web
-    needs: [release, deploy-web]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Sentry CLI
-        run: npm i -g @sentry/cli
-
-      - name: Cache PNPM store
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install PNPM
-        run: npm i -g pnpm
-
-      - name: Install
-        run: pnpm i
-
-      - name: Cache Web Build
-        uses: actions/cache@v3
-        with:
-          path: apps/web/.next
-          key: ${{ runner.os }}-web-next-${{ hashFiles('apps/web/**/*.[jt]s*', 'apps/web/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-web-next-
-
-      - name: Build
-        run: pnpm build:web
-
-      - name: Sentry Release
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_WEB_PROJECT }}
-          ENVIRONMENT: ${{ needs.release.outputs.environment }}
-          VERSION: ${{ needs.release.outputs.version }}
-        run: |
-          sentry-cli releases new $VERSION
-          sentry-cli releases set-commits --auto $VERSION
-          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/web/.next/static/chunks \
-            --url-prefix '~/_next' \
-            --validate \
-            --rewrite
+#  sentry-release-web:
+#    name: Sentry Web
+#    needs: [release, deploy-web]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Install Sentry CLI
+#        run: npm i -g @sentry/cli
+#
+#      - name: Cache PNPM store
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.pnpm-store
+#          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-pnpm-store-
+#
+#      - name: Install PNPM
+#        run: npm i -g pnpm
+#
+#      - name: Install
+#        run: pnpm i
+#
+#      - name: Cache Web Build
+#        uses: actions/cache@v3
+#        with:
+#          path: apps/web/.next
+#          key: ${{ runner.os }}-web-next-${{ hashFiles('apps/web/**/*.[jt]s*', 'apps/web/package.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-web-next-
+#
+#      - name: Build
+#        run: pnpm build:web
+#
+#      - name: Sentry Release
+#        env:
+#          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+#          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+#          SENTRY_PROJECT: ${{ vars.SENTRY_WEB_PROJECT }}
+#          ENVIRONMENT: ${{ needs.release.outputs.environment }}
+#          VERSION: ${{ needs.release.outputs.version }}
+#        run: |
+#          sentry-cli releases new $VERSION
+#          sentry-cli releases set-commits --auto $VERSION
+#          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+#          sentry-cli releases files $VERSION upload-sourcemaps apps/web/.next/static/chunks \
+#            --url-prefix '~/_next' \
+#            --validate \
+#            --rewrite
 
   publish-cli:
     needs: release
@@ -627,64 +627,64 @@ jobs:
             gh release upload "v${VERSION}" "${{ matrix.output }}"
           fi
 
-  sentry-release-cli:
-    name: Sentry CLI
-    needs: [release, publish-cli]
-    runs-on: ubuntu-latest
-    if: ${{ needs.publish-cli.outputs.skip_publish != 'true' }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          registry-url: https://registry.npmjs.org
-
-      - name: Cache PNPM store
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install PNPM
-        run: npm i -g pnpm
-
-      - name: Install
-        run: pnpm i
-
-      - name: Cache CLI Build
-        uses: actions/cache@v3
-        with:
-          path: apps/cli/dist
-          key: ${{ runner.os }}-cli-dist-${{ hashFiles('apps/cli/src/**/*', 'apps/cli/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-cli-dist-
-
-      - name: Build
-        run: pnpm build:cli
-
-      - name: Install sentry-cli
-        run: npm i -g @sentry/cli
-
-      - name: Make release
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_CLI_PROJECT }}
-          VERSION: ${{ needs.release.outputs.version }}
-          ENVIRONMENT: ${{ needs.release.outputs.environment }}
-        run: |
-          # CLI
-          VERSION=`jq -r '.version' apps/cli/package.json`
-          sentry-cli releases new -p $SENTRY_PROJECT $VERSION
-          sentry-cli releases set-commits --auto $VERSION 
-          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/cli/dist \
-            --validate \
-            --rewrite
+#  sentry-release-cli:
+#    name: Sentry CLI
+#    needs: [release, publish-cli]
+#    runs-on: ubuntu-latest
+#    if: ${{ needs.publish-cli.outputs.skip_publish != 'true' }}
+#    steps:
+#      - name: checkout
+#        uses: actions/checkout@v4
+#        with:
+#          persist-credentials: false
+#
+#      - name: node
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22.x
+#          registry-url: https://registry.npmjs.org
+#
+#      - name: Cache PNPM store
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.pnpm-store
+#          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-pnpm-store-
+#
+#      - name: Install PNPM
+#        run: npm i -g pnpm
+#
+#      - name: Install
+#        run: pnpm i
+#
+#      - name: Cache CLI Build
+#        uses: actions/cache@v3
+#        with:
+#          path: apps/cli/dist
+#          key: ${{ runner.os }}-cli-dist-${{ hashFiles('apps/cli/src/**/*', 'apps/cli/package.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-cli-dist-
+#
+#      - name: Build
+#        run: pnpm build:cli
+#
+#      - name: Install sentry-cli
+#        run: npm i -g @sentry/cli
+#
+#      - name: Make release
+#        env:
+#          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+#          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+#          SENTRY_PROJECT: ${{ vars.SENTRY_CLI_PROJECT }}
+#          VERSION: ${{ needs.release.outputs.version }}
+#          ENVIRONMENT: ${{ needs.release.outputs.environment }}
+#        run: |
+#          # CLI
+#          VERSION=`jq -r '.version' apps/cli/package.json`
+#          sentry-cli releases new -p $SENTRY_PROJECT $VERSION
+#          sentry-cli releases set-commits --auto $VERSION
+#          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+#          sentry-cli releases files $VERSION upload-sourcemaps apps/cli/dist \
+#            --validate \
+#            --rewrite

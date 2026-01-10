@@ -137,6 +137,74 @@ describe('User Controller Tests', () => {
     expect(workspace.ownerId).toEqual(createUserResponse.id)
   })
 
+  it('should have created an example project in the default workspace', async () => {
+    const createUserResponse = await userService.createUser({
+      email: 'jane@keyshade.io',
+      name: 'Jane',
+      isAdmin: false,
+      isActive: true,
+      isOnboardingFinished: true,
+      profilePictureUrl: null
+    })
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        ownerId: createUserResponse.id,
+        isDefault: true
+      }
+    })
+
+    expect(workspace).toBeDefined()
+
+    // Check project validity
+    const projectsResponse = await app.inject({
+      method: 'GET',
+      url: `/project/all/${workspace.slug}`,
+      headers: {
+        'x-e2e-user-email': 'jane@keyshade.io'
+      }
+    })
+    expect(projectsResponse.statusCode).toBe(200)
+    expect(projectsResponse.json().items).toHaveLength(1)
+    const exampleProject = projectsResponse.json().items[0]
+    expect(exampleProject).toBeDefined()
+    expect(exampleProject.name).toBe('Example Project')
+
+    // Check environments
+    const environmentsResponse = await app.inject({
+      method: 'GET',
+      url: `/environment/all/${exampleProject.slug}`,
+      headers: {
+        'x-e2e-user-email': 'jane@keyshade.io'
+      }
+    })
+    expect(environmentsResponse.statusCode).toBe(200)
+    expect(environmentsResponse.json().items).toHaveLength(3)
+
+    // Check secrets validity
+    const secretsResponse = await app.inject({
+      method: 'GET',
+      url: `/secret/${exampleProject.slug}`,
+      headers: {
+        'x-e2e-user-email': 'jane@keyshade.io'
+      }
+    })
+    expect(secretsResponse.statusCode).toBe(200)
+    expect(secretsResponse.json().items).toHaveLength(2)
+    expect(secretsResponse.json().items[0].versions).toHaveLength(2)
+
+    // Check variables validity
+    const variablesResponse = await app.inject({
+      method: 'GET',
+      url: `/variable/${exampleProject.slug}`,
+      headers: {
+        'x-e2e-user-email': 'jane@keyshade.io'
+      }
+    })
+    expect(variablesResponse.statusCode).toBe(200)
+    expect(variablesResponse.json().items).toHaveLength(2)
+    expect(variablesResponse.json().items[0].versions).toHaveLength(2)
+  })
+
   it('should skip workspace creation for admin users', async () => {
     const createAdminUserResponse = await userService.createUser({
       email: '',

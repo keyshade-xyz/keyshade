@@ -1,6 +1,6 @@
 {
   "name": "@keyshade/cli",
-  "version": "3.8.0-stage.1",
+  "version": "3.8.0",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
@@ -48,7 +48,7 @@
     "dotenv": "^16.4.7",
     "eccrypto": "^1.1.6",
     "figlet": "^1.7.0",
-    "glob": "^11.0.0",
+    "glob": "11.1.0",
     "nodemon": "^3.1.4",
     "socket.io-client": "^4.7.5",
     "typescript": "^5.5.2"
@@ -60,7 +60,7 @@
     "@types/eccrypto": "^1.1.6",
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.14.10",
-    "esbuild": "^0.24.2",
+    "esbuild": "0.25.0",
     "esbuild-plugin-env": "^1.1.1",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "tsup": "^8.1.2"

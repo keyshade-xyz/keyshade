@@ -444,3 +444,9 @@
 ### Minor Changes
 
 - Added a confirmation prompt to the `workspace delete` command, displaying a list of consequences before proceeding with deletion.
+
+## 3.8.0
+
+### Minor Changes
+
+- Added a confirmation prompt to the `workspace delete` command, displaying a list of consequences before proceeding with deletion.
