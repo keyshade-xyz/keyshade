@@ -4,6 +4,7 @@ WORKDIR /app
 
 RUN apk add --no-cache curl bash
 RUN curl -fsSL https://bun.sh/install | bash && ln -s /root/.bun/bin/bun /usr/local/bin/bun
+RUN npm install --ignore-scripts -g turbo
 
 COPY --chown=root:root --chmod=755 package.json turbo.json ./
 COPY --chown=root:root --chmod=755 apps/api/package.json apps/api/tsconfig.json apps/api/
