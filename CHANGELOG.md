@@ -1,3 +1,15 @@
+## [2.49.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.49.0...v2.49.1-stage.1) (2026-01-10)
+
+### 🐛 Bug Fixes
+
+* **web:** add missing "Share" link to navbar ([#1272](https://github.com/keyshade-xyz/keyshade/issues/1272)) ([766a98c](https://github.com/keyshade-xyz/keyshade/commit/766a98c0e14ef340f59e83c980698727848a7251))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** update package managers to use v3.8.0 [skip ci] ([81372b7](https://github.com/keyshade-xyz/keyshade/commit/81372b73aed45a5ac0da18ea0195739484cf90ce))
+* **cli:** update package managers to use v3.8.0 [skip ci] ([3787ab8](https://github.com/keyshade-xyz/keyshade/commit/3787ab8d49b509eac95828f3b6d988d7a741582c))
+* remove sentry release from workflow [skip ci] ([dc71778](https://github.com/keyshade-xyz/keyshade/commit/dc7177806c3f940c947ffc240937948436316c1a))
+
 ## [2.49.0](https://github.com/keyshade-xyz/keyshade/compare/v2.48.0...v2.49.0) (2026-01-05)
 
 ### 🚀 Features
