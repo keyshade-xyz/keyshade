@@ -2,23 +2,23 @@ FROM node:22.21-alpine AS build
 
 WORKDIR /app
 
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
+ENV BUN_HOME="/bun"
+ENV PATH="$BUN_HOME:$PATH"
 
 RUN corepack enable
 
-COPY --chown=root:root --chmod=755 package.json turbo.json pnpm-*.yaml ./
+COPY --chown=root:root --chmod=755 package.json turbo.json bun.lock ./
 COPY --chown=root:root --chmod=755 apps/api/package.json apps/api/tsconfig.json apps/api/
 COPY --chown=root:root --chmod=755 packages packages
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-	pnpm install --ignore-scripts --frozen-lockfile && \
+RUN --mount=type=cache,id=bun,target=/bun/store \
+	bun install --ignore-scripts --frozen-lockfile && \
 	rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
 
 COPY --chown=root:root --chmod=755 apps/api/src apps/api/src
 
-RUN pnpm db:generate-types && \
-	pnpm build:api
+RUN bun run db:generate-types && \
+	bun run build:api
 
 USER node
 
