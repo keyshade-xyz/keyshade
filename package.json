@@ -4,7 +4,7 @@
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
-  "packageManager": "pnpm@9.2.0",
+  "packageManager": "bun@1.3.6",
   "release": {
     "branches": [
       "main",
@@ -110,7 +110,7 @@
     "lint:schema": "turbo run lint --filter=@keyshade/schema",
     "lint:common": "turbo run lint --filter=@keyshade/common",
     "build": "turbo run build",
-    "build:api": "pnpm db:generate-types && pnpm build:schema && pnpm build:common && turbo run build --filter=@keyshade/api",
+    "build:api": "bun run db:generate-types && bun run build:schema && bun run build:common && turbo run build --filter=@keyshade/api",
     "build:web": "pnpm build:api-client && turbo run build --filter=@keyshade/web",
     "build:platform": "pnpm build:api-client && pnpm build:common && turbo run build --filter=@keyshade/platform",
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=@keyshade/cli",
@@ -125,20 +125,20 @@
     "start:platform": "turbo run start --filter=@keyshade/platform",
     "start:cli": "turbo run start --filter=@keyshade/cli",
     "test": "turbo run test",
-    "test:api": "pnpm unit:api && pnpm e2e:api",
-    "unit:api": "pnpm build:common && pnpm run --filter=@keyshade/api unit",
-    "e2e:api": "pnpm run --filter=@keyshade/api e2e",
+    "test:api": "bun run unit:api && bun run e2e:api",
+    "unit:api": "bun run build:common && bun run --filter=@keyshade/api unit",
+    "e2e:api": "bun run --filter=@keyshade/api e2e",
     "test:web": "turbo run test --filter=@keyshade/web",
     "test:platform": "turbo run test --filter=@keyshade/platform",
     "test:api-client": "pnpm run --filter=@keyshade/api-client test",
     "test:secret-scan": "pnpm run --filter=secret-scan test",
-    "db:seed": "pnpm run --filter=@keyshade/api db:seed",
-    "db:generate-types": "pnpm run --filter=@keyshade/api db:generate-types",
-    "db:generate-migrations": "pnpm run --filter=@keyshade/api db:generate-migrations",
-    "db:deploy-migrations": "pnpm run --filter=@keyshade/api db:deploy-migrations",
-    "db:validate": "pnpm run --filter=@keyshade/api db:validate",
-    "db:format": "pnpm run --filter=@keyshade/api db:format",
-    "db:reset": "pnpm run --filter=@keyshade/api db:reset",
+    "db:seed": "bun run --filter=@keyshade/api db:seed",
+    "db:generate-types": "bun run --filter=@keyshade/api db:generate-types",
+    "db:generate-migrations": "bun run --filter=@keyshade/api db:generate-migrations",
+    "db:deploy-migrations": "bun run --filter=@keyshade/api db:deploy-migrations",
+    "db:validate": "bun run --filter=@keyshade/api db:validate",
+    "db:format": "bun run --filter=@keyshade/api db:format",
+    "db:reset": "bun run --filter=@keyshade/api db:reset",
     "format": "prettier apps/**/*.{ts,tsx} packages/**/*.ts --write",
     "prepare": "husky",
     "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
@@ -197,5 +197,9 @@
     "typescript": "^5.5.2",
     "typescript-transform-paths": "^3.5.0",
     "zod": "^3.23.6"
-  }
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }
