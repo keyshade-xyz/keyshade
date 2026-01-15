@@ -31,7 +31,7 @@ jobs:
       - name: Install bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: 1.3.6
+          version: latest
           run_install: false
 
       - name: Get bun cache directory

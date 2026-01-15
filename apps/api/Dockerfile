@@ -15,8 +15,8 @@ COPY --chown=root:root --chmod=755 apps/api/package.json apps/api/tsconfig.json 
 COPY --chown=root:root --chmod=755 packages packages
 
 RUN --mount=type=cache,id=bun,target=/bun/store \
-	bun install --ignore-scripts --frozen-lockfile && \
-	rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
+    bun install --ignore-scripts && \
+    rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
 
 COPY --chown=root:root --chmod=755 apps/api/src apps/api/src
 
