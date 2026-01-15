@@ -2,12 +2,11 @@ FROM node:22.21-alpine AS build
 
 WORKDIR /app
 
-ENV BUN_HOME="/bun"
-ENV PATH="$BUN_HOME:$PATH"
+ENV BUN_HOME="/root/.bun"
+ENV PATH="$BUN_HOME/bin:$PATH"
 
 RUN apk add --no-cache bash curl unzip && \
-    curl -fsSL https://bun.sh/install | bash && \
-    ln -s /root/.bun/bin/bun /bun/bun
+    curl -fsSL https://bun.sh/install | bash
 
 RUN corepack enable
 
