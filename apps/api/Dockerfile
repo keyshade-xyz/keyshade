@@ -5,7 +5,7 @@ WORKDIR /app
 ENV BUN_HOME="/bun"
 ENV PATH="$BUN_HOME:$PATH"
 
-RUN apk add --no-cache curl unzip && \
+RUN apk add --no-cache bash curl unzip && \
     curl -fsSL https://bun.sh/install | bash && \
     ln -s /root/.bun/bin/bun /bun/bun
 
