@@ -34,10 +34,10 @@ jobs:
           version: latest
           run_install: false
 
-      - name: Get bun cache directory
+      - name: Set bun cache directory
         shell: bash
         run: |
-          echo "STORE_PATH=$(bun cache path --silent)" >> $GITHUB_ENV
+          echo "STORE_PATH=$HOME/.bun/install/cache" >> $GITHUB_ENV
 
       - uses: actions/cache@v4
         name: Setup bun cache
