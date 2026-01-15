@@ -5,6 +5,10 @@ WORKDIR /app
 ENV BUN_HOME="/bun"
 ENV PATH="$BUN_HOME:$PATH"
 
+RUN apk add --no-cache curl unzip && \
+    curl -fsSL https://bun.sh/install | bash && \
+    ln -s /root/.bun/bin/bun /bun/bun
+
 RUN corepack enable
 
 COPY --chown=root:root --chmod=755 package.json turbo.json bun.lock ./
