@@ -115,7 +115,6 @@ export class DiscordIntegration extends BaseIntegration {
     return new Set(['webhookUrl'])
   }
 
-<<<<<<< HEAD
   public async init(
     privateKey: Project['privateKey'],
     eventId: Event['id']
@@ -184,14 +183,6 @@ export class DiscordIntegration extends BaseIntegration {
         )
       )
     }
-=======
-  public destroy(eventId: Event['id']): Promise<void> {
-    // TODO: Delete webhook URL
-    this.logger.log(
-      `CLEANING UP DISCORD INTEGRATION: ${this.integration} EVENTID: ${eventId}`
-    )
-    return
->>>>>>> cc3c2870 (configured DeleteIntegrationDialog to send a cleanUp parameter to the delete integration endpoint)
   }
 
   public destroy(eventId: Event['id']): Promise<void> {
