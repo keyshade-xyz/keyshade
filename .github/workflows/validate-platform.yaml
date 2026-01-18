@@ -55,12 +55,12 @@ jobs:
 
       - name: Install packages
         run: |
-          bun install --frozen-lockfile
+          bun install --frozen-lockfile --ignore-scripts
 
       - name: Build deps
         run: |
-          bun build:schema
-          bun build:api-client
+          bun run build:schema
+          bun run build:api-client
 
       - name: Lint
         run: |

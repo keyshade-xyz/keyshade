@@ -48,7 +48,7 @@ jobs:
 
       - name: Install packages
         run: |
-          bun install --frozen-lockfile
+          bun install --frozen-lockfile --ignore-scripts
 
       - name: Lint
         run: |

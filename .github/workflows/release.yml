@@ -38,7 +38,7 @@ jobs:
         run: npm i -g bun
 
       - name: Install
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Release
         id: release
@@ -141,7 +141,7 @@ jobs:
         run: npm i -g bun
 
       - name: Install
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Run migrations
         env:
@@ -502,7 +502,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Cache CLI Build
         if: steps.check-versions.outputs.skip_publish != 'true'
@@ -592,7 +592,7 @@ jobs:
         run: npm i -g bun
 
       - name: Install Dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Build (TypeScript/monorepo)
         run: bun run build:cli
