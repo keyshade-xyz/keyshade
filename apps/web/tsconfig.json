@@ -4,7 +4,8 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
-      "@public/*": ["./public/*"]
+      "@public/*": ["./public/*"],
+      "react": ["./node_modules/@types/react"]
     },
     "strictNullChecks": true,
     "sourceMap": true,

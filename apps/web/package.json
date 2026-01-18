@@ -6,7 +6,8 @@
     "dev": "env-cmd -f ../../.env --silent next dev -p 6969",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs"
+    "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@keyshade/api-client": "workspace:*",

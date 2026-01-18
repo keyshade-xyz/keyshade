@@ -69,7 +69,7 @@ export function FollowPointer({
 }: {
   x: any
   y: any
-  title?: string 
+  title?: string
 }): React.JSX.Element {
   const colors = [
     'var(--sky-500)',

@@ -1,9 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { ArrowRight, Logo } from '@public/shared'
-import { GithubSVG } from '@public/navbar'
 import { Geist } from 'next/font/google'
 import { useState } from 'react'
+import { ArrowRight, Logo } from '@public/shared'
+import { GithubSVG } from '@public/navbar'
 import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 import CtaButton from '@/components/CtaButton'
 import TertiaryButton from '@/components/TertiaryButton'
@@ -83,7 +83,9 @@ function Navbar(): React.JSX.Element {
         {/* Hamburger Menu Button */}
         <button
           className="flex flex-col gap-1 md:hidden"
-          onClick={() => { setIsMenuOpen(!isMenuOpen); }}
+          onClick={() => {
+            setIsMenuOpen(!isMenuOpen)
+          }}
           type="button"
         >
           <div
@@ -99,7 +101,8 @@ function Navbar(): React.JSX.Element {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen ? <div className="absolute left-0 top-full z-50 w-full bg-black/90 backdrop-blur-sm md:hidden">
+      {isMenuOpen ? (
+        <div className="absolute left-0 top-full z-50 w-full bg-black/90 backdrop-blur-sm md:hidden">
           <div className={`flex flex-col p-4 ${geist.className}`}>
             {navContent.map((item) => {
               return (
@@ -107,7 +110,9 @@ function Navbar(): React.JSX.Element {
                   className="border-b border-gray-700 px-4 py-3 text-white"
                   href={item.href}
                   key={item.name}
-                  onClick={() => { setIsMenuOpen(false); }}
+                  onClick={() => {
+                    setIsMenuOpen(false)
+                  }}
                 >
                   {item.name}
                 </Link>
@@ -116,7 +121,9 @@ function Navbar(): React.JSX.Element {
             <div className="mt-4 flex flex-row items-center gap-3 md:flex-col">
               <a
                 href="https://github.com/keyshade-xyz/keyshade"
-                onClick={() => { setIsMenuOpen(false); }}
+                onClick={() => {
+                  setIsMenuOpen(false)
+                }}
                 rel="noopener noreferrer"
                 target="_blank"
               >
@@ -126,7 +133,9 @@ function Navbar(): React.JSX.Element {
               </a>
               <a
                 href="https://app.keyshade.io"
-                onClick={() => { setIsMenuOpen(false); }}
+                onClick={() => {
+                  setIsMenuOpen(false)
+                }}
                 rel="noopener noreferrer"
                 target="_blank"
               >
@@ -141,7 +150,8 @@ function Navbar(): React.JSX.Element {
               </a>
             </div>
           </div>
-        </div> : null}
+        </div>
+      ) : null}
     </>
   )
 }

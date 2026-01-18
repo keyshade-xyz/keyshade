@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment -- chill */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access -- chill */
+
 'use client'
 import { useRef } from 'react'
 import {
@@ -14,14 +13,11 @@ import { cn } from '@/utils/cn'
 interface ButtonProps {
   borderRadius?: string
   children: React.ReactNode
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's okey
-  as?: any
+  as?: React.ElementType
   containerClassName?: string
   borderClassName?: string
   duration?: number
   className?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's okey
-  [key: string]: any
 }
 
 export function Button({
@@ -85,15 +81,11 @@ export function MovingBorder({
   duration?: number
   rx?: string
   ry?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's
-  [key: string]: any
 }): React.JSX.Element {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ok
-  const pathRef = useRef<any>(undefined)
-  const progress = useMotionValue<number>(0)
+  const pathRef = useRef<SVGRectElement | null>(null)
+  const progress = useMotionValue(0)
 
   useAnimationFrame((time) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- chill
     const length = pathRef.current?.getTotalLength()
     if (length) {
       const pxPerMillisecond = length / duration
@@ -103,12 +95,10 @@ export function MovingBorder({
 
   const x = useTransform(
     progress,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call -- ignore
     (val) => pathRef.current?.getPointAtLength(val).x
   )
   const y = useTransform(
     progress,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call -- ignore
     (val) => pathRef.current?.getPointAtLength(val).y
   )
 
