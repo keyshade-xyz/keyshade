@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { WorkspaceSchema } from '@/workspace'
 import { authProviderEnum } from '@/enums'
+import { AlphaNumericStringSchema } from '@/alphanumeric'
 
 export const UserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   profilePictureUrl: z.string().nullable(),
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
@@ -26,7 +27,7 @@ export const GetSelfResponseSchema = UserSchema.extend({
 })
 
 export const UpdateSelfRequestSchema = z.object({
-  name: z.string().optional(),
+  name: AlphaNumericStringSchema.optional(),
   profilePictureUrl: z.string().optional(),
   email: z.string().email().optional(),
   emailPreferences: z
@@ -41,15 +42,15 @@ export const UpdateSelfRequestSchema = z.object({
 export const UpdateSelfResponseSchema = UserSchema
 
 export const FinishOnboardingRequestSchema = z.object({
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   profilePictureUrl: z.string().optional(),
-  role: z.string().optional(),
-  industry: z.string().optional(),
-  teamSize: z.string().optional(),
-  productStage: z.string().optional(),
-  useCase: z.string().optional(),
-  heardFrom: z.string().optional(),
-  referralCode: z.string().optional()
+  role: AlphaNumericStringSchema.optional(),
+  industry: AlphaNumericStringSchema.optional(),
+  teamSize: AlphaNumericStringSchema.optional(),
+  productStage: AlphaNumericStringSchema.optional(),
+  useCase: AlphaNumericStringSchema.optional(),
+  heardFrom: AlphaNumericStringSchema.optional(),
+  referralCode: AlphaNumericStringSchema.optional()
 })
 
 export const FinishOnboardingResponseSchema = UserSchema

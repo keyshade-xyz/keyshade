@@ -8,10 +8,11 @@ import {
   subscriptionStatusEnum
 } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
+import { AlphaNumericStringSchema } from '@/alphanumeric'
 
 export const WorkspaceSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   slug: z.string(),
   icon: z.string().nullable(),
   updatedAt: z.string().datetime(),

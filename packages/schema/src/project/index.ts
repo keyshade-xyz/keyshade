@@ -6,12 +6,13 @@ import {
 } from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
+import { AlphaNumericStringSchema } from '@/alphanumeric'
 
 export const BaseProjectSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   slug: z.string(),
-  description: z.string(),
+  description: AlphaNumericStringSchema,
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   publicKey: z.string(),
