@@ -12,7 +12,7 @@ export const BaseProjectSchema = z.object({
   id: z.string(),
   name: AlphaNumericStringSchema,
   slug: z.string(),
-  description: AlphaNumericStringSchema,
+  description: AlphaNumericStringSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   publicKey: z.string(),
