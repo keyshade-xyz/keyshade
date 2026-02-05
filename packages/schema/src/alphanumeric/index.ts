@@ -21,3 +21,12 @@ export const ExtendedAlphaNumericStringSchema = z
   .refine((val) => val.length > 0, {
     message: 'Extended alphanumeric string cannot be empty'
   })
+
+export const ColorCodeAlphaNumericStringSchema = z
+  .string()
+  .refine((val) => val.length === 6, {
+    message: 'Color code alphanumeric string must be 6 characters long'
+  })
+  .refine((val) => /^[0-9A-F]+$/.test(val), {
+    message: 'Color code alphanumeric string must be a valid hex color code'
+  })
