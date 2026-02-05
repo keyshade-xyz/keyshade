@@ -3,6 +3,7 @@ import type {
   CreateProjectRequest,
   GetAllProjectsResponse
 } from '@keyshade/schema'
+// @ts-expect-error - /raw export exists at runtime but TypeScript with 'node' moduleResolution can't resolve package.json exports
 import { CreateProjectRequestSchema } from '@keyshade/schema/raw'
 import type { Dispatch, SetStateAction } from 'react'
 import { useCallback, useState } from 'react'
