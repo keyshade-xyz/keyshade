@@ -53,9 +53,9 @@ export const ProjectSchema = BaseProjectSchema.refine((obj) =>
 )
 
 export const CreateProjectRequestSchema = z.object({
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   workspaceSlug: WorkspaceSchema.shape.slug,
-  description: z.string().optional(),
+  description: AlphaNumericStringSchema.optional(),
   storePrivateKey: z.boolean().optional(),
   environments: CreateEnvironmentRequestSchema.omit({ projectSlug: true })
     .array()
