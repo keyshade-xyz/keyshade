@@ -55,6 +55,7 @@ import DocumentSVG from './document.svg'
 import FeedbackSVG from './feedback.svg'
 import LinkArrowSVG from './link-arrow.svg'
 import ImportSVG from './import.svg'
+import WarningSVG from './warning.svg'
 
 export {
   DropdownSVG,
@@ -113,5 +114,6 @@ export {
   DocumentSVG,
   FeedbackSVG,
   LinkArrowSVG,
-  ImportSVG
+  ImportSVG,
+  WarningSVG
 }
