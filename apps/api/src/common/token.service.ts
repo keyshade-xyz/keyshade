@@ -11,7 +11,6 @@ import {
   User
 } from '@prisma/client'
 import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
 import { PrismaService } from '@/prisma/prisma.service'
 import { generateRandomBytes, toSHA256 } from '@/common/cryptography'
 import { DeviceDetail } from '@/auth/auth.types'
@@ -33,8 +32,7 @@ export class TokenService {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
-    private readonly configService: ConfigService
+    private readonly prisma: PrismaService
   ) {}
 
   /**
@@ -326,25 +324,6 @@ export class TokenService {
     // Extract the actual token from the Bearer token
     const actualToken = this.extractActualToken(token)
 
-    // Add validation and logging
-    if (!actualToken) {
-      this.logger.error(
-        `extractActualToken returned undefined for token: ${token.substring(0, 20)}...`
-      )
-      throw new UnauthorizedException(
-        'Invalid token format: could not extract token'
-      )
-    }
-
-    if (typeof actualToken !== 'string' || actualToken.length === 0) {
-      this.logger.error(
-        `Invalid actualToken: ${typeof actualToken}, length: ${actualToken?.length}`
-      )
-      throw new UnauthorizedException('Invalid token: empty or invalid format')
-    }
-
-    this.logger.log(`Validating bearer token (length: ${actualToken.length})`)
-
     // Validate the token against the browser session store
     const browserSession = await this.prisma.browserSession.findUnique({
       where: {
@@ -368,21 +347,12 @@ export class TokenService {
     })
 
     // Validate the token payload against the browser session
-    // Use ConfigService to get JWT_SECRET to ensure it matches what JwtModule uses
-    const jwtSecret = this.configService.get<string>('JWT_SECRET') ?? 'secret'
-    this.logger.log(
-      `Verifying JWT token with secret length: ${jwtSecret.length}`
-    )
     try {
       const payload = await this.jwtService.verifyAsync(actualToken, {
-        secret: jwtSecret,
-        issuer: 'keyshade.io',
-        algorithms: ['HS256']
+        secret: process.env.JWT_SECRET
       })
-      this.logger.log(`JWT token verified successfully for user: ${payload.id}`)
       return payload.id
     } catch (error) {
-      this.logger.error(`JWT verification failed: ${error.message}`)
       throw new UnauthorizedException(
         `Error validating JWT token: ${error.message}`
       )
@@ -497,10 +467,6 @@ export class TokenService {
       }
       return parts[2]
     }
-    // Add explicit error for unmatched tokens
-    throw new UnauthorizedException(
-      `Invalid token format: token does not start with 'Bearer' or 'ks.'`
-    )
   }
 
   private hasExpired(date: Date): boolean {
