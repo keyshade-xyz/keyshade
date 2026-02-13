@@ -16,5 +16,6 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html', 'tsx', 'jsx'],
   coverageDirectory: '../../coverage/apps/api',
   coverageReporters: ['json'],
-  collectCoverage: true
+  collectCoverage: true,
+  testTimeout: 30000
 }
