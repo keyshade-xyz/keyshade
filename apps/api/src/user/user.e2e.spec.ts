@@ -26,9 +26,7 @@ describe('User Controller Tests', () => {
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
       .compile()
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
-    )
+    app = moduleRef.createNestApplication<any>(new FastifyAdapter() as any)
     prisma = moduleRef.get(PrismaService)
     userService = moduleRef.get(UserService)
 

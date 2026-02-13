@@ -81,9 +81,7 @@ describe('Secret Controller Tests', () => {
       .useValue(mockDeep<RedisClientType>())
       .compile()
 
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
-    )
+    app = moduleRef.createNestApplication<any>(new FastifyAdapter() as any)
     prisma = moduleRef.get(PrismaService)
     projectService = moduleRef.get(ProjectService)
     workspaceService = moduleRef.get(WorkspaceService)
