@@ -1,7 +1,9 @@
 import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator'
+import { IsASCII } from '@/decorators/validation.decorator'
 
 export class CreateUserDto {
   @IsString()
+  @IsASCII()
   @IsOptional()
   name?: string
 

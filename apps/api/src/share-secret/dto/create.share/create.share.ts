@@ -1,10 +1,19 @@
-import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  Matches
+} from 'class-validator'
 
 export class CreateShare {
   @IsString()
+  @Matches(/^[\x20-\x7E\n\r\t]*$/) // Allow all printable ASCII characters (plus newlines, carriage returns, and tabs)
   secret: string
 
   @IsString()
+  @Matches(/^[\x20-\x7E]*$/) // Allow all printable ASCII characters
   @IsOptional()
   password?: string
 

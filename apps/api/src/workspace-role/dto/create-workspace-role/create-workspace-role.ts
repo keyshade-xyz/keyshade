@@ -4,9 +4,11 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  ValidateNested
+  ValidateNested,
+  Matches
 } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsASCII, IsDescriptive } from '@/decorators/validation.decorator'
 
 class ProjectEnvironments {
   @IsString()
@@ -21,13 +23,16 @@ class ProjectEnvironments {
 
 export class CreateWorkspaceRole {
   @IsString()
+  @IsASCII()
   readonly name: string
 
   @IsString()
   @IsOptional()
+  @IsDescriptive()
   readonly description?: string
 
   @IsString()
+  @Matches(/^[0-9A-F]+$/)
   @IsOptional()
   readonly colorCode?: string
 

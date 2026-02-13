@@ -12,9 +12,11 @@ import {
   IsOptional,
   IsString
 } from 'class-validator'
+import { IsName } from '@/decorators/validation.decorator'
 
 export class CreateIntegration {
   @IsString()
+  @IsName()
   name: string
 
   @IsEnum(IntegrationType)
