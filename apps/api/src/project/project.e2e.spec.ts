@@ -80,9 +80,7 @@ describe('Project Controller Tests', () => {
       .useClass(MockMailService)
       .compile()
 
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
-    )
+    app = moduleRef.createNestApplication<any>(new FastifyAdapter() as any)
     prisma = moduleRef.get(PrismaService)
     eventService = moduleRef.get(EventService)
     projectService = moduleRef.get(ProjectService)
