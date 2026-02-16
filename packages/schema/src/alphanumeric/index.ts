@@ -30,3 +30,10 @@ export const ColorCodeAlphaNumericStringSchema = z
   .refine((val) => /^[0-9A-F]+$/.test(val), {
     message: 'Color code alphanumeric string must be a valid hex color code'
   })
+
+export const EmailAlphaNumericStringSchema = z
+  .string()
+  .email()
+  .refine((val) => val.length > 0, {
+    message: 'Email alphanumeric string must be a valid email'
+  })
