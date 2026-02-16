@@ -8,13 +8,16 @@ import {
   IsOptional,
   IsString
 } from 'class-validator'
+import { IsName, IsDescriptive } from '@/decorators/validation.decorator'
 
 export class CreateProject {
   @IsString()
+  @IsName()
   @IsNotEmpty()
   name: string
 
   @IsString()
+  @IsDescriptive()
   @IsOptional()
   description?: string
 

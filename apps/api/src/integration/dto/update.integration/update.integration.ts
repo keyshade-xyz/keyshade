@@ -6,9 +6,11 @@ import {
   IsOptional,
   IsString
 } from 'class-validator'
+import { IsName } from '@/decorators/validation.decorator'
 
 export class UpdateIntegration {
   @IsString()
+  @IsName()
   @IsOptional()
   name?: string
 
