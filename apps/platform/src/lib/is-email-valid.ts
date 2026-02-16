@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { EmailAlphaNumericStringSchema } from '@keyshade/schema/raw'
 import { isEmptyString } from './is-empty-string'
 
 /**
@@ -11,6 +11,7 @@ export function isEmailValid(value: string | null | undefined): boolean {
   if (isEmptyString(value)) {
     return false
   }
-  const { success } = z.string().email().safeParse(value)
+
+  const { success } = EmailAlphaNumericStringSchema.safeParse(value)
   return success
 }
