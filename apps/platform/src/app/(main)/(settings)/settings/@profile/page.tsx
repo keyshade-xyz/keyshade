@@ -10,6 +10,7 @@ import GeneralSettings from '@/components/userSettings/profile/generalSettings'
 import EmailSettings from '@/components/userSettings/profile/emailSettings'
 import DeleteProfile from '@/components/userSettings/profile/deleteProfile'
 import AuthProvider from '@/components/userSettings/profile/authProvider'
+import PersonalAccessTokens from '@/components/userSettings/profile/personalAccessTokens'
 import ShareReferralCode from '@/components/userSettings/profile/shareReferralCode'
 
 function ProfilePage(): React.JSX.Element {
@@ -42,6 +43,7 @@ function ProfilePage(): React.JSX.Element {
       <GeneralSettings />
       <EmailSettings />
       <AuthProvider />
+      <PersonalAccessTokens />
       <Separator className="w-full bg-white/15" />
       <ShareReferralCode />
       <Separator className="w-full bg-white/15" />
