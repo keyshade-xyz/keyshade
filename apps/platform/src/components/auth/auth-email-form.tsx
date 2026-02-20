@@ -32,6 +32,7 @@ export default function AuthEmailForm() {
     e.preventDefault()
 
     if (!isEmailValid(email)) {
+      toast.error("Invalid email preventing submission")
       setIsInvalidEmail(true)
       return
     }

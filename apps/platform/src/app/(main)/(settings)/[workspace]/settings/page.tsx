@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { AlphaNumericStringSchema  } from '@keyshade/schema/dist/src'
 import {
   allWorkspacesAtom,
   deleteWorkspaceOpenAtom,
@@ -92,6 +93,16 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   }
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const rawData = e.target.value;
+    const validation = AlphaNumericStringSchema.safeParse(rawData);
+
+    if(!validation.success){
+      toast.error("Invalid name change");
+      return;
+    }
+
+    toast.message("Name changed");
+
     setWorkspaceData({
       ...workspaceData,
       name: e.target.value
