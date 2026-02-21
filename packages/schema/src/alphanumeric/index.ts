@@ -42,7 +42,7 @@ export const EmailAlphaNumericStringSchema = z
   })
 
 //purpose: add alphanumeric schema string for auth device details in order to prevent spoofed data attributes of data
-export const ipAddressAlphaNumericStringSchema = z // purpose: additional .trim() and refine are a shield against spoofing attacks
+export const IPAddressAlphaNumericStringSchema = z // purpose: additional .trim() and refine are a shield against spoofing attacks
   .string()
   .trim()
   .ip()
@@ -70,7 +70,7 @@ export const OSAlphaNumericStringSchema = z
     message: 'OS name left undefined'
   })
 
-export const agentAlphaNumericStringSchema = z
+export const AgentAlphaNumericStringSchema = z
   .string()
   .min(1, 'Minimum characters(Agent): 1')
   .optional()
@@ -78,7 +78,7 @@ export const agentAlphaNumericStringSchema = z
     message: 'Agent name left undefined'
   })
 
-export const cityAlphaNumericStringSchema = z
+export const CityAlphaNumericStringSchema = z
   .string()
   .min(1, 'Minimum characters(City): 1')
   .optional()
@@ -86,7 +86,7 @@ export const cityAlphaNumericStringSchema = z
     message: 'City name left undefined'
   })
 
-export const countryAlphaNumericStringSchema = z
+export const CountryAlphaNumericStringSchema = z
   .string()
   .min(1, 'Minimum characters(Country): 1')
   .optional()
@@ -94,7 +94,7 @@ export const countryAlphaNumericStringSchema = z
     message: 'Country name left undefined'
   })
 
-export const regionAlphaNumericStringSchema = z
+export const RegionAlphaNumericStringSchema = z
   .string()
   .min(1, 'Minimum characters(Region): 1')
   .optional()
