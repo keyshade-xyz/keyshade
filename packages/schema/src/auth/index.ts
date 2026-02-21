@@ -1,29 +1,39 @@
 import { UserSchema } from '@/user'
 import { z } from 'zod'
 import { WorkspaceSchema } from '@/workspace'
+import {
+  EmailAlphaNumericStringSchema,
+  ipAddressAlphaNumericStringSchema,
+  EncryptedDeviceDataSchema,
+  OSAlphaNumericStringSchema,
+  agentAlphaNumericStringSchema,
+  cityAlphaNumericStringSchema,
+  countryAlphaNumericStringSchema,
+  regionAlphaNumericStringSchema
+} from '@/alphanumeric'
 
 export const DeviceDetailSchema = z.object({
-  ipAddress: z.string().ip().optional(),
-  encryptedIpAddress: z.string(),
-  os: z.string().optional(),
-  agent: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  region: z.string().optional()
+  ipAddress: ipAddressAlphaNumericStringSchema,
+  encryptedIpAddress: EncryptedDeviceDataSchema,
+  os: OSAlphaNumericStringSchema,
+  agent: agentAlphaNumericStringSchema,
+  city: cityAlphaNumericStringSchema,
+  country: countryAlphaNumericStringSchema,
+  region: regionAlphaNumericStringSchema
 })
 
 export const ResendOTPRequestSchema = z.object({
-  userEmail: z.string().email()
+  userEmail: EmailAlphaNumericStringSchema
 })
 
 export const ResendOTPResponseSchema = z.void()
 
 export const ValidateOTPRequestSchema = z.object({
-  email: z.string().email(),
+  email: EmailAlphaNumericStringSchema, // purpose: make the email attribute of object sent to alphanumeric schema
   otp: z.string().length(6),
   mode: z.enum(['cli']).optional(),
-  os: z.string().optional(),
-  agent: z.string().optional()
+  os: OSAlphaNumericStringSchema,
+  agent: agentAlphaNumericStringSchema
 })
 
 export const ValidateOTPResponseSchema = UserSchema.extend({
@@ -33,10 +43,10 @@ export const ValidateOTPResponseSchema = UserSchema.extend({
 })
 
 export const SendOTPRequestSchema = z.object({
-  email: z.string().email(),
+  email: EmailAlphaNumericStringSchema, // purpose: make the email attribute of object sent to alphanumeric schema
   mode: z.enum(['cli']).optional(),
-  os: z.string().optional(),
-  agent: z.string().optional()
+  os: OSAlphaNumericStringSchema,
+  agent: agentAlphaNumericStringSchema
 })
 
 export const SendOTPResponseSchema = z.void()
