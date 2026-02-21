@@ -9,7 +9,8 @@ import {
   AgentAlphaNumericStringSchema,
   CityAlphaNumericStringSchema,
   CountryAlphaNumericStringSchema,
-  RegionAlphaNumericStringSchema
+  RegionAlphaNumericStringSchema,
+  OTPAlphaNumericStringSchema
 } from '@/alphanumeric'
 
 export const DeviceDetailSchema = z.object({
@@ -30,7 +31,7 @@ export const ResendOTPResponseSchema = z.void()
 
 export const ValidateOTPRequestSchema = z.object({
   email: EmailAlphaNumericStringSchema, // purpose: make the email attribute of object sent to alphanumeric schema
-  otp: z.string().length(6),
+  otp: OTPAlphaNumericStringSchema,
   mode: z.enum(['cli']).optional(),
   os: OSAlphaNumericStringSchema,
   agent: AgentAlphaNumericStringSchema
