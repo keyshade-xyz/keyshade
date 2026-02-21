@@ -9,13 +9,17 @@ import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
 import { EventSchema } from '@/event'
-import { AlphaNumericStringSchema } from '@/alphanumeric'
+import {
+  AlphaNumericStringSchema,
+  MetaDataAlphaNumericStringSchema,
+  TitleAlphaNumericStringSchema
+} from '@/alphanumeric'
 
 export const IntegrationSchema = z.object({
   id: z.string(),
   name: AlphaNumericStringSchema,
   slug: z.string(),
-  metadata: z.record(z.string()),
+  metadata: z.record(MetaDataAlphaNumericStringSchema),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   type: integrationTypeEnum,
@@ -51,7 +55,7 @@ export const IntegrationSchema = z.object({
 
 export const IntegrationRunSchema = z.object({
   id: z.string(),
-  title: z.string(),
+  title: TitleAlphaNumericStringSchema,
   duration: z.number(),
   triggeredAt: z.string().datetime(),
   logs: z.string().optional(),
@@ -67,7 +71,7 @@ export const CreateIntegrationRequestSchema = z.object({
   name: AlphaNumericStringSchema,
   type: IntegrationSchema.shape.type,
   notifyOn: IntegrationSchema.shape.notifyOn.min(1).optional(),
-  metadata: z.record(z.string()),
+  metadata: z.record(MetaDataAlphaNumericStringSchema),
   environmentSlugs: z.array(EnvironmentSchema.shape.slug.optional()),
   privateKey: z.string().optional()
 })
@@ -78,7 +82,7 @@ export const UpdateIntegrationRequestSchema = z.object({
   integrationSlug: IntegrationSchema.shape.slug,
   name: z.string().optional(),
   notifyOn: IntegrationSchema.shape.notifyOn.optional(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(MetaDataAlphaNumericStringSchema).optional(),
   environmentSlugs: z.array(EnvironmentSchema.shape.slug).optional()
 })
 
