@@ -44,7 +44,7 @@ export const IntegrationSchema = z.object({
   workspace: WorkspaceSchema,
   lastUpdatedBy: z.object({
     id: z.string(),
-    name: z.string(),
+    name: AlphaNumericStringSchema,
     profilePictureUrl: z.string().nullable()
   }),
   entitlements: z.object({
