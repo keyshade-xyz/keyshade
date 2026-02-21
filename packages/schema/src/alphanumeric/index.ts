@@ -101,3 +101,12 @@ export const RegionAlphaNumericStringSchema = z
   .refine((val) => val !== undefined, {
     message: 'Region name left undefined'
   })
+
+export const OTPAlphaNumericStringSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{6}$/, 'OTP must be 6 digits long and contain only numbers')
+  .length(6)
+  .refine((str) => /^[a-z0-9]+$/i.test(str), {
+    message: 'OTP must be a 6 digit alphanumeric string'
+  })
