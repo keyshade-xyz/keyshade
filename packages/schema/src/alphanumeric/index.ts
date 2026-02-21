@@ -110,3 +110,23 @@ export const OTPAlphaNumericStringSchema = z
   .refine((str) => /^[a-z0-9]+$/i.test(str), {
     message: 'OTP must be a 6 digit alphanumeric string'
   })
+
+export const MetaDataAlphaNumericStringSchema = z
+  .string()
+  .trim()
+  .min(1, 'Minimum characters(Metadata): 1')
+  .max(256, 'Maximum characters(Metadata): 256') // purpose: enforces a max for metadata to prevent injection attacks of bufferoverflows
+  .refine((val) => /^[a-zA-Z0-9\s\-_.]+$/.test(val), {
+    message:
+      'Invalid Metadata string: only alphanumeric characters, spaces, hyphens, underscores, and periods are allowed'
+  })
+
+export const TitleAlphaNumericStringSchema = z
+  .string()
+  .trim() // purpose: trim any sort of leading trails but allows inner white space
+  .min(1, 'Minimum characters(Title): 1')
+  .max(256, 'Maximum characters(Title): 256') // // purpose: enforces a max for titles to prevent injection attacks of bufferoverflows
+  .refine((val) => /^[a-zA-Z0-9\s\-_.]+$/.test(val), {
+    message:
+      'Invalid Title string: only alphanumeric characters, inner spaces, hyphens, underscores and periods are allowed'
+  })
