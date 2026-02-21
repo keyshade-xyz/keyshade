@@ -1,4 +1,4 @@
-import { EmailAlphaNumericStringSchema } from '@keyshade/schema/raw' // import from alphanumeric schema file: frontend.ts
+import { EmailAlphaNumericStringSchema } from '@keyshade/schema/src' 
 import { isEmptyString } from './is-empty-string'
 
 /**
