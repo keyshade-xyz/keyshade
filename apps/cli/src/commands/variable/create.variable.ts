@@ -122,10 +122,6 @@ export default class CreateVariable extends BaseCommand {
       })
     }
 
-    if (!note) {
-      note = name
-    }
-
     if (rawEntries) {
       for (const entry of rawEntries) {
         const idx = entry.indexOf('=')
