@@ -25,7 +25,7 @@ export const BaseProjectSchema = z.object({
   lastUpdatedById: z.string(),
   lastUpdatedBy: z.object({
     id: z.string(),
-    name: z.string(),
+    name: AlphaNumericStringSchema,
     profilePictureUrl: z.string().nullable()
   }),
   workspaceId: WorkspaceSchema.shape.id,
