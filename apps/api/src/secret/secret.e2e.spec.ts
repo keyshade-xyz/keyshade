@@ -547,8 +547,42 @@ describe('Secret Controller Tests', () => {
 
       const messages = response.json().message
 
-      expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual('name should not be empty')
+      expect(messages).toHaveLength(2)
+      expect(messages[1]).toEqual('name should not be empty')
+    })
+
+    it('should not be able to create a secret with a name that contains invalid characters', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: {
+          name: 'Secret 3 🎉'
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should not be able to create a secret with an invalid note', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}`,
+        payload: {
+          name: 'Secret 3',
+          note: 'Secret 3 note 🎉'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain(
+        'Description can only contain printable ASCII characters'
+      )
     })
 
     it('should not be able to create a secret with a non-existing environment', async () => {
@@ -690,8 +724,8 @@ describe('Secret Controller Tests', () => {
 
       const messages = response.json().message
 
-      expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual('name should not be empty')
+      expect(messages).toHaveLength(2)
+      expect(messages[1]).toEqual('name should not be empty')
     })
 
     it('should be able to update the secret name and note without creating a new version', async () => {

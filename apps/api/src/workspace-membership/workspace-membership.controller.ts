@@ -11,7 +11,7 @@ import {
   Query
 } from '@nestjs/common'
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
-import { CreateWorkspaceMember } from './dto/create.workspace/create.workspace-membership'
+import { BulkInviteUsersDto } from './dto/bulk.invite-users/bulk.invite-users'
 import { WorkspaceMembershipService } from './workspace-membership.service'
 import { AuthenticatedUser } from '@/user/user.types'
 
@@ -40,12 +40,12 @@ export class WorkspaceMembershipController {
   async addUsers(
     @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
-    @Body() members: CreateWorkspaceMember[]
+    @Body() dto: BulkInviteUsersDto
   ) {
     return this.workspaceMembershipService.inviteUsersToWorkspace(
       user,
       workspaceSlug,
-      members
+      dto.members
     )
   }
 

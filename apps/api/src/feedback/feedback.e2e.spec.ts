@@ -13,6 +13,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { User } from '@prisma/client'
 import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
+import { ValidationPipe } from '@nestjs/common'
 
 describe('Feedback Controller (E2E)', () => {
   let app: NestFastifyApplication
@@ -36,6 +37,13 @@ describe('Feedback Controller (E2E)', () => {
     userService = moduleRef.get(UserService)
 
     prisma = moduleRef.get(PrismaService)
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true
+      })
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -80,6 +88,22 @@ describe('Feedback Controller (E2E)', () => {
     })
 
     expect(statusCode).toBe(201)
+  })
+
+  it('should not be able to register feedback with invalid characters', async () => {
+    const { statusCode, json } = await app.inject({
+      method: 'POST',
+      url: '/feedback',
+      payload: { feedback: 'Invalid feedback message with 🎉' },
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(statusCode).toBe(400)
+    expect(json().message[0]).toContain(
+      'Value can only contain printable ASCII characters'
+    )
   })
 
   it('should handle empty feedback', async () => {

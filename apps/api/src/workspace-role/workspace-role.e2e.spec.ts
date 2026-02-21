@@ -25,6 +25,7 @@ import { WorkspaceRoleService } from './workspace-role.service'
 import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
+import { ValidationPipe } from '@nestjs/common'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
 import { HydratedWorkspaceRole } from '@/workspace-role/workspace-role.types'
@@ -60,7 +61,14 @@ describe('Workspace Role Controller Tests', () => {
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     userService = moduleRef.get(UserService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -819,7 +827,16 @@ describe('Workspace Role Controller Tests', () => {
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
-          projectIds: projects.map((project) => project.id)
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['dev']
+            },
+            {
+              projectSlug: projects[1].slug,
+              environmentSlugs: ['stage']
+            }
+          ]
         },
         headers: {
           'x-e2e-user-email': charlie.email

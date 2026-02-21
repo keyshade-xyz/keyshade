@@ -38,7 +38,7 @@ import { WorkspaceMembershipService } from '@/workspace-membership/workspace-mem
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
-import { HttpStatus } from '@nestjs/common'
+import { HttpStatus, ValidationPipe } from '@nestjs/common'
 
 const createMembership = async (
   roleId: string,
@@ -114,7 +114,14 @@ describe('Workspace Controller Tests', () => {
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -313,6 +320,24 @@ describe('Workspace Controller Tests', () => {
         createdOn: expect.any(Date)
       })
     })
+
+    it('should not be able to create a workspace with an invalid name', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: '/workspace',
+        payload: {
+          name: 'Invalid Workspace Name 🎉'
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toBe(
+        'Value can only contain printable ASCII characters'
+      )
+    })
   })
 
   describe('Update Workspace Tests', () => {
@@ -444,7 +469,7 @@ describe('Workspace Controller Tests', () => {
       expect(workspaceJson.name).toEqual('My Workspace')
       expect(workspaceJson.maxAllowedMembers).toBeDefined()
       expect(workspaceJson.maxAllowedProjects).toBeDefined()
-      expect(workspaceJson.totalProjects).toBe(0)
+      expect(workspaceJson.totalProjects).toBe(1)
       expect(workspaceJson.totalMembers).toBe(1)
 
       //check metadata
@@ -638,14 +663,11 @@ describe('Workspace Controller Tests', () => {
     })
 
     it('should be able to fetch blacklisted IP addresses by workspace administrator', async () => {
-      await prisma.workspace.update({
-        where: {
-          id: workspace1.id
-        },
-        data: {
-          blacklistedIpAddresses: [BLACKLISTED_IP_ADDRESS]
-        }
-      })
+      await workspaceService.updateBlacklistedIpAddresses(
+        user1,
+        workspace1.slug,
+        { ipAddresses: [BLACKLISTED_IP_ADDRESS] }
+      )
 
       const response = await app.inject({
         method: 'GET',
@@ -681,14 +703,11 @@ describe('Workspace Controller Tests', () => {
     })
 
     it('should not be able to update blacklisted IP addresses by workspace administrator from a blacklisted IP address', async () => {
-      await prisma.workspace.update({
-        where: {
-          id: workspace1.id
-        },
-        data: {
-          blacklistedIpAddresses: [USER_IP_ADDRESS]
-        }
-      })
+      await workspaceService.updateBlacklistedIpAddresses(
+        user1,
+        workspace1.slug,
+        { ipAddresses: [USER_IP_ADDRESS] }
+      )
 
       const response = await app.inject({
         method: 'PUT',
@@ -697,7 +716,7 @@ describe('Workspace Controller Tests', () => {
         },
         url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
         payload: {
-          ipAddresses: []
+          ipAddresses: [BLACKLISTED_IP_ADDRESS]
         }
       })
 

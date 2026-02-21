@@ -1,6 +1,7 @@
 import { AppModule } from '@/app/app.module'
 import { fetchEvents } from '@/common/event'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
+import { ValidationPipe } from '@nestjs/common'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/environment.service'
 import { EventModule } from '@/event/event.module'
@@ -117,7 +118,14 @@ describe('Workspace Membership Controller Tests', () => {
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     tierLimitService = moduleRef.get(TierLimitService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -342,12 +350,14 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${user1DefaultWorkspace.slug}/invite-users`,
-        body: [
-          {
-            email: user2.email,
-            roleSlugs: [memberRole.slug]
-          }
-        ]
+        payload: {
+          members: [
+            {
+              email: user2.email,
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
       })
 
       expect(response.statusCode).toBe(400)
@@ -399,28 +409,32 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
-        payload: [
-          {
-            email: user.email,
-            roleSlugs: [memberRole.slug]
-          }
-        ]
+        payload: {
+          members: [
+            {
+              email: user.email,
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
       })
 
       expect(response.statusCode).toBe(400)
     })
 
-    it('should do nothing if null or empty array is sent for invitation of user', async () => {
+    it('should reject empty array for invitation of user', async () => {
       const response = await app.inject({
         method: 'POST',
         headers: {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
-        payload: []
+        payload: {
+          members: []
+        }
       })
 
-      expect(response.statusCode).toBe(201)
+      expect(response.statusCode).toBe(400)
     })
 
     it('should not allow user to invite another user ', async () => {
@@ -430,12 +444,14 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
-        payload: [
-          {
-            email: user2.email,
-            roleSlugs: [adminRole.slug]
-          }
-        ]
+        payload: {
+          members: [
+            {
+              email: user2.email,
+              roleSlugs: [adminRole.slug]
+            }
+          ]
+        }
       })
 
       expect(response.statusCode).toBe(400)
@@ -448,12 +464,14 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
-        payload: [
-          {
-            email: user2.email,
-            roleSlugs: [memberRole.slug]
-          }
-        ]
+        payload: {
+          members: [
+            {
+              email: user2.email,
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
       })
 
       expect(response.statusCode).toBe(201)
@@ -487,15 +505,79 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
-        payload: [
-          {
-            email: user2.email,
-            roleSlugs: []
-          }
-        ]
+        payload: {
+          members: [
+            {
+              email: user2.email,
+              roleSlugs: []
+            }
+          ]
+        }
       })
 
       expect(response.statusCode).toBe(409)
+    })
+
+    it('should not allow invalid email format', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/invite-users`,
+        payload: {
+          members: [
+            {
+              email: 'invalid-email',
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain('email must be an email')
+    })
+
+    it('should not allow empty email', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/invite-users`,
+        payload: {
+          members: [
+            {
+              email: '',
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain('email should not be empty')
+    })
+
+    it('should not allow missing email field', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/invite-users`,
+        payload: {
+          members: [
+            {
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain('email should not be empty')
     })
 
     it('should have created a INVITED_TO_WORKSPACE event', async () => {
@@ -536,12 +618,14 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/invite-users`,
-        payload: [
-          {
-            email: 'joy@keyshade.io',
-            roleSlugs: [memberRole.slug]
-          }
-        ]
+        payload: {
+          members: [
+            {
+              email: 'joy@keyshade.io',
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        }
       })
 
       expect(response.statusCode).toBe(201)

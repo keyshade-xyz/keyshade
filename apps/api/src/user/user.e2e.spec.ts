@@ -10,6 +10,8 @@ import { User } from '@prisma/client'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { UserService } from './service/user.service'
+import { ValidationPipe } from '@nestjs/common'
+import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
@@ -30,11 +32,25 @@ describe('User Controller Tests', () => {
     prisma = moduleRef.get(PrismaService)
     userService = moduleRef.get(UserService)
 
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true
+      }),
+      new QueryTransformPipe()
+    )
+
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
   })
 
   beforeEach(async () => {
+    // Clean up before creating users to ensure a clean state
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
+
     adminUser = await userService.createUser({
       email: 'admin@keyshade.io',
       name: 'Admin',
@@ -59,9 +75,10 @@ describe('User Controller Tests', () => {
 
   afterEach(async () => {
     // Delete the users
-    await prisma.user.deleteMany()
-    // Delete the workspaces
-    await prisma.workspace.deleteMany()
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
   })
 
   it('should be defined', () => {
@@ -303,6 +320,7 @@ describe('User Controller Tests', () => {
           'x-e2e-user-email': regularUser.email
         },
         payload: {
+          name: 'John',
           teamSize: '4-10',
           heardFrom: 'Google'
         }
@@ -337,6 +355,7 @@ describe('User Controller Tests', () => {
           'x-e2e-user-email': regularUser.email
         },
         payload: {
+          name: 'John',
           teamSize: '4-10',
           heardFrom: 'Google'
         }
@@ -361,6 +380,7 @@ describe('User Controller Tests', () => {
           'x-e2e-user-email': regularUser.email
         },
         payload: {
+          name: 'John',
           referralCode: '123456'
         }
       })
@@ -382,10 +402,136 @@ describe('User Controller Tests', () => {
           'x-e2e-user-email': regularUser.email
         },
         payload: {
+          name: 'John',
           referralCode: '123456'
         }
       })
       expect(result.statusCode).toEqual(404)
+    })
+
+    test('users should not be able to finish onboarding with an invalid name', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'invalid name 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+    })
+
+    test('users should not be able to finish onboarding with an invalid role', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'John',
+          role: 'invalid role 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, underscores, and slashes'
+      )
+    })
+
+    test('users should not be able to finish onboarding with an invalid industry', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'John',
+          industry: 'invalid industry 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+    })
+
+    test('users should not be able to finish onboarding with an invalid team size', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'John',
+          teamSize: 'invalid team size 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Team size can only contain letters, numbers, spaces, hyphens, and plus signs'
+      )
+    })
+
+    test('users should not be able to finish onboarding with an invalid product stage', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'John',
+          productStage: 'invalid product stage 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+    })
+
+    test('users should not be able to finish onboarding with an invalid use case', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'John',
+          useCase: 'invalid use case 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Description can only contain printable ASCII characters'
+      )
+    })
+
+    test('users should not be able to finish onboarding with an invalid heard from', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          name: 'John',
+          heardFrom: 'invalid heard from 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
     })
   })
 
@@ -438,7 +584,7 @@ describe('User Controller Tests', () => {
   test('admin should be able to fetch all users', async () => {
     const result = await app.inject({
       method: 'GET',
-      url: `/user/all`,
+      url: `/user/all?page=1&limit=10&sort=name&order=asc&search=`,
       headers: {
         'x-e2e-user-email': adminUser.email
       }

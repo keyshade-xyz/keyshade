@@ -126,6 +126,17 @@ describe('Share Secret Tests', () => {
       expect(response2.statusCode).toBe(201)
       expect(response2.json().hash).not.toBe(response.json().hash)
     })
+
+    it('should not be able to create a share with an invalid secret', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/share-secret',
+        payload: {
+          secret: 'secret 🎉'
+        }
+      })
+      expect(response.statusCode).toBe(400)
+    })
   })
 
   describe('Add Email To Share Tests', () => {

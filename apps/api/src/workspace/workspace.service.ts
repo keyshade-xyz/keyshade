@@ -799,7 +799,8 @@ export class WorkspaceService implements OnModuleInit {
       },
       data: {
         blacklistedIpAddresses: dto.ipAddresses
-      }
+      },
+      include: InclusionQuery.Workspace
     })
 
     this.logger.log(

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsAlphanumeric } from 'class-validator'
+import { IsOptional, IsString } from 'class-validator'
 import {
   IsNameWithSlash,
   IsName,
@@ -46,7 +46,6 @@ export class OnboardingAnswersDto {
   heardFrom?: string
 
   @IsString()
-  @IsAlphanumeric()
   @IsOptional()
   referralCode?: string
 }

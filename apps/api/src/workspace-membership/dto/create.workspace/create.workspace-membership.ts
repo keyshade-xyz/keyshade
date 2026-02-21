@@ -8,6 +8,6 @@ export class CreateWorkspaceMember {
   email: string
 
   @IsArray()
-  @IsString()
+  @IsString({ each: true })
   roleSlugs: WorkspaceRole['slug'][]
 }

@@ -32,7 +32,7 @@ export class CreateWorkspaceRole {
   readonly description?: string
 
   @IsString()
-  @Matches(/^[0-9A-F]+$/)
+  @Matches(/^#?[0-9A-Fa-f]{6}$/)
   @IsOptional()
   readonly colorCode?: string
 

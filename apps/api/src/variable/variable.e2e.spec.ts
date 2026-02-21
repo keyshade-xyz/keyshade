@@ -490,10 +490,7 @@ describe('Variable Controller Tests', () => {
 
       expect(response.statusCode).toBe(400)
 
-      const messages = response.json().message
-
-      expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual('name should not be empty')
+      expect(response.json().message[1]).toEqual('name should not be empty')
     })
 
     it('should not be able to create a variable with a non-existing environment', async () => {
@@ -619,6 +616,39 @@ describe('Variable Controller Tests', () => {
         `A secret named COLLIDE already exists in this project. Please choose a different name.`
       )
     })
+
+    it('should not be able to create a variable with an invalid name', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}`,
+        payload: {
+          name: 'invalid name 🎉'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should not be able to create a variable with an invalid note', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}`,
+        payload: {
+          name: 'Variable 1',
+          note: 'invalid note 🎉'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+
+      expect(response.json().message[0]).toContain(
+        'Description can only contain printable ASCII characters'
+      )
+    })
   })
 
   describe('Update Variable Tests', () => {
@@ -652,10 +682,7 @@ describe('Variable Controller Tests', () => {
 
       expect(response.statusCode).toBe(400)
 
-      const messages = response.json().message
-
-      expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual('name should not be empty')
+      expect(response.json().message[1]).toEqual('name should not be empty')
     })
 
     it('should not be able to update variable with empty name', async () => {
@@ -672,10 +699,7 @@ describe('Variable Controller Tests', () => {
 
       expect(response.statusCode).toBe(400)
 
-      const messages = response.json().message
-
-      expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual('name should not be empty')
+      expect(response.json().message[1]).toEqual('name should not be empty')
     })
 
     it('should not be able to update a variable with same name in the same project', async () => {

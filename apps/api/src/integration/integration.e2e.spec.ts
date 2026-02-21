@@ -30,7 +30,9 @@ import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import { CreateIntegration } from './dto/create.integration/create.integration'
 import { SlackIntegrationMetadata } from './integration.types'
-import nock = require('nock')
+import { ValidationPipe } from '@nestjs/common'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nock = require('nock')
 
 const originalFetch = global.fetch
 // helper to create dynamic mock responses
@@ -190,7 +192,13 @@ describe('Integration Controller Tests', () => {
     projectService = moduleRef.get(ProjectService)
     environmentService = moduleRef.get(EnvironmentService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -500,6 +508,29 @@ describe('Integration Controller Tests', () => {
       expect(integration).toBeDefined()
       expect(integration!.id).toEqual(result.json().id)
     })
+
+    it('should not be able to create an integration with invalid characters in the name', async () => {
+      const result = await app.inject({
+        method: 'POST',
+        url: `/integration/${workspace1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: {
+          name: 'Integration 2 🎉',
+          type: IntegrationType.DISCORD,
+          metadata: {
+            webhookUrl: DUMMY_WEBHOOK_URL
+          },
+          notifyOn: [EventType.WORKSPACE_UPDATED]
+        }
+      })
+
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+    })
   })
 
   describe('Discord Integration Initialization Tests', () => {
@@ -778,6 +809,22 @@ describe('Integration Controller Tests', () => {
       expect(updatedIntegration).toBeDefined()
       expect(updatedIntegration.name).toEqual('Integration 2')
       expect(updatedIntegration.slug).not.toEqual(integration1.slug)
+    })
+    it('should not be able to update the name to an invalid characters', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: `/integration/${integration1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: {
+          name: 'Integration 2 🎉'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+      expect(result.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
     })
   })
 

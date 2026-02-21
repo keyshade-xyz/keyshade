@@ -40,6 +40,7 @@ import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import { ValidationPipe } from '@nestjs/common'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -93,7 +94,13 @@ describe('Project Controller Tests', () => {
     variableService = moduleRef.get(VariableService)
     tierLimitService = moduleRef.get(TierLimitService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -323,6 +330,43 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to create a project with a name that contains invalid characters', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/project/${workspace1.slug}`,
+        payload: {
+          name: 'Project 3 🎉'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+    })
+
+    it('should not be able to create a project with an invalid description', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/project/${workspace1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        payload: {
+          name: 'Project 3',
+          description: 'Project 3 description 🎉'
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain(
+        'Description can only contain printable ASCII characters'
+      )
     })
   })
 

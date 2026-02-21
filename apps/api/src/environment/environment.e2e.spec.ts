@@ -332,6 +332,43 @@ describe('Environment Controller Tests', () => {
       expect(event.workspaceId).toBe(workspace1.id)
       expect(event.itemId).toBeDefined()
     })
+
+    it('should not be able to create an environment with a name that contains invalid characters', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Environment 1!',
+          description: 'Environment 1 description'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+    })
+    it('should not be able to create an environment with an invalid description', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Invalid Description Test',
+          description: 'Description with émoji 🎉'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message[0]).toContain(
+        'Description can only contain printable ASCII characters'
+      )
+    })
   })
 
   describe('Update Environment Tests', () => {
