@@ -16,7 +16,7 @@ concurrency:
 jobs:
   validate-node-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     name: Validate API (Node)
 
     steps:
