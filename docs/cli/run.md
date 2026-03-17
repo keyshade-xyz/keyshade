@@ -35,6 +35,7 @@ The `run` command supports the following options for runtime configuration overr
 
 - `-f, --config-file <path>`  
   Specify a different configuration file instead of the default `keyshade.json`. Useful for maintaining different configurations for different environments.
+  
 - `-s, --show-process`
   Show PID information for Keyshade runner and the spawned subprocess.
 
