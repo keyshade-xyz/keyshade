@@ -33,6 +33,7 @@ export default class RunCommand extends BaseCommand {
   private command: string
 
   private childProcess = null
+  private showProcess = false
 
   // TODO: implement --show-process PIDS
 
@@ -73,6 +74,13 @@ export default class RunCommand extends BaseCommand {
         short: '-f',
         long: '--config-file <path>',
         description: 'Path to config file (default: keyshade.json)'
+      },
+      {
+        short: '-s',
+        long: '--show-process',
+        description:
+          'Show PID information for the keyshade runner and the spawned subprocess',
+        defaultValue: false
       }
     ]
   }
@@ -86,6 +94,9 @@ export default class RunCommand extends BaseCommand {
     // @ts-expect-error -- false positive, might be an error on commander.js
     // args return string[][] instead of string[]
     this.command = args[0].join(' ')
+
+    // Whether to show process IDs for debugging / UX
+    this.showProcess = Boolean(options.showProcess)
 
     // Pass all relevant options to fetchConfigurations for proper precedence handling
     const configurations = await this.fetchConfigurations({
@@ -333,6 +344,17 @@ export default class RunCommand extends BaseCommand {
     })
   }
 
+  private logProcessTree(childPid?: number) {
+    if (!this.showProcess) return
+
+    const parentPid = process.pid
+    const childPidString = childPid ? String(childPid) : 'N/A'
+
+    log.info(
+      `Process tree:\n  keyshade run (parent) PID: ${parentPid}\n  └─ subcommand PID: ${childPidString}`
+    )
+  }
+
   private async sleep(ms: number) {
     return await new Promise((resolve) => {
       setTimeout(resolve, ms)
@@ -391,6 +413,8 @@ export default class RunCommand extends BaseCommand {
       },
       detached: !isWin // only on POSIX
     })
+
+    this.logProcessTree(this.childProcess.pid)
 
     // Allow parent to exit independently of child on POSIX process groups
     if (!isWin && this.childProcess?.pid) {
