@@ -35,8 +35,6 @@ export default class RunCommand extends BaseCommand {
   private childProcess = null
   private showProcess = false
 
-  // TODO: implement --show-process PIDS
-
   getName(): string {
     return 'run'
   }
