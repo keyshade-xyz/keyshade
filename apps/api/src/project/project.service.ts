@@ -48,6 +48,8 @@ import { HydrationService } from '@/common/hydration.service'
 import { checkForDisabledWorkspace } from '@/common/workspace'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { ProjectCacheService } from '@/cache/project-cache.service'
+import { ShareSecretService } from '@/share-secret/share-secret.service'
+import { ShareProjectRequest } from '../../../../packages/schema/src/project/index.types'
 
 @Injectable()
 export class ProjectService {
@@ -63,7 +65,8 @@ export class ProjectService {
     private readonly variableService: VariableService,
     private readonly exportService: ExportService,
     private readonly hydrationService: HydrationService,
-    private readonly projectCacheService: ProjectCacheService
+    private readonly projectCacheService: ProjectCacheService,
+    private readonly shareSecretService: ShareSecretService
   ) {}
 
   /**
@@ -1580,5 +1583,96 @@ export class ProjectService {
     )
 
     return { txs, newPrivateKey, newPublicKey }
+  }
+
+  /**
+   * Shares a project's private key via a one-time secure link.
+   *
+   * The private key is stored as a temporary secret with a limited
+   * number of views and expiration, and a share link is sent to the recipient.
+   *
+   * @param user - The authenticated user initiating the share
+   * @param projectSlug - Unique identifier of the project to share
+   * @param dto - Contains recipient email and private key to share
+   *
+   * @returns An object containing the share link and a success message
+   *
+   * @throws BadRequestException if private key is missing
+   * @throws UnauthorizedException if user lacks access to the project
+   */
+  async shareProject(
+    user: AuthenticatedUser,
+    projectSlug: string,
+    dto: ShareProjectRequest
+  ) {
+    this.logger.log(
+      `User ${user.id} is sharing project ${projectSlug} with ${dto.recipientEmail}`
+    )
+
+    // Ensure user has access to the project
+    const project =
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
+        slug: projectSlug,
+        authorities: [Authority.READ_PROJECT]
+      })
+
+    // Ensure workspace is active
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to share project ${projectSlug} in a disabled workspace`
+    )
+
+    // Validate required input
+    if (!dto.privateKey) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Private key missing',
+          'Private key is required to share this project'
+        )
+      )
+    }
+
+    // Create one-time share secret
+    const share = await this.shareSecretService.createShare({
+      secret: dto.privateKey,
+      expiresAfterDays: 7,
+      viewLimit: 1
+    })
+
+    // Send email with share link
+    await this.shareSecretService.addEmailToShare(
+      share.hash,
+      dto.recipientEmail
+    )
+
+    // Log audit event
+    await createEvent(
+      {
+        triggeredBy: user,
+        entity: project,
+        type: EventType.PROJECT_UPDATED,
+        source: EventSource.PROJECT,
+        title: `Project shared`,
+        metadata: {
+          projectId: project.id,
+          projectSlug,
+          recipient: dto.recipientEmail
+        },
+        workspaceId: project.workspaceId
+      },
+      this.prisma
+    )
+
+    this.logger.debug(
+      `Project ${projectSlug} shared successfully. Hash: ${share.hash}`
+    )
+
+    return {
+      shareLink: `${process.env.WEB_FRONTEND_URL}/share/${share.hash}`,
+      message:
+        'Project shared successfully! The recipient will receive an email shortly.'
+    }
   }
 }
