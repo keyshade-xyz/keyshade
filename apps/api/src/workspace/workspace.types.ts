@@ -19,7 +19,7 @@ export interface HydratedWorkspace extends Workspace {
   totalIntegrations: number
   projects: number
   integrations: number
-  subscription: Subscription
+  subscription: Subscription & { compoundedPrice: number }
   entitlements: {
     canReadProjects: boolean
     canCreateProjects: boolean
@@ -40,21 +40,21 @@ export interface HydratedWorkspace extends Workspace {
   isDefault: boolean
 }
 
-export interface RawWorkspace
-  extends Omit<
-    HydratedWorkspace,
-    | 'entitlements'
-    | 'maxAllowedProjects'
-    | 'totalProjects'
-    | 'maxAllowedMembers'
-    | 'totalMembers'
-    | 'maxAllowedRoles'
-    | 'totalRoles'
-    | 'maxAllowedIntegrations'
-    | 'totalIntegrations'
-    | 'projects'
-    | 'integrations'
-  > {
+export interface RawWorkspace extends Omit<
+  HydratedWorkspace,
+  | 'entitlements'
+  | 'maxAllowedProjects'
+  | 'totalProjects'
+  | 'maxAllowedMembers'
+  | 'totalMembers'
+  | 'maxAllowedRoles'
+  | 'totalRoles'
+  | 'maxAllowedIntegrations'
+  | 'totalIntegrations'
+  | 'projects'
+  | 'integrations'
+  | 'subscription'
+> {
   subscription: Subscription
   members: Partial<WorkspaceMember>[]
   roles: Partial<WorkspaceRole>[]
