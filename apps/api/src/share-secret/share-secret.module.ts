@@ -4,6 +4,7 @@ import { ShareSecretService } from './share-secret.service'
 
 @Module({
   controllers: [ShareSecretController],
-  providers: [ShareSecretService]
+  providers: [ShareSecretService],
+  exports: [ShareSecretService]
 })
 export class ShareSecretModule {}

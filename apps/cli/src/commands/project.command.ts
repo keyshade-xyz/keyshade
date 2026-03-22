@@ -9,6 +9,7 @@ import ListProject from './project/list.project'
 import SyncProject from './project/sync.project'
 import UnlinkProject from './project/unlink.project'
 import UpdateProject from './project/update.project'
+import ShareProject from './project/share.project'
 
 export default class ProjectCommand extends BaseCommand {
   getName(): string {
@@ -30,7 +31,8 @@ export default class ProjectCommand extends BaseCommand {
       new SyncProject(),
       new UnlinkProject(),
       new UpdateProject(),
-      new ExportProject()
+      new ExportProject(),
+      new ShareProject()
     ]
   }
 }

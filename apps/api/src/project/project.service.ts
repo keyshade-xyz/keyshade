@@ -49,7 +49,7 @@ import { checkForDisabledWorkspace } from '@/common/workspace'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { ProjectCacheService } from '@/cache/project-cache.service'
 import { ShareSecretService } from '@/share-secret/share-secret.service'
-import { ShareProjectRequest } from '../../../../packages/schema/src/project/index.types'
+import { ShareProjectRequest } from '@keyshade/schema'
 
 @Injectable()
 export class ProjectService {
