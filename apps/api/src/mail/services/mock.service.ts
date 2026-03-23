@@ -93,4 +93,13 @@ export class MockMailService implements IMailService {
   ): Promise<void> {
     return
   }
+
+  async shareProjectAccess(
+    email: string,
+    data: { projectName: string; expiresAt: Date; url: string }
+  ): Promise<void> {
+    this.log.log(
+      `[MOCK] Project Access Email for ${data.projectName} would be sent to ${email}. URL=${data.url}`
+    )
+  }
 }

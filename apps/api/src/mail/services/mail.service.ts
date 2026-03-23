@@ -20,6 +20,7 @@ import { OnboardingReminder4Email } from '../emails/onboarding-reminder-email-4'
 import { OnboardingReminder5Email } from '../emails/onboarding-reminder-email-5'
 import { OnboardingReminder6Email } from '../emails/onboarding-reminder-email-6'
 import SignInCodeEmailTemplate from '@/mail/emails/signin-code-email'
+import ShareProjectAccessEmail from '../emails/share-project-access'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -272,5 +273,20 @@ export class MailService implements IMailService {
         )
       )
     }
+  }
+
+  async shareProjectAccess(
+    email: string,
+    data: { projectName: string; expiresAt: Date; url: string }
+  ): Promise<void> {
+    const subject = `Access shared for project: ${data.projectName}`
+
+    const body = await render(
+      ShareProjectAccessEmail({
+        data
+      })
+    )
+
+    await this.sendEmail(email, subject, body)
   }
 }
