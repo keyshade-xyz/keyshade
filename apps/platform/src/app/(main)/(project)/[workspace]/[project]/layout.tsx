@@ -24,6 +24,7 @@ import { useHttp } from '@/hooks/use-http'
 import LineTabController from '@/components/shared/navbar/line-tab-controller'
 import { Button } from '@/components/ui/button'
 import ImportEnvButton from '@/components/dashboard/overview/ImportEnvContainer/import-env-button'
+import ShareProjectButton from '@/components/dashboard/overview/ShareProjectContainer/share-project-button'
 
 function DetailedProjectPage(): React.JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
@@ -109,6 +110,7 @@ function DetailedProjectPage(): React.JSX.Element {
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-[28px]">{selectedProject?.name}</h1>
         <div className="flex flex-row items-center gap-x-2">
+          <ShareProjectButton projectSlug={projectSlug} />
           <ImportEnvButton projectSlug={projectSlug} />
           <Button type="button" variant="outline">
             <CodeSVG />
