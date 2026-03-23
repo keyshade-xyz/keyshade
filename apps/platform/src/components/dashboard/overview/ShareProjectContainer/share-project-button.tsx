@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -26,26 +28,36 @@ export default function ShareProjectButton({ projectSlug }: { projectSlug: strin
   }, [])
 
   const handleShare = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      // Dummy FETCH call, replace with actual API call when implemented.
-      // You will call your internal API route to generate the one-time link and trigger the email.
-      await fetch('/api/projects/share', {
-        method: 'POST',
-        body: JSON.stringify({ projectSlug, memberId: selectedMember, privateKey }),
-      })
-      
-      //console.log('Sharing project:', projectSlug, 'with:', selectedMember)
-      toast.success('One-time link generated and email sent successfully!')
-      handleClose()
-    } catch (error) {
-      toast.error('Failed to share the project. Please try again.')
-    } finally {
-      setIsSubmitting(false)
+  try {
+    const url = `/api/project/${projectSlug}/share`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        projectSlug, 
+        recipientEmail: selectedMember,
+        privateKey 
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json()) as { message?: string };
+      throw new Error(errorData.message || 'Failed to share');
     }
+
+    toast.success('Project shared successfully!');
+    handleClose();
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+    toast.error(errorMessage);
+  } finally {
+    setIsSubmitting(false);
   }
+};
 
   return (
     <div>
@@ -55,7 +67,6 @@ export default function ShareProjectButton({ projectSlug }: { projectSlug: strin
 
       <Dialog onOpenChange={handleClose} open={isOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          {/* Wrap the content in a form to handle 'Enter' key submissions natively */}
           <form onSubmit={handleShare}>
             <DialogHeader>
               <DialogTitle>Whom would you like to share this project with?</DialogTitle>
@@ -70,7 +81,6 @@ export default function ShareProjectButton({ projectSlug }: { projectSlug: strin
                 <label className="text-sm font-medium text-white/80" htmlFor="member">
                   Team Member
                 </label>
-                {/* Note: Depending on your exact Radix setup, you might swap this native select with @radix-ui/react-select */}
                 <select
                   className="flex h-10 w-full rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white ring-offset-zinc-950 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   id="member"
@@ -79,8 +89,8 @@ export default function ShareProjectButton({ projectSlug }: { projectSlug: strin
                   value={selectedMember}
                 >
                   <option disabled value="">Select an account...</option>
-                  <option value="bob_123">Bob</option>
-                  <option value="alice_456">Alice</option>
+                  <option value="bob@keyshade.com">Bob (bob@keyshade.com)</option>
+                  <option value="alice@keyshade.com">Alice (alice@keyshade.com)</option>
                 </select>
               </div>
 
