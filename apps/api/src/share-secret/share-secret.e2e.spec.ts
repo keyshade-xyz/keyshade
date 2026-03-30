@@ -32,9 +32,7 @@ describe('Share Secret Tests', () => {
       .useValue(mockDeep<RedisClientType>())
       .compile()
 
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
-    )
+    app = moduleRef.createNestApplication<any>(new FastifyAdapter() as any)
     shareSecretService = moduleRef.get(ShareSecretService)
     prisma = moduleRef.get(PrismaService)
 

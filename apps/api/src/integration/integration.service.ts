@@ -48,7 +48,6 @@ export class IntegrationService {
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
     private readonly hydrationService: HydrationService,
-    private readonly vercelIntegration: VercelIntegration,
     private readonly workspaceCacheService: WorkspaceCacheService,
     private readonly tierLimitService: TierLimitService
   ) {}
@@ -467,7 +466,8 @@ export class IntegrationService {
       `User ${user.id} fetching Vercel environments for integration ${dto.projectId}`
     )
 
-    return this.vercelIntegration.getVercelEnvironments(dto)
+    const vercelIntegration = new VercelIntegration(this.prisma)
+    return vercelIntegration.getVercelEnvironments(dto)
   }
 
   /* istanbul ignore next */

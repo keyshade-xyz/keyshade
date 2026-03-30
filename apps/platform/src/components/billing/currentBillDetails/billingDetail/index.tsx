@@ -60,7 +60,7 @@ export default function BillingDetail({
   const calculateCompoundedPrice = () => {
     const isAnnual = currentSubscription?.isAnnual
     const monthsPaid = isAnnual ? 12 : 1
-    return calculateTotalSeatPrice() * monthsPaid
+    return Math.round(calculateTotalSeatPrice()* 100) / 100 
   }
 
   const planPrice = (): `$${number}` => {
