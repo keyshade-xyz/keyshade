@@ -63,6 +63,7 @@ export const WorkspaceSchema = z.object({
     activatedOn: z.string().datetime(),
     seatsBooked: z.number(),
     isAnnual: z.boolean(),
+    compoundedPrice: z.number(),
     trialActivatedOn: z.string().datetime().nullable(),
     trialPlan: subscriptionPlanEnum.nullable(),
     user: z.object({

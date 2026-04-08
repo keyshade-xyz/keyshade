@@ -44,6 +44,8 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import { HydratedWorkspace, RawWorkspace } from '@/workspace/workspace.types'
 import { WorkspaceCacheService } from '@/cache/workspace-cache.service'
 import { CollectiveAuthoritiesCacheService } from '@/cache/collective-authorities-cache.service'
+import { PER_SEAT_PRICE } from '@/payment-gateway/payment-gateway.constants'
+import { AllowedPlans } from '@/payment-gateway/payment-gateway.types'
 
 type RootHydrationParams = {
   user: AuthenticatedUser
@@ -617,11 +619,19 @@ export class HydrationService {
     delete workspace.members
     delete workspace.roles
 
+    const compoundedPrice = this.calculateCompoundedPrice(
+      workspace.subscription
+    )
+
     return {
       ...workspace,
       ...tierLimits,
       ...workspaceResources,
       entitlements,
+      subscription: {
+        ...workspace.subscription,
+        compoundedPrice
+      },
       isDefault: workspace.isDefault && workspace.ownerId === user.id
     }
   }
@@ -742,6 +752,25 @@ export class HydrationService {
       permittedAuthorities.has(authority) ||
       permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
     )
+  }
+
+  private calculateCompoundedPrice(subscription: {
+    plan: string
+    seatsBooked: number
+    isAnnual: boolean
+  }): number {
+    const plan = subscription.plan as AllowedPlans
+    const priceEntry = PER_SEAT_PRICE[plan]
+    if (!priceEntry) {
+      return 0
+    }
+
+    const basePrice = subscription.isAnnual
+      ? priceEntry.annually
+      : priceEntry.monthly
+    const raw =
+      subscription.seatsBooked * basePrice * (subscription.isAnnual ? 12 : 1)
+    return Math.round((raw + Number.EPSILON) * 100) / 100
   }
 
   /**
