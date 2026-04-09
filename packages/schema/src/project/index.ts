@@ -134,3 +134,14 @@ export const ExportProjectConfigurationsResponseSchema = z.record(
   EnvironmentSchema.shape.slug,
   z.string()
 )
+
+export const ShareProjectRequestSchema = z.object({
+  projectSlug: BaseProjectSchema.shape.slug,
+  recipientEmail: z.string().email(),
+  privateKey: z.string().min(1)
+})
+
+export const ShareProjectResponseSchema = z.object({
+  shareLink: z.string().url(),
+  message: z.string()
+})

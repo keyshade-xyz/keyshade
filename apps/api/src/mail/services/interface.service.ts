@@ -63,4 +63,13 @@ export interface IMailService {
     name: string | null,
     reminderIndex: number
   ): Promise<void>
+
+  shareProjectAccess(
+    email: string,
+    data: {
+      projectName: string
+      expiresAt: Date
+      url: string
+    }
+  ): Promise<void>
 }

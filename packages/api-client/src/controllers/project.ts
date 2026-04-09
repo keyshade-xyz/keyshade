@@ -20,7 +20,9 @@ import {
   UpdateProjectRequest,
   UpdateProjectResponse,
   ExportProjectRequest,
-  ExportProjectResponse
+  ExportProjectResponse,
+  ShareProjectRequest,
+  ShareProjectResponse
 } from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
@@ -162,5 +164,16 @@ export default class ProjectController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<ExportProjectResponse>(response)
+  }
+
+  async shareProject(
+    request: ShareProjectRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<ShareProjectResponse>> {
+    const url = `/api/project/${request.projectSlug}/share`
+
+    const response = await this.apiClient.post(url, request, headers)
+
+    return await parseResponse<ShareProjectResponse>(response)
   }
 }
