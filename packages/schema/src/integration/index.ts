@@ -9,10 +9,11 @@ import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
 import { EventSchema } from '@/event'
+import { AlphaNumericStringSchema } from '@/alphanumeric'
 
 export const IntegrationSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   slug: z.string(),
   metadata: z.record(z.string()),
   createdAt: z.string().datetime(),
@@ -63,7 +64,7 @@ export const IntegrationRunSchema = z.object({
 export const CreateIntegrationRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug,
   projectSlug: BaseProjectSchema.shape.slug.optional(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   type: IntegrationSchema.shape.type,
   notifyOn: IntegrationSchema.shape.notifyOn.min(1).optional(),
   metadata: z.record(z.string()),

@@ -3,6 +3,8 @@ import type {
   CreateProjectRequest,
   GetAllProjectsResponse
 } from '@keyshade/schema'
+// @ts-expect-error - /raw export exists at runtime but TypeScript with 'node' moduleResolution can't resolve package.json exports
+import { CreateProjectRequestSchema } from '@keyshade/schema/raw'
 import type { Dispatch, SetStateAction } from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -75,10 +77,12 @@ export function useCreateNewProject(
 
   const createNewProject = useCallback(async () => {
     if (selectedWorkspace) {
-      if (newProjectData.name.trim() === '') {
-        toast.error('Project name cannot be empty')
+      // Validate the project data
+      if (!CreateProjectRequestSchema.shape.name.safeParse(newProjectData.name).success) {
+        toast.error('Project name must be alphanumeric and cannot be empty')
         return
       }
+      
 
       setIsLoading(true)
 

@@ -1,11 +1,14 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
+import { AlphaNumericStringSchema } from '@/alphanumeric'
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
-  name: z.string().trim().min(3),
+  name: AlphaNumericStringSchema.refine((val) => val.length >= 3, {
+    message: 'Environment name must be at least 3 characters long'
+  }),
   slug: z.string(),
-  description: z.string().nullable(),
+  description: AlphaNumericStringSchema.optional(),
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   projectId: z.string(),
@@ -29,7 +32,7 @@ export const EnvironmentSchema = z.object({
 
 export const CreateEnvironmentRequestSchema = z.object({
   name: EnvironmentSchema.shape.name,
-  description: z.string().optional(),
+  description: AlphaNumericStringSchema.optional(),
   projectSlug: z.string()
 })
 

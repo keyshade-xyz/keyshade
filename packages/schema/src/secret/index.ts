@@ -3,6 +3,10 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { rotateAfterEnum } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 import { UserSchema } from '@/user'
+import {
+  AlphaNumericStringSchema,
+  VariableAlphaNumericStringSchema
+} from '@/alphanumeric'
 
 export const SecretRevisionSchema = z.object({
   value: z.string(),
@@ -24,12 +28,12 @@ export const SecretRevisionSchema = z.object({
 
 export const SecretSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: VariableAlphaNumericStringSchema,
   slug: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   rotateAt: z.string().datetime().nullable(),
-  note: z.string().nullable(),
+  note: AlphaNumericStringSchema.optional(),
   lastUpdatedById: z.string(),
   projectId: z.string(),
   lastUpdatedBy: z.object({
@@ -46,8 +50,8 @@ export const SecretSchema = z.object({
 
 export const CreateSecretRequestSchema = z.object({
   projectSlug: z.string(),
-  name: z.string(),
-  note: z.string().optional(),
+  name: VariableAlphaNumericStringSchema,
+  note: AlphaNumericStringSchema.optional(),
   rotateAfter: rotateAfterEnum.optional(),
   entries: z
     .array(

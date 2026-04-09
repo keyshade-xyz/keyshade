@@ -3,8 +3,9 @@ import { useAtom } from 'jotai'
 import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { posthog } from 'posthog-js'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { LoadingSVG } from '@public/svg/shared'
+import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import ReferralDetailsForm from './onboarding slides/referral-details-form'
 import ProfileDetailsForm from './onboarding slides/profile-details-form'
 import TeamOverviewForm from './onboarding slides/team-overview-form'
@@ -22,7 +23,7 @@ import {
 } from '@/components/ui/stepper'
 import { redirectTo } from '@/lib/redirect-to'
 
-const nameSchema = z.string().trim().min(1, 'Name is required')
+const nameSchema = AlphaNumericStringSchema
 const totalSteps = 4
 
 export interface OnboardingData {

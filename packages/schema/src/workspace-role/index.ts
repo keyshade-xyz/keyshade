@@ -2,14 +2,18 @@ import { authorityEnum } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { WorkspaceSchema } from '@/workspace'
+import {
+  AlphaNumericStringSchema,
+  ColorCodeAlphaNumericStringSchema
+} from '@/alphanumeric'
 import { z } from 'zod'
 
 export const WorkspaceRoleSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   slug: z.string(),
-  description: z.string().nullable(),
-  colorCode: z.string().nullable(),
+  description: AlphaNumericStringSchema.optional(),
+  colorCode: ColorCodeAlphaNumericStringSchema.optional(),
   hasAdminAuthority: z.boolean(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -51,8 +55,8 @@ export const WorkspaceRoleSchema = z.object({
 export const CreateWorkspaceRoleRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug,
   name: WorkspaceRoleSchema.shape.name,
-  description: z.string().optional(),
-  colorCode: z.string().optional(),
+  description: AlphaNumericStringSchema.optional(),
+  colorCode: ColorCodeAlphaNumericStringSchema.optional(),
   authorities: z.array(authorityEnum).optional(),
   projectEnvironments: z
     .array(

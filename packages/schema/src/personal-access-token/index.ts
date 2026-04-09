@@ -1,8 +1,9 @@
 import { z } from 'zod'
+import { ExtendedAlphaNumericStringSchema } from '@/alphanumeric'
 
 export const PersonalAccessTokenSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: ExtendedAlphaNumericStringSchema,
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   expiresOn: z.string().datetime().nullable(),
@@ -10,7 +11,7 @@ export const PersonalAccessTokenSchema = z.object({
 })
 
 export const CreatePersonalAccessTokenRequest = z.object({
-  name: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+  name: ExtendedAlphaNumericStringSchema,
   expiresAfterDays: z.number().min(0).max(365).nullable()
 })
 

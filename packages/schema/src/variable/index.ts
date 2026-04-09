@@ -2,6 +2,10 @@ import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { EnvironmentSchema } from '@/environment'
 import { UserSchema } from '@/user'
+import {
+  AlphaNumericStringSchema,
+  VariableAlphaNumericStringSchema
+} from '@/alphanumeric'
 
 export const VariableRevisionSchema = z.object({
   version: z.number(),
@@ -24,11 +28,11 @@ export const VariableRevisionSchema = z.object({
 
 export const VariableSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: VariableAlphaNumericStringSchema,
   slug: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  note: z.string().nullable(),
+  note: AlphaNumericStringSchema.optional(),
   lastUpdatedById: z.string(),
   projectId: z.string(),
   lastUpdatedBy: z.object({
@@ -44,8 +48,8 @@ export const VariableSchema = z.object({
 })
 export const CreateVariableRequestSchema = z.object({
   projectSlug: z.string(),
-  name: z.string(),
-  note: z.string().optional(),
+  name: VariableAlphaNumericStringSchema,
+  note: AlphaNumericStringSchema.optional(),
   entries: z
     .array(
       z.object({
@@ -83,8 +87,8 @@ export const BulkCreateVariableResponseSchema = z.object({
 
 export const UpdateVariableRequestSchema = z.object({
   variableSlug: z.string(),
-  name: z.string().optional(),
-  note: z.string().optional(),
+  name: VariableAlphaNumericStringSchema.optional(),
+  note: AlphaNumericStringSchema.optional(),
   entries: z
     .array(
       z.object({
@@ -167,7 +171,7 @@ export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
 
 export const GetAllVariablesOfEnvironmentResponseSchema = z.array(
   z.object({
-    name: z.string(),
+    name: VariableAlphaNumericStringSchema,
     value: z.string(),
     isPlaintext: z.boolean()
   })

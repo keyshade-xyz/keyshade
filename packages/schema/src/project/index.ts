@@ -6,12 +6,13 @@ import {
 } from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
+import { AlphaNumericStringSchema } from '@/alphanumeric'
 
 export const BaseProjectSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   slug: z.string(),
-  description: z.string(),
+  description: AlphaNumericStringSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   publicKey: z.string(),
@@ -52,9 +53,9 @@ export const ProjectSchema = BaseProjectSchema.refine((obj) =>
 )
 
 export const CreateProjectRequestSchema = z.object({
-  name: z.string(),
+  name: AlphaNumericStringSchema,
   workspaceSlug: WorkspaceSchema.shape.slug,
-  description: z.string().optional(),
+  description: AlphaNumericStringSchema.optional(),
   storePrivateKey: z.boolean().optional(),
   environments: CreateEnvironmentRequestSchema.omit({ projectSlug: true })
     .array()
