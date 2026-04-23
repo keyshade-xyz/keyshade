@@ -1,6 +1,6 @@
 {
-  "workspace": "team-keyshade-0",
-  "project": "keyshade-0",
-  "environment": "dev-1",
+  "workspace": "${KEYSHADE_WORKSPACE:-default-workspace}",
+  "project": "${KEYSHADE_PROJECT:-my-project}",
+  "environment": "${NODE_ENV:-development}",
   "quitOnDecryptionFailure": false
 }
