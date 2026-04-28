@@ -22,6 +22,10 @@ import {
 import { useHttp } from '@/hooks/use-http'
 import { parseUpdatedEnvironmentValues } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
+import {
+  CONFIG_NAME_ERROR_MESSAGE,
+  isValidConfigName
+} from '@/lib/config-name-validation'
 
 export default function AddVariableDialogue(): React.JSX.Element {
   const [isCreateVariableOpen, setIsCreateVariableOpen] = useAtom(
@@ -63,8 +67,12 @@ export default function AddVariableDialogue(): React.JSX.Element {
 
   const handleAddVariable = useCallback(async () => {
     if (selectedProject) {
-      if (requestData.name.trim() === '') {
-        toast.error('Variable name is required')
+      if (!isValidConfigName(requestData.name)) {
+        toast.error('Variable name is invalid', {
+          description: (
+            <p className="text-xs text-red-300">{CONFIG_NAME_ERROR_MESSAGE}</p>
+          )
+        })
         return
       }
 

@@ -28,6 +28,7 @@ import {
   mergeExistingEnvironments,
   parseUpdatedEnvironmentValues
 } from '@/lib/utils'
+import { isValidConfigName } from '@/lib/config-name-validation'
 
 export default function EditVariablSheet() {
   const [isEditVariableOpen, setIsEditVariableOpen] =
@@ -208,7 +209,7 @@ export default function EditVariablSheet() {
         <SheetFooter>
           <SheetClose asChild>
             <Button
-              disabled={isLoading || !hasChanges}
+              disabled={isLoading || !hasChanges || !isValidConfigName(name)}
               onClick={handleSave}
               variant="secondary"
             >

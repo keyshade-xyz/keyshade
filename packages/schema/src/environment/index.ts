@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
+import { ConfigNameSchema } from '@/common'
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
@@ -28,7 +29,7 @@ export const EnvironmentSchema = z.object({
 })
 
 export const CreateEnvironmentRequestSchema = z.object({
-  name: EnvironmentSchema.shape.name,
+  name: ConfigNameSchema.min(3),
   description: z.string().optional(),
   projectSlug: z.string()
 })

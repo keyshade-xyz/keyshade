@@ -2,9 +2,10 @@ import 'reflect-metadata'
 import { Type } from 'class-transformer'
 import { IsArray, IsOptional, Length, ValidateNested } from 'class-validator'
 import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
+import { ConfigName } from '@/decorators/config-name.decorator'
 
 export class CreateVariable {
-  @NonEmptyTrimmedString()
+  @ConfigName()
   name: string
 
   @IsOptional()
