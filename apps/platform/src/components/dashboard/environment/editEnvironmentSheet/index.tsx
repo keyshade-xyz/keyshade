@@ -23,6 +23,7 @@ import {
   environmentsOfProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
+import { isValidConfigName } from '@/lib/config-name-validation'
 
 export default function EditEnvironmentDialogue(): React.JSX.Element {
   const [isEditEnvironmentOpen, setIsEditEnvironmentOpen] = useAtom(
@@ -110,6 +111,9 @@ export default function EditEnvironmentDialogue(): React.JSX.Element {
     setIsEditEnvironmentOpen
   ])
 
+  const isSaveDisabled =
+    isLoading || !isValidConfigName(requestData.name || '', 3)
+
   return (
     <Sheet
       onOpenChange={(open) => {
@@ -154,7 +158,7 @@ export default function EditEnvironmentDialogue(): React.JSX.Element {
               <div className="flex justify-end">
                 <Button
                   className="rounded-lg border-white/10 bg-[#E0E0E0] text-xs font-semibold text-black hover:bg-gray-200"
-                  disabled={isLoading}
+                  disabled={isSaveDisabled}
                   onClick={handleUpdateEnvironment}
                   variant="secondary"
                 >

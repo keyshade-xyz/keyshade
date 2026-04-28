@@ -29,6 +29,7 @@ import {
   mergeExistingEnvironments,
   parseUpdatedEnvironmentValues
 } from '@/lib/utils'
+import { isValidConfigName } from '@/lib/config-name-validation'
 
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
@@ -189,7 +190,7 @@ export default function EditSecretSheet(): JSX.Element {
     []
   )
 
-  const isSaveDisabled = isLoading || !hasChanges
+  const isSaveDisabled = isLoading || !hasChanges || !isValidConfigName(name)
 
   return (
     <Sheet onOpenChange={setIsEditSecretSheetOpen} open={isEditSecretSheetOpen}>

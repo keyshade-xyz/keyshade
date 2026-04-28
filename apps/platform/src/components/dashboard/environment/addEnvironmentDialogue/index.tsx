@@ -20,6 +20,10 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import {
+  CONFIG_NAME_ERROR_MESSAGE,
+  isValidConfigName
+} from '@/lib/config-name-validation'
 
 export default function AddEnvironmentDialogue(): React.JSX.Element {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
@@ -38,11 +42,11 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  // Check if environment name is empty/only whitespace and whether is at least 3 chars length
   const MIN_ENV_NAME_LENGTH = 3
-  const isInvalidEnvironmentName =
-    newEnvironmentData.environmentName.trim() === '' ||
-    newEnvironmentData.environmentName.trim().length < MIN_ENV_NAME_LENGTH
+  const isInvalidEnvironmentName = !isValidConfigName(
+    newEnvironmentData.environmentName,
+    MIN_ENV_NAME_LENGTH
+  )
 
   const createEnvironment = useHttp(() =>
     ControllerInstance.getInstance().environmentController.createEnvironment({
@@ -55,11 +59,10 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
   const handleAddEnvironment = useCallback(async () => {
     if (selectedProject) {
       if (isInvalidEnvironmentName) {
-        toast.error('Environment name is required', {
+        toast.error('Environment name is invalid', {
           description: (
             <p className="text-xs text-red-300">
-              Please provide a valid name for the environment (not blank and at
-              least has 3 chars).
+              {CONFIG_NAME_ERROR_MESSAGE}. It must be at least 3 characters.
             </p>
           )
         })

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { EnvironmentSchema } from '@/environment'
 import { UserSchema } from '@/user'
+import { ConfigNameSchema } from '@/common'
 
 export const VariableRevisionSchema = z.object({
   version: z.number(),
@@ -44,7 +45,7 @@ export const VariableSchema = z.object({
 })
 export const CreateVariableRequestSchema = z.object({
   projectSlug: z.string(),
-  name: z.string(),
+  name: ConfigNameSchema,
   note: z.string().optional(),
   entries: z
     .array(
@@ -83,7 +84,7 @@ export const BulkCreateVariableResponseSchema = z.object({
 
 export const UpdateVariableRequestSchema = z.object({
   variableSlug: z.string(),
-  name: z.string().optional(),
+  name: ConfigNameSchema.optional(),
   note: z.string().optional(),
   entries: z
     .array(

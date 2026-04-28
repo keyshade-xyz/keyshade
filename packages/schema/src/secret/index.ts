@@ -3,6 +3,7 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { rotateAfterEnum } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 import { UserSchema } from '@/user'
+import { ConfigNameSchema } from '@/common'
 
 export const SecretRevisionSchema = z.object({
   value: z.string(),
@@ -46,7 +47,7 @@ export const SecretSchema = z.object({
 
 export const CreateSecretRequestSchema = z.object({
   projectSlug: z.string(),
-  name: z.string(),
+  name: ConfigNameSchema,
   note: z.string().optional(),
   rotateAfter: rotateAfterEnum.optional(),
   entries: z

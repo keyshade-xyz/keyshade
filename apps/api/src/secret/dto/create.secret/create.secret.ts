@@ -7,11 +7,11 @@ import {
   Length,
   ValidateNested
 } from 'class-validator'
-import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
+import { ConfigName } from '@/decorators/config-name.decorator'
 import { Entry } from '@/common/dto/entry.dto'
 
 export class CreateSecret {
-  @NonEmptyTrimmedString()
+  @ConfigName()
   name: string
 
   @IsOptional()

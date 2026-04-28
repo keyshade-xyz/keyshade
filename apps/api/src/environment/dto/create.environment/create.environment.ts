@@ -1,8 +1,7 @@
 import { IsOptional, IsString } from 'class-validator'
-import { TrimmedMinLengthString } from '@/decorators/trimmed-minlength-string.decorator'
+import { ConfigName } from '@/decorators/config-name.decorator'
 export class CreateEnvironment {
-  @IsString()
-  @TrimmedMinLengthString(3)
+  @ConfigName(3)
   name: string
 
   @IsString()
