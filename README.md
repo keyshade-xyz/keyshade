@@ -64,21 +64,21 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 
 - **Secret Rotation**: We allow you to rotate your secrets regularly. This means that you can update your secrets without having to update your application.
 
-- **Workspaces and projects**: Managing your data in a clean and efficient goes a long way in improving your productivity. We allow you to organize your secrets into workspaces and projects. This gives you the ability to share your secrets with your team members easily.
+- **Workspaces and projects**: Managing your data cleanly and efficiently goes a long way in improving your productivity. We allow you to organize your secrets into workspaces and projects. This gives you the ability to share your secrets with your team members easily.
 
 - **Access Control**: You are the owner of your secrets. This means that you have complete control over who can access your secrets. You can share your secrets with your team members by adding them to your workspace.
 
-- **Custom Roles**: We allow you to create custom roles for your team members. This will allow you to fine tune your control over who gets to do what.
+- **Custom Roles**: We allow you to create custom roles for your team members. This allows you to fine-tune your control over who gets to do what.
 
-- **Event tracking**: For every event that happens, we maintain an in detailed log of what happened, accounting for who did what and when.
+- **Event tracking**: For every event that happens, we maintain a detailed log of what happened, accounting for who did what and when.
 
-- **Auditing and anomaly detection**: Our robots are continuously monitoring access to your secrets and variables. With the power of AI, it becomes near to impossible to breach your data.
+- **Auditing and anomaly detection**: Our systems continuously monitor access to your secrets and variables. With the power of AI, it becomes nearly impossible to breach your data.
 
-- **Integrations**: Our vast library of integration allows you to use keyshade with your favorite tools and platforms.
+- **Integrations**: Our vast library of integrations allows you to use keyshade with your favorite tools and platforms.
 
 ## Setting things up
 
-We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.io/contributing-to-keyshade/setting-things-up).
+We maintain detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.io/contributing-to-keyshade/setting-things-up).
 
 ## Contributing
 
