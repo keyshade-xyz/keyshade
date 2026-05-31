@@ -16,6 +16,7 @@ class SecretDetector {
    */
   detect(input: string): SecretResult {
     for (const regex of this.patterns) {
+      regex.lastIndex = 0
       // If the regex has a filter, use it for post-processing
       if ((regex as any).filter) {
         const matches = input.match(regex)

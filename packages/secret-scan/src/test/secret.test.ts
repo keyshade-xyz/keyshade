@@ -126,6 +126,25 @@ describe('Detect Secrets from string', () => {
     testSecret(jwt.testcases)
   })
 
+  it('should detect global regex patterns consistently across repeated scans', () => {
+    jest.isolateModules(() => {
+      jest.doMock('@/denylist', () => ({
+        __esModule: true,
+        default: {
+          test: [/secret_[a-z]+/g]
+        }
+      }))
+
+      const detector = require('@/index').default
+      const token = 'secret_token'
+
+      expect(detector.detect(token).found).toBe(true)
+      expect(detector.detect(token).found).toBe(true)
+    })
+
+    jest.dontMock('@/denylist')
+  })
+
   it(testcaseTitleTemplate('Cloudflare Key'), () => {
     testSecret(cloudflare.testcases)
   })
