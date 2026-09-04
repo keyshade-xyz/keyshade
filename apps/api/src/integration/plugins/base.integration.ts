@@ -74,6 +74,22 @@ export abstract class BaseIntegration {
    */
   abstract validateConfiguration(metadata: IntegrationMetadata): Promise<void>
 
+  /**
+   * Use this function to verify the integrity and active connectivity of the configured integration.
+   * Plugins can override this method if additional custom verification logic is required.
+   */
+  public async verifyIntegrity(): Promise<{
+    success: boolean
+    message: string
+  }> {
+    const integration = this.getIntegration()
+    await this.validateConfiguration(integration.metadata)
+    return {
+      success: true,
+      message: `${this.integrationType.toString()} integration configuration verified successfully`
+    }
+  }
+
   public setIntegration<T extends IntegrationMetadata>(
     integration:
       | HydratedIntegration

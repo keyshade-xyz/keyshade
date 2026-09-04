@@ -450,3 +450,10 @@
 ### Minor Changes
 
 - Added a confirmation prompt to the `workspace delete` command, displaying a list of consequences before proceeding with deletion.
+
+## 3.9.0
+
+### Minor Changes
+
+- Added `keyshade integration verify <slug>` command to verify integration connectivity and configuration
+

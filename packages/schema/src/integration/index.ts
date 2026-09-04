@@ -143,3 +143,12 @@ export const GetVercelEnvironmentsResponseSchema = z.record(
     vercelCustomEnvironmentId: z.string().optional()
   })
 )
+
+export const VerifyIntegrationRequestSchema = z.object({
+  integrationSlug: IntegrationSchema.shape.slug
+})
+
+export const VerifyIntegrationResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string()
+})

@@ -92,6 +92,19 @@ export class IntegrationController {
     return await this.integrationService.getIntegration(user, integrationSlug)
   }
 
+  @Post(':integrationSlug/verify')
+  @HttpCode(HttpStatus.OK)
+  @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
+  async verifyIntegration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('integrationSlug') integrationSlug: string
+  ) {
+    return await this.integrationService.verifyIntegration(
+      user,
+      integrationSlug
+    )
+  }
+
   /* istanbul ignore next */
   @Get('all/:workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
