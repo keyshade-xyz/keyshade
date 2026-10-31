@@ -4,6 +4,7 @@ import {
   EventController,
   IntegrationController,
   PaymentController,
+  PersonalAccessTokenController,
   ProjectController,
   SecretController,
   UserController,
@@ -88,6 +89,12 @@ export default class ControllerInstance {
     return this._paymentController
   }
 
+  private _personalAccessTokenController: PersonalAccessTokenController
+
+  get personalAccessTokenController(): PersonalAccessTokenController {
+    return this._personalAccessTokenController
+  }
+
   static getInstance(): ControllerInstance {
     if (!ControllerInstance.instance) {
       ControllerInstance.instance = new ControllerInstance()
@@ -122,6 +129,8 @@ export default class ControllerInstance {
       ControllerInstance.instance._paymentController = new PaymentController(
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
+      ControllerInstance.instance._personalAccessTokenController =
+        new PersonalAccessTokenController(process.env.NEXT_PUBLIC_BACKEND_URL)
     }
     return ControllerInstance.instance
   }
