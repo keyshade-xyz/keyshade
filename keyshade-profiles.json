@@ -1,0 +1,20 @@
+{
+  "workspace": "${KEYSHADE_WORKSPACE:-company}",
+  "project": "${KEYSHADE_PROJECT:-app}",
+  "environment": "development",
+  "quitOnDecryptionFailure": false,
+  "profiles": {
+    "dev": {
+      "environment": "development",
+      "quitOnDecryptionFailure": false
+    },
+    "staging": {
+      "environment": "staging",
+      "quitOnDecryptionFailure": true
+    },
+    "prod": {
+      "environment": "production",
+      "quitOnDecryptionFailure": true
+    }
+  }
+}
