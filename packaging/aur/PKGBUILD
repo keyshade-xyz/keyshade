@@ -1,0 +1,18 @@
+pkgname=keyshade-bin
+pkgver=3.8.0
+pkgrel=1
+pkgdesc="Secure, real-time secret and configuration management CLI"
+arch=('x86_64' 'aarch64')
+url="https://keyshade.io"
+license=('MPL-2.0')
+provides=('keyshade')
+conflicts=('keyshade')
+_releasever=2.49.0
+source_x86_64=("keyshade-${pkgver}-x86_64::https://github.com/keyshade-xyz/keyshade/releases/download/v${_releasever}/keyshade-cli-linux-x64")
+source_aarch64=("keyshade-${pkgver}-aarch64::https://github.com/keyshade-xyz/keyshade/releases/download/v${_releasever}/keyshade-cli-linux-arm64")
+sha256sums_x86_64=('73ad2b8002a88878d91714ac7ff345f5c610736721bbda375802989ee47acb02')
+sha256sums_aarch64=('60d272fb819c6099b97eb4250afa97284c5036cf577230f1c1cb76f1dc960ea7')
+
+package() {
+  install -Dm755 "${srcdir}/keyshade-${pkgver}-${CARCH}" "${pkgdir}/usr/bin/keyshade"
+}
