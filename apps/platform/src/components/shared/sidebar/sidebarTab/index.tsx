@@ -2,20 +2,27 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
-import { motion } from 'framer-motion'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 
 interface SidebarTabProps {
   name: string
   icon: React.JSX.Element
   link: string
   matchTo: string
+  isCollapsed?: boolean
 }
 
 function SidebarTab({
   name,
   icon,
   link,
-  matchTo
+  matchTo,
+  isCollapsed = false
 }: SidebarTabProps): React.JSX.Element {
   const currentPath = usePathname()
 
@@ -32,21 +39,31 @@ function SidebarTab({
     return currentPath === basePath || currentPath.startsWith(`${basePath}/`)
   }
 
-  return (
+  const isActive = isCurrentActive(matchTo)
+  const tabLink = (
     <Link
-      className={`${isCurrentActive(matchTo) ? 'text-primary-200' : 'text-neutral-500 hover:text-white'} relative flex w-full items-center gap-x-3 rounded-xl p-2.5 text-base capitalize transition-colors`}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={name}
+      className={cn(
+        'relative flex w-full items-center rounded-xl p-2.5 text-base font-medium text-neutral-400 transition-colors hover:text-white',
+        isCollapsed ? 'justify-center' : 'gap-x-3'
+      )}
       href={link}
     >
-      {isCurrentActive(matchTo) && (
-        <motion.span
-          className="bg-primary-1100 border-primary-200/30 absolute inset-0 -z-10 border"
-          layoutId="bubble"
-          style={{ borderRadius: 12 }}
-          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-        />
-      )}
-      {icon} {name}
+      {icon}
+      {!isCollapsed && <span>{name}</span>}
     </Link>
+  )
+
+  if (!isCollapsed) {
+    return tabLink
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{tabLink}</TooltipTrigger>
+      <TooltipContent side="right">{name}</TooltipContent>
+    </Tooltip>
   )
 }
 
