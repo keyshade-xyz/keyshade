@@ -12,6 +12,7 @@ import { selectedIntegrationAtom, selectedWorkspaceAtom } from '@/store'
 import DeleteIntegrationDialog from '@/components/integrations/confirmDeleteIntegration'
 import ProjectEnvironmentList from '@/components/integrations/projectEnvironmentList'
 import ResyncIntegration from '@/components/integrations/resyncIntegration'
+import CheckConfiguration from '@/components/integrations/checkConfiguration'
 import EventSubscriptions from '@/components/integrations/eventSubcriptions'
 import IntegrationDetails from '@/components/integrations/IntegrationDetails'
 import ErrorCard from '@/components/shared/error-card'
@@ -89,6 +90,9 @@ function IntegrationDetailsPage() {
 
         {/* Resync button */}
         <ResyncIntegration />
+
+        {/* Check configurations button */}
+        <CheckConfiguration selectedIntegration={selectedIntegration} />
 
         {/* Event Subscription */}
         <EventSubscriptions selectedIntegration={selectedIntegration} />

@@ -14,7 +14,9 @@ import {
   ValidateIntegrationConfigurationRequest,
   ValidateIntegrationConfigurationResponse,
   GetVercelEnvironmentsRequest,
-  GetVercelEnvironmentsResponse
+  GetVercelEnvironmentsResponse,
+  VerifyIntegrationRequest,
+  VerifyIntegrationResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { ClientResponse } from '@keyshade/schema'
@@ -131,5 +133,17 @@ export default class IntegrationController {
     return await parseResponse<ValidateIntegrationConfigurationResponse>(
       response
     )
+  }
+
+  async verifyIntegration(
+    request: VerifyIntegrationRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<VerifyIntegrationResponse>> {
+    const response = await this.apiClient.post(
+      `/api/integration/${request.integrationSlug}/verify`,
+      {},
+      headers
+    )
+    return await parseResponse<VerifyIntegrationResponse>(response)
   }
 }

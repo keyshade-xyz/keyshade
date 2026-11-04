@@ -726,6 +726,35 @@ export class IntegrationService {
   }
 
   /**
+   * Verifies the configuration and live connectivity of an existing integration.
+   *
+   * @param user The authenticated user requesting verification
+   * @param integrationSlug The slug of the integration to verify
+   * @returns { success: boolean, message: string }
+   */
+  async verifyIntegration(
+    user: AuthenticatedUser,
+    integrationSlug: Integration['slug']
+  ): Promise<{ success: boolean; message: string }> {
+    this.logger.log(
+      `User ${user.id} requested verification of integration ${integrationSlug}`
+    )
+    const integration =
+      await this.authorizationService.authorizeUserAccessToIntegration({
+        user,
+        slug: integrationSlug,
+        authorities: [Authority.READ_INTEGRATION]
+      })
+
+    const integrationPlugin = IntegrationFactory.createIntegration(
+      integration,
+      this.prisma
+    )
+
+    return await integrationPlugin.verifyIntegrity()
+  }
+
+  /**
    * Checks if an integration with the same name already exists in the workspace.
    * Throws a ConflictException if the integration already exists.
    *

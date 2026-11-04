@@ -16,7 +16,9 @@ import {
   ValidateIntegrationConfigurationRequestSchema,
   ValidateIntegrationConfigurationResponseSchema,
   GetVercelEnvironmentsRequestSchema,
-  GetVercelEnvironmentsResponseSchema
+  GetVercelEnvironmentsResponseSchema,
+  VerifyIntegrationRequestSchema,
+  VerifyIntegrationResponseSchema
 } from '.'
 import { z } from 'zod'
 
@@ -84,4 +86,12 @@ export type GetVercelEnvironmentsRequest = z.infer<
 
 export type GetVercelEnvironmentsResponse = z.infer<
   typeof GetVercelEnvironmentsResponseSchema
+>
+
+export type VerifyIntegrationRequest = z.infer<
+  typeof VerifyIntegrationRequestSchema
+>
+
+export type VerifyIntegrationResponse = z.infer<
+  typeof VerifyIntegrationResponseSchema
 >

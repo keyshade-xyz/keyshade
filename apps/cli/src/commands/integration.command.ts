@@ -1,4 +1,5 @@
 import BaseCommand from './base.command'
+import VerifyIntegration from './integration/verify.integration'
 
 export default class IntegrationCommand extends BaseCommand {
   getName(): string {
@@ -11,5 +12,9 @@ export default class IntegrationCommand extends BaseCommand {
 
   canMakeHttpRequests(): boolean {
     return true
+  }
+
+  getSubCommands(): BaseCommand[] {
+    return [new VerifyIntegration()]
   }
 }
