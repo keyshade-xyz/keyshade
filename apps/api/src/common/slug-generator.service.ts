@@ -6,8 +6,7 @@ import {
   Logger
 } from '@nestjs/common'
 import { PrismaClient } from '@prisma/client'
-import slugify from 'slugify'
-import { constructErrorBody } from './util'
+import { constructErrorBody, toBaseSlug } from './util'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 
@@ -128,7 +127,7 @@ export default class SlugGenerator {
       `Generating unique slug for ${name} in ${model.toString()}...`
     )
 
-    const baseSlug = slugify(name, { lower: true, strict: true })
+    const baseSlug = toBaseSlug(name, this.slugFallbackFor(model))
     this.logger.log(`Generated base slug for ${name}: ${baseSlug}`)
 
     let max: number = 0
@@ -216,6 +215,22 @@ export default class SlugGenerator {
     }
 
     return newSlug!
+  }
+
+  /**
+   * Derives a fallback slug from the Prisma model name.
+   *
+   * Used when the entity name contains no slug-able characters (for example an
+   * all-unicode name), so the generated slug never starts with a hyphen.
+   *
+   * @param model The Prisma model name.
+   * @returns The model name in kebab-case.
+   */
+  private slugFallbackFor(model: keyof PrismaClient): string {
+    return model
+      .toString()
+      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+      .toLowerCase()
   }
 
   /**
