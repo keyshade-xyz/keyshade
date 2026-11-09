@@ -7,6 +7,7 @@ import * as crypto from 'crypto'
 import { sDecrypt, sEncrypt } from './cryptography'
 import { Entry } from './dto/entry.dto'
 import { Environment } from '@keyshade/schema'
+import slugify from 'slugify'
 
 /**
  * Limits the given limit to a maximum number of items per page.
@@ -292,4 +293,29 @@ export const generateReferralCode = async (
   logger.log(`Generated referral code: ${referralCode} in ${tries} tries`)
 
   return referralCode
+}
+
+/**
+ * Converts an arbitrary entity name into a URL-safe base slug.
+ *
+ * `slugify` with `strict: true` strips every non-ASCII character, so a name
+ * made up entirely of unicode characters (for example "\u4e2d\u6587" or an emoji)
+ * collapses to an empty string. Concatenating that empty string with the
+ * numeric suffix produces a slug that starts with a hyphen (for example "-0").
+ * This helper trims stray hyphens and falls back to a caller-supplied slug so
+ * the result is always well formed.
+ *
+ * @param name The raw entity name.
+ * @param fallback The slug to use when the name yields no usable characters.
+ * @returns A non-empty, hyphen-trimmed base slug.
+ */
+export const toBaseSlug = (
+  name: string | null | undefined,
+  fallback: string = 'entity'
+): string => {
+  const base = slugify(name ?? '', { lower: true, strict: true }).replace(
+    /^-+|-+$/g,
+    ''
+  )
+  return base || fallback
 }
